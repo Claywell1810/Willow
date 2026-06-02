@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>D&D 5e Charakterbogen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
@@ -26,33 +26,33 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 /* HEADER */
 .hdr{background:var(--bg1);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
 .rune{width:38px;height:38px;background:var(--purple3);border:1px solid var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.hdr-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:3px}
+.hdr-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:3px}
 .name-in{background:transparent;border:none;border-bottom:1px solid var(--border);font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--text);width:100%;outline:none;padding:2px 0}
 .name-in::placeholder{color:var(--text3)}
 
 /* TABS */
 .tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));background:var(--bg1);border-bottom:1px solid var(--border2);position:sticky;top:62px;z-index:99}
-.tab{padding:9px 6px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;white-space:nowrap;border-bottom:2px solid transparent;text-align:center;-webkit-tap-highlight-color:transparent}
+.tab{padding:9px 6px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;white-space:nowrap;border-bottom:2px solid transparent;text-align:center;-webkit-tap-highlight-color:transparent}
 .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* BODY */
 .body{padding:14px}
 .panel{display:none}
 .panel.on{display:block}
-.sec{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold2);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid rgba(201,168,76,0.2);text-transform:uppercase}
+.sec{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold2);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid rgba(201,168,76,0.2);text-transform:uppercase}
 .sec:first-child{margin-top:0}
 
 /* INPUTS */
 .igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
-.ifield label{display:block;font-size:9px;letter-spacing:1px;color:var(--text2);margin-bottom:3px;font-family:'Cinzel',serif;text-transform:uppercase}
-.ifield input,.ifield select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;padding:7px 9px;outline:none;-webkit-appearance:none}
+.ifield label{display:block;font-size:11px;letter-spacing:1px;color:var(--text2);margin-bottom:3px;font-family:'Cinzel',serif;text-transform:uppercase}
+.ifield input,.ifield select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:7px 9px;outline:none;-webkit-appearance:none}
 .ifield input:focus,.ifield select:focus{border-color:var(--purple)}
 .ifield select option{background:var(--bg2)}
 
 /* HP */
 .hp-row{display:flex;gap:8px;margin-bottom:6px}
 .hpbox{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center}
-.hp-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text2);margin-bottom:5px;text-transform:uppercase}
+.hp-lbl{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--text2);margin-bottom:5px;text-transform:uppercase}
 .hp-ctrl{display:flex;align-items:center;gap:5px;justify-content:center}
 .hbtn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
 .hpval{font-family:'Cinzel',serif;font-size:22px;font-weight:600;color:var(--green);min-width:36px;text-align:center}
@@ -62,18 +62,18 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 
 /* ATTRIBUTES */
 .attr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
-.acard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 5px;text-align:center}
-.aname{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--gold2);margin-bottom:3px;text-transform:uppercase}
+.acard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center}
+.aname{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--gold2);margin-bottom:3px;text-transform:uppercase}
 .aval{font-family:'Cinzel',serif;font-size:22px;font-weight:600;color:var(--text);background:transparent;border:none;outline:none;width:50px;text-align:center;-webkit-appearance:none}
-.amod{font-size:12px;color:var(--purple);margin-top:1px;font-family:'Cinzel',serif}
+.amod{font-size:13px;color:var(--purple);margin-top:1px;font-family:'Cinzel',serif}
 
 /* STATS */
-.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
-.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 6px;text-align:center}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;width:100%}
+.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center;min-width:0}
 
 /* DEATH SAVES */
 .ds-row{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 12px;margin-bottom:10px;flex-wrap:wrap}
-.ds-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text2);text-transform:uppercase}
+.ds-lbl{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--text2);text-transform:uppercase}
 .dspip{width:20px;height:20px;border-radius:50%;border:1px solid;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dspip.s{border-color:var(--green)}.dspip.s.f{background:var(--green)}
 .dspip.x{border-color:var(--red)}.dspip.x.f{background:var(--red)}
@@ -86,44 +86,48 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .sk-pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--text3);flex-shrink:0}
 .sk-pip.p{background:var(--gold);border-color:var(--gold)}
 .sk-pip.e{background:var(--purple);border-color:var(--purple)}
-.sk-name{font-size:14px;color:var(--text);flex:1}
-.sk-attr{font-size:10px;color:var(--text3);font-family:'Cinzel',serif;min-width:28px}
-.sk-bon{font-size:13px;color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
+.sk-name{font-size:15px;color:var(--text);flex:1}
+.sk-attr{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;min-width:28px}
+.sk-bon{font-size:14px;color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
 
 /* SPELL CARDS (Charakterbogen) */
 .spell-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;overflow:hidden}
 .spell-main{display:flex;align-items:center;gap:7px;padding:9px 11px}
-.spell-name{font-family:'Cinzel',serif;font-size:12px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sp-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;white-space:nowrap;flex-shrink:0}
+.spell-name{font-family:'Cinzel',serif;font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-badge{font-size:10px;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;white-space:nowrap;flex-shrink:0}
 .sp-info{background:rgba(91,155,213,0.2);color:var(--blue)}
 .sp-warn{background:rgba(201,168,76,0.2);color:var(--gold)}
 .spell-prep{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .spell-prep.on{background:var(--gold);border-color:var(--gold);color:var(--bg0)}
-.expbtn{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;flex-shrink:0;padding:0 2px;line-height:1;-webkit-tap-highlight-color:transparent}
+.expbtn{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;flex-shrink:0;padding:4px 8px;line-height:1;-webkit-tap-highlight-color:transparent;margin-left:auto}
 .spell-notes{display:none;padding:0 11px 10px;border-top:1px solid var(--border2)}
 .spell-notes.on{display:block}
-.spell-notes textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:13px;padding:7px;resize:vertical;outline:none;min-height:65px;margin-top:8px}
+.spell-notes textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:16px;padding:7px;resize:vertical;outline:none;min-height:65px;margin-top:8px}
 
 /* SPELL SLOTS */
 .slot-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
 .slvl{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center}
-.slvl-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold2);margin-bottom:5px;text-transform:uppercase}
+.slvl-lbl{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--gold2);margin-bottom:5px;text-transform:uppercase}
 .slpip{width:13px;height:13px;border-radius:50%;border:1px solid var(--purple2);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-block;margin:2px}
 .slpip.u{background:var(--purple2)}
 
 /* FEATURES */
 .feat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:6px}
 .feat-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.feat-name{font-family:'Cinzel',serif;font-size:12px;color:var(--gold)}
-.feat-tag{font-size:9px;padding:2px 7px;border-radius:10px;background:rgba(91,155,213,0.2);color:var(--blue);font-family:'Cinzel',serif}
-.feat-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.feat-name{font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
+.feat-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(91,155,213,0.2);color:var(--blue);font-family:'Cinzel',serif}
+.feat-desc{font-size:14px;color:var(--text2);line-height:1.5}
+
+/* SUBTABS */
+.subtab{padding:8px 14px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;white-space:nowrap;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent}
+.subtab.on{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* HINTERGRUND */
-.bg-desc{font-size:13px;color:var(--text2);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
+.bg-desc{font-size:14px;color:var(--text2);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
 .bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .bg-pill{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px}
-.bg-pill-label{font-family:'Cinzel',serif;font-size:9px;color:var(--text3);letter-spacing:1px;margin-bottom:4px}
-.bg-pill-val{font-size:12px;color:var(--text)}
+.bg-pill-label{font-family:'Cinzel',serif;font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:4px}
+.bg-pill-val{font-size:13px;color:var(--text)}
 .bg-pill.full{grid-column:1/-1}
 
 /* KLASSENFÄHIGKEITEN */
@@ -135,41 +139,41 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .ab-icon.reaktion{background:rgba(91,155,213,0.2);border:1px solid rgba(91,155,213,0.4)}
 .ab-icon.passiv{background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.3)}
 .ab-title{flex:1;min-width:0}
-.ab-name{font-family:'Cinzel',serif;font-size:12px;color:var(--gold)}
-.ab-tag{font-size:9px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:.5px}
+.ab-name{font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
+.ab-tag{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:.5px}
 .ab-uses{display:flex;gap:4px;align-items:center;flex-shrink:0}
 .ab-pip{width:14px;height:14px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
 .ab-pip.used{background:var(--purple2);border-color:var(--purple)}
 .ab-body{display:none;padding:0 12px 10px;border-top:1px solid var(--border2)}
 .ab-body.on{display:block}
-.ab-desc{font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-line;margin-top:8px}
-.ab-restore{font-size:10px;color:var(--text3);font-family:'Cinzel',serif;margin-top:6px;letter-spacing:.5px}
+.ab-desc{font-size:14px;color:var(--text2);line-height:1.6;white-space:pre-line;margin-top:8px}
+.ab-restore{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;margin-top:6px;letter-spacing:.5px}
 
 /* BUTTONS */
-.add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;-webkit-tap-highlight-color:transparent;margin-top:4px}
+.add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;-webkit-tap-highlight-color:transparent;margin-top:4px}
 .delbtn{width:20px;height:20px;border-radius:50%;border:1px solid rgba(224,85,85,0.4);background:transparent;color:var(--red);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
-.nta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px;resize:vertical;outline:none;line-height:1.6;margin-bottom:10px;min-height:60px}
+.nta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:10px;resize:vertical;outline:none;line-height:1.6;margin-bottom:10px;min-height:60px}
 .nta::placeholder{color:var(--text3)}
 
 /* ===== ZAUBERBUCH ===== */
 .zb-controls{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
 .search-wrap{position:relative}
-.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:8px 12px 8px 32px;outline:none}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:8px 12px 8px 32px;outline:none}
 .search-wrap input:focus{border-color:var(--purple)}
 .search-wrap input::placeholder{color:var(--text3)}
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
 .filter-row{display:flex;gap:5px;flex-wrap:wrap}
-.fbtn{padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.fbtn{padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 .fbtn.on{background:rgba(76,175,125,0.2);color:var(--green);border-color:var(--green)}
 .fbtn.school.on{background:rgba(201,168,76,0.15);color:var(--gold);border-color:var(--gold2)}
-.zb-count{font-family:'Cinzel',serif;font-size:9px;color:var(--text3);letter-spacing:1px;margin-bottom:6px}
-.zb-divider{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:7px 0 4px;border-bottom:1px solid var(--border2);margin-bottom:4px}
+.zb-count{font-family:'Cinzel',serif;font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:6px}
+.zb-divider{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:7px 0 4px;border-bottom:1px solid var(--border2);margin-bottom:4px}
 
 /* ZAUBERBUCH KARTEN */
 .zb-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:5px;overflow:hidden}
 .zb-top{display:flex;align-items:center;gap:6px;padding:9px 11px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.zb-name{font-family:'Cinzel',serif;font-size:12px;color:var(--text);flex:1;min-width:0}
-.zb-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;white-space:nowrap;flex-shrink:0}
+.zb-name{font-family:'Cinzel',serif;font-size:13px;color:var(--text);flex:1;min-width:0}
+.zb-badge{font-size:10px;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;white-space:nowrap;flex-shrink:0}
 .zb-c{background:rgba(76,175,125,0.2);color:var(--green)}
 .zb-1{background:rgba(91,155,213,0.2);color:var(--blue)}
 .zb-school{background:rgba(201,168,76,0.15);color:var(--gold)}
@@ -177,14 +181,21 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .zb-detail{display:none;border-top:1px solid var(--border2);padding:10px 11px}
 .zb-detail.on{display:block}
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:8px}
-.di label{display:block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text3);margin-bottom:2px;text-transform:uppercase}
-.di span{font-size:12px;color:var(--text2)}
-.desc-text{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px;white-space:pre-line}
+.di label{display:block;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--text3);margin-bottom:2px;text-transform:uppercase}
+.di span{font-size:13px;color:var(--text2)}
+.desc-text{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:8px;white-space:pre-line}
 .higher-box{background:rgba(91,155,213,0.1);border:1px solid rgba(91,155,213,0.3);border-radius:6px;padding:7px 10px;margin-bottom:8px}
-.higher-box label{display:block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--blue);margin-bottom:2px;text-transform:uppercase}
-.higher-box p{font-size:12px;color:var(--text2);line-height:1.5}
-.zb-addbtn{width:100%;padding:7px;background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.4);border-radius:6px;color:var(--green);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.higher-box label{display:block;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--blue);margin-bottom:2px;text-transform:uppercase}
+.higher-box p{font-size:13px;color:var(--text2);line-height:1.5}
+.zb-addbtn{width:100%;padding:7px;background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.4);border-radius:6px;color:var(--green);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .zb-addbtn.done{background:var(--bg3);border-color:var(--border2);color:var(--text3)}
+
+/* CHARAKTER SWITCHER */
+.char-bar{display:flex;gap:6px;align-items:center;padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border2)}
+.char-sel{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Cinzel',serif;font-size:13px;padding:6px 8px;border-radius:6px;-webkit-appearance:none}
+.char-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:'Cinzel',serif;font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.char-btn:active{background:var(--bg2)}
+.char-btn.danger{color:var(--red);border-color:rgba(224,85,85,0.3)}
 
 /* TOAST */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--purple3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-family:'Cinzel',serif;font-size:11px;color:var(--text);letter-spacing:1px;transition:transform .3s;z-index:999;white-space:nowrap}
@@ -201,15 +212,31 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
     </div>
   </div>
 
+  <div class="char-bar">
+    <select id="charSel" onchange="loadChar(this.value)" style="flex:1;min-width:0"></select>
+    <button class="char-btn" onclick="newChar()" title="Neuer Charakter">＋</button>
+    <button class="char-btn" onclick="saveChar()" title="Speichern">💾</button>
+    <button class="char-btn danger" onclick="deleteChar()" title="Löschen">✕</button>
+  </div>
+  <div id="newCharModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin:20px;width:100%;max-width:340px">
+      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:12px;letter-spacing:1px">Neuer Charakter</div>
+      <input id="newCharName" placeholder="Name eingeben..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Cinzel',serif;font-size:13px;padding:10px;border-radius:8px;box-sizing:border-box;margin-bottom:12px">
+      <div style="display:flex;gap:8px">
+        <button class="add-btn" style="flex:1;margin:0" onclick="confirmNewChar()">Erstellen</button>
+        <button class="char-btn" style="flex:1" onclick="document.getElementById('newCharModal').style.display='none'">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
   <div class="tabs" id="tabs">
     <button class="tab on" data-tab="basis">Grundwerte</button>
-    <button class="tab" data-tab="hintergrund">Hintergrund</button>
     <button class="tab" data-tab="skills">Fertigkeiten</button>
     <button class="tab" data-tab="zauber">Zauber</button>
-    <button class="tab" data-tab="zauberbuch">Zauberbuch</button>
-    <button class="tab" data-tab="feats">Feats</button>
     <button class="tab" data-tab="features">Features</button>
     <button class="tab" data-tab="bestien" id="tabBestien" style="display:none">Bestien</button>
+    <button class="tab" data-tab="hintergrund">Hintergrund</button>
+    <button class="tab" data-tab="feats">Feats</button>
     <button class="tab" data-tab="notizen">Notizen</button>
   </div>
 
@@ -221,10 +248,15 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
         <div class="ifield"><label>Klasse</label>
           <select id="cls" onchange="onClsChange()"><option value="">—</option><option>Barbar</option><option>Barde</option><option>Druide</option><option>Hexenmeister</option><option>Jäger</option><option>Kleriker</option><option>Kämpfer</option><option>Magier</option><option>Mönch</option><option>Paladin</option><option>Schurke</option><option>Zauberer</option></select></div>
         <div class="ifield"><label>Rasse</label><input id="race" placeholder="Elf, Mensch..."></div>
-        <div class="ifield"><label>Level</label><input type="number" id="lvl" value="1" min="1" max="20" oninput="buildAbilities()"></div>
+        <div class="ifield"><label>Level</label>
+          <div style="display:flex;align-items:center;gap:4px">
+            <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
+            <input type="number" id="lvl" onchange="buildAbilities();autoLoadClassFeatures();autoSave()" value="1" min="1" max="20" oninput="buildAbilities()" style="text-align:center;flex:1">
+            <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
+          </div></div>
         <div class="ifield"><label>Hintergrund</label><input id="bg" placeholder="Söldner..."></div>
         <div class="ifield" id="subclsField" style="display:none"><label>Subklasse</label>
-          <select id="subcls" onchange="buildAbilities()"><option value="">—</option></select></div>
+          <select id="subcls" onchange="onSubclsChange()"><option value="">—</option></select></div>
         <div class="ifield"><label>Gesinnung</label>
           <select id="align"><option value="">—</option><option>Rechtschaffen Gut</option><option>Neutral Gut</option><option>Chaotisch Gut</option><option>Rechtschaffen Neutral</option><option>Neutral</option><option>Chaotisch Neutral</option><option>Rechtschaffen Böse</option><option>Neutral Böse</option><option>Chaotisch Böse</option></select></div>
         <div class="ifield"><label>Übungsbonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
@@ -243,11 +275,19 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
         </div>
         <div class="hpbox">
           <div class="hp-lbl">Maximum</div>
-          <input class="hpin" type="number" id="hpM" value="10" min="1" oninput="updBar()">
+          <div class="hp-ctrl">
+            <button class="hbtn" onclick="chHpM(-1)">−</button>
+            <input class="hpin" type="number" id="hpM" value="10" min="1" oninput="onHpMChange()" style="width:44px">
+            <button class="hbtn" onclick="chHpM(1)">+</button>
+          </div>
         </div>
         <div class="hpbox" style="border-color:rgba(180,139,224,0.35)">
           <div class="hp-lbl">Temporär</div>
-          <input class="hpin" type="number" id="hpT" value="0" min="0" style="color:var(--purple)">
+          <div class="hp-ctrl">
+            <button class="hbtn" onclick="chHpT(-1)">−</button>
+            <input class="hpin" type="number" id="hpT" value="0" min="0" style="color:var(--purple);width:44px">
+            <button class="hbtn" onclick="chHpT(1)">+</button>
+          </div>
         </div>
       </div>
 
@@ -277,10 +317,11 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 
       <div class="sec">Attribute</div>
       <div class="attr-grid" id="attrGrid"></div>
+      <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
       <div class="stat3">
-        <div class="sbox"><div class="hp-lbl">Rüstung (AC)</div><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"></div>
-        <div class="sbox"><div class="hp-lbl">Initiative</div><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"></div>
-        <div class="sbox"><div class="hp-lbl">Bewegung (ft)</div><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"></div>
+        <div class="sbox"><div class="hp-lbl">Rüstung (AC)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ac',-1)">−</button><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"><button class="hbtn" onclick="chStat('ac',1)">+</button></div></div>
+        <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
+        <div class="sbox"><div class="hp-lbl">Bewegung (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
       </div>
     </div>
 
@@ -319,32 +360,41 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 
     <!-- ZAUBER (Charakterbogen) -->
     <div class="panel" id="tab-zauber">
-      <div class="sec">Zauberwirken</div>
-      <div class="igrid" style="grid-template-columns:1fr 1fr 1fr">
-        <div class="ifield"><label>Fähigkeit</label>
-          <select id="spAttr" onchange="calcSpell()"><option value="">—</option><option value="INT">INT</option><option value="WIS">WIS</option><option value="CHA">CHA</option></select></div>
-        <div class="ifield"><label>Rettungs-SG</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
-        <div class="ifield"><label>Angriff</label><input id="spAtk" value="+0" readonly style="color:var(--gold)"></div>
+      <!-- Zauber Untertabs -->
+      <div style="display:flex;border-bottom:1px solid var(--border2);margin-bottom:10px">
+        <button class="subtab on" data-st="meinezauber" onclick="switchSubtab('zauber',this)">Meine Zauber</button>
+        <button class="subtab" data-st="zauberbuch" onclick="switchSubtab('zauber',this)">Zauberbuch</button>
       </div>
-      <div class="sec">Zauberplätze</div>
-      <div class="slot-g" id="spSlots"></div>
-      <div class="sec">Meine Zauber</div>
-      <div id="mySpells"></div>
-      <button class="add-btn" onclick="addSpellManual()">+ Zauber manuell hinzufügen</button>
-    </div>
 
-    <!-- ZAUBERBUCH -->
-    <div class="panel" id="tab-zauberbuch">
-      <div class="zb-controls">
-        <div class="search-wrap">
-          <span class="si">🔍</span>
-          <input type="search" id="zbQ" placeholder="Zauber suchen..." oninput="zbRender()">
+      <!-- Meine Zauber -->
+      <div id="subpanel-meinezauber">
+        <div class="sec">Zauberwirken</div>
+        <div class="igrid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="ifield"><label>Fähigkeit</label>
+            <select id="spAttr" onchange="calcSpell()"><option value="">—</option><option value="INT">INT</option><option value="WIS">WIS</option><option value="CHA">CHA</option></select></div>
+          <div class="ifield"><label>Rettungs-SG</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
+          <div class="ifield"><label>Angriff</label><input id="spAtk" value="+0" readonly style="color:var(--gold)"></div>
         </div>
-        <div class="filter-row" id="zbGradFilters"></div>
-        <div class="filter-row" id="zbSchoolFilters"></div>
+        <div class="sec">Zauberplätze</div>
+        <div class="slot-g" id="spSlots"></div>
+        <div class="sec">Meine Zauber</div>
+        <div id="mySpells"></div>
+        <button class="add-btn" onclick="addSpellManual()">+ Zauber manuell hinzufügen</button>
       </div>
-      <div class="zb-count" id="zbCount"></div>
-      <div id="zbList"></div>
+
+      <!-- Zauberbuch Browser -->
+      <div id="subpanel-zauberbuch" style="display:none">
+        <div class="zb-controls">
+          <div class="search-wrap">
+            <span class="si">🔍</span>
+            <input type="search" id="zbQ" placeholder="Zauber suchen..." oninput="zbRender()">
+          </div>
+          <div class="filter-row" id="zbGradFilters"></div>
+          <div class="filter-row" id="zbSchoolFilters"></div>
+        </div>
+        <div class="zb-count" id="zbCount"></div>
+        <div id="zbList"></div>
+      </div>
     </div>
 
     <!-- FEATURES -->
@@ -367,7 +417,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
       </div>
       <div class="sec" id="featSec">Features & Talente</div>
       <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
-        <button class="add-btn" style="flex:1;margin:0" onclick="loadClassFeatures()">⚔ Klassen-Features laden</button>
+        
         <button class="add-btn" style="flex:1;margin:0" onclick="addFeat()">+ Manuell hinzufügen</button>
       </div>
       <div id="featList"></div>
@@ -415,7 +465,13 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 
 <script>
 const ATTRS=[{k:'STR',l:'Stärke'},{k:'DEX',l:'Geschick'},{k:'CON',l:'Konst.'},{k:'INT',l:'Intell.'},{k:'WIS',l:'Weish.'},{k:'CHA',l:'Charis.'}];
-const SKILLS=[{n:'Akrobatik',a:'DEX'},{n:'Arkane Kunde',a:'INT'},{n:'Athletik',a:'STR'},{n:'Auftreten',a:'CHA'},{n:'Einschüchtern',a:'CHA'},{n:'Einsicht',a:'WIS'},{n:'Fingerfertigkeit',a:'DEX'},{n:'Geschichte',a:'INT'},{n:'Heimlichkeit',a:'DEX'},{n:'Medizin',a:'WIS'},{n:'Natur',a:'INT'},{n:'Überlebenskunst',a:'WIS'},{n:'Überreden',a:'CHA'},{n:'Täuschung',a:'CHA'},{n:'Tierführung',a:'WIS'},{n:'Untersuchen',a:'INT'},{n:'Wahrnehmung',a:'WIS'},{n:'Religion',a:'INT'}];
+const SKILLS=[
+  {n:'Athletik',a:'STR'},
+  {n:'Akrobatik',a:'DEX'},{n:'Fingerfertigkeit',a:'DEX'},{n:'Heimlichkeit',a:'DEX'},
+  {n:'Arkane Kunde',a:'INT'},{n:'Geschichte',a:'INT'},{n:'Natur',a:'INT'},{n:'Religion',a:'INT'},{n:'Untersuchen',a:'INT'},
+  {n:'Einsicht',a:'WIS'},{n:'Medizin',a:'WIS'},{n:'Tierführung',a:'WIS'},{n:'Überlebenskunst',a:'WIS'},{n:'Wahrnehmung',a:'WIS'},
+  {n:'Auftreten',a:'CHA'},{n:'Einschüchtern',a:'CHA'},{n:'Täuschung',a:'CHA'},{n:'Überreden',a:'CHA'}
+];
 
 // ZAUBERDATENBANK
 const ZB_SPELLS=[
@@ -544,7 +600,13 @@ function buildAttrs(){
   ATTRS.forEach(a=>{
     const v=st.attrs[a.k],m=md(v);
     const d=document.createElement('div');d.className='acard';
-    d.innerHTML=`<div class="aname">${a.l}</div><input class="aval" type="number" min="1" max="30" value="${v}" id="a_${a.k}"><div class="amod" id="m_${a.k}">${fmt(m)}</div>`;
+    d.innerHTML=`<div class="aname">${a.l}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:2px">
+        <button class="hbtn" onclick="chAttr('${a.k}',-1)" style="width:22px;height:22px;font-size:14px">−</button>
+        <input class="aval" type="number" min="1" max="30" value="${v}" id="a_${a.k}" style="width:38px">
+        <button class="hbtn" onclick="chAttr('${a.k}',1)" style="width:22px;height:22px;font-size:14px">+</button>
+      </div>
+      <div class="amod" id="m_${a.k}">${fmt(m)}</div>`;
     g.appendChild(d);
     d.querySelector('input').addEventListener('input',e=>{
       st.attrs[a.k]=parseInt(e.target.value)||10;
@@ -553,6 +615,21 @@ function buildAttrs(){
     });
   });
 }
+
+function chLvl(d){
+  const el=document.getElementById('lvl');
+  const v=Math.max(1,Math.min(20,(parseInt(el.value)||1)+d));
+  el.value=v;buildAbilities();
+}
+function chAttr(k,d){
+  st.attrs[k]=Math.max(1,Math.min(30,(st.attrs[k]||10)+d));
+  const inp=document.getElementById('a_'+k);
+  if(inp) inp.value=st.attrs[k];
+  document.getElementById('m_'+k).textContent=fmt(md(st.attrs[k]));
+  buildSaves();buildSkills();calcSpell();
+}
+
+function chStat(id,d){const el=document.getElementById(id);if(!el)return;el.value=parseInt(el.value||0)+d;el.dispatchEvent(new Event('input'));}
 
 function buildSaves(){
   const g=document.getElementById('savesGrid');if(!g)return;g.innerHTML='';
@@ -566,7 +643,17 @@ function buildSaves(){
 
 function buildSkills(){
   const g=document.getElementById('skillsGrid');if(!g)return;g.innerHTML='';
+  const attrOrder=['STR','DEX','CON','INT','WIS','CHA'];
+  const attrNames={STR:'Stärke',DEX:'Geschicklichkeit',CON:'Konstitution',INT:'Intelligenz',WIS:'Weisheit',CHA:'Charisma'};
+  let lastA='';
   SKILLS.forEach(s=>{
+    if(s.a!==lastA){
+      lastA=s.a;
+      const h=document.createElement('div');
+      h.style.cssText='font-family:\'Cinzel\',serif;font-size:8px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;padding:8px 2px 3px;';
+      h.textContent=attrNames[s.a]||s.a;
+      g.appendChild(h);
+    }
     const p=st.skillP[s.n];const b=md(st.attrs[s.a])+(p==='e'?prof()*2:p==='p'?prof():0);
     const r=document.createElement('div');r.className='sk-row';
     r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':''}"></div><span class="sk-name">${s.n}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span>`;
@@ -605,27 +692,57 @@ function togSlot(i,j){const u=st.slotUsed[i];st.slotUsed[i]=(j<u)?j:j+1;buildSlo
 // MY SPELLS
 function buildMySpells(){
   const list=document.getElementById('mySpells');if(!list)return;list.innerHTML='';
-  st.mySpells.forEach((sp,i)=>{
+  const sorted=st.mySpells.map((sp,i)=>({...sp,_i:i})).sort((a,b)=>{
+    if(a.prep!==b.prep) return a.prep?-1:1;
+    return a.grad-b.grad;
+  });
+  let lastPrep=null;
+  sorted.forEach(sp=>{
+    const i=sp._i;
+    if(lastPrep!==sp.prep){
+      lastPrep=sp.prep;
+      const hdr=document.createElement('div');hdr.className='zb-divider';
+      hdr.textContent=sp.prep?'✦ Vorbereitet':'◦ Nicht vorbereitet';
+      list.appendChild(hdr);
+    }
     const div=document.createElement('div');div.className='spell-card';
     const lbl=sp.grad===0?'Cantrip':'Stufe '+sp.grad;
-    div.innerHTML=`
+    const dbSpell=ZB_SPELLS.find(s=>s.name===sp.name);
+    const inner=document.createElement('div');
+    const descHtml=dbSpell?`<div style="font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-line;margin-bottom:8px;padding:4px 0">${dbSpell.desc}${dbSpell.higher?'\n\nHöhere Grade: '+dbSpell.higher:''}</div>`:'';
+    const metaHtml=dbSpell?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:'Cinzel',serif;letter-spacing:.5px">${dbSpell.zeit} · ${dbSpell.reichweite} · ${dbSpell.dauer}${dbSpell.komp?' · '+dbSpell.komp:''}</div>`:'';
+    inner.innerHTML=`
     <div class="spell-main">
+      <button class="delbtn" onclick="delMySpell(${i})">✕</button>
       <span class="spell-name">${sp.name}</span>
       <span class="sp-badge sp-info">${lbl}</span>
       <span class="sp-badge sp-warn">${sp.school}</span>
-      <div class="spell-prep${sp.prep?' on':''}" onclick="togPrep(${i})">✦</div>
-      <button class="expbtn" onclick="togMyNotes(${i},this)">▾</button>
-      <button class="delbtn" onclick="delMySpell(${i})">✕</button>
+      <div class="spell-prep${sp.prep?' on':''}" onclick="togPrep(${i})" style="margin-left:auto">✦</div>
+      <button class="expbtn" onclick="togMySpellDetail(${i},this)">▾</button>
     </div>
-    <div class="spell-notes${sp.notes?' on':''}" id="msn_${i}">
+    <div class="spell-notes" id="msn_${i}" style="display:none">
+      ${descHtml}${metaHtml}
       <textarea placeholder="Notizen..." oninput="st.mySpells[${i}].notes=this.value">${sp.notes||''}</textarea>
     </div>`;
+    div.appendChild(inner);
     list.appendChild(div);
   });
 }
+function togMySpellDetail(i,btn){
+  const n=document.getElementById('msn_'+i);
+  const open=n.style.display==='none';
+  n.style.display=open?'block':'none';
+  btn.textContent=open?'▴':'▾';
+}
 function togPrep(i){st.mySpells[i].prep=!st.mySpells[i].prep;buildMySpells()}
-function togMyNotes(i,btn){const n=document.getElementById('msn_'+i);n.classList.toggle('on');btn.textContent=n.classList.contains('on')?'▴':'▾'}
-function delMySpell(i){if(confirm('Löschen?')){st.mySpells.splice(i,1);buildMySpells()}}
+function delMySpell(i){
+  const sp=st.mySpells[i];
+  // Remove from zbAdded so it can be added again
+  const idx=ZB_SPELLS.findIndex(s=>s.name===sp.name);
+  if(idx>=0) st.zbAdded.delete(idx);
+  st.mySpells.splice(i,1);
+  buildMySpells();
+}
 function addSpellManual(){
   const name=prompt('Zauber-Name:');if(!name)return;
   const grad=parseInt(prompt('Grad (0=Cantrip, 1-9):','1'))||0;
@@ -652,6 +769,14 @@ function delFeat(i){st.feats.splice(i,1);buildFeats();}
 
 // HP
 function chHP(d){const m=parseInt(document.getElementById('hpM').value)||10;st.hpC=Math.max(0,Math.min(m,st.hpC+d));document.getElementById('hpC').textContent=st.hpC;updBar()}
+function chHpM(d){const el=document.getElementById('hpM');el.value=Math.max(1,(parseInt(el.value)||10)+d);onHpMChange();}
+function chHpT(d){const el=document.getElementById('hpT');el.value=Math.max(0,(parseInt(el.value)||0)+d);}
+function onHpMChange(){
+  const newMax=parseInt(document.getElementById('hpM').value)||10;
+  st.hpC=newMax;
+  document.getElementById('hpC').textContent=st.hpC;
+  updBar();
+}
 function updBar(){
   const m=parseInt(document.getElementById('hpM').value)||10;
   st.hpC=Math.min(st.hpC,m);document.getElementById('hpC').textContent=st.hpC;
@@ -694,15 +819,22 @@ function zbBuildFilters(){
   });
 }
 
+// Class spell lists - maps class name to allowed classes field values
+const CLASS_SPELL_MAP={'Druide':['Druid'],'Magier':['Wizard'],'Kleriker':['Cleric'],'Barde':['Bard'],'Hexenmeister':['Warlock'],'Paladin':['Paladin'],'Jäger':['Ranger'],'Zauberer':['Sorcerer']};
+
 function zbRender(){
   const q=document.getElementById('zbQ').value.toLowerCase().trim();
+  const cls=document.getElementById('cls')?.value||'';
+  const clsFilter=CLASS_SPELL_MAP[cls]||null;
   const f=ZB_SPELLS.filter(s=>{
     const gOk=zbFGrad==='all'||s.grad==zbFGrad;
     const sOk=zbFSchool==='all'||s.school===zbFSchool;
     const qOk=!q||s.name.toLowerCase().includes(q)||s.school.toLowerCase().includes(q)||s.desc.toLowerCase().includes(q);
-    return gOk&&sOk&&qOk;
+    const clsOk=!clsFilter||!s.classes||clsFilter.some(c=>s.classes.includes(c));
+    return gOk&&sOk&&qOk&&clsOk;
   });
-  document.getElementById('zbCount').textContent=f.length+' von '+ZB_SPELLS.length+' Zaubern';
+  const total=clsFilter?ZB_SPELLS.filter(s=>!s.classes||clsFilter.some(c=>s.classes.includes(c))).length:ZB_SPELLS.length;
+  document.getElementById('zbCount').textContent=f.length+' von '+total+' Zaubern'+(cls?' ('+cls+')':'');
   const list=document.getElementById('zbList');list.innerHTML='';
   if(!f.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-family:\'Cinzel\',serif;font-size:11px">Keine Zauber gefunden</div>';return;}
   const c0=f.filter(s=>s.grad===0),c1=f.filter(s=>s.grad===1);
@@ -772,10 +904,15 @@ const DRUID_CLASS_FEATURES=[
   {lvl:2,name:"Wild Companion",desc:"As a Magic action, you can expend a spell slot or a use of Wild Shape to cast the Find Familiar spell without Material components. The familiar is Fey and disappears when you finish a Long Rest.",tag:"Aktion"},
   {lvl:2,name:"Wild Shape",desc:"As a Bonus Action, you shape-shift into a Beast form you have learned. You stay in that form for hours equal to half your Druid level, until you use Wild Shape again, become Incapacitated, or die.\n• Uses: 2 per Long Rest; regain 1 per Short Rest.\n• Known Forms: 4 forms (max CR 1/4, no Fly Speed at start). Fly Speed allowed from level 8.\n• Temp HP: Gain HP equal to your Druid level when shifting.\n• You retain your personality, memories, INT/WIS/CHA, class features, and proficiencies. You cannot cast spells while shifted.",tag:"Bonusaktion"},
   {lvl:3,name:"Druid Subclass",desc:"You gain a Druid subclass of your choice. For the rest of your career, you gain each subclass feature at the appropriate Druid level.",tag:"Passiv"},
+  {lvl:4,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
   {lvl:5,name:"Wild Resurgence",desc:"Once per turn, if you have no Wild Shape uses left, you can expend a spell slot to gain one use (no action required).\nAlternatively, you can expend one use of Wild Shape to gain a level 1 spell slot (once per Long Rest).",tag:"Passiv"},
   {lvl:7,name:"Elemental Fury",desc:"Choose one of the following:\n• Potent Spellcasting: Add your Wisdom modifier to damage dealt by any Druid cantrip.\n• Primal Strike: Once per turn when you hit with a weapon or Wild Shape attack, deal an extra 1d8 Cold, Fire, Lightning, or Thunder damage.",tag:"Passiv"},
+  {lvl:8,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
+  {lvl:12,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
   {lvl:15,name:"Improved Elemental Fury",desc:"Your Elemental Fury option improves:\n• Potent Spellcasting: Druid cantrips with range 10+ feet gain +300 feet range.\n• Primal Strike: Extra damage increases to 2d8.",tag:"Passiv"},
+  {lvl:16,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
   {lvl:18,name:"Beast Spells",desc:"While using Wild Shape, you can cast spells in Beast form, except spells with a Material component that has a cost or is consumed.",tag:"Passiv"},
+  {lvl:19,name:"Epic Boon",desc:"You gain an Epic Boon feat or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.",tag:"Passiv"},
   {lvl:20,name:"Archdruid",desc:"• Evergreen Wild Shape: Whenever you roll Initiative with no Wild Shape uses left, regain one use.\n• Nature Magician: Convert unexpended Wild Shape uses into a spell slot (each use = 2 spell levels, once per Long Rest).\n• Longevity: For every 10 years, your body ages only 1 year.",tag:"Passiv"}
 ];
 const DRUID_SUBCLASS_FEATURES={
@@ -840,6 +977,7 @@ const SUBCLS_BY_CLASS={
 
 function onClsChange(){
   const cls=document.getElementById('cls').value;
+  applyTheme(cls);
   const bstTab=document.getElementById('tabBestien');
   if(bstTab) bstTab.style.display=['Druide','Jäger','Waldläufer'].includes(cls)?'':'none';
   const field=document.getElementById('subclsField');
@@ -853,25 +991,40 @@ function onClsChange(){
     sel.innerHTML='<option value="">—</option>';
   }
   buildAbilities();
+  autoLoadClassFeatures();
+}
+function onSubclsChange(){
+  buildAbilities();
+  autoLoadClassFeatures();
 }
 
-function loadClassFeatures(){
+// CLASS_FEATURES registry — add other classes here later
+const CLASS_FEATURES={
+  "Druide":{
+    base: typeof DRUID_CLASS_FEATURES!=='undefined'?DRUID_CLASS_FEATURES:[],
+    subclass: typeof DRUID_SUBCLASS_FEATURES!=='undefined'?DRUID_SUBCLASS_FEATURES:{}
+  }
+};
+
+function autoLoadClassFeatures(){
   const cls=document.getElementById('cls').value;
   const subcls=document.getElementById('subcls').value;
   const lvl=parseInt(document.getElementById('lvl').value)||1;
-  if(cls!=='Druide'){showToast('Nur Druide hat Daten');return;}
+  const clsData=CLASS_FEATURES[cls];
+  if(!clsData) return;
   const existing=new Set(st.feats.map(f=>f.name));
   let added=0;
-  DRUID_CLASS_FEATURES.filter(f=>f.lvl<=lvl&&!existing.has(f.name)).forEach(f=>{
-    st.feats.push({name:`Lvl ${f.lvl}: ${f.name}`,tag:f.tag,desc:f.desc});added++;
+  (clsData.base||[]).filter(f=>f.lvl<=lvl).forEach(f=>{
+    const n=`Lvl ${f.lvl}: ${f.name}`;
+    if(!existing.has(n)){st.feats.push({name:n,tag:f.tag,desc:f.desc});existing.add(n);added++;}
   });
-  if(subcls&&DRUID_SUBCLASS_FEATURES[subcls]){
-    DRUID_SUBCLASS_FEATURES[subcls].filter(f=>f.lvl<=lvl&&!existing.has(`Lvl ${f.lvl}: ${f.name}`)).forEach(f=>{
-      st.feats.push({name:`Lvl ${f.lvl}: ${f.name}`,tag:f.tag,desc:f.desc});added++;
+  if(subcls&&clsData.subclass&&clsData.subclass[subcls]){
+    clsData.subclass[subcls].filter(f=>f.lvl<=lvl).forEach(f=>{
+      const n=`Lvl ${f.lvl}: ${f.name}`;
+      if(!existing.has(n)){st.feats.push({name:n,tag:f.tag,desc:f.desc});existing.add(n);added++;}
     });
   }
-  buildFeats();
-  showToast(added>0?`${added} Features geladen`:'Alle Features bereits vorhanden');
+  if(added>0){buildFeats();autoSave();}
 }
 
 
@@ -1238,6 +1391,7 @@ function bstSave(name){
   st.savedBeasts.push(b);
   buildSavedBeasts();
   bstRender();
+  autoSave();
   showToast(name+' gespeichert');
 }
 
@@ -1273,6 +1427,15 @@ function bstRemove(i){
   st.savedBeasts.splice(i,1);
   buildSavedBeasts();
   bstRender();
+  autoSave();
+}
+
+function switchSubtab(parent, btn){
+  const active=btn.dataset.st;
+  btn.closest('div').querySelectorAll('.subtab').forEach(b=>b.classList.toggle('on',b===btn));
+  const panel=document.getElementById('tab-'+parent);
+  panel.querySelectorAll('[id^="subpanel-"]').forEach(p=>p.style.display=p.id==='subpanel-'+active?'':'none');
+  if(active==='zauberbuch') zbRender();
 }
 
 function switchTab(t){
@@ -1282,6 +1445,220 @@ function switchTab(t){
   if(t==='bestien'){bstInit();buildSavedBeasts();}
   if(t==='feats'){ftBuildFilters();}
 }
+
+// LOCALSTORAGE / MEHRCHARAKTERE
+const LS_KEY = 'dnd5e_chars';
+const TEXT_IDS = ['charName','cls','race','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes'];
+
+function getAllChars(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
+  catch{ return {}; }
+}
+
+function collectState(){
+  const snap = JSON.parse(JSON.stringify(st, (k,v) => v instanceof Set ? [...v] : v));
+  TEXT_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) snap['_f_'+id] = el.value;
+  });
+  return snap;
+}
+
+function applyState(snap){
+  // restore st
+  const restored = JSON.parse(JSON.stringify(snap));
+  // Extract field values before overwriting st
+  const fields = {};
+  TEXT_IDS.forEach(id=>{ if('_f_'+id in restored){ fields[id]=restored['_f_'+id]; delete restored['_f_'+id]; }});
+  // Restore zbAdded as Set
+  if(Array.isArray(restored.zbAdded)) restored.zbAdded = new Set(restored.zbAdded);
+  else restored.zbAdded = new Set();
+  Object.assign(st, {
+    attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
+    saveP:{},skillP:{},
+    hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
+    slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
+    mySpells:[],feats:[],bg:'',zbAdded:new Set(),
+    abUses:{},savedBeasts:[]
+  }, restored);
+  // Apply field values (cls first so subcls dropdown gets populated)
+  const clsEl=document.getElementById('cls');
+  if(clsEl && fields['cls']!==undefined) clsEl.value=fields['cls'];
+  // Build subcls options based on cls
+  onClsChange();
+  // Now apply all other fields including subcls
+  TEXT_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && fields[id]!==undefined) el.value=fields[id];
+  });
+  // Trigger dependent UI (skip onClsChange - already called)
+  buildAttrs();buildSaves();buildSkills();updBar();
+  buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
+  calcSpell();
+  // Background
+  if(st.bg) renderBgCard(st.bg);
+  // Death saves / inspiration
+  ['dsS','dsF'].forEach(k=>{
+    const el=document.getElementById(k==='dsS'?'dsS':'dsF');
+    if(el) el.querySelectorAll('.dspip').forEach((p,j)=>p.classList.toggle('f',!!(st[k]||[])[j]));
+  });
+  document.getElementById('ins0')?.classList.toggle('f',!!st.ins?.[0]);
+  document.getElementById('ins1')?.classList.toggle('f',!!st.ins?.[1]);
+  document.getElementById('ins2')?.classList.toggle('f',!!st.ins?.[2]);
+  document.getElementById('hpC').textContent=st.hpC;
+  updBar();
+}
+
+function saveChar(){
+  const name = document.getElementById('charName')?.value.trim();
+  if(!name){showToast('Bitte zuerst einen Namen eingeben');return;}
+  const chars = getAllChars();
+  chars[name] = collectState();
+  localStorage.setItem(LS_KEY, JSON.stringify(chars));
+  refreshCharSel(name);
+  showToast('💾 '+name+' gespeichert');
+}
+
+function loadChar(name){
+  if(!name) return;
+  const chars = getAllChars();
+  if(!chars[name]) return;
+  applyState(chars[name]);
+  refreshCharSel(name);
+}
+
+function newChar(){
+  const modal=document.getElementById('newCharModal');
+  modal.style.display='flex';
+  document.getElementById('newCharName').value='';
+  document.getElementById('newCharName').focus();
+  return;
+}
+function confirmNewChar(){
+  const modal=document.getElementById('newCharModal');
+  const name=document.getElementById('newCharName').value.trim();
+  if(!name){showToast('Bitte Namen eingeben');return;}
+  modal.style.display='none';
+  _doNewChar(name);
+}
+function _doNewChar(name){
+  const _name=name;
+  {
+  // Reset state
+  Object.assign(st, {
+    attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
+    saveP:{},skillP:{},
+    hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
+    slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
+    mySpells:[],feats:[],bg:'',zbAdded:new Set(),
+    abUses:{},savedBeasts:[]
+  });
+  TEXT_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      if(id==='charName') el.value=_name;
+      else if(el.tagName==='SELECT') el.value='';
+      else if(el.type==='number') el.value=el.defaultValue||'';
+      else el.value='';
+    }
+  });
+  onClsChange(); // also calls applyTheme
+  buildAttrs();buildSaves();buildSkills();updBar();
+  buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
+  calcSpell();
+  const chars = getAllChars();
+  chars[_name] = collectState();
+  localStorage.setItem(LS_KEY, JSON.stringify(chars));
+  refreshCharSel(_name);
+  showToast('✨ Neuer Charakter: '+_name);
+  }
+}
+
+function deleteChar(){
+  const name = document.getElementById('charSel')?.value;
+  if(!name) return;
+  showDeleteConfirm(name);
+}
+function showDeleteConfirm(name){
+  const modal=document.getElementById('deleteModal');
+  document.getElementById('deleteModalName').textContent=name;
+  modal.style.display='flex';
+}
+function confirmDelete(){
+  const name=document.getElementById('charSel')?.value;
+  document.getElementById('deleteModal').style.display='none';
+  if(!name)return;
+  const chars=getAllChars();
+  delete chars[name];
+  localStorage.setItem(LS_KEY,JSON.stringify(chars));
+  const remaining=Object.keys(chars);
+  if(remaining.length) loadChar(remaining[0]);
+  else { refreshCharSel(''); showToast('Alle Charaktere gelöscht'); }
+}
+
+function refreshCharSel(active){
+  const sel = document.getElementById('charSel');
+  if(!sel) return;
+  const chars = getAllChars();
+  const names = Object.keys(chars);
+  sel.innerHTML = names.length
+    ? names.map(n=>`<option value="${n}" ${n===active?'selected':''}>${n}</option>`).join('')
+    : '<option value="">— Kein Charakter —</option>';
+  // style the select to match theme
+  sel.style.color = names.length ? 'var(--text)' : 'var(--text3)';
+}
+
+function initApp(){
+  const chars = getAllChars();
+  const names = Object.keys(chars);
+  if(names.length){
+    loadChar(names[0]);
+  } else {
+    buildAttrs();buildSaves();buildSkills();
+    buildSlots();buildMySpells();buildFeats();
+    buildBgSelect();calcSpell();updBar();
+    refreshCharSel('');
+  }
+}
+
+// Auto-save on input changes
+document.addEventListener('input', autoSave);
+function autoSave(){
+  const name = document.getElementById('charName')?.value.trim();
+  if(name){
+    const chars = getAllChars();
+    chars[name] = collectState();
+    localStorage.setItem(LS_KEY, JSON.stringify(chars));
+  }
+}
+
+
+// KLASSEN-FARBTHEMEN
+const CLASS_THEMES={"": {"gold": "#c9a84c", "gold2": "#8a6f2e", "purple": "#b48be0", "purple2": "#7c4dba", "purple3": "#3a1f6b", "bg0": "#0d0b14", "bg1": "#141020", "bg2": "#1a1530", "bg3": "#100e1c", "border": "rgba(180,139,224,0.3)", "border2": "rgba(180,139,224,0.15)", "text": "#f0e8ff", "text2": "#9b8fc0", "text3": "#6b5f8a"}, "Druide": {"gold": "#7a9a5a", "gold2": "#4a6a32", "purple": "#8aaa6a", "purple2": "#4a7038", "purple3": "#1a2a10", "bg0": "#0a0c08", "bg1": "#111408", "bg2": "#181c10", "bg3": "#0c0f08", "border": "rgba(122,154,90,0.3)", "border2": "rgba(122,154,90,0.15)", "text": "#e8ead8", "text2": "#8a9a72", "text3": "#5a6a48"}, "Magier": {"gold": "#5b9bd5", "gold2": "#2a5f8a", "purple": "#7ab3e8", "purple2": "#3a6aaa", "purple3": "#0e1f40", "bg0": "#080b14", "bg1": "#0d1220", "bg2": "#12192e", "bg3": "#090e1c", "border": "rgba(90,155,213,0.3)", "border2": "rgba(90,155,213,0.15)", "text": "#e0eaff", "text2": "#7a9bc0", "text3": "#4a6a8a"}, "Kleriker": {"gold": "#e8c84a", "gold2": "#a08a28", "purple": "#f0d878", "purple2": "#b89a30", "purple3": "#3a3010", "bg0": "#100e08", "bg1": "#1c1a0e", "bg2": "#242010", "bg3": "#16140a", "border": "rgba(232,200,74,0.3)", "border2": "rgba(232,200,74,0.15)", "text": "#fff8e0", "text2": "#c0aa70", "text3": "#8a7a48"}, "Paladin": {"gold": "#d4af70", "gold2": "#9a7a40", "purple": "#e8d0a0", "purple2": "#b09060", "purple3": "#40300e", "bg0": "#0e0c08", "bg1": "#1a160c", "bg2": "#221c10", "bg3": "#14120a", "border": "rgba(212,175,112,0.3)", "border2": "rgba(212,175,112,0.15)", "text": "#fff0d0", "text2": "#c0a870", "text3": "#8a7848"}, "Hexenmeister": {"gold": "#cc5555", "gold2": "#882030", "purple": "#d080c0", "purple2": "#903080", "purple3": "#3a0838", "bg0": "#0e0808", "bg1": "#1a0c18", "bg2": "#221020", "bg3": "#160a14", "border": "rgba(204,85,85,0.3)", "border2": "rgba(204,85,85,0.15)", "text": "#ffe0f8", "text2": "#b878a8", "text3": "#8a4878"}, "Barde": {"gold": "#40c8c0", "gold2": "#207870", "purple": "#a060e0", "purple2": "#6030b0", "purple3": "#1e0848", "bg0": "#080e0e", "bg1": "#0c1818", "bg2": "#101e20", "bg3": "#0a1414", "border": "rgba(64,200,192,0.3)", "border2": "rgba(64,200,192,0.15)", "text": "#e0fff8", "text2": "#70b8b0", "text3": "#408880"}, "Jäger": {"gold": "#a0844a", "gold2": "#705828", "purple": "#88aa66", "purple2": "#587840", "purple3": "#1e2a10", "bg0": "#0a0c08", "bg1": "#141810", "bg2": "#1a2014", "bg3": "#10140c", "border": "rgba(160,132,74,0.3)", "border2": "rgba(160,132,74,0.15)", "text": "#f0ead8", "text2": "#a09870", "text3": "#706848"}, "Kämpfer": {"gold": "#c0c0c0", "gold2": "#808080", "purple": "#a0a8b8", "purple2": "#606878", "purple3": "#1a1e28", "bg0": "#0a0a0c", "bg1": "#141418", "bg2": "#1c1c22", "bg3": "#101014", "border": "rgba(192,192,192,0.3)", "border2": "rgba(192,192,192,0.15)", "text": "#f0f0f8", "text2": "#9090a8", "text3": "#606078"}, "Schurke": {"gold": "#88c050", "gold2": "#508028", "purple": "#708090", "purple2": "#405060", "purple3": "#141c20", "bg0": "#080a08", "bg1": "#101410", "bg2": "#141a14", "bg3": "#0c100c", "border": "rgba(136,192,80,0.3)", "border2": "rgba(136,192,80,0.15)", "text": "#e8f8e0", "text2": "#88a878", "text3": "#587848"}, "Barbar": {"gold": "#e06030", "gold2": "#a03810", "purple": "#d08050", "purple2": "#904830", "purple3": "#380e08", "bg0": "#0e0808", "bg1": "#1a0e0a", "bg2": "#22120c", "bg3": "#160a08", "border": "rgba(224,96,48,0.3)", "border2": "rgba(224,96,48,0.15)", "text": "#fff0e8", "text2": "#c08868", "text3": "#8a5840"}, "Mönch": {"gold": "#50c8a0", "gold2": "#287860", "purple": "#80c8e0", "purple2": "#4090a8", "purple3": "#0e2830", "bg0": "#080e0c", "bg1": "#0c1818", "bg2": "#101e1c", "bg3": "#0a1414", "border": "rgba(80,200,160,0.3)", "border2": "rgba(80,200,160,0.15)", "text": "#e0fff8", "text2": "#70b8a8", "text3": "#408878"}, "Zauberer": {"gold": "#c060c0", "gold2": "#803080", "purple": "#e080d0", "purple2": "#a040a0", "purple3": "#380838", "bg0": "#0e080e", "bg1": "#180c18", "bg2": "#200e20", "bg3": "#140a14", "border": "rgba(192,96,192,0.3)", "border2": "rgba(192,96,192,0.15)", "text": "#ffe8ff", "text2": "#b878b8", "text3": "#884888"}};
+
+const CLASS_RUNES={'Barbar':'🪓','Barde':'🎭','Druide':'🌿','Hexenmeister':'🕯','Jäger':'🏹','Kleriker':'🕊','Kämpfer':'⚔','Magier':'📜','Mönch':'🥋','Paladin':'🛡','Schurke':'🗡','Zauberer':'⭐'};
+
+function applyTheme(cls){
+  const t=CLASS_THEMES[cls]||CLASS_THEMES[''];
+  const r=document.documentElement.style;
+  r.setProperty('--gold',t.gold);
+  r.setProperty('--gold2',t.gold2);
+  r.setProperty('--purple',t.purple);
+  r.setProperty('--purple2',t.purple2);
+  r.setProperty('--purple3',t.purple3);
+  r.setProperty('--bg0',t.bg0);
+  r.setProperty('--bg1',t.bg1);
+  r.setProperty('--bg2',t.bg2);
+  r.setProperty('--bg3',t.bg3);
+  r.setProperty('--border',t.border);
+  r.setProperty('--border2',t.border2);
+  r.setProperty('--text',t.text);
+  r.setProperty('--text2',t.text2);
+  r.setProperty('--text3',t.text3);
+  const rune=document.querySelector('.rune');
+  if(rune) rune.textContent=CLASS_RUNES[cls]||'⚔';
+}
+
 // TABS
 document.getElementById('tabs').addEventListener('click',e=>{
   const btn=e.target.closest('.tab');if(!btn)return;
@@ -1296,16 +1673,25 @@ document.getElementById('tabs').addEventListener('click',e=>{
   if(t==='features'){buildFeats();buildAbilities();buildSavedBeasts();}
   if(t==='feats'){ftBuildFilters();}
   if(t==='bestien'){bstInit();buildSavedBeasts();}
+  if(t==='zauber'){buildSlots();buildMySpells();calcSpell();}
   if(t==='hintergrund')buildBgSelect();
 });
 
 document.getElementById('prof').addEventListener('input',()=>{buildSaves();buildSkills();calcSpell()});
 
 // INIT
-buildAttrs();
-buildSlots();
 zbBuildFilters();
-updBar();
+initApp();
 </script>
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
+    <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--text);margin-bottom:8px">Charakter löschen?</div>
+    <div id="deleteModalName" style="font-family:'Cinzel',serif;font-size:16px;color:var(--red);margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="char-btn" style="flex:1" onclick="document.getElementById('deleteModal').style.display='none'">Abbrechen</button>
+      <button class="char-btn danger" style="flex:1" onclick="confirmDelete()">Löschen</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
