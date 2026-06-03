@@ -1,0 +1,23 @@
+{
+  "name": "Willow Character App",
+  "short_name": "Willow",
+  "description": "D&D 5e Charakterbogen",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0b14",
+  "theme_color": "#141020",
+  "icons": [
+    {
+      "src": "willow-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "willow-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
