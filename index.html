@@ -2,14 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>D&D 5e Charakterbogen</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#141020">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Willow">
-<link rel="apple-touch-icon" href="willow-icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -42,8 +36,8 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .tabs .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* BODY */
-.body{padding:14px;padding-bottom:80px}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border2);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.body{padding:14px;padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border2);display:flex;z-index:200;padding-bottom:max(env(safe-area-inset-bottom), 8px)}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--text3);transition:color .2s;-webkit-tap-highlight-color:transparent;outline:none}
 .bnav-btn:focus{outline:none}
 .bnav-btn.on{color:var(--purple)}
@@ -2053,12 +2047,5 @@ initApp();
     <span class="bnav-icon">⭐</span><span class="bnav-label">Features</span>
   </button>
 </nav>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js");
-  });
-}
-</script>
 </body>
 </html>
