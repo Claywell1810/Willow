@@ -31,12 +31,19 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .name-in::placeholder{color:var(--text3)}
 
 /* TABS */
-.tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));background:var(--bg1);border-bottom:1px solid var(--border2);position:sticky;top:62px;z-index:99}
+.tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));background:var(--bg1)}
 .tab{padding:9px 6px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;white-space:nowrap;border-bottom:2px solid transparent;text-align:center;-webkit-tap-highlight-color:transparent}
-.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tabs .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* BODY */
-.body{padding:14px}
+.body{padding:14px;padding-bottom:80px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border2);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--text3);transition:color .2s;-webkit-tap-highlight-color:transparent;outline:none}
+.bnav-btn:focus{outline:none}
+.bnav-btn.on{color:var(--purple)}
+.bnav-btn.on .bnav-icon{filter:drop-shadow(0 0 4px var(--purple))}
+.bnav-btn .bnav-icon{font-size:20px;line-height:1}
+.bnav-btn .bnav-label{font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.5px}
 .panel{display:none}
 .panel.on{display:block}
 .sec{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold2);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid rgba(201,168,76,0.2);text-transform:uppercase}
@@ -122,7 +129,29 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .subtab{padding:8px 14px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;white-space:nowrap;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent}
 .subtab.on{color:var(--gold);border-bottom-color:var(--gold)}
 
-/* HINTERGRUND */
+/* AUSRÜSTUNG */
+.currency-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.currency-box{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 4px}
+.currency-box label{font-size:10px;font-family:'Cinzel',serif;letter-spacing:1px;color:var(--gold)}
+.currency-box input{width:100%;background:none;border:none;color:var(--text);font-size:15px;text-align:center;outline:none;padding:0}
+.item-add-row{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.item-add-row input,.item-add-row select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:6px 7px;outline:none;min-width:0}
+.item-add-row select option{background:var(--bg2)}
+.item-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.item-top{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer}
+.item-cat{font-size:14px;flex-shrink:0}
+.item-name{flex:1;font-family:'Cinzel',serif;font-size:13px;color:var(--text)}
+.item-qty{font-size:12px;color:var(--gold);font-family:'Cinzel',serif;flex-shrink:0}
+.item-wt{font-size:11px;color:var(--text3);flex-shrink:0}
+.item-detail{display:none;padding:8px 10px;border-top:1px solid var(--border2);gap:6px;flex-direction:column}
+.item-detail.on{display:flex}
+.item-detail textarea{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:16px;padding:6px;resize:none;min-height:50px;outline:none;font-family:inherit}
+.item-detail-row{display:flex;gap:6px;align-items:center}
+.item-detail-row input{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:16px;padding:5px 7px;outline:none;flex:1;min-width:0}
+.item-del{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--red);font-size:12px;padding:5px 10px;cursor:pointer;font-family:'Cinzel',serif}
+.item-del:hover{background:rgba(224,85,85,0.15)}
+
+
 .bg-desc{font-size:14px;color:var(--text2);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
 .bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .bg-pill{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px}
@@ -157,12 +186,29 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 
 /* ===== ZAUBERBUCH ===== */
 .zb-controls{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
-.search-wrap{position:relative}
-.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:8px 12px 8px 32px;outline:none}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:8px 36px 8px 32px;outline:none}
 .search-wrap input:focus{border-color:var(--purple)}
 .search-wrap input::placeholder{color:var(--text3)}
+.search-clear{position:absolute;right:8px;background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:4px;line-height:1}
+.search-clear:hover{color:var(--text)}
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
-.filter-row{display:flex;gap:5px;flex-wrap:wrap}
+.nta-wrap{position:relative;display:flex;flex-direction:column}
+.nta-expand{position:absolute;top:6px;right:6px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:5px;color:var(--text3);font-size:14px;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s;z-index:1}
+.nta-expand:hover{color:var(--gold);border-color:var(--gold)}
+.note-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;align-items:center;justify-content:center;padding:16px}
+.note-modal-overlay.on{display:flex}
+.note-modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:600px;display:flex;flex-direction:column;gap:0;overflow:hidden;max-height:90vh}
+.note-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border2)}
+.note-modal-title{font-family:'Cinzel',serif;font-size:13px;letter-spacing:1px;color:var(--gold)}
+.note-modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:0}
+.note-modal-close:hover{color:var(--red)}
+.note-modal textarea{flex:1;background:var(--bg3);border:none;color:var(--text);font-size:15px;padding:14px;resize:none;outline:none;min-height:300px;font-family:inherit;line-height:1.6}
+.filter-toggle{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:color .2s,border-color .2s}
+.filter-toggle:hover{color:var(--gold);border-color:var(--gold)}
+.filter-toggle.on{color:var(--gold);border-color:var(--gold)}
+.filter-collapsible{display:none;flex-direction:column;gap:5px}
+.filter-collapsible.on{display:flex}
 .fbtn{padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 .fbtn.on{background:rgba(76,175,125,0.2);color:var(--green);border-color:var(--green)}
 .fbtn.school.on{background:rgba(201,168,76,0.15);color:var(--gold);border-color:var(--gold2)}
@@ -198,7 +244,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .char-btn.danger{color:var(--red);border-color:rgba(224,85,85,0.3)}
 
 /* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--purple3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-family:'Cinzel',serif;font-size:11px;color:var(--text);letter-spacing:1px;transition:transform .3s;z-index:999;white-space:nowrap}
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--purple3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-family:'Cinzel',serif;font-size:11px;color:var(--text);letter-spacing:1px;transition:transform .3s;z-index:999;white-space:nowrap;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
@@ -229,21 +275,32 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
     </div>
   </div>
 
-  <div class="tabs" id="tabs">
-    <button class="tab on" data-tab="basis">Grundwerte</button>
-    <button class="tab" data-tab="skills">Fertigkeiten</button>
-    <button class="tab" data-tab="zauber">Zauber</button>
-    <button class="tab" data-tab="features">Features</button>
-    <button class="tab" data-tab="bestien" id="tabBestien" style="display:none">Bestien</button>
-    <button class="tab" data-tab="hintergrund">Hintergrund</button>
-    <button class="tab" data-tab="feats">Feats</button>
-    <button class="tab" data-tab="notizen">Notizen</button>
+  <div style="position:sticky;top:62px;z-index:99;background:var(--bg1);border-bottom:1px solid var(--border2)">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-tab="basis">Grundwerte</button>
+      <button class="tab" data-tab="skills">Fertigkeiten</button>
+      <button class="tab" data-tab="ausruestung">Ausrüstung</button>
+      <button class="tab" data-tab="zauber">Zauber</button>
+      <button class="tab" data-tab="features">Features</button>
+      <button class="tab" data-tab="bestien" id="tabBestien">Bestien</button>
+      <button class="tab" data-tab="hintergrund">Hintergrund</button>
+      <button class="tab" data-tab="feats">Feats</button>
+      <button class="tab" data-tab="notizen">Notizen</button>
+    </div>
+    <button id="tabsToggleBtn" onclick="toggleTabs()" style="width:100%;background:none;border:none;border-top:1px solid var(--border2);color:var(--text3);font-size:10px;font-family:'Cinzel',serif;letter-spacing:1px;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+      <span id="tabsToggleArrow">▴</span><span id="tabsToggleLabel">Navigation einklappen</span>
+    </button>
   </div>
 
   <div class="body">
 
     <!-- GRUNDWERTE -->
     <div class="panel on" id="tab-basis">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span class="sec" style="margin:0">Charakterdaten</span>
+        <button class="filter-toggle on" id="metaToggleBtn" onclick="toggleMeta()" style="padding:3px 10px">▴ Einklappen</button>
+      </div>
+      <div id="metaCollapsible">
       <div class="igrid">
         <div class="ifield"><label>Klasse</label>
           <select id="cls" onchange="onClsChange()"><option value="">—</option><option>Barbar</option><option>Barde</option><option>Druide</option><option>Hexenmeister</option><option>Jäger</option><option>Kleriker</option><option>Kämpfer</option><option>Magier</option><option>Mönch</option><option>Paladin</option><option>Schurke</option><option>Zauberer</option></select></div>
@@ -260,6 +317,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
         <div class="ifield"><label>Gesinnung</label>
           <select id="align"><option value="">—</option><option>Rechtschaffen Gut</option><option>Neutral Gut</option><option>Chaotisch Gut</option><option>Rechtschaffen Neutral</option><option>Neutral</option><option>Chaotisch Neutral</option><option>Rechtschaffen Böse</option><option>Neutral Böse</option><option>Chaotisch Böse</option></select></div>
         <div class="ifield"><label>Übungsbonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
+      </div>
       </div>
 
       <div class="sec">Trefferpunkte</div>
@@ -328,27 +386,25 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
     <!-- FERTIGKEITEN -->
     <!-- HINTERGRUND -->
     <div class="panel" id="tab-hintergrund">
-      <div class="sec">Hintergrund</div>
-      <div class="ifield" style="margin-bottom:6px">
-        <label>Quelle filtern</label>
-        <select id="bgSrcFilter" onchange="buildBgSelect()"><option value="all">Alle Quellen</option></select>
+      <div class="zb-controls">
+        <div class="search-wrap">
+          <span class="si">🔍</span>
+          <input type="search" id="bgQ" placeholder="Hintergrund suchen..." oninput="bgRender();onSearch('bgQ')" style="padding-right:32px"><button class="search-clear" id="bgQ-clear" onclick="clearSearch('bgQ')" style="display:none">✕</button>
+        </div>
+        <button class="filter-toggle" onclick="toggleFilters('bgFilters',this)">⚙ Filter <span id="bgFilters-arrow">▾</span></button>
+        <div class="filter-collapsible" id="bgFilters">
+          <div class="filter-row" id="bgSrcFilters"></div>
+        </div>
       </div>
-      <div class="ifield" style="margin-bottom:10px">
-        <label>Hintergrund wählen</label>
-        <select id="bgSelect" onchange="onBgChange()"><option value="">— Wählen —</option></select>
+      <div id="bgMySection">
+        <div class="sec" style="margin-top:10px">Mein Hintergrund</div>
+        <div id="bgMyCard"></div>
       </div>
-      <div id="bgCard" style="display:none">
-        <div class="bg-desc" id="bgDesc"></div>
-        <div class="bg-grid" id="bgGrid"></div>
-      </div>
-      <div class="sec" style="margin-top:14px">Hintergrund-Notizen</div>
-      <textarea class="nta" id="n_bg_feature" placeholder="Feature / Klassenmerkmale..." style="min-height:60px"></textarea>
-      <textarea class="nta" id="n_bg_extra" placeholder="Ausrüstung, Sprachen, sonstige Vorteile..." style="min-height:60px"></textarea>
-      <div class="sec" style="margin-top:4px">Persönlichkeit</div>
-      <textarea class="nta" id="n_pers" placeholder="Persönlichkeitseigenschaft..."></textarea>
-      <textarea class="nta" id="n_ideal" placeholder="Ideale..."></textarea>
-      <textarea class="nta" id="n_bond" placeholder="Bindungen..."></textarea>
-      <textarea class="nta" id="n_flaw" placeholder="Schwächen..."></textarea>
+      <div class="sec" style="margin-top:6px">Hintergrund-Notizen</div>
+      <div class="nta-wrap"><textarea class="nta" id="n_bg_notes" placeholder="Notizen zu diesem Hintergrund..." style="min-height:100px"></textarea><button class="nta-expand" onclick="openNoteModal('n_bg_notes','Hintergrund-Notizen')">⛶</button></div>
+      <div class="sec" style="margin-top:10px">Alle Hintergründe</div>
+      <div class="zb-count" id="bgCount"></div>
+      <div id="bgList"></div>
     </div>
 
     <div class="panel" id="tab-skills">
@@ -356,6 +412,45 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
       <div class="sk-list" id="savesGrid"></div>
       <div class="sec" style="margin-top:14px">Fertigkeiten <span style="color:var(--text3);font-size:9px">(1× Übung · 2× Experte)</span></div>
       <div class="sk-list" id="skillsGrid"></div>
+    </div>
+
+    <!-- AUSRÜSTUNG -->
+    <div class="panel" id="tab-ausruestung">
+
+      <!-- Währung -->
+      <div class="sec">Währung</div>
+      <div class="currency-grid">
+        <div class="currency-box"><label>PP</label><input type="number" id="cur_pp" min="0" value="0" oninput="autoSave()"></div>
+        <div class="currency-box"><label>GP</label><input type="number" id="cur_gp" min="0" value="0" oninput="autoSave()"></div>
+        <div class="currency-box"><label>EP</label><input type="number" id="cur_ep" min="0" value="0" oninput="autoSave()"></div>
+        <div class="currency-box"><label>SP</label><input type="number" id="cur_sp" min="0" value="0" oninput="autoSave()"></div>
+        <div class="currency-box"><label>CP</label><input type="number" id="cur_cp" min="0" value="0" oninput="autoSave()"></div>
+      </div>
+
+      <!-- Gewicht -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px">
+        <span class="sec" style="margin:0">Gegenstände</span>
+        <span id="weightDisplay" style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif"></span>
+      </div>
+
+      <!-- Kategorie-Filter -->
+      <div class="filter-row" id="itemCatFilter" style="margin-bottom:8px"></div>
+
+      <!-- Item hinzufügen -->
+      <div class="item-add-row">
+        <input id="itemName" placeholder="Name..." style="flex:2">
+        <input id="itemQty" type="number" min="1" value="1" placeholder="Menge" style="flex:0.6;text-align:center">
+        <input id="itemWeight" type="number" min="0" step="0.1" placeholder="kg" style="flex:0.6;text-align:center">
+        <select id="itemCat" style="flex:1">
+          <option value="Waffe">⚔ Waffe</option>
+          <option value="Rüstung">🛡 Rüstung</option>
+          <option value="Werkzeug">🔧 Werkzeug</option>
+          <option value="Verbrauch">🧪 Verbrauch</option>
+          <option value="Sonstiges" selected>📦 Sonstiges</option>
+        </select>
+        <button class="add-btn" style="margin:0;flex:0.8" onclick="addItem()">+ Add</button>
+      </div>
+      <div id="itemList"></div>
     </div>
 
     <!-- ZAUBER (Charakterbogen) -->
@@ -387,7 +482,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
         <div class="zb-controls">
           <div class="search-wrap">
             <span class="si">🔍</span>
-            <input type="search" id="zbQ" placeholder="Zauber suchen..." oninput="zbRender()">
+            <input type="search" id="zbQ" placeholder="Zauber suchen..." oninput="zbRender();onSearch('zbQ')" style="padding-right:32px"><button class="search-clear" id="zbQ-clear" onclick="clearSearch('zbQ')" style="display:none">✕</button>
           </div>
           <div class="filter-row" id="zbGradFilters"></div>
           <div class="filter-row" id="zbSchoolFilters"></div>
@@ -425,15 +520,24 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 
     <!-- BESTIEN -->
     <div class="panel" id="tab-bestien">
-      <div class="sec">Bestien-Browser</div>
       <div class="zb-controls">
         <div class="search-wrap">
           <span class="si">🔍</span>
-          <input type="search" id="bstQ" placeholder="Bestie suchen..." oninput="bstRender()">
+          <input type="search" id="bstQ" placeholder="Bestie suchen..." oninput="bstRender();onSearch('bstQ')" style="padding-right:32px"><button class="search-clear" id="bstQ-clear" onclick="clearSearch('bstQ')" style="display:none">✕</button>
         </div>
-        <div class="filter-row" id="bstTypeFilters"></div>
-        <div class="filter-row" id="bstCRFilters"></div>
+        <button class="filter-toggle" onclick="toggleFilters('bstFilters',this)">⚙ Filter <span id="bstFilters-arrow">▾</span></button>
+        <div class="filter-collapsible" id="bstFilters">
+          <div class="filter-row" id="bstTypeFilters"></div>
+          <div class="filter-row" id="bstCRFilters"></div>
+        </div>
       </div>
+      <div id="bstSavedSection">
+        <div class="sec" style="margin-top:10px">Meine Bestien</div>
+        <div id="bstSavedList"></div>
+      </div>
+      <div class="sec" style="margin-top:6px">Bestien-Notizen</div>
+      <div class="nta-wrap"><textarea class="nta" id="n_bst_notes" placeholder="Notizen zu Wild Shape, Vertrauten..." style="min-height:80px"></textarea><button class="nta-expand" onclick="openNoteModal('n_bst_notes','Bestien-Notizen')">⛶</button></div>
+      <div class="sec" style="margin-top:6px">Alle Bestien</div>
       <div class="zb-count" id="bstCount"></div>
       <div id="bstList"></div>
     </div>
@@ -443,22 +547,49 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
       <div class="zb-controls">
         <div class="search-wrap">
           <span class="si">🔍</span>
-          <input type="search" id="ftQ" placeholder="Feat suchen..." oninput="ftRender()">
+          <input type="search" id="ftQ" placeholder="Feat suchen..." oninput="ftRender();onSearch('ftQ')" style="padding-right:32px"><button class="search-clear" id="ftQ-clear" onclick="clearSearch('ftQ')" style="display:none">✕</button>
         </div>
-        <div class="filter-row" id="ftCatFilters"></div>
+        <button class="filter-toggle" onclick="toggleFilters('ftFilters',this)">⚙ Filter <span id="ftFilters-arrow">▾</span></button>
+        <div class="filter-collapsible" id="ftFilters">
+          <div class="filter-row" id="ftCatFilters"></div>
+        </div>
       </div>
+      <div id="ftMySection">
+        <div class="sec" style="margin-top:10px">Meine Feats</div>
+        <div id="ftMyList"></div>
+      </div>
+      <div class="sec" style="margin-top:6px">Feats-Notizen</div>
+      <div class="nta-wrap"><textarea class="nta" id="n_ft_notes" placeholder="Notizen zu deinen Feats..." style="min-height:80px"></textarea><button class="nta-expand" onclick="openNoteModal('n_ft_notes','Feats-Notizen')">⛶</button></div>
+      <div class="sec" style="margin-top:6px">Alle Feats</div>
       <div class="zb-count" id="ftCount"></div>
       <div id="ftList"></div>
     </div>
 
     <!-- NOTIZEN -->
     <div class="panel" id="tab-notizen">
-      <div class="sec">Ausrüstung</div>
+      <div class="sec">Persönlichkeit</div>
+      <textarea class="nta" id="n_pers" placeholder="Persönlichkeitseigenschaft..."></textarea>
+      <textarea class="nta" id="n_ideal" placeholder="Ideale..."></textarea>
+      <textarea class="nta" id="n_bond" placeholder="Bindungen..."></textarea>
+      <textarea class="nta" id="n_flaw" placeholder="Schwächen..."></textarea>
+      <div class="sec" style="margin-top:4px">Hintergrund-Feature</div>
+      <textarea class="nta" id="n_bg_feature" placeholder="Feature / Klassenmerkmale..." style="min-height:60px"></textarea>
+      <textarea class="nta" id="n_bg_extra" placeholder="Ausrüstung, Sprachen, sonstige Vorteile..." style="min-height:60px"></textarea>
+      <div class="sec" style="margin-top:4px">Ausrüstung</div>
       <textarea class="nta" id="n_equip" placeholder="Waffen, Gegenstände, Schätze..." style="min-height:80px"></textarea>
-      <div class="sec">Notizen</div>
+      <div class="sec" style="margin-top:4px">Notizen</div>
       <textarea class="nta" id="n_notes" placeholder="Abenteuer, NPCs, Quests..." style="min-height:120px"></textarea>
     </div>
 
+  </div>
+</div>
+<div class="note-modal-overlay" id="noteModalOverlay" onclick="closeNoteModal(event)">
+  <div class="note-modal">
+    <div class="note-modal-header">
+      <span class="note-modal-title" id="noteModalTitle"></span>
+      <button class="note-modal-close" onclick="closeNoteModal()">✕</button>
+    </div>
+    <textarea id="noteModalTA" oninput="syncNoteModal()"></textarea>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -591,7 +722,7 @@ const prof=()=>parseInt(document.getElementById('prof')?.value||2);
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2000);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.textContent='',300);},2000);
 }
 
 // ATTRS
@@ -979,7 +1110,7 @@ function onClsChange(){
   const cls=document.getElementById('cls').value;
   applyTheme(cls);
   const bstTab=document.getElementById('tabBestien');
-  if(bstTab) bstTab.style.display=['Druide','Jäger','Waldläufer'].includes(cls)?'':'none';
+  if(bstTab) bstTab.style.display='';
   const field=document.getElementById('subclsField');
   const sel=document.getElementById('subcls');
   const opts=SUBCLS_BY_CLASS[cls]||[];
@@ -1177,54 +1308,229 @@ function restoreAllUses(){
 // HINTERGRUND-DATEN (XPHB)
 const BG_DATA=[{"n": "Aberrant Heir", "s": ["History", "Intimidation"], "t": ["Disguise Kit"], "f": "Aberrant Dragonmark", "a": "STR, CON, CHA", "src": "EFA"}, {"n": "Acolyte", "s": ["Insight", "Religion"], "t": ["Calligrapher's Supplies"], "f": "Magic Initiate", "a": "INT, WIS, CHA", "src": "XPHB"}, {"n": "Anthropologist", "s": ["Insight", "Religion"], "t": [], "f": "", "a": "", "src": "ToA"}, {"n": "Archaeologist", "s": ["History", "Survival"], "t": ["Wähle 1: Navigator's Tools, Cartographer's Tools"], "f": "", "a": "", "src": "ToA"}, {"n": "Artisan", "s": ["Investigation", "Persuasion"], "t": ["Any Artisan's Tool"], "f": "Crafter", "a": "STR, DEX, INT", "src": "XPHB"}, {"n": "Astral Drifter", "s": ["Insight", "Religion"], "t": [], "f": "Magic Initiate", "a": "", "src": "AAG"}, {"n": "Athlete", "s": ["Acrobatics", "Athletics"], "t": ["Vehicles (Land)"], "f": "", "a": "", "src": "MOT"}, {"n": "Azorius Functionary", "s": ["Insight", "Intimidation"], "t": [], "f": "", "a": "", "src": "GGR"}, {"n": "Boros Legionnaire", "s": ["Athletics", "Intimidation"], "t": ["Any Gaming Set"], "f": "", "a": "", "src": "GGR"}, {"n": "Carouser", "s": ["Deception", "Persuasion"], "t": ["Gaming Set"], "f": "Tireless Reveler", "a": "DEX, INT, CHA", "src": "ABH"}, {"n": "Celebrity Adventurer's Scion", "s": ["Perception", "Performance"], "t": ["Disguise Kit"], "f": "", "a": "", "src": "AI"}, {"n": "Charlatan", "s": ["Deception", "Sleight of Hand"], "t": ["Forgery Kit"], "f": "Skilled", "a": "DEX, CON, CHA", "src": "XPHB"}, {"n": "Chondathan Freebooter", "s": ["Athletics", "Sleight of Hand"], "t": ["Weaver's Tools"], "f": "Skilled", "a": "STR, DEX, WIS", "src": "FRHoF"}, {"n": "City Watch", "s": ["Athletics", "Insight"], "t": [], "f": "", "a": "", "src": "SCAG"}, {"n": "Clan Crafter", "s": ["History", "Insight"], "t": ["Any Artisan's Tool"], "f": "", "a": "", "src": "SCAG"}, {"n": "Cloistered Scholar", "s": ["History", "Wähle 1: Arcana, Nature, Religion"], "t": [], "f": "", "a": "", "src": "SCAG"}, {"n": "Courtier", "s": ["Insight", "Persuasion"], "t": [], "f": "", "a": "", "src": "SCAG"}, {"n": "Criminal", "s": ["Sleight of Hand", "Stealth"], "t": ["Thieves' Tools"], "f": "Alert", "a": "DEX, CON, INT", "src": "XPHB"}, {"n": "Custom Background", "s": [], "t": [], "f": "", "a": "", "src": "PHB"}, {"n": "Dead Magic Dweller", "s": ["Medicine", "Survival"], "t": ["Leatherworker's Tools"], "f": "Healer", "a": "STR, CON, WIS", "src": "FRHoF"}, {"n": "Dimir Operative", "s": ["Deception", "Stealth"], "t": ["Disguise Kit"], "f": "", "a": "", "src": "GGR"}, {"n": "Dragon Cultist", "s": ["Deception", "Stealth"], "t": ["Calligrapher's Supplies"], "f": "Cult Of The Dragon Initiate", "a": "DEX, CON, INT", "src": "FRHoF"}, {"n": "Emerald Enclave Caretaker", "s": ["Nature", "Survival"], "t": ["Herbalism Kit"], "f": "Emerald Enclave Fledgling", "a": "CON, INT, WIS", "src": "FRHoF"}, {"n": "Entertainer", "s": ["Acrobatics", "Performance"], "t": ["Any Musical Instrument"], "f": "Musician", "a": "STR, DEX, CHA", "src": "XPHB"}, {"n": "Faceless", "s": ["Deception", "Intimidation"], "t": ["Disguise Kit"], "f": "", "a": "", "src": "BGDIA"}, {"n": "Faction Agent", "s": ["Insight", "Wähle 1: Arcana, Animal Handling, Deception, History..."], "t": [], "f": "", "a": "", "src": "SCAG"}, {"n": "Failed Merchant", "s": ["Investigation", "Persuasion"], "t": ["Any Artisan's Tool"], "f": "", "a": "", "src": "AI"}, {"n": "Far Traveler", "s": ["Insight", "Perception"], "t": ["Wähle 1: Musical Instrument, Gaming Set"], "f": "", "a": "", "src": "SCAG"}, {"n": "Farmer", "s": ["Animal Handling", "Nature"], "t": ["Carpenter's Tools"], "f": "Tough", "a": "STR, CON, WIS", "src": "XPHB"}, {"n": "Feylost", "s": ["Deception", "Survival"], "t": ["Any Musical Instrument"], "f": "", "a": "", "src": "WBtW"}, {"n": "Fisher", "s": ["History", "Survival"], "t": [], "f": "", "a": "", "src": "GoS"}, {"n": "Flaming Fist Mercenary", "s": ["Intimidation", "Perception"], "t": ["Smith's Tools"], "f": "Tough", "a": "STR, CON, CHA", "src": "FRHoF"}, {"n": "Folk Hero", "s": ["Animal Handling", "Survival"], "t": ["Any Artisan's Tool", "Vehicles (Land)"], "f": "", "a": "", "src": "PHB"}, {"n": "Gambler", "s": ["Deception", "Insight"], "t": ["Any Gaming Set"], "f": "", "a": "", "src": "AI"}, {"n": "Gate Warden", "s": ["Persuasion", "Survival"], "t": [], "f": "Scion Of The Outer Planes", "a": "", "src": "SatO"}, {"n": "Genie Touched", "s": ["Perception", "Persuasion"], "t": ["Glassblower's Tools"], "f": "", "a": "DEX, WIS, CHA", "src": "FRHoF"}, {"n": "Giant Foundling", "s": ["Intimidation", "Survival"], "t": [], "f": "Strike Of The Giants", "a": "", "src": "BGG"}, {"n": "Golgari Agent", "s": ["Nature", "Survival"], "t": ["Poisoner's Kit"], "f": "", "a": "", "src": "GGR"}, {"n": "Grinner", "s": ["Deception", "Performance"], "t": ["Thieves' Tools", "Any Musical Instrument"], "f": "", "a": "", "src": "EGW"}, {"n": "Gruul Anarch", "s": ["Animal Handling", "Athletics"], "t": ["Herbalism Kit"], "f": "", "a": "", "src": "GGR"}, {"n": "Guard", "s": ["Athletics", "Perception"], "t": ["Any Gaming Set"], "f": "Alert", "a": "STR, INT, WIS", "src": "XPHB"}, {"n": "Guide", "s": ["Stealth", "Survival"], "t": ["Cartographer's Tools"], "f": "Magic Initiate", "a": "DEX, CON, WIS", "src": "XPHB"}, {"n": "Guild Artisan", "s": ["Insight", "Persuasion"], "t": ["Any Artisan's Tool"], "f": "", "a": "", "src": "PHB"}, {"n": "Harper", "s": ["Performance", "Sleight of Hand"], "t": ["Disguise Kit"], "f": "Harper Agent", "a": "DEX, INT, CHA", "src": "FRHoF"}, {"n": "Haunted One", "s": ["Wähle 2: Arcana, Investigation, Religion, Survival"], "t": [], "f": "", "a": "", "src": "VRGR"}, {"n": "Hermit", "s": ["Medicine", "Religion"], "t": ["Herbalism Kit"], "f": "Healer", "a": "CON, WIS, CHA", "src": "XPHB"}, {"n": "House Agent", "s": ["Investigation", "Persuasion"], "t": ["Varies by House"], "f": "", "a": "", "src": "ERLW"}, {"n": "House Cannith Heir", "s": ["Investigation", "Sleight of Hand"], "t": ["Any Artisan's Tool"], "f": "Mark Of Making", "a": "STR, DEX, INT", "src": "EFA"}, {"n": "House Deneith Heir", "s": ["Insight", "Perception"], "t": ["Any Gaming Set"], "f": "Mark Of Sentinel", "a": "STR, CON, WIS", "src": "EFA"}, {"n": "House Ghallanda Heir", "s": ["Insight", "Persuasion"], "t": ["Cook's Utensils"], "f": "Mark Of Hospitality", "a": "DEX, WIS, CHA", "src": "EFA"}, {"n": "House Jorasco Heir", "s": ["Medicine", "Stealth"], "t": ["Herbalism Kit"], "f": "Mark Of Healing", "a": "DEX, CON, WIS", "src": "EFA"}, {"n": "House Kundarak Heir", "s": ["Arcana", "Investigation"], "t": ["Thieves' Tools"], "f": "Mark Of Warding", "a": "STR, CON, INT", "src": "EFA"}, {"n": "House Lyrandar Heir", "s": ["Acrobatics", "Nature"], "t": ["Navigator's Tools"], "f": "Mark Of Storm", "a": "STR, DEX, CHA", "src": "EFA"}, {"n": "House Medani Heir", "s": ["Insight", "Investigation"], "t": ["Disguise Kit"], "f": "Mark Of Detection", "a": "DEX, INT, WIS", "src": "EFA"}, {"n": "House Orien Heir", "s": ["Acrobatics", "Athletics"], "t": ["Cartographer's Tools"], "f": "Mark Of Passage", "a": "DEX, CON, INT", "src": "EFA"}, {"n": "House Phiarlan Heir", "s": ["Deception", "Stealth"], "t": ["Disguise Kit"], "f": "Mark Of Shadow", "a": "DEX, WIS, CHA", "src": "EFA"}, {"n": "House Sivis Heir", "s": ["History", "Perception"], "t": ["Calligrapher's Supplies"], "f": "Mark Of Scribing", "a": "INT, WIS, CHA", "src": "EFA"}, {"n": "House Tharashk Heir", "s": ["Perception", "Survival"], "t": ["Any Gaming Set"], "f": "Mark Of Finding", "a": "CON, INT, WIS", "src": "EFA"}, {"n": "House Thuranni Heir", "s": ["Performance", "Stealth"], "t": ["Any Musical Instrument"], "f": "Mark Of Shadow", "a": "DEX, INT, CHA", "src": "EFA"}, {"n": "House Vadalis Heir", "s": ["Animal Handling", "Nature"], "t": ["Herbalism Kit"], "f": "Mark Of Handling", "a": "CON, WIS, CHA", "src": "EFA"}, {"n": "Ice Fisher", "s": ["Animal Handling", "Athletics"], "t": ["Woodcarver's Tools"], "f": "Alert", "a": "STR, DEX, CON", "src": "FRHoF"}, {"n": "Inheritor", "s": ["Survival", "Wähle 1: Arcana, History, Religion"], "t": ["Wähle 1: Musical Instrument, Gaming Set"], "f": "", "a": "", "src": "SCAG"}, {"n": "Initiate", "s": ["Athletics", "Intimidation"], "t": ["Any Gaming Set", "Vehicles (Land)"], "f": "", "a": "", "src": "PSA"}, {"n": "Inquisitive", "s": ["Insight", "Investigation"], "t": ["Thieves' Tools"], "f": "Alert", "a": "CON, INT, CHA", "src": "EFA"}, {"n": "Inquisitor", "s": ["Investigation", "Religion"], "t": ["Thieves' Tools", "Any Artisan's Tool"], "f": "", "a": "", "src": "PSI"}, {"n": "Investigator", "s": ["Wähle 2: Insight, Investigation, Perception"], "t": ["Disguise Kit", "Thieves' Tools"], "f": "", "a": "", "src": "VRGR"}, {"n": "Izzet Engineer", "s": ["Arcana", "Investigation"], "t": ["Any Artisan's Tool"], "f": "", "a": "", "src": "GGR"}, {"n": "Knight of Solamnia", "s": ["Athletics", "Survival"], "t": [], "f": "Squire Of Solamnia", "a": "", "src": "DSotDQ"}, {"n": "Knight of the Gauntlet", "s": ["Athletics", "Medicine"], "t": ["Smith's Tools"], "f": "Tyro Of The Gauntlet", "a": "STR, INT, WIS", "src": "FRHoF"}, {"n": "Knight of the Order", "s": ["Persuasion", "Wähle 1: Arcana, History, Nature, Religion"], "t": ["Wähle 1: Musical Instrument, Gaming Set"], "f": "", "a": "", "src": "SCAG"}, {"n": "Lords' Alliance Vassal", "s": ["Insight", "Persuasion"], "t": ["Calligrapher's Supplies"], "f": "Lords' Alliance Agent", "a": "STR, INT, CHA", "src": "FRHoF"}, {"n": "Lorehold Student", "s": ["History", "Religion"], "t": [], "f": "Strixhaven Initiate", "a": "", "src": "SCC"}, {"n": "Lorwyn Expert", "s": ["Athletics", "Nature"], "t": ["Cartographer's Tools"], "f": "Child Of The Sun", "a": "STR, CON, WIS", "src": "LFL"}, {"n": "Mage of High Sorcery", "s": ["Arcana", "History"], "t": [], "f": "Initiate Of High Sorcery", "a": "", "src": "DSotDQ"}, {"n": "Marine", "s": ["Athletics", "Survival"], "t": ["Vehicles (Water)", "Vehicles (Land)"], "f": "", "a": "", "src": "GoS"}, {"n": "Mercenary Veteran", "s": ["Athletics", "Persuasion"], "t": ["Any Gaming Set", "Vehicles (Land)"], "f": "", "a": "", "src": "SCAG"}, {"n": "Merchant", "s": ["Animal Handling", "Persuasion"], "t": ["Navigator's Tools"], "f": "Lucky", "a": "CON, INT, CHA", "src": "XPHB"}, {"n": "Moonwell Pilgrim", "s": ["Nature", "Performance"], "t": ["Painter's Supplies"], "f": "Magic Initiate", "a": "CON, WIS, CHA", "src": "FRHoF"}, {"n": "Mulhorandi Tomb Raider", "s": ["Investigation", "Religion"], "t": ["Mason's Tools"], "f": "Lucky", "a": "DEX, CON, INT", "src": "FRHoF"}, {"n": "Mythalkeeper", "s": ["Arcana", "History"], "t": ["Jeweler's Tools"], "f": "Crafter", "a": "INT, WIS, CHA", "src": "FRHoF"}, {"n": "Noble", "s": ["History", "Persuasion"], "t": ["Any Gaming Set"], "f": "Skilled", "a": "STR, INT, CHA", "src": "XPHB"}, {"n": "Orzhov Representative", "s": ["Intimidation", "Religion"], "t": [], "f": "", "a": "", "src": "GGR"}, {"n": "Outlander", "s": ["Athletics", "Survival"], "t": ["Any Musical Instrument"], "f": "", "a": "", "src": "PHB"}, {"n": "Plaintiff", "s": ["Medicine", "Persuasion"], "t": ["Any Artisan's Tool"], "f": "", "a": "", "src": "AI"}, {"n": "Planar Philosopher", "s": ["Arcana", "Wähle 1: Religion, Insight, Nature..."], "t": [], "f": "Scion Of The Outer Planes", "a": "", "src": "SatO"}, {"n": "Prismari Student", "s": ["Acrobatics", "Performance"], "t": ["Wähle 1: Artisan's Tool, Musical Instrument"], "f": "Strixhaven Initiate", "a": "", "src": "SCC"}, {"n": "Purple Dragon Squire", "s": ["Animal Handling", "Insight"], "t": ["Navigator's Tools"], "f": "Purple Dragon Rook", "a": "STR, WIS, CHA", "src": "FRHoF"}, {"n": "Quandrix Student", "s": ["Arcana", "Nature"], "t": ["Any Artisan's Tool"], "f": "Strixhaven Initiate", "a": "", "src": "SCC"}, {"n": "Rakdos Cultist", "s": ["Acrobatics", "Performance"], "t": ["Any Musical Instrument"], "f": "", "a": "", "src": "GGR"}, {"n": "Rashemi Wanderer", "s": ["Intimidation", "Perception"], "t": ["Cartographer's Tools"], "f": "Tough", "a": "STR, CON, CHA", "src": "FRHoF"}, {"n": "Rewarded", "s": ["Insight", "Persuasion"], "t": ["Any Gaming Set"], "f": "Lucky", "a": "", "src": "BMT"}, {"n": "Rival Intern", "s": ["History", "Investigation"], "t": ["Any Artisan's Tool"], "f": "", "a": "", "src": "AI"}, {"n": "Ruined", "s": ["Stealth", "Survival"], "t": ["Any Gaming Set"], "f": "Alert", "a": "", "src": "BMT"}, {"n": "Rune Carver", "s": ["History", "Perception"], "t": ["Any Artisan's Tool"], "f": "Rune Shaper", "a": "", "src": "BGG"}, {"n": "Sage", "s": ["Arcana", "History"], "t": ["Calligrapher's Supplies"], "f": "Magic Initiate", "a": "CON, INT, WIS", "src": "XPHB"}, {"n": "Sailor", "s": ["Acrobatics", "Perception"], "t": ["Navigator's Tools"], "f": "Tavern Brawler", "a": "STR, DEX, WIS", "src": "XPHB"}, {"n": "Scribe", "s": ["Investigation", "Perception"], "t": ["Calligrapher's Supplies"], "f": "Skilled", "a": "DEX, INT, WIS", "src": "XPHB"}, {"n": "Selesnya Initiate", "s": ["Nature", "Persuasion"], "t": ["Wähle 1: Artisan's Tool, Musical Instrument"], "f": "", "a": "", "src": "GGR"}, {"n": "Shadowmasters Exile", "s": ["Acrobatics", "Stealth"], "t": ["Thieves' Tools"], "f": "Savage Attacker", "a": "DEX, INT, CHA", "src": "FRHoF"}, {"n": "Shadowmoor Expert", "s": ["Acrobatics", "Deception"], "t": ["Glassblower's Tools"], "f": "Shadowmoor Hexer", "a": "DEX, INT, CHA", "src": "LFL"}, {"n": "Shipwright", "s": ["History", "Perception"], "t": ["Carpenter's Tools", "Vehicles (Water)"], "f": "", "a": "", "src": "GoS"}, {"n": "Silverquill Student", "s": ["Intimidation", "Persuasion"], "t": [], "f": "Strixhaven Initiate", "a": "", "src": "SCC"}, {"n": "Simic Scientist", "s": ["Arcana", "Medicine"], "t": [], "f": "", "a": "", "src": "GGR"}, {"n": "Smuggler", "s": ["Athletics", "Deception"], "t": ["Vehicles (Water)"], "f": "", "a": "", "src": "GoS"}, {"n": "Soldier", "s": ["Athletics", "Intimidation"], "t": ["Any Gaming Set"], "f": "Savage Attacker", "a": "STR, DEX, CON", "src": "XPHB"}, {"n": "Spellfire Initiate", "s": ["Arcana", "Perception"], "t": ["Any Gaming Set"], "f": "Spellfire Spark", "a": "CON, INT, CHA", "src": "FRHoF"}, {"n": "Urban Bounty Hunter", "s": ["Wähle 2: Deception, Insight, Persuasion, Stealth"], "t": ["Wähle 2: Gaming Set, Musical Instrument, Thieves' Tools"], "f": "", "a": "", "src": "SCAG"}, {"n": "Urchin", "s": ["Sleight of Hand", "Stealth"], "t": ["Disguise Kit", "Thieves' Tools"], "f": "", "a": "", "src": "PHB"}, {"n": "Uthgardt Tribe Member", "s": ["Athletics", "Survival"], "t": ["Wähle 1: Musical Instrument, Artisan's Tool"], "f": "", "a": "", "src": "SCAG"}, {"n": "Vampire Devotee", "s": ["Persuasion", "Stealth"], "t": ["Cook's Utensils"], "f": "Vampire's Plaything", "a": "STR, CON, CHA", "src": "ABH"}, {"n": "Vampire Survivor", "s": ["Insight", "Religion"], "t": ["Woodcarver's Tools"], "f": "Vampire Hunter", "a": "DEX, CON, WIS", "src": "ABH"}, {"n": "Variant City Watch (Investigator)", "s": ["Insight", "Investigation"], "t": [], "f": "", "a": "", "src": "SCAG"}, {"n": "Vizier", "s": ["History", "Religion"], "t": ["Any Artisan's Tool", "Any Musical Instrument"], "f": "", "a": "", "src": "PSA"}, {"n": "Volstrucker Agent", "s": ["Deception", "Stealth"], "t": ["Poisoner's Kit"], "f": "", "a": "", "src": "EGW"}, {"n": "Waterdhavian Noble", "s": ["History", "Persuasion"], "t": ["Wähle 1: Gaming Set, Musical Instrument"], "f": "", "a": "", "src": "SCAG"}, {"n": "Wayfarer", "s": ["Insight", "Stealth"], "t": ["Thieves' Tools"], "f": "Lucky", "a": "DEX, WIS, CHA", "src": "XPHB"}, {"n": "Wildspacer", "s": ["Athletics", "Survival"], "t": ["Navigator's Tools", "Vehicles (Space)"], "f": "Tough", "a": "", "src": "AAG"}, {"n": "Witchlight Hand", "s": ["Performance", "Sleight of Hand"], "t": ["Wähle 1: Disguise Kit, Musical Instrument"], "f": "", "a": "", "src": "WBtW"}, {"n": "Witherbloom Student", "s": ["Nature", "Survival"], "t": ["Herbalism Kit"], "f": "Strixhaven Initiate", "a": "", "src": "SCC"}, {"n": "Zhentarim Mercenary", "s": ["Intimidation", "Perception"], "t": ["Forgery Kit"], "f": "Zhentarim Ruffian", "a": "STR, DEX, CHA", "src": "FRHoF"}];
 
+let bgFSrc='all';
+
 function buildBgSelect(){
-  const sel=document.getElementById('bgSelect');
-  if(!sel)return;
-  const srcSel=document.getElementById('bgSrcFilter');
-  const src=srcSel?srcSel.value:'all';
-  // Populate source filter once
-  if(srcSel&&srcSel.options.length<=1){
-    const srcs=[...new Set(BG_DATA.map(b=>b.src))].sort();
-    srcs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;srcSel.appendChild(o);});
-  }
-  sel.innerHTML='<option value="">— Wählen —</option>';
-  BG_DATA.filter(b=>src==='all'||b.src===src).forEach(b=>{
-    const o=document.createElement('option');
-    o.value=b.n;o.textContent=b.n+' ('+b.src+')';
-    if(st.bg===b.n)o.selected=true;
-    sel.appendChild(o);
+  // legacy compat — just call bgInit
+  bgInit();
+}
+
+let _noteModalId=null;
+function openNoteModal(id,title){
+  _noteModalId=id;
+  const src=document.getElementById(id);
+  document.getElementById('noteModalTitle').textContent=title||'Notizen';
+  document.getElementById('noteModalTA').value=src?src.value:'';
+  document.getElementById('noteModalOverlay').classList.add('on');
+  setTimeout(()=>document.getElementById('noteModalTA').focus(),100);
+}
+function syncNoteModal(){
+  if(!_noteModalId)return;
+  const src=document.getElementById(_noteModalId);
+  if(src){src.value=document.getElementById('noteModalTA').value;autoSave();}
+}
+function closeNoteModal(e){
+  if(e&&e.target!==document.getElementById('noteModalOverlay'))return;
+  document.getElementById('noteModalOverlay').classList.remove('on');
+  _noteModalId=null;
+}
+
+function onSearch(id){
+  const btn=document.getElementById(id+'-clear');
+  if(btn) btn.style.display=document.getElementById(id)?.value?'':'none';
+}
+function clearSearch(id){
+  const inp=document.getElementById(id);
+  if(inp){inp.value='';inp.dispatchEvent(new Event('input'));}
+  const btn=document.getElementById(id+'-clear');
+  if(btn) btn.style.display='none';
+}
+
+// AUSRÜSTUNG
+const ITEM_CATS={Waffe:'⚔',Rüstung:'🛡',Werkzeug:'🔧',Verbrauch:'🧪',Sonstiges:'📦'};
+let itemFilter='all';
+
+function buildItemCatFilter(){
+  const f=document.getElementById('itemCatFilter');if(!f||f.children.length)return;
+  const cats=['all',...Object.keys(ITEM_CATS)];
+  cats.forEach(c=>{
+    const b=document.createElement('button');b.className='fbtn'+(c==='all'?' on':'');
+    b.textContent=c==='all'?'Alle':(ITEM_CATS[c]||'')+' '+c;b.dataset.val=c;
+    b.onclick=()=>{itemFilter=c;f.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val===c));renderItems();};
+    f.appendChild(b);
   });
-  if(st.bg)renderBgCard(st.bg);
+}
+
+function addItem(){
+  const name=document.getElementById('itemName').value.trim();
+  if(!name)return;
+  const qty=parseInt(document.getElementById('itemQty').value)||1;
+  const wt=parseFloat(document.getElementById('itemWeight').value)||0;
+  const cat=document.getElementById('itemCat').value;
+  st.items=st.items||[];
+  st.items.push({id:Date.now(),name,qty,wt,cat,note:''});
+  document.getElementById('itemName').value='';
+  document.getElementById('itemQty').value='1';
+  document.getElementById('itemWeight').value='';
+  renderItems();autoSave();
+}
+
+function renderItems(){
+  buildItemCatFilter();
+  const list=document.getElementById('itemList');if(!list)return;
+  st.items=st.items||[];
+  const filtered=itemFilter==='all'?st.items:st.items.filter(i=>i.cat===itemFilter);
+  const totalWt=st.items.reduce((s,i)=>s+(i.wt||0)*(i.qty||1),0);
+  const strVal=parseInt(document.getElementById('a_str')?.value||10)||10;
+  const carry=strVal*15;
+  const wd=document.getElementById('weightDisplay');
+  if(wd)wd.textContent=totalWt.toFixed(1)+' kg · Tragelast '+carry+' lb';
+  list.innerHTML='';
+  filtered.forEach(item=>{
+    const card=document.createElement('div');card.className='item-card';
+    const top=document.createElement('div');top.className='item-top';
+    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${item.name}</span><span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt}kg</span>`:''}`;
+    const detail=document.createElement('div');detail.className='item-detail';
+    const row=document.createElement('div');row.className='item-detail-row';
+    row.innerHTML=`<input type="number" min="1" value="${item.qty}" placeholder="Menge" oninput="updItem(${item.id},'qty',+this.value);renderItems()"><input type="number" min="0" step="0.1" value="${item.wt||''}" placeholder="Gewicht kg" oninput="updItem(${item.id},'wt',+this.value)">`;
+    const ta=document.createElement('textarea');ta.placeholder='Notiz...';ta.value=item.note||'';ta.oninput=()=>{updItem(item.id,'note',ta.value);};
+    const del=document.createElement('button');del.className='item-del';del.textContent='✕ Entfernen';del.onclick=()=>{st.items=st.items.filter(i=>i.id!==item.id);renderItems();autoSave();};
+    detail.appendChild(row);detail.appendChild(ta);detail.appendChild(del);
+    top.onclick=()=>detail.classList.toggle('on');
+    card.appendChild(top);card.appendChild(detail);
+    list.appendChild(card);
+  });
+}
+
+function updItem(id,key,val){
+  const item=(st.items||[]).find(i=>i.id===id);
+  if(item){item[key]=val;autoSave();}
+}
+
+function switchTabAll(t, bnavBtn){
+  // find and click the top tab button
+  const topBtn=document.querySelector(`.tab[data-tab="${t}"]`);
+  if(topBtn) switchTab(topBtn);
+  // sync bottom nav
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+}
+
+function toggleTabs(){
+  const tabs=document.getElementById('tabs');
+  const arrow=document.getElementById('tabsToggleArrow');
+  const label=document.getElementById('tabsToggleLabel');
+  const open=tabs.style.display!=='none';
+  tabs.style.display=open?'none':'';
+  arrow.textContent=open?'▾':'▴';
+  label.textContent=open?'Navigation ausklappen':'Navigation einklappen';
+}
+
+function toggleMeta(){
+  const el=document.getElementById('metaCollapsible');
+  const btn=document.getElementById('metaToggleBtn');
+  if(!el)return;
+  const open=el.style.display!=='none';
+  el.style.display=open?'none':'';
+  btn.textContent=open?'▾ Ausklappen':'▴ Einklappen';
+  btn.classList.toggle('on',!open);
+}
+
+function toggleFilters(id,btn){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.toggle('on');
+  btn.classList.toggle('on');
+  const arrow=document.getElementById(id+'-arrow');
+  if(arrow)arrow.textContent=el.classList.contains('on')?'▴':'▾';
+}
+
+function bgInit(){
+  const sf=document.getElementById('bgSrcFilters');
+  if(sf&&!sf.children.length){
+    const allB=document.createElement('button');
+    allB.className='fbtn on';allB.textContent='Alle';allB.dataset.val='all';
+    allB.onclick=()=>{bgFSrc='all';sf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val==='all'));bgRender();};
+    sf.appendChild(allB);
+    [...new Set(BG_DATA.map(b=>b.src))].sort().forEach(s=>{
+      const b=document.createElement('button');
+      b.className='fbtn';b.textContent=s;b.dataset.val=s;
+      b.onclick=()=>{bgFSrc=s;sf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val===s));bgRender();};
+      sf.appendChild(b);
+    });
+  }
+  bgRenderMy();
+  bgRender();
+}
+
+function bgMakeCard(bg){
+  const isMy=st.bg===bg.n;
+  const div=document.createElement('div');div.className='zb-card';
+  const top=document.createElement('div');top.className='zb-top';top.style.cursor='pointer';
+  top.innerHTML=`<span class="zb-name">${bg.n}</span><span class="zb-badge zb-src">${bg.src}</span>`;
+  const detail=document.createElement('div');detail.className='zb-detail';
+  detail.innerHTML=`
+    <div class="bg-grid" style="margin-bottom:8px">
+      <div class="bg-pill"><div class="bg-pill-label">SKILLS</div><div class="bg-pill-val">${bg.s.join(', ')||'—'}</div></div>
+      <div class="bg-pill"><div class="bg-pill-label">WERKZEUG</div><div class="bg-pill-val">${bg.t.join(', ')||'—'}</div></div>
+      <div class="bg-pill"><div class="bg-pill-label">FEAT</div><div class="bg-pill-val">${bg.f||'—'}</div></div>
+      <div class="bg-pill"><div class="bg-pill-label">ATTRIBUTE</div><div class="bg-pill-val">${bg.a||'—'}</div></div>
+    </div>`;
+  const btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;align-items:center';
+  const selBtn=document.createElement('button');selBtn.className='add-btn';selBtn.style.cssText='margin:0;flex:1'+(isMy?';background:rgba(122,154,90,0.2);border-color:var(--green);color:var(--green)':'');
+  selBtn.textContent=isMy?'✓ Mein Hintergrund':'📜 Als meinen wählen';
+  selBtn.onclick=()=>bgSelect(bg.n);
+  const link=document.createElement('a');
+  link.href=`https://5e.tools/backgrounds.html#${encodeURIComponent(bg.n.toLowerCase())}_${bg.src.toLowerCase()},bookview:true`;
+  link.target='_blank';link.style.cssText="color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-decoration:none;flex-shrink:0";
+  link.textContent='📖 5e.tools →';
+  btnRow.appendChild(selBtn);btnRow.appendChild(link);
+  detail.appendChild(btnRow);
+  top.onclick=()=>detail.classList.toggle('on');
+  div.appendChild(top);div.appendChild(detail);
+  return div;
+}
+
+function bgSelect(name){
+  st.bg = st.bg===name ? '' : name;
+  bgRenderMy();
+  bgRender();
+  autoSave();
+}
+
+function bgRenderMy(){
+  const el=document.getElementById('bgMyCard');
+  if(!el)return;
+  if(!st.bg){
+    el.innerHTML='<div style="color:var(--text3);font-size:12px;font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">Noch kein Hintergrund gewählt</div>';
+    return;
+  }
+  const bg=BG_DATA.find(b=>b.n===st.bg);
+  if(!bg){el.innerHTML='';return;}
+  el.innerHTML='';
+  const card=bgMakeCard(bg);
+  el.appendChild(card);
+}
+
+function bgRender(){
+  const q=document.getElementById('bgQ')?.value.toLowerCase().trim()||'';
+  const list=document.getElementById('bgList');if(!list)return;
+  const f=BG_DATA.filter(b=>{
+    const srcOk=bgFSrc==='all'||b.src===bgFSrc;
+    const qOk=!q||b.n.toLowerCase().includes(q);
+    return srcOk&&qOk;
+  });
+  document.getElementById('bgCount').textContent=f.length+' von '+BG_DATA.length+' Hintergründen';
+  list.innerHTML='';
+  f.forEach(bg=>list.appendChild(bgMakeCard(bg)));
 }
 
 function onBgChange(){
-  const val=document.getElementById('bgSelect').value;
-  st.bg=val;
-  renderBgCard(val);
+  const val=document.getElementById('bgSelect')?.value;
+  if(val!==undefined){st.bg=val;bgRenderMy();bgRender();}
 }
 
 function renderBgCard(name){
-  const card=document.getElementById('bgCard');
-  const desc=document.getElementById('bgDesc');
-  const grid=document.getElementById('bgGrid');
-  if(!card)return;
-  if(!name){card.style.display='none';return;}
-  const bg=BG_DATA.find(b=>b.n===name);
-  if(!bg){card.style.display='none';return;}
-  card.style.display='';
-  desc.style.display='none';
-  const slug=bg.n.toLowerCase().replace(/[^a-z0-9]+/g,'-');
-  const link=`https://5e.tools/backgrounds.html#${encodeURIComponent(bg.n.toLowerCase().replace(/ /g,'_'))}`;
-  grid.innerHTML=`
-    <div class="bg-pill"><div class="bg-pill-label">SKILLS</div><div class="bg-pill-val">${bg.s.join(', ')||'—'}</div></div>
-    <div class="bg-pill"><div class="bg-pill-label">WERKZEUG</div><div class="bg-pill-val">${bg.t.join(', ')||'—'}</div></div>
-    <div class="bg-pill"><div class="bg-pill-label">FEAT</div><div class="bg-pill-val">${bg.f||'—'}</div></div>
-    <div class="bg-pill"><div class="bg-pill-label">ATTRIBUTE (+2/+1/+1)</div><div class="bg-pill-val">${bg.a||'—'}</div></div>
-    <div class="bg-pill full" style="text-align:center;display:flex;gap:8px;justify-content:center">
-      <a href="https://5e.tools/backgrounds.html#${encodeURIComponent(bg.n.toLowerCase())}_${bg.src.toLowerCase()}" target="_blank" style="color:var(--purple);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-decoration:none">📖 5e.tools →</a>
-      <a href="https://5e.tools/backgrounds.html#${encodeURIComponent(bg.n.toLowerCase())}_${bg.src.toLowerCase()},bookview:true" target="_blank" style="color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-decoration:none">🖨 Print View →</a>
-    </div>
-  `;
+  st.bg=name;bgRenderMy();
 }
 
 
@@ -1246,6 +1552,7 @@ function ftBuildFilters(){
     b.onclick=()=>{ftFCat=k;cf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val===k));ftRender()};
     cf.appendChild(b);
   });
+  ftRenderMy();
   ftRender();
 }
 
@@ -1263,6 +1570,7 @@ function ftRender(){
 }
 
 function ftMakeCard(ft){
+  const isMy=st.feats.some(f=>f.name===ft.n&&f.tag==='Feat');
   const div=document.createElement('div');
   div.className='zb-card';
   const catLabel=FT_CATS[ft.cat]||ft.cat||'';
@@ -1270,19 +1578,52 @@ function ftMakeCard(ft){
   top.innerHTML=`<span class="zb-name">${ft.n}</span> ${catLabel?`<span class="zb-badge zb-school">${catLabel}</span>`:''} ${ft.pre?`<span class="zb-badge zb-src" title="${ft.pre}">${ft.pre}</span>`:''}<span class="zb-badge zb-src">${ft.src}</span>`;
   const detail=document.createElement('div');detail.className='zb-detail';
   const desc=document.createElement('div');desc.style.cssText='font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-line;margin-bottom:8px';desc.textContent=ft.d;
-  const btn=document.createElement('button');btn.className='add-btn';btn.style.margin='0';btn.textContent='+ Zum Charakterbogen';
-  btn.onclick=()=>ftAddToFeats(ft.n,ft.d);
+  const btn=document.createElement('button');btn.className='add-btn';btn.style.cssText='margin:0'+(isMy?';background:rgba(122,154,90,0.2);border-color:var(--green);color:var(--green)':'');
+  btn.textContent=isMy?'✓ Mein Feat':'+ Zum Charakterbogen';
+  btn.onclick=()=>ftToggle(ft.n,ft.d);
   detail.appendChild(desc);detail.appendChild(btn);
   top.onclick=()=>detail.classList.toggle('on');
   div.appendChild(top);div.appendChild(detail);
   return div;
 }
 
-function ftAddToFeats(name,desc){
-  if(st.feats.find(f=>f.name===name)){showToast('Bereits vorhanden');return;}
-  st.feats.push({name,tag:'Feat',desc});
-  showToast(name+' hinzugefügt');
+function ftToggle(name,desc){
+  const idx=st.feats.findIndex(f=>f.name===name&&f.tag==='Feat');
+  if(idx>=0){
+    st.feats.splice(idx,1);
+    showToast(name+' entfernt');
+  } else {
+    st.feats.push({name,tag:'Feat',desc});
+    showToast(name+' hinzugefügt');
+  }
+  ftRenderMy();
+  ftRender();
+  autoSave();
 }
+
+function ftRenderMy(){
+  const list=document.getElementById('ftMyList');if(!list)return;
+  const myFeats=st.feats.filter(f=>f.tag==='Feat');
+  if(!myFeats.length){
+    list.innerHTML='<div style="color:var(--text3);font-size:12px;font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">Noch keine Feats gewählt</div>';
+    return;
+  }
+  list.innerHTML='';
+  myFeats.forEach(f=>{
+    const ft=FT_FEATS.find(x=>x.n===f.name);
+    if(ft){
+      const card=ftMakeCard(ft);
+      list.appendChild(card);
+    } else {
+      // manuell hinzugefügt, kein Datenbank-Eintrag
+      const div=document.createElement('div');div.className='zb-card';
+      div.innerHTML=`<div class="zb-top" style="justify-content:space-between"><span class="zb-name">${f.name}</span><span class="zb-badge zb-school">Feat</span></div>`;
+      list.appendChild(div);
+    }
+  });
+}
+
+function ftAddToFeats(name,desc){ftToggle(name,desc);}
 
 
 // BESTIEN-DATENBANK
@@ -1368,9 +1709,9 @@ function bstMakeCard(b){
   detail.appendChild(inner);
 
   const btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
-  const saveBtn=document.createElement('button');saveBtn.className='add-btn';saveBtn.style.cssText='margin:0;flex:1';
-  saveBtn.textContent=isSaved?'✓ Gespeichert':'🐾 Wild Shape / Familiar';
-  saveBtn.onclick=()=>bstSave(b.n);
+  const saveBtn=document.createElement('button');saveBtn.className='add-btn';saveBtn.style.cssText='margin:0;flex:1'+(isSaved?';background:rgba(122,154,90,0.2);border-color:var(--green);color:var(--green)':'');
+  saveBtn.textContent=isSaved?'✓ Meine Bestie':'🐾 Zu meinen Bestien';
+  saveBtn.onclick=()=>bstToggle(b.n);
   const link=document.createElement('a');
   link.href=`https://5e.tools/bestiary.html#${encodeURIComponent(b.n.toLowerCase())}_xmm,bookview:true`;
   link.target='_blank';link.style.cssText="color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-decoration:none;flex-shrink:0";
@@ -1383,51 +1724,53 @@ function bstMakeCard(b){
   return div;
 }
 
-function bstSave(name){
+function bstToggle(name){
   st.savedBeasts=st.savedBeasts||[];
-  if(st.savedBeasts.find(s=>s.n===name)){showToast('Bereits gespeichert');return;}
-  const b=BST_DATA.find(x=>x.n===name);
-  if(!b)return;
-  st.savedBeasts.push(b);
+  const idx=st.savedBeasts.findIndex(s=>s.n===name);
+  if(idx>=0){
+    st.savedBeasts.splice(idx,1);
+    showToast(name+' entfernt');
+  } else {
+    const b=BST_DATA.find(x=>x.n===name);
+    if(!b)return;
+    st.savedBeasts.push(b);
+    showToast('🐾 '+name+' gespeichert');
+  }
   buildSavedBeasts();
   bstRender();
   autoSave();
-  showToast(name+' gespeichert');
 }
 
 function buildSavedBeasts(){
-  const list=document.getElementById('savedBeasts');if(!list)return;
+  // Render in Bestien-Tab (bstSavedList)
+  const list=document.getElementById('bstSavedList');
+  const sec=document.getElementById('bstSavedSection');
   st.savedBeasts=st.savedBeasts||[];
-  if(!st.savedBeasts.length){
-    list.innerHTML='<div style="color:var(--text3);font-size:12px;font-family:\'Cinzel\',serif;text-align:center;padding:12px">Noch keine Formen gespeichert</div>';
-    return;
-  }
-  list.innerHTML='';
-  st.savedBeasts.forEach((b,i)=>{
-    const card=bstMakeCard(b);
-    // replace save button with remove button
-    const btnRow=card.querySelector('.add-btn')?.parentElement;
-    if(btnRow){
-      const removeBtn=document.createElement('button');
-      removeBtn.className='add-btn';removeBtn.style.cssText='margin:0;flex:1;background:rgba(224,85,85,0.15);border-color:var(--red);color:var(--red)';
-      removeBtn.textContent='✕ Entfernen';
-      removeBtn.onclick=()=>bstRemove(i);
-      const saveBtn=btnRow.querySelector('.add-btn');
-      if(saveBtn) btnRow.replaceChild(removeBtn,saveBtn);
+  if(list){
+    if(!st.savedBeasts.length){
+      list.innerHTML='<div style="color:var(--text3);font-size:12px;font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">Noch keine Bestien markiert</div>';
+    } else {
+      list.innerHTML='';
+      st.savedBeasts.forEach(b=>{
+        const card=bstMakeCard(b);
+        list.appendChild(card);
+      });
     }
-    // auto-open detail
-    const detail=card.querySelector('.zb-detail');
-    if(detail) detail.classList.add('on');
-    list.appendChild(card);
-  });
-}
-
-
-function bstRemove(i){
-  st.savedBeasts.splice(i,1);
-  buildSavedBeasts();
-  bstRender();
-  autoSave();
+  }
+  // Auch in Features-Tab aktualisieren falls vorhanden
+  const featureList=document.getElementById('savedBeasts');
+  if(featureList){
+    const fsec=document.getElementById('savedBeastsSection');
+    if(fsec) fsec.style.display=st.savedBeasts.length?'':'none';
+    if(!st.savedBeasts.length){
+      featureList.innerHTML='';return;
+    }
+    featureList.innerHTML='';
+    st.savedBeasts.forEach(b=>{
+      const card=bstMakeCard(b);
+      featureList.appendChild(card);
+    });
+  }
 }
 
 function switchSubtab(parent, btn){
@@ -1439,16 +1782,22 @@ function switchSubtab(parent, btn){
 }
 
 function switchTab(t){
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+t));
-  if(t==='features'){buildFeats();buildAbilities();buildSavedBeasts();}
-  if(t==='bestien'){bstInit();buildSavedBeasts();}
-  if(t==='feats'){ftBuildFilters();}
+  const tabId = typeof t === 'string' ? t : t.dataset.tab;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+tabId));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
+  if(tabId==='features'){buildFeats();buildAbilities();buildSavedBeasts();}
+  if(tabId==='ausruestung'){renderItems();}
+  if(tabId==='bestien'){bstInit();buildSavedBeasts();}
+  if(tabId==='feats'){ftBuildFilters();}
+  if(tabId==='hintergrund')bgInit();
+  if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();}
+  if(tabId==='zauberbuch'){zbRender();}
 }
 
 // LOCALSTORAGE / MEHRCHARAKTERE
 const LS_KEY = 'dnd5e_chars';
-const TEXT_IDS = ['charName','cls','race','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes'];
+const TEXT_IDS = ['charName','cls','race','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
 
 function getAllChars(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
@@ -1479,7 +1828,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',zbAdded:new Set(),
-    abUses:{},savedBeasts:[]
+    abUses:{},savedBeasts:[],items:[]
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -1551,7 +1900,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',zbAdded:new Set(),
-    abUses:{},savedBeasts:[]
+    abUses:{},savedBeasts:[],items:[]
   });
   TEXT_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -1662,19 +2011,7 @@ function applyTheme(cls){
 // TABS
 document.getElementById('tabs').addEventListener('click',e=>{
   const btn=e.target.closest('.tab');if(!btn)return;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('tab-'+btn.dataset.tab).classList.add('on');
-  const t=btn.dataset.tab;
-  if(t==='skills'){buildSaves();buildSkills();}
-  if(t==='zauber'){buildSlots();buildMySpells();calcSpell();}
-  if(t==='zauberbuch'){zbRender();}
-  if(t==='features'){buildFeats();buildAbilities();buildSavedBeasts();}
-  if(t==='feats'){ftBuildFilters();}
-  if(t==='bestien'){bstInit();buildSavedBeasts();}
-  if(t==='zauber'){buildSlots();buildMySpells();calcSpell();}
-  if(t==='hintergrund')buildBgSelect();
+  switchTab(btn.dataset.tab);
 });
 
 document.getElementById('prof').addEventListener('input',()=>{buildSaves();buildSkills();calcSpell()});
@@ -1693,5 +2030,22 @@ initApp();
     </div>
   </div>
 </div>
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-btn on" data-tab="basis" onclick="switchTabAll('basis',this)">
+    <span class="bnav-icon">🧙</span><span class="bnav-label">Basis</span>
+  </button>
+  <button class="bnav-btn" data-tab="skills" onclick="switchTabAll('skills',this)">
+    <span class="bnav-icon">🎲</span><span class="bnav-label">Skills</span>
+  </button>
+  <button class="bnav-btn" data-tab="ausruestung" onclick="switchTabAll('ausruestung',this)">
+    <span class="bnav-icon">🗡️</span><span class="bnav-label">Ausrüstung</span>
+  </button>
+  <button class="bnav-btn" data-tab="zauber" onclick="switchTabAll('zauber',this)">
+    <span class="bnav-icon">🔮</span><span class="bnav-label">Zauber</span>
+  </button>
+  <button class="bnav-btn" data-tab="features" onclick="switchTabAll('features',this)">
+    <span class="bnav-icon">⭐</span><span class="bnav-label">Features</span>
+  </button>
+</nav>
 </body>
 </html>
