@@ -261,8 +261,9 @@ input[type=number]{-moz-appearance:textfield}
     <div class="rune">⚔</div>
     <div style="flex:1;min-width:0">
       <div class="hdr-title">D&D 5e · Character Sheet</div>
-      <input class="name-in" placeholder="Character Name..." id="charName" maxlength="40">
+      <div class="name-in" id="charName" style="cursor:default;border-bottom:1px solid var(--border);padding:2px 0;min-height:26px"></div>
     </div>
+    <button onclick="openSettings()" style="background:none;border:none;font-size:22px;cursor:pointer;padding:4px 2px;line-height:1;color:var(--text2);-webkit-tap-highlight-color:transparent" title="Settings">⚙️</button>
   </div>
 
   <div class="char-bar">
@@ -284,7 +285,8 @@ input[type=number]{-moz-appearance:textfield}
 
   <div style="position:sticky;top:62px;z-index:99;background:var(--bg1);border-bottom:1px solid var(--border2)">
     <div class="tabs" id="tabs">
-      <button class="tab on" data-tab="basis">Stats</button>
+      <button class="tab on" data-tab="info">Info</button>
+      <button class="tab" data-tab="basis">Stats</button>
       <button class="tab" data-tab="skills">Skills</button>
       <button class="tab" data-tab="ausruestung">Equipment</button>
       <button class="tab" data-tab="zauber">Spells</button>
@@ -302,13 +304,10 @@ input[type=number]{-moz-appearance:textfield}
 
   <div class="body">
 
-    <!-- GRUNDWERTE -->
-    <div class="panel on" id="tab-basis">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span class="sec" style="margin:0">Character Info</span>
-        <button class="filter-toggle on" id="metaToggleBtn" onclick="toggleMeta()" style="padding:3px 10px">▴ Collapse</button>
-      </div>
-      <div id="metaCollapsible">
+    <!-- INFO TAB -->
+    <div class="panel on" id="tab-info">
+      <div class="sec" style="margin-top:0">Character Info</div>
+      <div id="charInfoBody">
       <div class="igrid">
         <div class="ifield"><label>Class</label>
           <select id="cls" onchange="onClsChange()"><option value="">—</option><option>Barbarian</option><option>Bard</option><option>Druid</option><option>Warlock</option><option>Ranger</option><option>Cleric</option><option>Fighter</option><option>Wizard</option><option>Monk</option><option>Paladin</option><option>Rogue</option><option>Sorcerer</option></select></div>
@@ -316,7 +315,7 @@ input[type=number]{-moz-appearance:textfield}
         <div class="ifield"><label>Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
-            <input type="number" id="lvl" onchange="buildAbilities();autoLoadClassFeatures();autoSave()" value="1" min="1" max="20" oninput="buildAbilities()" style="text-align:center;flex:1">
+            <input type="number" id="lvl" onchange="buildAbilities()autoSave()" value="1" min="1" max="20" oninput="buildAbilities()" style="text-align:center;flex:1">
             <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
           </div></div>
         <div class="ifield"><label>Background</label><input id="bg" placeholder="Mercenary..."></div>
@@ -326,16 +325,35 @@ input[type=number]{-moz-appearance:textfield}
           <select id="align"><option value="">—</option><option>Lawful Good</option><option>Neutral Good</option><option>Chaotic Good</option><option>Lawful Neutral</option><option>Neutral</option><option>Chaotic Neutral</option><option>Lawful Evil</option><option>Neutral Evil</option><option>Chaotic Evil</option></select></div>
         <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
       </div>
+      </div>
       <div id="coreTraitsSection" style="display:none;margin-top:10px">
         <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
           <span>Class Traits</span>
-          <span id="coreTraitsHd" style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif"></span>
+          <button onclick="toggleInfoSection('coreTraitsBody','coreTraitsBtn')" id="coreTraitsBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
-        <div id="coreTraitsList" style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.7;color:var(--text2)"></div>
-        <div class="nta-wrap" style="margin-top:6px"><textarea class="nta" id="n_class_traits" placeholder="Homebrew notes, custom traits..." style="min-height:60px"></textarea><button class="nta-expand" onclick="openNoteModal('n_class_traits','Class Traits Notes')">⛶</button></div>
+        <div id="coreTraitsBody" style="display:none">
+          <div id="coreTraitsList" style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:14px;line-height:1.8;color:var(--text2)"></div>
+          <div class="nta-wrap" style="margin-top:6px"><textarea class="nta" id="n_class_traits" placeholder="Homebrew notes, custom traits..." style="min-height:60px"></textarea><button class="nta-expand" onclick="openNoteModal('n_class_traits','Class Traits Notes')">⛶</button></div>
+        </div>
       </div>
+      <div id="clsLoreSection" style="display:none;margin-top:10px">
+        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+          <span id="clsLoreTitle">Class: —</span>
+          <button onclick="toggleClsLore()" id="clsLoreToggleBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
+        </div>
+        <div id="clsLoreBody" style="display:none"></div>
       </div>
+      <div id="subclsLoreSection" style="display:none;margin-top:10px">
+        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+          <span id="subclsLoreTitle">Subclass: —</span>
+          <button onclick="toggleInfoSection('subclsLoreBody','subclsLoreBtn')" id="subclsLoreBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
+        </div>
+        <div id="subclsLoreBody" style="display:none"></div>
+      </div>
+    </div>
 
+    <!-- GRUNDWERTE -->
+    <div class="panel" id="tab-basis">
       <div class="sec">Hit Points</div>
       <div class="hp-row">
         <div class="hpbox" style="border-color:rgba(76,175,125,0.4)">
@@ -512,7 +530,7 @@ input[type=number]{-moz-appearance:textfield}
           <div style="color:var(--text3);font-size:12px;font-family:'Cinzel',serif;text-align:center;padding:12px">No forms saved yet</div>
         </div>
       </div>
-      <div class="sec" id="featSec">Features & Talents</div>
+      <div class="sec" id="featSec">Custom Features & Talents</div>
       <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
         
         <button class="add-btn" style="flex:1;margin:0" onclick="addFeat()">+ Add Manually</button>
@@ -733,7 +751,7 @@ function buildSlots(){
     d.innerHTML=`<div class="slvl-lbl">${i+1}. Level</div>
     <div style="display:flex;gap:4px;justify-content:center;align-items:center;margin-bottom:5px">
       <button class="hbtn" style="width:22px;height:22px;font-size:13px" onclick="chSlot(${i},-1)">−</button>
-      <span style="font-family:'Cinzel',serif;font-size:12px;color:var(--text);min-width:16px;text-align:center">${tot}</span>
+      <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--text);min-width:16px;text-align:center">${tot}</span>
       <button class="hbtn" style="width:22px;height:22px;font-size:13px" onclick="chSlot(${i},1)">+</button>
     </div>
     <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap">${pips}</div>`;
@@ -1155,18 +1173,18 @@ const DRUID_SUBCLASS_FEATURES={
   ]
 };
 const SUBCLS_BY_CLASS={
-  "Barbarian":["Path of the Berserker","Path of the Wild Heart","Path of the World Tree","Path of the Zealot","Path of the Totem Warrior (PHB)"],
-  "Bard":["College of Dance","College of Glamour","College of Lore","College of Valor","College of Whispers","College of Creation (TCE)","College of Eloquence (TCE)"],
-  "Cleric":["Life Domain","Light Domain","Trickery Domain","War Domain","Knowledge Domain","Nature Domain","Tempest Domain","Forge Domain (XGE)","Grave Domain (XGE)","Order Domain (TCE)","Peace Domain (TCE)","Twilight Domain (TCE)"],
-  "Druid":["Circle of the Land","Circle of the Moon","Circle of the Sea","Circle of the Stars","Circle of Dreams (XGE)","Circle of the Shepherd (XGE)","Circle of Spores (TCE)","Circle of Wildfire (TCE)"],
-  "Fighter":["Battle Master","Champion","Eldritch Knight","Arcane Archer (XGE)","Cavalier (XGE)","Echo Knight (EGW)","Psi Warrior (TCE)","Rune Knight (TCE)","Samurai (XGE)"],
-  "Monk":["Warrior of the Hand","Warrior of the Elements","Warrior of Mercy","Warrior of Shadow","Warrior of the Astral Self (TCE)","Warrior of the Drunken Master (XGE)","Warrior of the Kensei (XGE)","Warrior of the Sun Soul (XGE)"],
-  "Paladin":["Oath of Devotion","Oath of Glory","Oath of the Ancients","Oath of Vengeance","Oath of Conquest (XGE)","Oath of Redemption (XGE)","Oath of Watchers (TCE)","Oathbreaker"],
-  "Ranger":["Beast Master","Fey Wanderer","Gloom Stalker","Hunter","Drakewarden (FTD)","Swarmkeeper (TCE)","Monster Slayer (XGE)"],
-  "Rogue":["Arcane Trickster","Assassin","Soulknife","Thief","Inquisitive (XGE)","Mastermind (XGE)","Phantom (TCE)","Scout (XGE)","Swashbuckler (XGE)"],
-  "Sorcerer":["Draconic Bloodline","Wild Magic","Aberrant Mind (TCE)","Clockwork Soul (TCE)","Divine Soul (XGE)","Lunar Sorcery (DSotDQ)","Shadow Magic (XGE)","Storm Sorcery (XGE)"],
-  "Warlock":["Archfey Patron","Celestial Patron","Fiend Patron","Great Old One Patron","Genie Patron (TCE)","Hexblade (XGE)","Undead Patron (VRGtR)"],
-  "Wizard":["Abjurer","Bladesinger","Diviner","Evoker","Illusionist","Necromancer","Transmuter","Conjurer","Enchanter","Order of Scribes (TCE)","War Mage (XGE)"]
+  "Barbarian":["Path of the Berserker (PHB)","Path of the Totem Warrior (PHB)","Path of the Wild Heart (XPHB)","Path of the World Tree (XPHB)","Path of the Battlerager (SCAG)","Path of the Ancestral Guardian (XGE)","Path of the Storm Herald (XGE)","Path of the Zealot (XGE)","Path of the Beast (TCE)","Path of Wild Magic (TCE)","Path of the Giant (BGG)"],
+  "Bard":["College of Lore (PHB)","College of Valor (PHB)","College of Dance (XPHB)","College of Glamour (XGE)","College of Swords (XGE)","College of Whispers (XGE)","College of Creation (TCE)","College of Eloquence (TCE)","College of Spirits (VRGR)"],
+  "Cleric":["Knowledge Domain (PHB)","Life Domain (PHB)","Light Domain (PHB)","Nature Domain (PHB)","Tempest Domain (PHB)","Trickery Domain (PHB)","War Domain (PHB)","Death Domain (DMG)","Arcana Domain (SCAG)","Forge Domain (XGE)","Grave Domain (XGE)","Order Domain (TCE)","Peace Domain (TCE)","Twilight Domain (TCE)"],
+  "Druid":["Circle of the Land (PHB)","Circle of the Moon (PHB)","Circle of the Sea (XPHB)","Circle of the Stars (XPHB)","Circle of Dreams (XGE)","Circle of the Shepherd (XGE)","Circle of Spores (TCE)","Circle of Wildfire (TCE)"],
+  "Fighter":["Battle Master (PHB)","Champion (PHB)","Eldritch Knight (PHB)","Arcane Archer (XGE)","Cavalier (XGE)","Samurai (XGE)","Echo Knight (EGW)","Psi Warrior (TCE)","Rune Knight (TCE)","Banneret (SCAG)"],
+  "Monk":["Way of the Open Hand (PHB)","Way of Shadow (PHB)","Way of the Four Elements (PHB)","Warrior of the Open Hand (XPHB)","Warrior of Shadow (XPHB)","Warrior of the Elements (XPHB)","Warrior of Mercy (XPHB)","Way of the Long Death (SCAG)","Way of the Drunken Master (XGE)","Way of the Kensei (XGE)","Way of the Sun Soul (XGE)","Way of Mercy (TCE)","Way of the Astral Self (TCE)","Way of the Ascendant Dragon (FTD)"],
+  "Paladin":["Oath of Devotion (PHB)","Oath of the Ancients (PHB)","Oath of Vengeance (PHB)","Oathbreaker (DMG)","Oath of the Crown (SCAG)","Oath of Conquest (XGE)","Oath of Redemption (XGE)","Oath of Glory (TCE)","Oath of the Watchers (TCE)"],
+  "Ranger":["Beast Master (PHB)","Hunter (PHB)","Gloom Stalker (XGE)","Horizon Walker (XGE)","Monster Slayer (XGE)","Fey Wanderer (TCE)","Swarmkeeper (TCE)","Drakewarden (FTD)"],
+  "Rogue":["Arcane Trickster (PHB)","Assassin (PHB)","Thief (PHB)","Inquisitive (XGE)","Mastermind (XGE)","Scout (XGE)","Swashbuckler (XGE)","Phantom (TCE)","Soulknife (TCE)"],
+  "Sorcerer":["Draconic Bloodline (PHB)","Wild Magic (PHB)","Draconic Sorcery (XPHB)","Wild Magic Sorcery (XPHB)","Aberrant Sorcery (XPHB)","Clockwork Sorcery (XPHB)","Divine Soul (XGE)","Shadow Magic (XGE)","Storm Sorcery (XGE)","Aberrant Mind (TCE)","Clockwork Soul (TCE)","Lunar Sorcery (DSotDQ)"],
+  "Warlock":["The Archfey (PHB)","The Fiend (PHB)","The Great Old One (PHB)","Archfey Patron (XPHB)","Fiend Patron (XPHB)","Great Old One Patron (XPHB)","Celestial Patron (XPHB)","The Undying (SCAG)","The Celestial (XGE)","The Hexblade (XGE)","The Fathomless (TCE)","The Genie (TCE)","The Undead (VRGR)"],
+  "Wizard":["School of Abjuration (PHB)","School of Conjuration (PHB)","School of Divination (PHB)","School of Enchantment (PHB)","School of Evocation (PHB)","School of Illusion (PHB)","School of Necromancy (PHB)","School of Transmutation (PHB)","Abjurer (XPHB)","Diviner (XPHB)","Evoker (XPHB)","Illusionist (XPHB)","War Magic (XGE)","Chronurgy Magic (EGW)","Graviturgy Magic (EGW)","Bladesinging (TCE)","Order of Scribes (TCE)"]
 };
 
 
@@ -1192,6 +1210,24 @@ const CLASS_CORE_TRAITS = {
     multiclassingReq: "Wisdom 13",
     multiclassingGains: "Light armor, Medium armor, Shields (non-metal)",
     source: "PHB'24, page 78"
+  },
+  "Wizard": {
+    hd: "d6",
+    primaryAbility: "Intelligence",
+    hpLevel1: "6 + Con modifier",
+    hpPerLevel: "d6 (or 4) + Con modifier",
+    savingThrows: ["Intelligence","Wisdom"],
+    armorTraining: "None",
+    weaponProficiencies: "Simple weapons",
+    skillProficiencies: {count:2, from:["Arcana","History","Insight","Investigation","Medicine","Nature","Religion"]},
+    spellcastingAbility: "Intelligence",
+    startingEquipment: [
+      "(A) 2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar's Pack, and 5 GP",
+      "— or — 55 GP"
+    ],
+    multiclassingReq: "Intelligence 13",
+    multiclassingGains: "Spellcasting (if not already)",
+    source: "PHB'24, page 163"
   }
 };
 
@@ -1199,12 +1235,10 @@ function buildCoreTraits(){
   const cls = document.getElementById('cls')?.value||'';
   const sec = document.getElementById('coreTraitsSection');
   const list = document.getElementById('coreTraitsList');
-  const hdEl = document.getElementById('coreTraitsHd');
   if(!sec||!list) return;
   const t = CLASS_CORE_TRAITS[cls];
   if(!t){sec.style.display='none';return;}
   sec.style.display='';
-  hdEl.textContent = 'Hit Die: '+t.hd;
   const lbl = s => `<span style="color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:2px">${s}</span>`;
   const div = (label, val) => `<div>${lbl(label)}${val}</div>`;
   const hr = '<hr style="border:none;border-top:1px solid var(--border2);margin:6px 0">';
@@ -1232,6 +1266,83 @@ function buildCoreTraits(){
   list.innerHTML = rows.join(hr);
 }
 
+function buildClsLore(){
+  const cls=document.getElementById('cls')?.value||'';
+  const sec=document.getElementById('clsLoreSection');
+  const body=document.getElementById('clsLoreBody');
+  const title=document.getElementById('clsLoreTitle');
+  if(!sec||!body) return;
+  const clsData=CLASS_FEATURES[cls];
+  if(!clsData){sec.style.display='none';return;}
+  sec.style.display='';
+  title.textContent='Class: '+cls;
+  const all=[...(clsData.base||[])];
+  all.sort((a,b)=>a.lvl-b.lvl);
+  const byLvl={};
+  all.forEach(f=>{(byLvl[f.lvl]=byLvl[f.lvl]||[]).push(f);});
+  body.innerHTML=Object.entries(byLvl).map(([lvl,feats])=>`
+    <div style="margin-bottom:8px">
+      <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">LEVEL ${lvl}</div>
+      ${feats.map(f=>`
+        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--text)">${f.name}</span>
+            <span style="font-size:9px;color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
+          </div>
+          <div style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function buildSubclsLore(){
+  const cls=document.getElementById('cls')?.value||'';
+  const subcls=document.getElementById('subcls')?.value||'';
+  const sec=document.getElementById('subclsLoreSection');
+  const body=document.getElementById('subclsLoreBody');
+  const title=document.getElementById('subclsLoreTitle');
+  if(!sec||!body) return;
+  const clsData=CLASS_FEATURES[cls];
+  if(!clsData||!subcls){sec.style.display='none';return;}
+  // Try full name first, then strip source tag e.g. " (XPHB)"
+  const subclsKey=clsData.subclass&&clsData.subclass[subcls]?subcls:subcls.replace(/\s*\([^)]+\)\s*$/,'').trim();
+  if(!clsData.subclass||!clsData.subclass[subclsKey]){sec.style.display='none';return;}
+  sec.style.display='';
+  title.textContent='Subclass: '+subcls;
+  const feats=clsData.subclass[subclsKey];
+  const byLvl={};
+  feats.forEach(f=>{(byLvl[f.lvl]=byLvl[f.lvl]||[]).push(f);});
+  body.innerHTML=Object.entries(byLvl).map(([lvl,fs])=>`
+    <div style="margin-bottom:8px">
+      <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">LEVEL ${lvl}</div>
+      ${fs.map(f=>`
+        <div style="background:var(--bg2);border:1px solid var(--border2);border-left:2px solid var(--purple2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--purple)">${f.name}</span>
+            <span style="font-size:9px;color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
+          </div>
+          <div style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function toggleInfoSection(bodyId, btnId){
+  const body=document.getElementById(bodyId);
+  const btn=document.getElementById(btnId);
+  if(!body) return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  if(btn) btn.textContent=open?'▾ Expand':'▴ Collapse';
+}
+
+function toggleClsLore(){
+  const body=document.getElementById('clsLoreBody');
+  const btn=document.getElementById('clsLoreToggleBtn');
+  if(!body) return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  btn.textContent=open?'▾ Expand':'▴ Collapse';
+}
+
 function onClsChange(){
   const cls=document.getElementById('cls').value;
   applyTheme(cls);
@@ -1248,42 +1359,115 @@ function onClsChange(){
     sel.innerHTML='<option value="">—</option>';
   }
   buildAbilities();
-  autoLoadClassFeatures();
+  
   buildCoreTraits();
+  buildClsLore();
+  buildSubclsLore();
 }
 function onSubclsChange(){
   buildAbilities();
-  autoLoadClassFeatures();
+  
+  buildClsLore();
+  buildSubclsLore();
 }
 
 // CLASS_FEATURES registry — add other classes here later
+const WIZARD_CLASS_FEATURES=[
+  {lvl:1,name:"Arcane Recovery",desc:"You can regain some of your magical energy by studying your spellbook. When you finish a Short Rest, you can choose expended spell slots to recover. The spell slots can have a combined level equal to no more than half your Wizard level (round up), and none of the slots can be level 6 or higher. For example, if you're a level 4 Wizard, you can recover up to two levels' worth of spell slots, regaining either one level 2 spell slot or two level 1 spell slots.\nOnce you use this feature, you can't do so again until you finish a Long Rest.",tag:"Passiv"},
+  {lvl:1,name:"Ritual Adept",desc:"You can cast any spell as a Ritual if that spell has the Ritual tag and the spell is in your spellbook. You needn't have the spell prepared, but you must read from the book to cast a spell in this way.",tag:"Passiv"},
+  {lvl:1,name:"Spellcasting",desc:"As a student of arcane magic, you have learned to cast spells. See chapter 7 for the rules on spellcasting. The information below details how you use those rules with Wizard spells, which appear in the Wizard spell list later in the class's description.\n• Cantrips: You know three Wizard cantrips of your choice. Light, Mage Hand, and Ray of Frost are recommended. Whenever you finish a Long Rest, you can replace one of your cantrips from this feature with another Wizard cantrip of your choice.\nWhen you reach Wizard levels 4 and 10, you learn another Wizard cantrip of your choice, as shown in the Cantrips column of the Wizard Features table.\n• Spellbook: Your wizardly apprenticeship culminated in the creation of a unique book: your spellbook. It is a Tiny object that weighs 3 pounds, contains 100 pages, and can be read only by you or someone casting Identify. You determine the book's appearance and materials, such as a gilt-edged tome or a collection of vellum bound with twine.\nThe book contains the level 1+ spells you know. It starts with six level 1 Wizard spells of your choice. Detect Magic, Feather Fall, Mage Armor, Magic Missile, Sleep, and Thunderwave are recommended.\nWhenever you gain a Wizard level after 1, add two Wizard spells of your choice to your spellbook. Each of these spells must be of a level for which you have spell slots, as shown in the Wizard Features table. The spells are the culmination of arcane research you do regularly.\n• Spell Slots: The Wizard Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.\n• Prepared Spells of Level 1+: You prepare the list of level 1+ spells that are available for you to cast with this feature. To do so, choose four spells from your spellbook. The chosen spells must be of a level for which you have spell slots.\nThe number of spells on your list increases as you gain Wizard levels, as shown in the Prepared Spells column of the Wizard Features table. Whenever that number increases, choose additional Wizard spells until the number of spells on your list matches the number in the table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 3 Wizard, your list of prepared spells can include six spells of levels 1 and 2 in any combination, chosen from your spellbook.\nIf another Wizard feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Wizard spells for you.\n• Changing Your Prepared Spells: Whenever you finish a Long Rest, you can change your list of prepared spells, replacing any of the spells there with spells from your spellbook.\n• Spellcasting Ability: Intelligence is your spellcasting ability for your Wizard spells.\n• Spellcasting Focus: You can use an Arcane Focus or your spellbook as a Spellcasting Focus for your Wizard spells.",tag:"Passiv"},
+  {lvl:2,name:"Scholar",desc:"While studying magic, you also specialized in another field of study. Choose one of the following skills in which you have proficiency: Arcana, History, Investigation, Medicine, Nature, or Religion. You have Expertise in the chosen skill.",tag:"Passiv"},
+  {lvl:4,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
+  {lvl:5,name:"Memorize Spell",desc:"Whenever you finish a Short Rest, you can study your spellbook and replace one of the level 1+ Wizard spells you have prepared for your Spellcasting feature with another level 1+ spell from the book.",tag:"Passiv"},
+  {lvl:8,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
+  {lvl:12,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
+  {lvl:16,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
+  {lvl:18,name:"Spell Mastery",desc:"You have achieved such mastery over certain spells that you can cast them at will. Choose a level 1 and a level 2 spell in your spellbook that have a casting time of an action. You always have those spells prepared, and you can cast them at their lowest level without expending a spell slot. To cast either spell at a higher level, you must expend a spell slot.\nWhenever you finish a Long Rest, you can study your spellbook and replace one of those spells with an eligible spell of the same level from the book.",tag:"Passiv"},
+  {lvl:19,name:"Epic Boon",desc:"You gain an Epic Boon feat or another feat of your choice for which you qualify. Boon of Spell Recall is recommended.",tag:"Passiv"},
+  {lvl:20,name:"Signature Spells",desc:"Choose two level 3 spells in your spellbook as your signature spells. You always have these spells prepared, and you can cast each of them once at level 3 without expending a spell slot. When you do so, you can't cast them in this way again until you finish a Short Rest or Long Rest. To cast either spell at a higher level, you must expend a spell slot.",tag:"Passiv"}
+];
+const WIZARD_SUBCLASS_FEATURES={
+  "Abjurer":[
+  {lvl:3,name:"Abjuration Savant",desc:"Choose two Wizard spells from the Abjuration school, each of which must be no higher than level 2, and add them to your spellbook for free.\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Abjuration school to your spellbook for free. The chosen spell must be of a level for which you have spell slots.",tag:"Passiv"},
+  {lvl:3,name:"Arcane Ward",desc:"You can weave magic around yourself for protection. When you cast an Abjuration spell with a spell slot, you can simultaneously use a strand of the spell's magic to create a magical ward on yourself that lasts until you finish a Long Rest. The ward has a Hit Points maximum equal to twice your Wizard level plus your Intelligence modifier. Whenever you take damage, the ward takes the damage instead, and if you have any Resistances or Vulnerabilities, apply them before reducing the ward's Hit Points. If the damage reduces the ward to 0 Hit Points, you take any remaining damage. While the ward has 0 Hit Points, it can't absorb damage, but its magic remains.\nWhenever you cast an Abjuration spell with a spell slot, the ward regains a number of Hit Points equal to twice the level of the spell slot. Alternatively, as a Bonus Action, you can expend a spell slot, and the ward regains a number of Hit Points equal to twice the level of the spell slot expended.\nOnce you create the ward, you can't create it again until you finish a Long Rest.",tag:"Passiv"},
+  {lvl:6,name:"Projected Ward",desc:"When a creature that you can see within 30 feet of yourself takes damage, you can take a Reaction to cause your Arcane Ward to absorb that damage. If this damage reduces the ward to 0 Hit Points, the warded creature takes any remaining damage. If that creature has any Resistances or Vulnerabilities, apply them before reducing the ward's Hit Points.",tag:"Reaktion"},
+  {lvl:10,name:"Spell Breaker",desc:"You always have the Counterspell and Dispel Magic spells prepared. In addition, you can cast Dispel Magic as a Bonus Action, and you can add your Proficiency to its ability check.\nWhen you cast either spell with a spell slot, that slot isn't expended if the spell fails to stop a spell.",tag:"Bonusaktion"},
+  {lvl:14,name:"Spell Resistance",desc:"You have Advantage on saving throws against spells, and you have Resistance to the damage of spells.",tag:"Passiv"}
+  ],
+  "Diviner":[
+  {lvl:3,name:"Divination Savant",desc:"Choose two Wizard spells from the Divination school, each of which must be no higher than level 2, and add them to your spellbook for free.\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Divination school to your spellbook for free. The chosen spell must be of a level for which you have spell slots.",tag:"Passiv"},
+  {lvl:3,name:"Portent",desc:"Glimpses of the future begin to press on your awareness. Whenever you finish a Long Rest, roll two d20s and record the numbers rolled. You can replace any D20 Test made by you or a creature that you can see with one of these foretelling rolls. You must choose to do so before the roll, and you can replace a roll in this way only once per turn.\nEach foretelling roll can be used only once. When you finish a Long Rest, you lose any unused foretelling rolls.",tag:"Passiv"},
+  {lvl:6,name:"Expert Divination",desc:"Casting Divination spells comes so easily to you that it expends only a fraction of your spellcasting efforts. When you cast a Divination spell using a level 2+ spell slot, you regain one expended spell slot. The slot you regain must be of a level lower than the slot you expended and can't be higher than level 5.",tag:"Passiv"},
+  {lvl:10,name:"The Third Eye",desc:"You can increase your powers of perception. As a Bonus Action, choose one of the following benefits, which lasts until you start a Short Rest or Long Rest. You can't use this feature again until you finish a Short Rest or Long Rest.\n• Darkvision: You gain Darkvision with a range of 120 feet.\n• Greater Comprehension: You can read any language.\n• See Invisibility: You can cast See Invisibility without expending a spell slot.",tag:"Bonusaktion"},
+  {lvl:14,name:"Greater Portent",desc:"The visions in your dreams intensify and paint a more accurate picture in your mind of what is to come. Roll three d20s for your Portent feature rather than two.",tag:"Passiv"}
+  ],
+  "Evoker":[
+  {lvl:3,name:"Evocation Savant",desc:"Choose two Wizard spells from the Evocation school, each of which must be no higher than level 2, and add them to your spellbook for free.\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Evocation school to your spellbook for free. The chosen spell must be of a level for which you have spell slots.",tag:"Passiv"},
+  {lvl:3,name:"Potent Cantrip",desc:"Your damaging cantrips affect even creatures that avoid the brunt of the effect. When you cast a cantrip at a creature and you miss with the attack roll or the target succeeds on a saving throw against the cantrip, the target takes half the cantrip's damage (if any) but suffers no additional effect from the cantrip.",tag:"Passiv"},
+  {lvl:6,name:"Sculpt Spells",desc:"You can create pockets of relative safety within the effects of your evocations. When you cast an Evocation spell that affects other creatures that you can see, you can choose a number of them equal to 1 plus the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save.",tag:"Passiv"},
+  {lvl:10,name:"Empowered Evocation",desc:"Whenever you cast a Wizard spell from the Evocation school, you can add your Intelligence modifier to one damage roll of that spell.",tag:"Passiv"},
+  {lvl:14,name:"Overchannel",desc:"You can increase the power of your spells. When you cast a Wizard spell with a spell slot of levels 1–5 that deals damage, you can deal maximum damage with that spell on the turn you cast it.\nThe first time you do so, you suffer no adverse effect. If you use this feature again before you finish a Long Rest, you take 2d12 Necrotic damage for each level of the spell slot immediately after you cast it. This damage ignores Resistance and Immunity.\nEach time you use this feature again before finishing a Long Rest, the Necrotic damage per spell level increases by 1d12.",tag:"Passiv"}
+  ],
+  "Illusionist":[
+  {lvl:3,name:"Illusion Savant",desc:"Choose two Wizard spells from the Illusion school, each of which must be no higher than level 2, and add them to your spellbook for free.\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Illusion school to your spellbook for free. The chosen spell must be of a level for which you have spell slots.",tag:"Passiv"},
+  {lvl:3,name:"Improved Illusions",desc:"You can cast Illusion spells without providing Verbal components, and if an Illusion spell you cast has a range of 10+ feet, the range increases by 60 feet.\nYou also know the Minor Illusion cantrip. If you already know it, you learn a different Wizard cantrip of your choice. The cantrip doesn't count against your number of cantrips known. You can create both a sound and an image with a single casting of Minor Illusion, and you can cast it as a Bonus Action.",tag:"Passiv"},
+  {lvl:6,name:"Phantasmal Creatures",desc:"You always have the Summon Beast and Summon Fey spells prepared. Whenever you cast either spell, you can change its school to Illusion, which causes the summoned creature to appear spectral. You can cast the Illusion version of each spell without expending a spell slot, but casting it without a slot halves the creature's Hit Points. Once you cast either spell without a spell slot, you must finish a Long Rest before you can cast the spell in that way again.",tag:"Passiv"},
+  {lvl:10,name:"Illusory Self",desc:"When a creature hits you with an attack roll, you can take a Reaction to interpose an illusory duplicate of yourself between the attacker and yourself. The attack automatically misses you, then the illusion dissipates.\nOnce you use this feature, you can't use it again until you finish a Short Rest or Long Rest. You can also restore your use of it by expending a level 2+ spell slot (no action required).",tag:"Reaktion"},
+  {lvl:14,name:"Illusory Reality",desc:"You have learned to weave shadow magic into your illusions to give them a semi-reality. When you cast an Illusion spell with a spell slot, you can choose one inanimate, nonmagical object that is part of the illusion and make that object real. You can do this on your turn as a Bonus Action while the spell is ongoing. The object remains real for 1 minute, during which it can't deal damage or give any conditions. For example, you can create an illusion of a bridge over a chasm and then make it real and cross it.",tag:"Passiv"}
+  ],
+  "War Magic":[
+    {lvl:2,name:"War Magic",desc:"A variety of arcane colleges specialize in training wizards for war. The tradition of War Magic blends principles of evocation and abjuration, rather than specializing in either of those schools. It teaches techniques that empower a caster's spells, while also providing methods for wizards to bolster their own defenses.\nFollowers of this tradition are known as war mages. They see their magic as both a weapon and armor, a resource superior to any piece of steel. War mages act fast in battle, using their spells to seize tactical control of a situation. Their spells strike hard, while their defensive skills foil their opponents' attempts to counterattack. War mages are also adept at turning other spellcasters' magical energy against them.\nIn great battles, a war mage often works with evokers, abjurers, and other types of wizards. Evokers, in particular, sometimes tease war mages for splitting their attention between offense and defense. A war mage's typical response: \"What good is being able to throw a mighty fireball if I die before I can cast it?\"",tag:"Passiv"},
+    {lvl:2,name:"Arcane Deflection",desc:"At 2nd level, you have learned to weave your magic to fortify yourself against harm. When you are hit by an attack or you fail a saving throw, you can use your reaction to gain a +2 bonus to your AC against that attack or a +4 bonus to that saving throw.\nWhen you use this feature, you can't cast spells other than cantrips until the end of your next turn.",tag:"Reaktion"},
+    {lvl:2,name:"Tactical Wit",desc:"Starting at 2nd level, your keen ability to assess tactical situations allows you to act quickly in battle. You can give yourself a bonus to your initiative rolls equal to your Intelligence modifier.",tag:"Passiv"},
+    {lvl:6,name:"Power Surge",desc:"Starting at 6th level, you can store magical energy within yourself to later empower your damaging spells. In its stored form, this energy is called a power surge.\nYou can store a maximum number of power surges equal to your Intelligence modifier (minimum of one). Whenever you finish a long rest, your number of power surges resets to one. Whenever you successfully end a spell with dispel magic or counterspell, you gain one power surge, as you steal magic from the spell you foiled. If you end a short rest with no power surges, you gain one power surge.\nOnce per turn when you deal damage to a creature or object with a wizard spell, you can spend one power surge to deal extra force damage to that target. The extra damage equals half your wizard level.",tag:"Passiv"},
+    {lvl:10,name:"Durable Magic",desc:"Beginning at 10th level, the magic you channel helps ward off harm. While you maintain concentration on a spell, you have a +2 bonus to AC and all saving throws.",tag:"Passiv"},
+    {lvl:14,name:"Deflecting Shroud",desc:"At 14th level, your Arcane Deflection becomes infused with deadly magic. When you use your Arcane Deflection feature, you can cause magical energy to arc from you. Up to three creatures of your choice that you can see within 60 feet of you each take force damage equal to half your wizard level.",tag:"Passiv"}
+  ],
+  "Chronurgy Magic":[
+    {lvl:2,name:"Chronurgy Magic",desc:"Focusing on the manipulation of time, those who follow the Chronurgy tradition learn to alter the pace of reality to their liking. Using the ramping of anticipatory dunamis energy, these mages can bend the flow of time as adroitly as a skilled musician plays an instrument, lending themselves and their allies an advantage in the blink of an eye.\nNote: This subclass has access to {@book Dunamancy Spells}.",tag:"Passiv"},
+    {lvl:2,name:"Chronal Shift",desc:"2nd-level Chronurgy Magic feature\nYou can magically exert limited control over the flow of time around a creature. As a reaction, after you or a creature you can see within 30 feet of you makes an attack roll, an ability check, or a saving throw, you can force the creature to reroll. You make this decision after you see whether the roll succeeds or fails. The target must use the result of the second roll.\nYou can use this ability twice, and you regain any expended uses when you finish a long rest.",tag:"Reaktion"},
+    {lvl:2,name:"Temporal Awareness",desc:"2nd-level Chronurgy Magic feature\nYou can add your Intelligence modifier to your initiative rolls.",tag:"Passiv"},
+    {lvl:6,name:"Momentary Stasis",desc:"6th-level Chronurgy Magic feature\nAs an action, you can magically force a Large or smaller creature you can see within 60 feet of you to make a Constitution saving throw against your spell save DC. Unless the saving throw is a success, the creature is encased in a field of magical energy until the end of your next turn or until the creature takes any damage. While encased in this way, the creature is incapacitated and has a speed of 0.\nYou can use this feature a number of times equal to your Intelligence modifier (a minimum of once). You regain all expended uses when you finish a long rest.",tag:"Aktion"},
+    {lvl:10,name:"Arcane Abeyance",desc:"10th-level Chronurgy Magic feature\nWhen you cast a spell using a spell slot of 4th level or lower, you can condense the spell's magic into a mote. The spell is frozen in time at the moment of casting and held within a gray bead for 1 hour. This bead is a Tiny object with AC 15 and 1 hit point, and it is immune to poison and psychic damage. When the duration ends, or if the bead is destroyed, it vanishes in a flash of light, and the spell is lost.\nA creature holding the bead can use its action to release the spell within, whereupon the bead disappears. The spell uses your spell attack bonus and save DC, and the spell treats the creature who released it as the caster for all other purposes.\nOnce you create a bead with this feature, you can't do so again until you finish a short or long rest.",tag:"Passiv"},
+    {lvl:14,name:"Convergent Future",desc:"14th-level Chronurgy Magic feature\nYou can peer through possible futures and magically pull one of them into events around you, ensuring a particular outcome. When you or a creature you can see within 60 feet of you makes an attack roll, an ability check, or a saving throw, you can use your reaction to ignore the die roll and decide whether the number rolled is the minimum needed to succeed or one less than that number (your choice).\nWhen you use this feature, you gain one level of exhaustion. Only by finishing a long rest can you remove a level of exhaustion gained in this way.",tag:"Passiv"}
+  ],
+  "Graviturgy Magic":[
+    {lvl:2,name:"Graviturgy Magic",desc:"Understanding and mastering the forces that draw bodies of matter together or drive them apart, the students of the Graviturgy arcane tradition learn to further bend and manipulate the violent energy of gravity to their benefit, and the terrible detriment of their enemies.\nNote: This subclass has access to {@book Dunamancy Spells}.",tag:"Passiv"},
+    {lvl:2,name:"Adjust Density",desc:"2nd-level Graviturgy Magic feature\nAs an action, you can magically alter the weight of one object or creature you can see within 30 feet of you. The object or creature must be Large or smaller. The target's weight is halved or doubled for up to 1 minute or until your concentration ends (as if you were concentration on a spell).\nWhile the weight of a creature is halved by this effect, the creature's speed increases by 10 feet, it can jump twice as far as normal, and it has disadvantage on Strength checks and Strength saving throws. While the weight of a creature is doubled by this effect, the creature's speed is reduced by 10 feet, and it has advantage on Strength checks and Strength saving throws.\nUpon reaching 10th level in this class, you can target an object or a creature that is Huge or smaller.",tag:"Aktion"},
+    {lvl:6,name:"Gravity Well",desc:"6th-level Graviturgy Magic feature\nYou've learned how to manipulate gravity around a living being: whenever you cast a spell on a creature, you can move the target 5 feet to an unoccupied space of your choice if the target is willing to move, the spell hits it with an attack, or it fails a saving throw against the spell.",tag:"Passiv"},
+    {lvl:10,name:"Violent Attraction",desc:"10th-level Graviturgy Magic feature\nWhen another creature that you can see within 60 feet of you hits with a weapon attack, you can use your reaction to increase the attack's velocity, causing the attack's target to take an extra 1d10 damage of the weapon's type.\nAlternatively, if a creature within 60 feet of you takes damage from a fall, you can use your reaction to increase the fall's damage by 2d10.\nYou can use this feature a number of times equal to your Intelligence modifier (a minimum of once). You regain all expended uses when you finish a long rest.",tag:"Reaktion"},
+    {lvl:14,name:"Event Horizon",desc:"14th-level Graviturgy Magic feature\nAs an action, you can magically emit a powerful field of gravitational energy that tugs at other creatures for up to 1 minute or until your concentration ends (as if you were concentration on a spell). For the duration, whenever a creature hostile to you starts its turn within 30 feet of you, it must make a Strength saving throw against your spell save DC. On a failed save, it takes 2d10 force damage, and its speed is reduced to 0 until the start of its next turn. On a successful save, it takes half as much damage, and every foot it moves this turn costs 2 extra feet of movement.\nOnce you use this feature, you can't do so again until you finish a long rest or until you expend a spell slot of 3rd level or higher on it.",tag:"Aktion"}
+  ],
+  "Bladesinging":[
+    {lvl:2,name:"Bladesinger Styles",desc:"From its inception as a martial and magical art, Bladesinging has been tied to the sword, more specifically the longsword. Yet many generations of study gave rise to various styles of Bladesinging based on the melee weapon employed. The techniques of these styles are passed from master to students in small schools, some of which have a building dedicated to instruction. Even the newest styles are hundreds of years old, but are still taught by their original creators due to the long lives of elves. Most schools of Bladesinging are in Evermeet or Evereska. One was started in Myth Drannor, but the city's destruction has scattered those students who survived.\nStyles of Bladesinging are broadly categorized based on the type of weapon employed, and each is associated with a category of animal. Within that style are specializations named after specific animal types, based on the types of spells employed, the techniques of the master, and the particular weapon used. Bladesingers who apprentice to a master typically get a tattoo of their chosen style's animal. Some bladesingers learn multiple styles and bear many tattoos, wearing a warning on their skin of their deadly skills.\n• Cat: Styles that employ a sword belong to this family. The lion style, the eldest, trains practitioners in the use of the longsword and doesn't favor any particular type of spells. Leopard style focuses on the shortsword and spells of illusion and stealth. Red tiger, a style just three centuries old, has its bladesingers using the scimitar in a whirling dance of defense from which they launch into sudden leaps and attacks.\n• Bird: Styles that focus on the use of a hafted weapon, such as an axe or hammer, have been grouped together as bird styles, yet they vary wildly. All relatively new styles, they use weapons not typically favored by elves. Eagle-style bladesingers use small handaxes, and many maneuvers in the style focus on fluid ways to throw the weapon and draw a new one. Raven style uses a war pick, and spells associated with it grant the bladesinger more agility in combat.\n• Snake: Practitioners of these styles use a flail, chain, or whip. Viper style uses a whip, despite its inelegance as a weapon, and has almost as long a history as the lion style. Its masters punctuate their bladesong with a stunningly rapid rhythm of whip cracks, which can keep many foes at bay and allow the bladesinger space to cast the cruel spells of poison and disease favored by the style.",tag:"Passiv"},
+    {lvl:2,name:"Bladesong",desc:"Starting at 2nd level, you can invoke a secret elven magic called the Bladesong, provided you aren't wearing medium or heavy armor or using a shield. It graces you with supernatural speed, agility, and focus.\nYou can use a bonus action to start the Bladesong, which lasts for 1 minute. It ends early if you are incapacitated, if you don medium or heavy armor or a shield, or if you use two hands to make an attack with a weapon. You can also dismiss Bladesong at any time you choose (no action required).\nWhile your bladesong is active, you gain the following benefits:\n• You gain a bonus to your AC equal to your Intelligence modifier (minimum of +1).\n• Your walking speed increases by 10 feet.\n• You have advantage on Dexterity (Acrobatics) checks.\n• You gain a bonus to any Constitution saving throws you make to maintain concentration on a spell. The bonus equals your Intelligence modifier (minimum of +1).\nYou can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses of it when you finish a long rest.",tag:"Passiv"},
+    {lvl:2,name:"Training in War and Song (Bladesinging)",desc:"When you adopt this tradition at 2nd level, you gain proficiency with light armor, and you gain proficiency with one type of one-handed melee weapon of your choice.\nYou also gain proficiency in the Performance skill if you don't already have it.",tag:"Passiv"},
+    {lvl:6,name:"Extra Attack",desc:"Starting at 6th level, you can attack twice, instead of once, whenever you take the Attack action on your turn. Moreover, you can cast one of your cantrips in place of one of those attacks.",tag:"Passiv"},
+    {lvl:10,name:"Song of Defense",desc:"Beginning at 10th level, you can direct your magic to absorb damage while your bladesong is active. When you take damage, you can use your reaction to expend one spell slot and reduce that damage to you by an amount equal to five times the spell's slot level.",tag:"Reaktion"},
+    {lvl:14,name:"Song of Victory",desc:"Starting at 14th level, you add your Intelligence modifier (minimum of +1) to the damage of your melee weapon attacks while your Bladesong is active.",tag:"Passiv"}
+  ],
+  "Order of Scribes":[
+    {lvl:2,name:"Order of Scribes",desc:"Magic of the book-that's what many folk call wizardry. The name is apt, given how much time wizards spend poring over tomes and penning theories about the nature of magic. It's rare to see wizards traveling without books and scrolls sprouting from their bags, and a wizard would go to great lengths to plumb an archive of ancient knowledge.\nAmong wizards, the Order of Scribes is the most bookish. It takes many forms in different worlds, but its primary mission is the same everywhere: recording magical discoveries so that wizardry can flourish. And while all wizards value spellbooks, a wizard in the Order of Scribes magically awakens their book, turning it into a trusted companion. All wizards study books, but a wizardly scribe talks to theirs!",tag:"Passiv"},
+    {lvl:2,name:"Awakened Spellbook",desc:"2nd-level Order of Scribes feature\nUsing specially prepared inks and ancient incantations passed down by your wizardly order, you have awakened an arcane sentience within your spellbook.\nWhile you are holding the book, it grants you the following benefits:\n• You can use the book as a spellcasting focus for your wizard spells.\n• When you cast a wizard spell with a spell slot, you can temporarily replace its damage type with a type that appears in another spell in your spellbook, which magically alters the spell's formula for this casting only. The latter spell must be of the same level as the spell slot you expend.\n• When you cast a wizard spell as a ritual, you can use the spell's normal casting time, rather than adding 10 minutes to it. Once you use this benefit, you can't do so again until you finish a long rest.\nIf necessary, you can replace the book over the course of a short rest by using your Wizardly Quill to write arcane sigils in a blank book or a magic spellbook to which you're attuned. At the end of the rest, your spellbook's consciousness is summoned into the new book, which the consciousness transforms into your spellbook, along with all its spells. If the previous book still existed somewhere, all the spells vanish from its pages.",tag:"Passiv"},
+    {lvl:2,name:"Wizardly Quill",desc:"2nd-level Order of Scribes feature\nAs a bonus action, you can magically create a Tiny quill in your free hand. The magic quill has the following properties:\n• The quill doesn't require ink. When you write with it, it produces ink in a color of your choice on the writing surface.\n• The time you must spend to copy a spell into your spellbook equals 2 minutes per spell level if you use the quill for the transcription.\n• You can erase anything you write with the quill if you wave the feather over the text as a bonus action, provided the text is within 5 feet of you.\nThis quill disappears if you create another one or if you die.",tag:"Bonusaktion"},
+    {lvl:6,name:"Manifest Mind",desc:"6th-level Order of Scribes feature\nYou can conjure forth the mind of your Awakened Spellbook. As a bonus action while the book is on your person, you can cause the mind to manifest as a Tiny spectral object, hovering in an unoccupied space of your choice within 60 feet of you. The spectral mind is intangible and doesn't occupy its space, and it sheds dim light in a 10-foot radius. It looks like a ghostly tome, a cascade of text, or a scholar from the past (your choice).\nWhile manifested, the spectral mind can hear and see, and it has darkvision with a range of 60 feet. The mind can telepathically share with you what it sees and hears (no action required).\nWhenever you cast a wizard spell on your turn, you can cast it as if you were in the spectral mind's space, instead of your own, using its senses. You can do so a number of times per day equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.\nAs a bonus action, you can cause the spectral mind to hover up to 30 feet to an unoccupied space that you or it can see. It can pass through creatures but not objects.\nThe spectral mind stops manifesting if it is ever more than 300 feet away from you, if someone casts dispel magic on it, if the Awakened Spellbook is destroyed, if you die, or if you dismiss the spectral mind as a bonus action.\nOnce you conjure the mind, you can't do so again until you finish a long rest, unless you expend a spell slot of any level to conjure it again.",tag:"Bonusaktion"},
+    {lvl:10,name:"Master Scrivener",desc:"10th-level Order of Scribes feature\nWhenever you finish a long rest, you can create one magic scroll by touching your Wizardly Quill to a blank piece of paper or parchment and causing one spell from your Awakened Spellbook to be copied onto the scroll. The spellbook must be within 5 feet of you when you make the scroll.\nThe chosen spell must be of 1st or 2nd level and must have a casting time of 1 action. Once in the scroll, the spell's power is enhanced, counting as one level higher than normal. You can cast the spell from the scroll by reading it as an action. The scroll is unintelligible to anyone else, and the spell vanishes from the scroll when you cast it or when you finish your next long rest.\nYou are also adept at crafting spell scrolls, which are described in the treasure chapter of the Dungeon Master's Guide. The gold and time you must spend to make such a scroll are halved if you use your Wizardly Quill.",tag:"Passiv"},
+    {lvl:14,name:"One with the Word",desc:"14th-level Order of Scribes feature\nYour connection to your Awakened Spellbook has become so profound that your soul has become entwined with it. While the book is on your person, you have advantage on all Intelligence (Arcana) checks, as the spellbook helps you remember magical lore.\nMoreover, if you take damage while your spellbook's mind is manifested, you can prevent all of that damage to you by using your reaction to dismiss the spectral mind, using its magic to save yourself. Then roll 3d6. The spellbook temporarily loses spells of your choice that have a combined spell level equal to that roll or higher. For example, if the roll's total is 9, spells vanish from the book that have a combined level of at least 9, which could mean one 9th-level spell, three 3rd-level spells, or some other combination. If there aren't enough spells in the book to cover this cost, you drop to 0 hit points.\nUntil you finish 1d6 long rests, you are incapable of casting the lost spells, even if you find them on a scroll or in another spellbook. After you finish the required number of rests, the spells reappear in the spellbook.\nOnce you use this reaction, you can't do so again until you finish a long rest.",tag:"Passiv"}
+  ]
+
+};
 const CLASS_FEATURES={
   "Druid":{
     base: typeof DRUID_CLASS_FEATURES!=='undefined'?DRUID_CLASS_FEATURES:[],
     subclass: typeof DRUID_SUBCLASS_FEATURES!=='undefined'?DRUID_SUBCLASS_FEATURES:{}
+  },
+  "Wizard":{
+    base: typeof WIZARD_CLASS_FEATURES!=='undefined'?WIZARD_CLASS_FEATURES:[],
+    subclass: typeof WIZARD_SUBCLASS_FEATURES!=='undefined'?WIZARD_SUBCLASS_FEATURES:{}
   }
 };
 
-function autoLoadClassFeatures(){
-  const cls=document.getElementById('cls').value;
-  const subcls=document.getElementById('subcls').value;
-  const lvl=parseInt(document.getElementById('lvl').value)||1;
-  const clsData=CLASS_FEATURES[cls];
-  if(!clsData) return;
-  const existing=new Set(st.feats.map(f=>f.name));
-  let added=0;
-  (clsData.base||[]).filter(f=>f.lvl<=lvl).forEach(f=>{
-    const n=`Lvl ${f.lvl}: ${f.name}`;
-    if(!existing.has(n)){st.feats.push({name:n,tag:f.tag,desc:f.desc});existing.add(n);added++;}
-  });
-  if(subcls&&clsData.subclass&&clsData.subclass[subcls]){
-    clsData.subclass[subcls].filter(f=>f.lvl<=lvl).forEach(f=>{
-      const n=`Lvl ${f.lvl}: ${f.name}`;
-      if(!existing.has(n)){st.feats.push({name:n,tag:f.tag,desc:f.desc});existing.add(n);added++;}
-    });
-  }
-  if(added>0){buildFeats();autoSave();}
-}
+
 
 
 // CLASS FEATURES DATA
@@ -1919,11 +2103,12 @@ function switchTab(t){
   if(tabId==='hintergrund')bgInit();
   if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();}
   if(tabId==='spelllist'){slRender();}
+  if(tabId==='info'){buildClsLore();buildSubclsLore();}
 }
 
 // LOCALSTORAGE / MEHRCHARAKTERE
 const LS_KEY = 'dnd5e_chars';
-const TEXT_IDS = ['charName','cls','race','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
+const TEXT_IDS = ['cls','race','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
 
 function getAllChars(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
@@ -1969,7 +2154,7 @@ function applyState(snap){
   // Trigger dependent UI (skip onClsChange - already called)
   buildAttrs();buildSaves();buildSkills();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();
+  calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();
   // Background
   if(st.bg) renderBgCard(st.bg);
   // Death saves / inspiration
@@ -1985,7 +2170,7 @@ function applyState(snap){
 }
 
 function saveChar(){
-  const name = document.getElementById('charName')?.value.trim();
+  const name = document.getElementById('charName')?.textContent.trim();
   if(!name){showToast('Bitte zuerst einen Namen eingeben');return;}
   const chars = getAllChars();
   chars[name] = collectState();
@@ -2000,6 +2185,8 @@ function loadChar(name){
   if(!chars[name]) return;
   applyState(chars[name]);
   refreshCharSel(name);
+  const el=document.getElementById('charName');
+  if(el) el.textContent=name;
 }
 
 function newChar(){
@@ -2031,7 +2218,7 @@ function _doNewChar(name){
   TEXT_IDS.forEach(id=>{
     const el=document.getElementById(id);
     if(el){
-      if(id==='charName') el.value=_name;
+      if(id==='charName') el.textContent=_name;
       else if(el.tagName==='SELECT') el.value='';
       else if(el.type==='number') el.value=el.defaultValue||'';
       else el.value='';
@@ -2099,7 +2286,7 @@ function initApp(){
 // Auto-save on input changes
 document.addEventListener('input', autoSave);
 function autoSave(){
-  const name = document.getElementById('charName')?.value.trim();
+  const name = document.getElementById('charName')?.textContent.trim();
   if(name){
     const chars = getAllChars();
     chars[name] = collectState();
@@ -2114,7 +2301,9 @@ const CLASS_THEMES={"": {"gold": "#c9a84c", "gold2": "#8a6f2e", "purple": "#b48b
 const CLASS_RUNES={'Barbarian':'🪓','Bard':'🎭','Druid':'🌿','Warlock':'🕯','Ranger':'🏹','Cleric':'🕊','Fighter':'⚔','Wizard':'📜','Monk':'🥋','Paladin':'🛡','Rogue':'🗡','Sorcerer':'⭐'};
 
 function applyTheme(cls){
-  const t=CLASS_THEMES[cls]||CLASS_THEMES[''];
+  const base=CLASS_THEMES[cls]||CLASS_THEMES[''];
+  const ov=loadThemeOverrides();
+  const t={...base,...(ov[cls]||{})};
   const r=document.documentElement.style;
   r.setProperty('--gold',t.gold);
   r.setProperty('--gold2',t.gold2);
@@ -2142,6 +2331,154 @@ document.getElementById('tabs').addEventListener('click',e=>{
 
 document.getElementById('prof').addEventListener('input',()=>{buildSaves();buildSkills();calcSpell()});
 
+// EXPORT / IMPORT
+function exportChars(){
+  const chars = getAllChars();
+  const json = JSON.stringify(chars, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dnd5e_characters_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Characters exported!');
+}
+
+function importChars(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid format');
+      const existing = getAllChars();
+      const merged = {...existing, ...data};
+      localStorage.setItem(LS_KEY, JSON.stringify(merged));
+      const names = Object.keys(data);
+      refreshCharSel(names[0]||Object.keys(existing)[0]||'');
+      if(names[0]) loadChar(names[0]);
+      showToast(`Imported ${names.length} character(s)`);
+    } catch(err) {
+      showToast('Import failed: invalid file');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// SETTINGS
+const SETTINGS_LS = 'dnd5e_theme_overrides';
+const COLOR_LABELS = {gold:'Accent / Gold',purple:'Highlight',bg0:'Background',bg1:'Header BG',bg2:'Card BG',text:'Text'};
+let settingsActiveClass = '';
+
+function loadThemeOverrides(){
+  try{ return JSON.parse(localStorage.getItem(SETTINGS_LS)||'{}'); }catch(e){ return {}; }
+}
+function saveThemeOverrides(ov){ localStorage.setItem(SETTINGS_LS, JSON.stringify(ov)); }
+
+function openSettings(){
+  const modal = document.getElementById('settingsModal');
+  modal.style.display = 'flex';
+  const cls = document.getElementById('cls')?.value || '';
+  settingsActiveClass = cls || '';
+  buildSettingsUI();
+}
+function closeSettings(){ document.getElementById('settingsModal').style.display='none'; }
+
+function buildSettingsUI(){
+  const classes = ['(Default)','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
+  const picker = document.getElementById('settingsClassPicker');
+  const ov = loadThemeOverrides();
+  picker.innerHTML = classes.map(c => {
+    const key = c === '(Default)' ? '' : c;
+    const isActive = key === settingsActiveClass;
+    const hasOverride = ov[key] && Object.keys(ov[key]).length > 0;
+    const theme = {...(CLASS_THEMES[key]||CLASS_THEMES['']), ...(ov[key]||{})};
+    return `<button onclick="setSettingsClass('${key}')" style="
+      padding:5px 10px;border-radius:6px;font-family:'Cinzel',serif;font-size:10px;
+      letter-spacing:.5px;cursor:pointer;border:1px solid ${isActive?theme.gold:'rgba(255,255,255,0.15)'};
+      background:${isActive?theme.bg2:'transparent'};color:${isActive?theme.gold:'var(--text2)'};
+      position:relative">${c}${hasOverride?'<span style="position:absolute;top:2px;right:3px;width:5px;height:5px;border-radius:50%;background:'+theme.gold+'"></span>':''}</button>`;
+  }).join('');
+  buildColorPanel();
+}
+
+function setSettingsClass(cls){
+  settingsActiveClass = cls;
+  buildSettingsUI();
+}
+
+function buildColorPanel(){
+  const panel = document.getElementById('settingsColorPanels');
+  const ov = loadThemeOverrides();
+  const base = CLASS_THEMES[settingsActiveClass] || CLASS_THEMES[''];
+  const current = {...base, ...(ov[settingsActiveClass]||{})};
+  const clsLabel = settingsActiveClass || 'Default';
+  panel.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:1px">${clsLabel.toUpperCase()}</div>
+    ${Object.entries(COLOR_LABELS).map(([key, label]) => `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <input type="color" value="${current[key]||'#888888'}" 
+          oninput="previewColor('${key}',this.value)"
+          onchange="saveColor('${key}',this.value)"
+          style="width:36px;height:28px;border:none;background:none;cursor:pointer;border-radius:4px;padding:0">
+        <div style="flex:1">
+          <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--text2)">${label}</div>
+          <div style="font-size:10px;color:var(--text3)">${current[key]||'—'}</div>
+        </div>
+        ${(ov[settingsActiveClass]||{})[key] ? `<button onclick="resetColor('${key}')" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">↺</button>` : ''}
+      </div>`).join('')}`;
+}
+
+function previewColor(key, val){
+  // Live preview: apply temporarily
+  const ov = loadThemeOverrides();
+  if(!ov[settingsActiveClass]) ov[settingsActiveClass] = {};
+  ov[settingsActiveClass][key] = val;
+  saveThemeOverrides(ov);
+  const cls = document.getElementById('cls')?.value || '';
+  if(settingsActiveClass === cls) applyTheme(cls);
+}
+
+function saveColor(key, val){
+  const ov = loadThemeOverrides();
+  if(!ov[settingsActiveClass]) ov[settingsActiveClass] = {};
+  ov[settingsActiveClass][key] = val;
+  saveThemeOverrides(ov);
+  buildColorPanel();
+  const cls = document.getElementById('cls')?.value || '';
+  if(settingsActiveClass === cls) applyTheme(cls);
+}
+
+function resetColor(key){
+  const ov = loadThemeOverrides();
+  if(ov[settingsActiveClass]) delete ov[settingsActiveClass][key];
+  saveThemeOverrides(ov);
+  buildColorPanel();
+  buildSettingsUI();
+  const cls = document.getElementById('cls')?.value || '';
+  if(settingsActiveClass === cls) applyTheme(cls);
+}
+
+function resetClassTheme(){
+  const ov = loadThemeOverrides();
+  delete ov[settingsActiveClass];
+  saveThemeOverrides(ov);
+  buildColorPanel();
+  buildSettingsUI();
+  const cls = document.getElementById('cls')?.value || '';
+  if(settingsActiveClass === cls) applyTheme(cls);
+}
+
+function resetAllThemes(){
+  localStorage.removeItem(SETTINGS_LS);
+  buildColorPanel();
+  buildSettingsUI();
+  applyTheme(document.getElementById('cls')?.value || '');
+}
+
 // INIT
 slBuildFilters();
 initApp();
@@ -2158,7 +2495,7 @@ initApp();
 </div>
 <nav class="bottom-nav" id="bottomNav">
   <button class="bnav-btn on" data-tab="basis" onclick="switchTabAll('basis',this)">
-    <span class="bnav-icon">🧙</span><span class="bnav-label">Basis</span>
+    <span class="bnav-icon">❤️</span><span class="bnav-label">Stats</span>
   </button>
   <button class="bnav-btn" data-tab="skills" onclick="switchTabAll('skills',this)">
     <span class="bnav-icon">🎲</span><span class="bnav-label">Skills</span>
@@ -2173,5 +2510,31 @@ initApp();
     <span class="bnav-icon">⭐</span><span class="bnav-label">Features</span>
   </button>
 </nav>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto">
+    <div style="background:var(--bg1);border:1px solid var(--border);border-radius:14px;margin:16px;width:calc(100% - 32px);max-width:400px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border2)">
+        <span style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:1px">⚙ Settings</span>
+        <button onclick="closeSettings()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0 4px">✕</button>
+      </div>
+      <div style="padding:16px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:var(--gold);margin-bottom:12px">DATA</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Backup your characters or restore from a previous export.</div>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button onclick="exportChars()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">⬇ Export</button>
+          <label style="flex:1;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;text-align:center;display:block">⬆ Import<input type="file" accept=".json" onchange="importChars(event)" style="display:none"></label>
+        </div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:var(--gold);margin-bottom:12px">COLOR SCHEME</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Customize accent colors per class. Changes are saved automatically.</div>
+        <div id="settingsClassPicker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+        <div id="settingsColorPanels"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button onclick="resetClassTheme()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">↺ Reset Class</button>
+          <button onclick="resetAllThemes()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--red);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">↺ Reset All</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
