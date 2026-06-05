@@ -18,7 +18,8 @@ html{scrollbar-gutter:stable}
   --green:#4caf7d;--red:#e05555;--blue:#5b9bd5;
 }
 body{background:var(--bg0);color:var(--text);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;padding:0}
-input,select,textarea,button{font-family:inherit;color:inherit}
+input,select,textarea,button{font-family:inherit;color:inherit;-webkit-text-fill-color:inherit}
+input[type=color]{-webkit-text-fill-color:unset}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 
@@ -48,13 +49,13 @@ input[type=number]{-moz-appearance:textfield}
 .bnav-btn .bnav-label{font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.5px}
 .panel{display:none;width:100%;box-sizing:border-box}
 .panel.on{display:block;width:100%;box-sizing:border-box}
-.sec{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold2);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid rgba(201,168,76,0.2);text-transform:uppercase}
+.sec{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold2);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid color-mix(in srgb, var(--gold) 20%, transparent);text-transform:uppercase}
 .sec:first-child{margin-top:0}
 
 /* INPUTS */
 .igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
 .ifield label{display:block;font-size:11px;letter-spacing:1px;color:var(--text2);margin-bottom:3px;font-family:'Cinzel',serif;text-transform:uppercase}
-.ifield input,.ifield select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:7px 9px;outline:none;-webkit-appearance:none}
+.ifield input,.ifield select{width:100%;background:var(--bg3);background-color:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);-webkit-text-fill-color:var(--text);font-size:16px;padding:7px 9px;outline:none;-webkit-appearance:none}
 .ifield input:focus,.ifield select:focus{border-color:var(--purple)}
 .ifield select option{background:var(--bg2)}
 
@@ -104,8 +105,8 @@ input[type=number]{-moz-appearance:textfield}
 .spell-main{display:flex;align-items:center;gap:7px;padding:9px 11px}
 .spell-name{font-family:'Cinzel',serif;font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sp-badge{font-size:10px;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;white-space:nowrap;flex-shrink:0}
-.sp-info{background:rgba(91,155,213,0.2);color:var(--blue)}
-.sp-warn{background:rgba(201,168,76,0.2);color:var(--gold)}
+.sp-info{background:color-mix(in srgb, var(--blue) 20%, transparent);color:var(--blue)}
+.sp-warn{background:color-mix(in srgb, var(--gold) 20%, transparent);color:var(--gold)}
 .spell-prep{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .spell-prep.on{background:var(--gold);border-color:var(--gold);color:var(--bg0)}
 .expbtn{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;flex-shrink:0;padding:4px 8px;line-height:1;-webkit-tap-highlight-color:transparent;margin-left:auto}
@@ -124,7 +125,7 @@ input[type=number]{-moz-appearance:textfield}
 .feat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:6px}
 .feat-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .feat-name{font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
-.feat-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(91,155,213,0.2);color:var(--blue);font-family:'Cinzel',serif}
+.feat-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:color-mix(in srgb, var(--blue) 20%, transparent);color:var(--blue);font-family:'Cinzel',serif}
 .feat-desc{font-size:14px;color:var(--text2);line-height:1.5}
 
 /* SUBTABS */
@@ -153,7 +154,7 @@ input[type=number]{-moz-appearance:textfield}
 .item-detail-row{display:flex;gap:6px;align-items:center}
 .item-detail-row input{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:16px;padding:5px 7px;outline:none;flex:1;min-width:0}
 .item-del{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--red);font-size:12px;padding:5px 10px;cursor:pointer;font-family:'Cinzel',serif}
-.item-del:hover{background:rgba(224,85,85,0.15)}
+.item-del:hover{background:color-mix(in srgb, var(--red) 15%, transparent)}
 
 
 .bg-desc{font-size:14px;color:var(--text2);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
@@ -167,10 +168,10 @@ input[type=number]{-moz-appearance:textfield}
 .ab-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;overflow:hidden}
 .ab-top{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ab-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.ab-icon.aktion{background:rgba(224,85,85,0.2);border:1px solid rgba(224,85,85,0.4)}
-.ab-icon.bonus{background:rgba(201,168,76,0.2);border:1px solid rgba(201,168,76,0.4)}
-.ab-icon.reaktion{background:rgba(91,155,213,0.2);border:1px solid rgba(91,155,213,0.4)}
-.ab-icon.passiv{background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.3)}
+.ab-icon.aktion{background:color-mix(in srgb, var(--red) 20%, transparent);border:1px solid color-mix(in srgb, var(--red) 40%, transparent)}
+.ab-icon.bonus{background:color-mix(in srgb, var(--gold) 20%, transparent);border:1px solid color-mix(in srgb, var(--gold) 40%, transparent)}
+.ab-icon.reaktion{background:color-mix(in srgb, var(--blue) 20%, transparent);border:1px solid color-mix(in srgb, var(--blue) 40%, transparent)}
+.ab-icon.passiv{background:color-mix(in srgb, var(--green) 15%, transparent);border:1px solid color-mix(in srgb, var(--green) 30%, transparent)}
 .ab-title{flex:1;min-width:0}
 .ab-name{font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
 .ab-tag{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:.5px}
@@ -184,7 +185,7 @@ input[type=number]{-moz-appearance:textfield}
 
 /* BUTTONS */
 .add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;-webkit-tap-highlight-color:transparent;margin-top:4px}
-.delbtn{width:20px;height:20px;border-radius:50%;border:1px solid rgba(224,85,85,0.4);background:transparent;color:var(--red);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.delbtn{width:20px;height:20px;border-radius:50%;border:1px solid color-mix(in srgb, var(--red) 40%, transparent);background:transparent;color:var(--red);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .nta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:10px;resize:vertical;outline:none;line-height:1.6;margin-bottom:10px;min-height:60px}
 .nta::placeholder{color:var(--text3)}
 
@@ -216,8 +217,8 @@ input[type=number]{-moz-appearance:textfield}
 .filter-row{display:flex;flex-wrap:wrap;gap:5px;overflow-x:auto;scrollbar-width:none}
 .filter-row::-webkit-scrollbar{display:none}
 .fbtn{padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
-.fbtn.on{background:rgba(76,175,125,0.2);color:var(--green);border-color:var(--green)}
-.fbtn.school.on{background:rgba(201,168,76,0.15);color:var(--gold);border-color:var(--gold2)}
+.fbtn.on{background:color-mix(in srgb, var(--green) 20%, transparent);color:var(--green);border-color:var(--green)}
+.fbtn.school.on{background:color-mix(in srgb, var(--gold) 15%, transparent);color:var(--gold);border-color:var(--gold2)}
 .zb-count{font-family:'Cinzel',serif;font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:6px}
 .zb-divider{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:7px 0 4px;border-bottom:1px solid var(--border2);margin-bottom:4px}
 
@@ -226,9 +227,9 @@ input[type=number]{-moz-appearance:textfield}
 .zb-top{display:flex;align-items:center;gap:6px;padding:9px 11px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .zb-name{font-family:'Cinzel',serif;font-size:13px;color:var(--text);flex:1;min-width:0}
 .zb-badge{font-size:10px;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;white-space:nowrap;flex-shrink:0}
-.zb-c{background:rgba(76,175,125,0.2);color:var(--green)}
-.zb-1{background:rgba(91,155,213,0.2);color:var(--blue)}
-.zb-school{background:rgba(201,168,76,0.15);color:var(--gold)}
+.zb-c{background:color-mix(in srgb, var(--green) 20%, transparent);color:var(--green)}
+.zb-1{background:color-mix(in srgb, var(--blue) 20%, transparent);color:var(--blue)}
+.zb-school{background:color-mix(in srgb, var(--gold) 15%, transparent);color:var(--gold)}
 .zb-src{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
 .zb-detail{display:none;border-top:1px solid var(--border2);padding:10px 11px}
 .zb-detail.on{display:block}
@@ -236,10 +237,10 @@ input[type=number]{-moz-appearance:textfield}
 .di label{display:block;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--text3);margin-bottom:2px;text-transform:uppercase}
 .di span{font-size:13px;color:var(--text2)}
 .desc-text{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:8px;white-space:pre-line;overflow-wrap:break-word;word-break:break-word}
-.higher-box{background:rgba(91,155,213,0.1);border:1px solid rgba(91,155,213,0.3);border-radius:6px;padding:7px 10px;margin-bottom:8px}
+.higher-box{background:color-mix(in srgb, var(--blue) 10%, transparent);border:1px solid color-mix(in srgb, var(--blue) 30%, transparent);border-radius:6px;padding:7px 10px;margin-bottom:8px}
 .higher-box label{display:block;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--blue);margin-bottom:2px;text-transform:uppercase}
 .higher-box p{font-size:13px;color:var(--text2);line-height:1.5}
-.zb-addbtn{width:100%;padding:7px;background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.4);border-radius:6px;color:var(--green);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.zb-addbtn{width:100%;padding:7px;background:color-mix(in srgb, var(--green) 15%, transparent);border:1px solid color-mix(in srgb, var(--green) 40%, transparent);border-radius:6px;color:var(--green);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .zb-addbtn.done{background:var(--bg3);border-color:var(--border2);color:var(--text3)}
 
 /* CHARAKTER SWITCHER */
@@ -311,7 +312,17 @@ input[type=number]{-moz-appearance:textfield}
       <div class="igrid">
         <div class="ifield"><label>Class</label>
           <select id="cls" onchange="onClsChange()"><option value="">—</option><option>Barbarian</option><option>Bard</option><option>Druid</option><option>Warlock</option><option>Ranger</option><option>Cleric</option><option>Fighter</option><option>Wizard</option><option>Monk</option><option>Paladin</option><option>Rogue</option><option>Sorcerer</option></select></div>
-        <div class="ifield"><label>Race</label><input id="race" placeholder="Elf, Human..."></div>
+        <div class="ifield"><label>Race</label>
+          <select id="race" onchange="onRaceChange()">
+            <option value="">— Select —</option>
+            <option value="custom">Custom</option>
+            <option>Aasimar</option><option>Dragonborn</option><option>Dwarf</option>
+            <option>Elf</option><option>Gnome</option><option>Goliath</option>
+            <option>Half-Elf</option><option>Half-Orc</option><option>Halfling</option>
+            <option>Human</option><option>Orc</option><option>Tiefling</option>
+          </select>
+          <input id="raceCustom" placeholder="Custom race name..." style="display:none;margin-top:4px;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:7px 9px;outline:none">
+        </div>
         <div class="ifield"><label>Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
@@ -350,13 +361,20 @@ input[type=number]{-moz-appearance:textfield}
         </div>
         <div id="subclsLoreBody" style="display:none"></div>
       </div>
+      <div id="raceLoreSection" style="display:none;margin-top:10px">
+        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+          <span id="raceLoreTitle">Race: —</span>
+          <button onclick="toggleInfoSection('raceLoreBody','raceLoreBtn')" id="raceLoreBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
+        </div>
+        <div id="raceLoreBody" style="display:none"></div>
+      </div>
     </div>
 
     <!-- GRUNDWERTE -->
     <div class="panel" id="tab-basis">
       <div class="sec">Hit Points</div>
       <div class="hp-row">
-        <div class="hpbox" style="border-color:rgba(76,175,125,0.4)">
+        <div class="hpbox" style="border-color:color-mix(in srgb, var(--green) 40%, transparent)">
           <div class="hp-lbl">Current</div>
           <div class="hp-ctrl">
             <button class="hbtn" onclick="chHP(-1)">−</button>
@@ -1189,6 +1207,21 @@ const SUBCLS_BY_CLASS={
 
 
 // CORE TRAITS DATA
+const RACE_DATA={
+  "Aasimar":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Celestial Resistance: You have Resistance to Necrotic damage and Radiant damage.\n• Darkvision: You have Darkvision with a range of 60 feet.\n• Healing Hands: As a Magic action, you touch a creature and roll a number of d4s equal to your Proficiency. The creature regains a number of Hit Points equal to the total rolled. Once you use this trait, you can't use it again until you finish a Long Rest.\n• Light Bearer: You know the Light cantrip. Charisma is your spellcasting ability for it.\n• Celestial Revelation: When you reach character level 3, you can transform as a Bonus Action using one of the options below (choose the option each time you transform). The transformation lasts for 1 minute or until you end it (no action required). Once you transform, you can't do so again until you finish a Long Rest.\nOnce on each of your turns before the transformation ends, you can deal extra damage to one target when you deal damage to it with an attack or a spell. The extra damage equals your Proficiency, and the extra damage's type is either Necrotic for Necrotic Shroud or Radiant for Heavenly Wings and Inner Radiance.\nHere are the transformation options:\n• Two spectral wings sprout from your back temporarily. Until the transformation ends, you have a Fly Speed equal to your Speed.\n• Searing light temporarily radiates from your eyes and mouth. For the duration, you shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet, and at the end of each of your turns, each creature within 10 feet of you takes Radiant damage equal to your Proficiency.\n• Your eyes briefly become pools of darkness, and flightless wings sprout from your back temporarily. Creatures other than your allies within 10 feet of you must succeed on a Charisma saving throw (8 plus your Charisma modifier and Proficiency) or have the Frightened condition until the end of your next turn."},
+  "Dragonborn":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Draconic Ancestry: Your lineage stems from a dragon progenitor. Choose the kind of dragon from the Draconic Ancestors table. Your choice affects your Breath Weapon and Damage Resistance traits as well as your appearance.\n• Breath Weapon: When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone [Area of Effect] or a 30-foot Line [Area of Effect] that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (8 plus your Constitution modifier and Proficiency). On a failed save, a creature takes 1d10 damage of the type determined by your Draconic Ancestry trait. On a successful save, a creature takes half as much damage. This damage increases by 1d10 when you reach character levels 5 (2d10), 11 (3d10), and 17 (4d10).\nYou can use this Breath Weapon a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest.\n• Damage Resistance: You have Resistance to the damage type determined by your Draconic Ancestry trait.\n• Darkvision: You have Darkvision with a range of 60 feet.\n• Draconic Flight: When you reach character level 5, you can channel draconic magic to give yourself temporary flight. As a Bonus Action, you sprout spectral wings on your back that last for 10 minutes or until you retract the wings (no action required) or have the Incapacitated condition. During that time, you have a Fly Speed equal to your Speed. Your wings appear to be made of the same energy as your Breath Weapon. Once you use this trait, you can't use it again until you finish a Long Rest."},
+  "Dwarf":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Darkvision: You have Darkvision with a range of 120 feet.\n• Dwarven Resilience: You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.\n• Dwarven Toughness: Your Hit Points maximum increases by 1, and it increases by 1 again whenever you gain a level.\n• Stonecunning: As a Bonus Action, you gain Tremorsense with a range of 60 feet for 10 minutes. You must be on a stone surface or touching a stone surface to use this Tremorsense. The stone can be natural or worked.\nYou can use this Bonus Action a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest."},
+  "Elf":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Elven Lineage: You are part of a lineage that grants you supernatural abilities. Choose a lineage from the Elven Lineages table. You gain the level 1 benefit of that lineage.\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).\n• Fey Ancestry: You have Advantage on saving throws you make to avoid or end the Charmed condition.\n• Keen Senses: You have proficiency in the Insight, Perception, or Survival skill.\n• Trance: You don't need to sleep, and magic can't put you to sleep. You can finish a Long Rest in 4 hours if you spend those hours in a trancelike meditation, during which you retain consciousness."},
+  "Gnome":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Gnomish Cunning: You have Advantage on Intelligence, Wisdom, and Charisma saving throws.\n• Gnomish Lineage: You are part of a lineage that grants you supernatural abilities. Choose one of the following options; whichever one you choose, Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage):\n• You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.\n• You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action."},
+  "Goliath":{src:"XPHB",speed:35,size:"M",ability:"",traits:"• Giant Ancestry: You are descended from Giants. Choose one of the following benefits—a supernatural boon from your ancestry; you can use the chosen benefit a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest:\n• As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.\n• When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.\n• When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.\n• When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.\n• When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.\n• When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.\n• Large Form: Starting at character level 5, you can change your size to Large as a Bonus Action if you're in a big enough space. This transformation lasts for 10 minutes or until you end it (no action required). For that duration, you have Advantage on Strength checks, and your Speed increases by 10 feet. Once you use this trait, you can't use it again until you finish a Long Rest.\n• Powerful Build: You have Advantage on any ability check you make to end the Grappled condition. You also count as one size larger when determining your carrying capacity."},
+  "Half-Elf":{src:"PHB",speed:30,size:"M",ability:"+2 cha, +2 to any",traits:"• Age: Half-elves mature at the same rate humans do and reach adulthood around the age of 20. They live much longer than humans, however, often exceeding 180 years.\n• Size: Half-elves are about the same size as humans, ranging from 5 to 6 feet tall. Your size is Medium.\n• Darkvision: Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.\n• Fey Ancestry: You have advantage on saving throws against being charmed, and magic can't put you to sleep.\n• Skill Versatility: You gain proficiency in two skills of your choice.\n• Languages: You can speak, read, and write Common, Elvish, and one extra language of your choice."},
+  "Half-Orc":{src:"PHB",speed:30,size:"M",ability:"+2 str, +1 con",traits:"• Age: Half-orcs mature a little faster than humans, reaching adulthood around age 14. They age noticeably faster and rarely live longer than 75 years.\n• Size: Half-orcs are somewhat larger and bulkier than humans, and they range from 5 to well over 6 feet tall. Your size is Medium.\n• Darkvision: Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.\n• Menacing: You gain proficiency in the Intimidation skill.\n• Relentless Endurance: When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.\n• Savage Attacks: When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit.\n• Languages: You can speak, read, and write Common and Orc. Orc is a harsh, grating language with hard consonants. It has no script of its own but is written in the Dwarvish script."},
+  "Halfling":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Brave: You have Advantage on saving throws you make to avoid or end the Frightened condition.\n• Halfling Nimbleness: You can move through the space of any creature that is a size larger than you, but you can't stop in the same space.\n• Luck: When you roll a 1 on the d20 of a D20 Test, you can reroll the die, and you must use the new roll.\n• Naturally Stealthy: You can take the Hide action even when you are obscured only by a creature that is at least one size larger than you."},
+  "Human":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Resourceful: You gain Heroic Inspiration whenever you finish a Long Rest.\n• Skillful: You gain proficiency in one skill of your choice.\n• Versatile: You gain an Origin feat of your choice."},
+  "Orc":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Adrenaline Rush: You can take the Dash action as a Bonus Action. When you do so, you gain a number of Temporary Hit Points equal to your Proficiency.\nYou can use this trait a number of times equal to your Proficiency, and you regain all expended uses when you finish a Short Rest or Long Rest.\n• Darkvision: You have Darkvision with a range of 120 feet.\n• Relentless Endurance: When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Points instead. Once you use this trait, you can't do so again until you finish a Long Rest."},
+  "Tiefling":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Fiendish Legacy: You are the recipient of a legacy that grants you supernatural abilities. Choose a legacy from the Fiendish Legacies table. You gain the level 1 benefit of the chosen legacy.\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level. Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).\n• Otherworldly Presence: You know the Thaumaturgy cantrip. When you cast it with this trait, the spell uses the same spellcasting ability you use for your Fiendish Legacy Trait."}
+};
+
 const CLASS_CORE_TRAITS = {
   "Druid": {
     hd: "d8",
@@ -1292,6 +1325,78 @@ function buildClsLore(){
           <div style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
         </div>`).join('')}
     </div>`).join('');
+}
+
+function onRaceChange(){
+  const race = document.getElementById('race')?.value;
+  const customInput = document.getElementById('raceCustom');
+  if(customInput) customInput.style.display = race==='custom' ? '' : 'none';
+  buildRaceLore();
+  autoSave();
+}
+
+// Also rebuild race lore when custom name changes
+document.addEventListener('input', e=>{
+  if(e.target.id==='raceCustom') buildRaceLore();
+});
+
+function buildRaceLore(){
+  const race = document.getElementById('race')?.value || '';
+  const customName = document.getElementById('raceCustom')?.value.trim() || '';
+  const sec = document.getElementById('raceLoreSection');
+  const body = document.getElementById('raceLoreBody');
+  const title = document.getElementById('raceLoreTitle');
+  if(!sec||!body) return;
+
+  // Custom race
+  if(race==='custom'){
+    sec.style.display='';
+    title.textContent='Race: '+(customName||'Custom');
+    body.innerHTML='<div class="nta-wrap"><textarea class="nta" id="n_race_custom" placeholder="Describe your race traits, abilities, features..." style="min-height:100px"></textarea><button class="nta-expand" onclick="openNoteModal(\'n_race_custom\',\'Race Traits Notes\')">⛶</button></div>';
+    // restore saved value
+    const saved=document.getElementById('n_race_custom');
+    if(saved && typeof st.raceNotes!=='undefined') saved.value=st.raceNotes||'';
+    if(saved) saved.addEventListener('input',()=>{st.raceNotes=saved.value;autoSave();});
+    return;
+  }
+
+  if(!race){sec.style.display='none';return;}
+  const r = RACE_DATA[race];
+  if(!r){sec.style.display='none';return;}
+  sec.style.display='';
+  title.textContent='Race: '+race;
+
+  // Group traits: continuation lines (no •) attach to previous trait card
+  const raw = r.traits.split('\n').filter(t=>t.trim());
+  const groups = [];
+  for(const t of raw){
+    if(t.startsWith('• ')){
+      const colon = t.indexOf(': ');
+      if(colon>2){
+        groups.push({name: t.slice(2,colon), desc: t.slice(colon+2)});
+      } else {
+        groups.push({name:'', desc: t.slice(2)});
+      }
+    } else {
+      // continuation — append to last group's desc
+      if(groups.length) groups[groups.length-1].desc += ' '+t;
+      else groups.push({name:'', desc: t});
+    }
+  }
+
+  const meta = [];
+  if(r.speed) meta.push('Speed: '+r.speed+' ft');
+  if(r.size) meta.push('Size: '+(r.size==='M'?'Medium':r.size==='S'?'Small':r.size));
+  if(r.ability) meta.push('Ability Scores: '+r.ability);
+  if(r.src) meta.push(r.src);
+
+  body.innerHTML =
+    (meta.length?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+meta.map(m=>'<span style="font-size:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)">'+m+'</span>').join('')+'</div>':'') +
+    groups.map(g=>
+      '<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">'
+      +(g.name?'<div style="font-family:Cinzel,serif;font-size:13px;color:var(--gold);margin-bottom:3px">'+g.name+'</div>':'')
+      +'<div style="font-size:14px;color:var(--text2);line-height:1.7">'+g.desc+'</div></div>'
+    ).join('');
 }
 
 function buildSubclsLore(){
@@ -2103,12 +2208,12 @@ function switchTab(t){
   if(tabId==='hintergrund')bgInit();
   if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();}
   if(tabId==='spelllist'){slRender();}
-  if(tabId==='info'){buildClsLore();buildSubclsLore();}
+  if(tabId==='info'){buildClsLore();buildSubclsLore();buildRaceLore();}
 }
 
 // LOCALSTORAGE / MEHRCHARAKTERE
 const LS_KEY = 'dnd5e_chars';
-const TEXT_IDS = ['cls','race','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
+const TEXT_IDS = ['cls','race','raceCustom','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
 
 function getAllChars(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
@@ -2139,7 +2244,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',zbAdded:new Set(),
-    abUses:{},savedBeasts:[],items:[]
+    abUses:{},savedBeasts:[],items:[],raceNotes:""
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -2151,10 +2256,16 @@ function applyState(snap){
     const el=document.getElementById(id);
     if(el && fields[id]!==undefined) el.value=fields[id];
   });
+  // Sync custom race input visibility
+  const raceVal=document.getElementById('race')?.value;
+  const raceCustom=document.getElementById('raceCustom');
+  if(raceCustom) raceCustom.style.display=raceVal==='custom'?'':'none';
   // Trigger dependent UI (skip onClsChange - already called)
   buildAttrs();buildSaves();buildSkills();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();
+  calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();buildRaceLore();
+  const raceNotesEl=document.getElementById('n_race_custom');
+  if(raceNotesEl) raceNotesEl.value=st.raceNotes||'';
   // Background
   if(st.bg) renderBgCard(st.bg);
   // Death saves / inspiration
@@ -2183,10 +2294,12 @@ function loadChar(name){
   if(!name) return;
   const chars = getAllChars();
   if(!chars[name]) return;
+  _saving = true;
   applyState(chars[name]);
   refreshCharSel(name);
   const el=document.getElementById('charName');
   if(el) el.textContent=name;
+  _saving = false;
 }
 
 function newChar(){
@@ -2203,9 +2316,34 @@ function confirmNewChar(){
   modal.style.display='none';
   _doNewChar(name);
 }
+function resetUI(){
+  Object.assign(st, {
+    attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
+    saveP:{},skillP:{},
+    hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
+    slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
+    mySpells:[],feats:[],bg:'',zbAdded:new Set(),
+    abUses:{},savedBeasts:[],items:[],raceNotes:""
+  });
+  document.getElementById('charName').textContent='';
+  TEXT_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      if(el.tagName==='SELECT') el.value='';
+      else if(el.type==='number') el.value=el.defaultValue||'';
+      else el.value='';
+    }
+  });
+  onClsChange();
+  buildAttrs();buildSaves();buildSkills();updBar();
+  buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
+  calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();buildRaceLore();
+}
+
 function _doNewChar(name){
   const _name=name;
   {
+  _saving = true;
   // Reset state
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
@@ -2213,7 +2351,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',zbAdded:new Set(),
-    abUses:{},savedBeasts:[],items:[]
+    abUses:{},savedBeasts:[],items:[],raceNotes:""
   });
   TEXT_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -2232,6 +2370,7 @@ function _doNewChar(name){
   chars[_name] = collectState();
   localStorage.setItem(LS_KEY, JSON.stringify(chars));
   refreshCharSel(_name);
+  _saving = false;
   showToast('✨ New Character: '+_name);
   }
 }
@@ -2255,7 +2394,7 @@ function confirmDelete(){
   localStorage.setItem(LS_KEY,JSON.stringify(chars));
   const remaining=Object.keys(chars);
   if(remaining.length) loadChar(remaining[0]);
-  else { refreshCharSel(''); showToast('All characters deleted'); }
+  else { refreshCharSel(''); resetUI(); showToast('All characters deleted'); }
 }
 
 function refreshCharSel(active){
@@ -2284,8 +2423,10 @@ function initApp(){
 }
 
 // Auto-save on input changes
+let _saving = false;
 document.addEventListener('input', autoSave);
 function autoSave(){
+  if(_saving) return;
   const name = document.getElementById('charName')?.textContent.trim();
   if(name){
     const chars = getAllChars();
@@ -2319,6 +2460,9 @@ function applyTheme(cls){
   r.setProperty('--text',t.text);
   r.setProperty('--text2',t.text2);
   r.setProperty('--text3',t.text3);
+  r.setProperty('--red',t.red||'#e05555');
+  r.setProperty('--green',t.green||'#4caf7d');
+  r.setProperty('--blue',t.blue||'#5b9bd5');
   const rune=document.querySelector('.rune');
   if(rune) rune.textContent=CLASS_RUNES[cls]||'⚔';
 }
@@ -2370,7 +2514,7 @@ function importChars(e){
 
 // SETTINGS
 const SETTINGS_LS = 'dnd5e_theme_overrides';
-const COLOR_LABELS = {gold:'Accent / Gold',purple:'Highlight',bg0:'Background',bg1:'Header BG',bg2:'Card BG',text:'Text'};
+const COLOR_LABELS = {gold:'Accent / Gold',purple:'Highlight',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
 
 function loadThemeOverrides(){
@@ -2462,6 +2606,21 @@ function resetColor(key){
   if(settingsActiveClass === cls) applyTheme(cls);
 }
 
+function applyThemeFrom(){
+  const src = document.getElementById('copyThemeSel')?.value;
+  if(src === undefined || src === null) return;
+  const srcTheme = CLASS_THEMES[src] || CLASS_THEMES[''];
+  const ov = loadThemeOverrides();
+  ov[settingsActiveClass] = {...srcTheme};
+  saveThemeOverrides(ov);
+  buildColorPanel();
+  buildSettingsUI();
+  document.getElementById('copyThemeSel').value = '';
+  const cls = document.getElementById('cls')?.value || '';
+  if(settingsActiveClass === cls) applyTheme(cls);
+  showToast('Theme copied' + (src ? ' from '+src : ' from Default'));
+}
+
 function resetClassTheme(){
   const ov = loadThemeOverrides();
   delete ov[settingsActiveClass];
@@ -2530,8 +2689,21 @@ initApp();
         <div id="settingsClassPicker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
         <div id="settingsColorPanels"></div>
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button onclick="resetClassTheme()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">↺ Reset Class</button>
-          <button onclick="resetAllThemes()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--red);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">↺ Reset All</button>
+          <div style="margin-bottom:12px">
+            <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:var(--gold);margin-bottom:8px">COPY THEME FROM</div>
+            <div style="display:flex;gap:8px">
+              <select id="copyThemeSel" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:12px;padding:8px 10px;outline:none;-webkit-appearance:none">
+                <option value="">— Select Class —</option>
+                <option>Barbarian</option><option>Bard</option><option>Cleric</option><option>Druid</option>
+                <option>Fighter</option><option>Monk</option><option>Paladin</option><option>Ranger</option>
+                <option>Rogue</option><option>Sorcerer</option><option>Warlock</option><option>Wizard</option>
+                <option value="">(Default)</option>
+              </select>
+              <button onclick="applyThemeFrom()" style="padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">Apply</button>
+            </div>
+          </div>
+          <button onclick="resetClassTheme()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;width:100%;margin-bottom:6px">↺ Reset Class</button>
+          <button onclick="resetAllThemes()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--red);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;width:100%">↺ Reset All</button>
         </div>
       </div>
     </div>
