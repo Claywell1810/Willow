@@ -1392,7 +1392,7 @@ function buildClsLore(){
       ${feats.map(f=>`
         <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--text)">${f.name}</span>
+            <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold)">${f.name}</span>
             <span style="font-size:9px;color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
           <div style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
@@ -1495,7 +1495,7 @@ function buildSubclsLore(){
       ${fs.map(f=>`
         <div style="background:var(--bg2);border:1px solid var(--border2);border-left:2px solid var(--purple2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--purple)">${f.name}</span>
+            <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold)">${f.name}</span>
             <span style="font-size:9px;color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
           <div style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
@@ -2305,8 +2305,8 @@ function bstMakeCard(b){
   top.innerHTML=`<span class="zb-name">${b.n}</span><span class="zb-badge zb-school">${b.type}</span><span class="zb-badge zb-src">CR ${b.cr}</span><span class="zb-badge zb-src">${SIZE_MAP[b.size]||b.size}</span>`;
   const detail=document.createElement('div');detail.className='zb-detail';
   const statMod=v=>{const m=Math.floor((v-10)/2);return (m>=0?'+':'')+m;};
-  const actHtml=b.actions.map(a=>`<div style="margin-bottom:4px"><strong style="color:var(--gold);font-size:11px">${a.split(':')[0]}</strong><br><span style="font-size:12px;color:var(--text2)">${a.split(':').slice(1).join(':').trim()}</span></div>`).join('');
-  const traitHtml=b.traits.map(t=>`<div style="margin-bottom:4px"><strong style="color:var(--purple);font-size:11px">${t.split(':')[0]}</strong><br><span style="font-size:12px;color:var(--text2)">${t.split(':').slice(1).join(':').trim()}</span></div>`).join('');
+  const actHtml=b.actions.map(a=>`<div style="margin-bottom:4px"><strong style="color:var(--gold);font-size:12px">${a.split(':')[0]}</strong><br><span style="font-size:14px;color:var(--text2);line-height:1.5">${a.split(':').slice(1).join(':').trim()}</span></div>`).join('');
+  const traitHtml=b.traits.map(t=>`<div style="margin-bottom:4px"><strong style="color:var(--purple);font-size:12px">${t.split(':')[0]}</strong><br><span style="font-size:14px;color:var(--text2);line-height:1.5">${t.split(':').slice(1).join(':').trim()}</span></div>`).join('');
 
   const inner=document.createElement('div');
   inner.innerHTML=`
@@ -2738,7 +2738,7 @@ function importChars(e){
 
 // SETTINGS
 const SETTINGS_LS = 'dnd5e_theme_overrides';
-const COLOR_LABELS = {gold:'Accent / Gold',purple:'Highlight',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
+const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
 
 function loadThemeOverrides(){
