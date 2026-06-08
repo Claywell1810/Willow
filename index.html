@@ -236,7 +236,7 @@ input[type=number]{-moz-appearance:textfield}
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:0;padding-bottom:10px;border-bottom:1px solid var(--border2)}
 .di label{display:block;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--text3);margin-bottom:2px;text-transform:uppercase}
 .di span{font-size:13px;color:var(--text2)}
-.desc-text{font-size:14px;color:var(--text2);line-height:1.6;margin-top:10px;margin-bottom:8px;overflow-wrap:break-word;word-break:break-word}
+.desc-text{font-size:15px;color:var(--text2);line-height:1.65;margin-top:10px;margin-bottom:8px;overflow-wrap:break-word;word-break:break-word}
 .sdesc{font-size:inherit;color:inherit;line-height:inherit}
 .sdesc p.sdesc-p{margin:0 0 7px}
 .sdesc p.sdesc-p:last-child{margin-bottom:0}
@@ -548,6 +548,12 @@ input[type=number]{-moz-appearance:textfield}
         <div class="sec">Spell Slots</div>
         <div class="slot-g" id="spSlots"></div>
         <div class="sec">My Spells</div>
+        <div id="mySpellFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="filter-toggle on" id="msf_all" onclick="setMySpellFilter('all')">All</button>
+          <button class="filter-toggle" id="msf_action" onclick="setMySpellFilter('action')">Action</button>
+          <button class="filter-toggle" id="msf_bonus" onclick="setMySpellFilter('bonus')">Bonus Action</button>
+          <button class="filter-toggle" id="msf_reaction" onclick="setMySpellFilter('reaction')">Reaction</button>
+        </div>
         <div id="mySpells"></div>
         <button class="add-btn" onclick="addSpellManual()">+ Add Spell Manually</button>
       </div>
@@ -867,20 +873,56 @@ function formatSpellDesc(raw){
   }
   return html+'</div>';
 }
+let _mySpellFilter='all';
+function setMySpellFilter(f){
+  _mySpellFilter=f;
+  ['all','action','bonus','reaction'].forEach(k=>{
+    const btn=document.getElementById('msf_'+k);
+    if(btn) btn.classList.toggle('on',k===f);
+  });
+  buildMySpells();
+}
 function buildMySpells(){
   const list=document.getElementById('mySpells');if(!list)return;list.innerHTML='';
   const sorted=st.mySpells.map((sp,i)=>({...sp,_i:i})).sort((a,b)=>{
     if(a.prep!==b.prep) return a.prep?-1:1;
     return a.grad-b.grad;
   });
-  let lastPrep=null;
-  sorted.forEach(sp=>{
+  // Apply casting time filter
+  const f=_mySpellFilter;
+  const visible=sorted.filter(sp=>{
+    if(f==='all') return true;
+    const db=ZB_SPELLS.find(s=>s.name===sp.name);
+    const ct=(db?.zeit||'').toLowerCase();
+    if(f==='action') return ct.includes('action') && !ct.includes('bonus') && !ct.includes('reaction');
+    if(f==='bonus') return ct.includes('bonus');
+    if(f==='reaction') return ct.includes('reaction');
+    return true;
+  });
+  if(!visible.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='color:var(--text3);font-size:13px;font-family:\'Cinzel\',serif;text-align:center;padding:16px';
+    empty.textContent='No spells match this filter';
+    list.appendChild(empty);return;
+  }
+  let lastPrep=null;let lastGrad=null;
+  const gradLabel=g=>g===0?'Cantrips':g===1?'1st Level':g===2?'2nd Level':g===3?'3rd Level':g+'th Level';
+  visible.forEach(sp=>{
     const i=sp._i;
+    // Prepared divider
     if(lastPrep!==sp.prep){
-      lastPrep=sp.prep;
+      lastPrep=sp.prep;lastGrad=null;
       const hdr=document.createElement('div');hdr.className='zb-divider';
       hdr.textContent=sp.prep?'✦ Prepared':'◦ Unprepared';
       list.appendChild(hdr);
+    }
+    // Level divider
+    if(lastGrad!==sp.grad){
+      lastGrad=sp.grad;
+      const lvlHdr=document.createElement('div');
+      lvlHdr.style.cssText='font-family:\'Cinzel\',serif;font-size:10px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;padding:6px 2px 3px;border-bottom:1px solid var(--border2);margin-bottom:4px';
+      lvlHdr.textContent=gradLabel(sp.grad);
+      list.appendChild(lvlHdr);
     }
     const div=document.createElement('div');div.className='spell-card';
     const lbl=sp.grad===0?'Cantrip':ordinal(sp.grad)+' Level';
@@ -892,7 +934,7 @@ function buildMySpells(){
       <div class="di"><label>Duration</label><span>${dbSpell.dauer}</span></div>
       <div class="di"><label>Components</label><span>${dbSpell.komp||'—'}</span></div>
     </div>`:'';
-    const descHtml=dbSpell?`<div class="desc-text" style="font-size:12px">${formatSpellDesc(dbSpell.desc)}</div>`:'';
+    const descHtml=dbSpell?`<div class="desc-text">${formatSpellDesc(dbSpell.desc)}</div>`:'';
     const higherHtml=dbSpell&&dbSpell.higher?`<div class="higher-box"><label>At Higher Levels</label><p>${dbSpell.higher}</p></div>`:'';
     inner.innerHTML=`
     <div class="spell-main" onclick="togMySpellDetail(${i},this)" style="cursor:pointer">
@@ -1635,10 +1677,11 @@ function buildBgLore(){
   title.textContent='Background: '+bgName;
   sec.style.display='block';
 
-  // Look up extra data (feature text + fluff)
-  const extra=BG_EXTRA.find(e=>e.n===bgName);
+  // Look up extra data — prefer entry with feature text
+  const extras=BG_EXTRA.filter(e=>e.n===bgName);
+  const extra=extras.find(e=>e.f)||extras[0]||null;
 
-  let html='<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text2)">';
+  let html='<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:15px;color:var(--text2)">';
 
   // Source line
   if(data.src) html+=`<div style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:.5px;margin-bottom:10px">Source: ${data.src}</div>`;
@@ -1650,12 +1693,6 @@ function buildBgLore(){
   if(data.f) html+=`<div class="di"><label>Feat</label><span>${data.f}</span></div>`;
   if(data.a) html+=`<div class="di"><label>Ability Scores</label><span>${data.a}</span></div>`;
   html+='</div>';
-
-  // Fluff (flavor/lore) — shown first, italicized
-  if(extra&&extra.l){
-    html+=`<div style="font-style:italic;line-height:1.65;margin-bottom:10px;color:var(--text3)">${renderBgText(extra.l)}</div>`;
-    html+=`<div style="border-top:1px solid var(--border2);margin-bottom:10px"></div>`;
-  }
 
   // Feature text
   if(extra&&extra.f){
