@@ -95,7 +95,7 @@ input[type=number]{-moz-appearance:textfield}
 .sk-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sk-pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--text3);flex-shrink:0}
 .sk-pip.p{background:var(--gold);border-color:var(--gold)}
-.sk-pip.e{background:var(--purple);border-color:var(--purple)}
+.sk-pip.e{background:var(--green);border-color:var(--green)}
 .sk-name{font-size:15px;color:var(--text);flex:1}
 .sk-attr{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;min-width:28px}
 .sk-bon{font-size:14px;color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
@@ -456,6 +456,12 @@ input[type=number]{-moz-appearance:textfield}
         <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
         <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
       </div>
+
+      <div class="sec" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">
+        <span>Weapons</span>
+        <button onclick="addWeapon()" style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--gold);padding:3px 10px;cursor:pointer">+ Add</button>
+      </div>
+      <div id="weaponList" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
     <!-- FERTIGKEITEN -->
@@ -485,8 +491,16 @@ input[type=number]{-moz-appearance:textfield}
     <div class="panel" id="tab-skills">
       <div class="sec">Saving Throws <span style="color:var(--text3);font-size:9px">(tap = proficiency)</span></div>
       <div class="sk-list" id="savesGrid"></div>
-      <div class="sec" style="margin-top:14px">Skills <span style="color:var(--text3);font-size:9px">(1× proficient · 2× expert)</span></div>
+      <div class="sec" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">
+        <span>Skills <span style="color:var(--text3);font-size:9px">(1x prof · 2x expert)</span></span>
+        <button id="skEditBtn" onclick="toggleSkEdit()" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);padding:3px 8px;cursor:pointer">Edit</button>
+      </div>
       <div class="sk-list" id="skillsGrid"></div>
+      <div class="sec" style="margin-top:14px">Skill Notes</div>
+      <div style="position:relative">
+        <textarea id="skillNotes" rows="3" placeholder="z.B. Jack of All Trades +2 auf alle · Pass without Trace +10 Stealth" oninput="st.skillNotes=this.value;autoSave()" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:8px 34px 8px 10px;resize:vertical;outline:none;box-sizing:border-box"></textarea>
+        <button onclick="openNoteModalEl(document.getElementById('skillNotes'),'Skill Notes')" style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:2px">&#x26F6;</button>
+      </div>
     </div>
 
     <!-- EQUIPMENT -->
@@ -719,10 +733,10 @@ const ZB_SPELLS=[{"name":"Acid Splash","src":"PHB'24","grad":0,"school":"Evocati
 // STATE
 let st={
   attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
-  saveP:{},skillP:{},
+  saveP:{},skillP:{},skillMisc:{},skillNotes:'',
   hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
   slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
-  mySpells:[],feats:[],bg:'',
+  mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set()
 };
 let zbFGrad='all',zbFSchool='all';
@@ -784,9 +798,16 @@ function buildSaves(){
   });
 }
 
+let skEditMode=false;
+function toggleSkEdit(){
+  skEditMode=!skEditMode;
+  const btn=document.getElementById('skEditBtn');
+  if(btn){btn.textContent=skEditMode?'Done':'Edit';btn.style.color=skEditMode?'var(--gold)':'var(--text2)';}
+  buildSkills();
+}
+
 function buildSkills(){
   const g=document.getElementById('skillsGrid');if(!g)return;g.innerHTML='';
-  const attrOrder=['STR','DEX','CON','INT','WIS','CHA'];
   const attrNames={STR:'Strength',DEX:'Dexterity',CON:'Constitution',INT:'Intelligence',WIS:'Wisdom',CHA:'Charisma'};
   let lastA='';
   SKILLS.forEach(s=>{
@@ -797,11 +818,55 @@ function buildSkills(){
       h.textContent=attrNames[s.a]||s.a;
       g.appendChild(h);
     }
-    const p=st.skillP[s.n];const b=md(st.attrs[s.a])+(p==='e'?prof()*2:p==='p'?prof():0);
+    const p=st.skillP[s.n];
+    const misc=parseInt(st.skillMisc&&st.skillMisc[s.n])||0;
+    const b=md(st.attrs[s.a])+(p==='e'?prof()*2:p==='p'?prof():0)+misc;
     const r=document.createElement('div');r.className='sk-row';
-    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':''}"></div><span class="sk-name">${s.n}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span>`;
-    r.onclick=()=>{if(!p)st.skillP[s.n]='p';else if(p==='p')st.skillP[s.n]='e';else delete st.skillP[s.n];buildSkills()};
+    r.style.flexWrap='wrap';
+    const miscColor=misc>0?'var(--green)':misc<0?'var(--red)':'var(--text3)';
+    const miscStr=misc!==0?`<span style="font-size:11px;color:${miscColor};font-family:'Cinzel',serif;margin-left:2px">(${misc>0?'+':''}${misc})</span>`:'';
+    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':''}"></div><span class="sk-name">${s.n}${miscStr}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span>`
+      +(skEditMode?`<div style="width:100%;padding:4px 20px 2px;display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif">Misc</span><input type="number" value="${misc||''}" placeholder="0" oninput="st.skillMisc['${s.n}']=parseInt(this.value)||0;autoSave();buildSkills()" onclick="event.stopPropagation()" style="width:56px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;padding:3px 6px;outline:none;font-family:'Cinzel',serif"></div>`:'');
+    r.onclick=(e)=>{if(skEditMode||e.target.tagName==='INPUT')return;if(!p)st.skillP[s.n]='p';else if(p==='p')st.skillP[s.n]='e';else delete st.skillP[s.n];autoSave();buildSkills();};
     g.appendChild(r);
+  });
+}
+
+function addWeapon(){
+  if(!st.weapons) st.weapons=[];
+  st.weapons.push({name:'',atk:'',dmg:'',type:''});
+  autoSave();buildWeapons();
+}
+function delWeapon(i){
+  st.weapons.splice(i,1);autoSave();buildWeapons();
+}
+function buildWeapons(){
+  const g=document.getElementById('weaponList');if(!g)return;
+  if(!st.weapons||!st.weapons.length){g.innerHTML='<div style="font-size:13px;color:var(--text3);padding:6px 2px">No weapons added.</div>';return;}
+  g.innerHTML='';
+  st.weapons.forEach((w,i)=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px';
+    d.innerHTML=`
+      <div style="display:flex;gap:6px;align-items:center">
+        <input value="${w.name||''}" placeholder="Weapon name" oninput="st.weapons[${i}].name=this.value;autoSave()" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:15px;padding:5px 8px;outline:none;font-family:'Crimson Pro',serif">
+        <button onclick="delWeapon(${i})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">&times;</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text3);margin-bottom:3px">ATK BONUS</div>
+          <input value="${w.atk||''}" placeholder="+5" oninput="st.weapons[${i}].atk=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gold);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
+        </div>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text3);margin-bottom:3px">DAMAGE</div>
+          <input value="${w.dmg||''}" placeholder="1d8+3" oninput="st.weapons[${i}].dmg=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
+        </div>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text3);margin-bottom:3px">TYPE</div>
+          <input value="${w.type||''}" placeholder="Slashing" oninput="st.weapons[${i}].type=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;padding:5px 8px;outline:none;text-align:center">
+        </div>
+      </div>`;
+    g.appendChild(d);
   });
 }
 
@@ -2687,10 +2752,10 @@ function applyState(snap){
   else restored.zbAdded = new Set();
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
-    saveP:{},skillP:{},
+    saveP:{},skillP:{},skillMisc:{},skillNotes:'',
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
-    mySpells:[],feats:[],bg:'',zbAdded:new Set(),
+    mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
     abUses:{},savedBeasts:[],items:[],raceNotes:""
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
@@ -2708,11 +2773,13 @@ function applyState(snap){
   const raceCustom=document.getElementById('raceCustom');
   if(raceCustom) raceCustom.style.display=raceVal==='custom'?'':'none';
   // Trigger dependent UI (skip onClsChange - already called)
-  buildAttrs();buildSaves();buildSkills();updBar();
+  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
   const raceNotesEl=document.getElementById('n_race_custom');
   if(raceNotesEl) raceNotesEl.value=st.raceNotes||'';
+  const skillNotesEl=document.getElementById('skillNotes');
+  if(skillNotesEl) skillNotesEl.value=st.skillNotes||'';
   // Background
   if(st.bg) renderBgCard(st.bg);
   // Death saves / inspiration
@@ -2784,10 +2851,10 @@ function confirmNewChar(){
 function resetUI(){
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
-    saveP:{},skillP:{},
+    saveP:{},skillP:{},skillMisc:{},skillNotes:'',
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
-    mySpells:[],feats:[],bg:'',zbAdded:new Set(),
+    mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
     abUses:{},savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent='';
@@ -2800,9 +2867,10 @@ function resetUI(){
     }
   });
   onClsChange();
-  buildAttrs();buildSaves();buildSkills();updBar();
+  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
+  const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
 }
 
 function _doNewChar(name){
@@ -2812,10 +2880,10 @@ function _doNewChar(name){
   // Reset state
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
-    saveP:{},skillP:{},
+    saveP:{},skillP:{},skillMisc:{},skillNotes:'',
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
-    mySpells:[],feats:[],bg:'',zbAdded:new Set(),
+    mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
     abUses:{},savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent=_name;
@@ -2828,7 +2896,7 @@ function _doNewChar(name){
     }
   });
   onClsChange(); // also calls applyTheme
-  buildAttrs();buildSaves();buildSkills();updBar();
+  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();
   const chars = getAllChars();
@@ -2880,7 +2948,7 @@ function initApp(){
   if(names.length){
     loadChar(names[0]);
   } else {
-    buildAttrs();buildSaves();buildSkills();
+    buildAttrs();buildSaves();buildSkills();buildWeapons();
     buildSlots();buildMySpells();buildFeats();
     buildBgSelect();calcSpell();updBar();
     refreshCharSel('');
@@ -2979,7 +3047,7 @@ function importChars(e){
 
 // SETTINGS
 const SETTINGS_LS = 'dnd5e_theme_overrides';
-const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
+const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
 
 function loadThemeOverrides(){
