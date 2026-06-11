@@ -109,6 +109,9 @@ input[type=number]{-moz-appearance:textfield}
 .sp-warn{background:color-mix(in srgb, var(--gold) 20%, transparent);color:var(--gold)}
 .spell-prep{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .spell-prep.on{background:var(--gold);border-color:var(--gold);color:var(--bg0)}
+.sp-conc{background:color-mix(in srgb,var(--purple) 18%,transparent);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 35%,transparent);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.sp-conc.active{background:var(--purple);color:var(--bg0);border-color:var(--purple);box-shadow:0 0 8px color-mix(in srgb,var(--purple) 60%,transparent)}
+.spell-card.conc-active-card{border-left:3px solid var(--purple);background:color-mix(in srgb,var(--purple) 8%,var(--bg2));box-shadow:inset 2px 0 12px color-mix(in srgb,var(--purple) 12%,transparent)}
 .expbtn{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;flex-shrink:0;padding:4px 8px;line-height:1;-webkit-tap-highlight-color:transparent;margin-left:auto}
 .spell-notes{display:none;padding:0 11px 10px;border-top:1px solid var(--border2)}
 .spell-notes.on{display:block}
@@ -737,7 +740,8 @@ let st={
   hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
   slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
   mySpells:[],feats:[],bg:'',weapons:[],
-  zbAdded:new Set()
+  zbAdded:new Set(),
+  concActive:null
 };
 let zbFGrad='all',zbFSchool='all';
 
@@ -992,6 +996,9 @@ function buildMySpells(){
     const div=document.createElement('div');div.className='spell-card';
     const lbl=sp.grad===0?'Cantrip':ordinal(sp.grad)+' Level';
     const dbSpell=ZB_SPELLS.find(s=>s.name===sp.name);
+    const isConc=dbSpell?dbSpell.dauer.toLowerCase().includes('concentration'):false;
+    const concIsActive=st.concActive===i;
+    if(concIsActive) div.classList.add('conc-active-card');
     const inner=document.createElement('div');
     const metaHtml=dbSpell?`<div class="dgrid">
       <div class="di"><label>Casting Time</label><span>${dbSpell.zeit}</span></div>
@@ -1004,6 +1011,7 @@ function buildMySpells(){
     inner.innerHTML=`
     <div class="spell-main" onclick="togMySpellDetail(${i},this)" style="cursor:pointer">
       <span class="spell-name">${sp.name}</span>
+      ${isConc?`<span class="sp-badge sp-conc${concIsActive?' active':''}" onclick="event.stopPropagation();togConc(${i})" title="Concentration">C</span>`:''}
       <span class="sp-badge sp-info">${lbl}</span>
       <span class="sp-badge sp-warn">${sp.school}</span>
       <div class="spell-prep${sp.prep?' on':''}" onclick="event.stopPropagation();togPrep(${i})" style="margin-left:auto">✦</div>
@@ -1026,11 +1034,13 @@ function togMySpellDetail(i,el){
   if(arrow) arrow.textContent=open?'▴':'▾';
 }
 function togPrep(i){st.mySpells[i].prep=!st.mySpells[i].prep;buildMySpells()}
+function togConc(i){st.concActive=(st.concActive===i)?null:i;buildMySpells();}
 function delMySpell(i){
   const sp=st.mySpells[i];
   // Remove from zbAdded so it can be added again
   const idx=ZB_SPELLS.findIndex(s=>s.name===sp.name);
   if(idx>=0) st.zbAdded.delete(idx);
+  if(st.concActive===i) st.concActive=null;
   st.mySpells.splice(i,1);
   buildMySpells();
 }
