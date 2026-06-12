@@ -51,6 +51,10 @@ input[type=number]{-moz-appearance:textfield}
 .panel.on{display:block;width:100%;box-sizing:border-box}
 .sec{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold2);margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid color-mix(in srgb, var(--gold) 20%, transparent);text-transform:uppercase}
 .sec:first-child{margin-top:0}
+.sec-collapse{display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.sec-collapse .sec-arrow{font-size:11px;color:var(--text3);transition:transform .2s;display:inline-block}
+.sec-collapse.closed .sec-arrow{transform:rotate(-90deg)}
+.sec-collapsible{overflow:hidden}
 
 /* INPUTS */
 .igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
@@ -299,11 +303,9 @@ input[type=number]{-moz-appearance:textfield}
   <div style="position:sticky;top:62px;z-index:99;background:var(--bg1);border-bottom:1px solid var(--border2)">
     <div class="tabs" id="tabs">
       <button class="tab on" data-tab="info">Info</button>
-      <button class="tab" data-tab="basis">Stats</button>
       <button class="tab" data-tab="skills">Skills</button>
-      <button class="tab" data-tab="ausruestung">Equipment</button>
-      <button class="tab" data-tab="zauber">Spells</button>
-      <button class="tab" data-tab="features">Features</button>
+      <button class="tab" data-tab="ausruestung">Items</button>
+      <button class="tab" data-tab="zauber">Combat</button>
       <button class="tab" data-tab="bestien" id="tabBestien">Beasts</button>
       <button class="tab" data-tab="hintergrund">Background</button>
       <button class="tab" data-tab="feats">Feats</button>
@@ -349,6 +351,20 @@ input[type=number]{-moz-appearance:textfield}
         <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
       </div>
       </div>
+
+      <!-- ATTRIBUTE -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
+      <div class="sec" style="margin-top:0">Attribute</div>
+      <div class="attr-grid" id="attrGrid"></div>
+      <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
+      <div class="stat3">
+        <div class="sbox"><div class="hp-lbl">Armor (AC)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ac',-1)">−</button><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"><button class="hbtn" onclick="chStat('ac',1)">+</button></div></div>
+        <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
+        <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
+      </div>
+
+      <!-- EXPAND SECTIONS -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
       <div id="coreTraitsSection" style="display:none;margin-top:10px">
         <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
           <span>Class Traits</span>
@@ -394,77 +410,6 @@ input[type=number]{-moz-appearance:textfield}
         </div>
         <div id="featsInfoBody" style="display:none"></div>
       </div>
-    </div>
-
-    <!-- GRUNDWERTE -->
-    <div class="panel" id="tab-basis">
-      <div class="sec">Hit Points</div>
-      <div class="hp-row">
-        <div class="hpbox" style="border-color:color-mix(in srgb, var(--green) 40%, transparent)">
-          <div class="hp-lbl">Current</div>
-          <div class="hp-ctrl">
-            <button class="hbtn" onclick="chHP(-1)">−</button>
-            <div class="hpval" id="hpC">10</div>
-            <button class="hbtn" onclick="chHP(1)">+</button>
-          </div>
-          <div class="hpbar-w"><div class="hpbar" id="hpBar" style="width:100%"></div></div>
-        </div>
-        <div class="hpbox">
-          <div class="hp-lbl">Maximum</div>
-          <div class="hp-ctrl">
-            <button class="hbtn" onclick="chHpM(-1)">−</button>
-            <input class="hpin" type="number" id="hpM" value="10" min="1" oninput="onHpMChange()" style="width:44px">
-            <button class="hbtn" onclick="chHpM(1)">+</button>
-          </div>
-        </div>
-        <div class="hpbox" style="border-color:rgba(180,139,224,0.35)">
-          <div class="hp-lbl">Temp</div>
-          <div class="hp-ctrl">
-            <button class="hbtn" onclick="chHpT(-1)">−</button>
-            <input class="hpin" type="number" id="hpT" value="0" min="0" style="color:var(--purple);width:44px">
-            <button class="hbtn" onclick="chHpT(1)">+</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="ds-row">
-        <div>
-          <div class="ds-lbl" style="margin-bottom:5px">Death Saves</div>
-          <div style="display:flex;gap:14px">
-            <div><div style="font-size:9px;color:var(--green);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:3px">SUCCESSES</div>
-              <div style="display:flex;gap:5px" id="dsS">
-                <div class="dspip s" onclick="togDS('s',0)"></div><div class="dspip s" onclick="togDS('s',1)"></div><div class="dspip s" onclick="togDS('s',2)"></div>
-              </div></div>
-            <div><div style="font-size:9px;color:var(--red);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:3px">FAILURES</div>
-              <div style="display:flex;gap:5px" id="dsF">
-                <div class="dspip x" onclick="togDS('x',0)"></div><div class="dspip x" onclick="togDS('x',1)"></div><div class="dspip x" onclick="togDS('x',2)"></div>
-              </div></div>
-          </div>
-        </div>
-        <div style="margin-left:auto;text-align:center">
-          <div class="ds-lbl" style="margin-bottom:5px">Inspiration</div>
-          <div style="display:flex;gap:5px">
-            <div class="inspip" id="ins0" onclick="togIns(0)"></div>
-            <div class="inspip" id="ins1" onclick="togIns(1)"></div>
-            <div class="inspip" id="ins2" onclick="togIns(2)"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sec">Attribute</div>
-      <div class="attr-grid" id="attrGrid"></div>
-      <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
-      <div class="stat3">
-        <div class="sbox"><div class="hp-lbl">Armor (AC)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ac',-1)">−</button><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"><button class="hbtn" onclick="chStat('ac',1)">+</button></div></div>
-        <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
-        <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
-      </div>
-
-      <div class="sec" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">
-        <span>Weapons</span>
-        <button onclick="addWeapon()" style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--gold);padding:3px 10px;cursor:pointer">+ Add</button>
-      </div>
-      <div id="weaponList" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
     <!-- FERTIGKEITEN -->
@@ -547,61 +492,152 @@ input[type=number]{-moz-appearance:textfield}
       <div class="nta-wrap"><textarea class="nta" id="n_equip_notes" placeholder="Notes on equipment, carrying capacity, special items..." style="min-height:80px"></textarea><button class="nta-expand" onclick="openNoteModal('n_equip_notes','Equipment Notes')">⛶</button></div>
     </div>
 
-    <!-- ZAUBER (Charakterbogen) -->
+    <!-- COMBAT -->
     <div class="panel" id="tab-zauber">
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
         <button onclick="switchTab('spelllist')" style="background:transparent;border:none;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;letter-spacing:.5px">📖 Spell List →</button>
       </div>
 
-      <!-- Meine Zauber -->
-      <div id="subpanel-meinezauber">
-        <div class="sec">Spellcasting</div>
-        <div class="igrid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="ifield"><label>Ability</label>
-            <select id="spAttr" onchange="calcSpell()"><option value="">—</option><option value="INT">INT</option><option value="WIS">WIS</option><option value="CHA">CHA</option></select></div>
-          <div class="ifield"><label>Save DC</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
-          <div class="ifield"><label>Attack</label><input id="spAtk" value="+0" readonly style="color:var(--gold)"></div>
+      <!-- HIT POINTS -->
+      <div class="sec">Hit Points</div>
+      <div class="hp-row">
+        <div class="hpbox" style="border-color:color-mix(in srgb, var(--green) 40%, transparent)">
+          <div class="hp-lbl">Current</div>
+          <div class="hp-ctrl">
+            <button class="hbtn" onclick="chHP(-1)">−</button>
+            <div class="hpval" id="hpC">10</div>
+            <button class="hbtn" onclick="chHP(1)">+</button>
+          </div>
+          <div class="hpbar-w"><div class="hpbar" id="hpBar" style="width:100%"></div></div>
         </div>
-        <div class="sec">Spell Slots</div>
-        <div class="slot-g" id="spSlots"></div>
-        <div class="sec">My Spells</div>
-        <div id="mySpellFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          <button class="filter-toggle on" id="msf_all" onclick="setMySpellFilter('all')">All</button>
-          <button class="filter-toggle" id="msf_action" onclick="setMySpellFilter('action')">Action</button>
-          <button class="filter-toggle" id="msf_bonus" onclick="setMySpellFilter('bonus')">Bonus Action</button>
-          <button class="filter-toggle" id="msf_reaction" onclick="setMySpellFilter('reaction')">Reaction</button>
+        <div class="hpbox">
+          <div class="hp-lbl">Maximum</div>
+          <div class="hp-ctrl">
+            <button class="hbtn" onclick="chHpM(-1)">−</button>
+            <input class="hpin" type="number" id="hpM" value="10" min="1" oninput="onHpMChange()" style="width:44px">
+            <button class="hbtn" onclick="chHpM(1)">+</button>
+          </div>
         </div>
-        <div id="mySpells"></div>
-        <button class="add-btn" onclick="addSpellManual()">+ Add Spell Manually</button>
+        <div class="hpbox" style="border-color:rgba(180,139,224,0.35)">
+          <div class="hp-lbl">Temp</div>
+          <div class="hp-ctrl">
+            <button class="hbtn" onclick="chHpT(-1)">−</button>
+            <input class="hpin" type="number" id="hpT" value="0" min="0" style="color:var(--purple);width:44px">
+            <button class="hbtn" onclick="chHpT(1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div>
+          <div class="ds-lbl" style="margin-bottom:5px">Death Saves</div>
+          <div style="display:flex;gap:14px">
+            <div><div style="font-size:9px;color:var(--green);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:3px">SUCCESSES</div>
+              <div style="display:flex;gap:5px" id="dsS">
+                <div class="dspip s" onclick="togDS('s',0)"></div><div class="dspip s" onclick="togDS('s',1)"></div><div class="dspip s" onclick="togDS('s',2)"></div>
+              </div></div>
+            <div><div style="font-size:9px;color:var(--red);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:3px">FAILURES</div>
+              <div style="display:flex;gap:5px" id="dsF">
+                <div class="dspip x" onclick="togDS('x',0)"></div><div class="dspip x" onclick="togDS('x',1)"></div><div class="dspip x" onclick="togDS('x',2)"></div>
+              </div></div>
+          </div>
+        </div>
+        <div style="margin-left:auto;text-align:center">
+          <div class="ds-lbl" style="margin-bottom:5px">Inspiration</div>
+          <div style="display:flex;gap:5px">
+            <div class="inspip" id="ins0" onclick="togIns(0)"></div>
+            <div class="inspip" id="ins1" onclick="togIns(1)"></div>
+            <div class="inspip" id="ins2" onclick="togIns(2)"></div>
+          </div>
+        </div>
       </div>
 
+      <!-- WEAPONS -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
+      <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Weapons & Attacks</span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <button onclick="addWeapon()" style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--gold);padding:3px 10px;cursor:pointer">+ Add</button>
+          <button onclick="toggleInfoSection('sb-weapons','sb-weapons-btn')" id="sb-weapons-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+        </span>
+      </div>
+      <div id="sb-weapons">
+        <div id="weaponList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      </div>
 
-    </div>
+      <!-- Spellcasting -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
+      <div id="subpanel-meinezauber">
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Spellcasting</span>
+          <button onclick="toggleInfoSection('sb-spellcasting','sb-spellcasting-btn')" id="sb-spellcasting-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+        </div>
+        <div id="sb-spellcasting">
+          <div class="igrid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:8px">
+            <div class="ifield"><label>Ability</label>
+              <select id="spAttr" onchange="calcSpell()"><option value="">—</option><option value="INT">INT</option><option value="WIS">WIS</option><option value="CHA">CHA</option></select></div>
+            <div class="ifield"><label>Save DC</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
+            <div class="ifield"><label>Attack</label><input id="spAtk" value="+0" readonly style="color:var(--gold)"></div>
+          </div>
+        </div>
 
-    <!-- FEATURES -->
-    <div class="panel" id="tab-features">
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Spell Slots</span>
+          <button onclick="toggleInfoSection('sb-spellslots','sb-spellslots-btn')" id="sb-spellslots-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+        </div>
+        <div id="sb-spellslots">
+          <div class="slot-g" id="spSlots"></div>
+        </div>
+
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+          <span>My Spells</span>
+          <button onclick="toggleInfoSection('sb-myspells','sb-myspells-btn')" id="sb-myspells-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+        </div>
+        <div id="sb-myspells">
+          <div id="mySpellFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <button class="filter-toggle on" id="msf_all" onclick="setMySpellFilter('all')">All</button>
+            <button class="filter-toggle" id="msf_action" onclick="setMySpellFilter('action')">Action</button>
+            <button class="filter-toggle" id="msf_bonus" onclick="setMySpellFilter('bonus')">Bonus Action</button>
+            <button class="filter-toggle" id="msf_reaction" onclick="setMySpellFilter('reaction')">Reaction</button>
+          </div>
+          <div id="mySpells"></div>
+        </div>
+      </div>
+
+      <!-- CLASS FEATURES -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
       <div id="abilitiesSection" style="display:none">
         <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
           <span>Class Features</span>
-          <button style="background:transparent;border:none;color:var(--text3);font-size:10px;font-family:'Cinzel',serif;cursor:pointer" onclick="restoreAllUses()">↺ Reset All Uses</button>
+          <span style="display:flex;gap:6px;align-items:center">
+            <button style="background:transparent;border:none;color:var(--text3);font-size:10px;font-family:'Cinzel',serif;cursor:pointer" onclick="restoreAllUses()">↺ Reset</button>
+            <button onclick="toggleInfoSection('sb-classfeatures','sb-classfeatures-btn')" id="sb-classfeatures-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+          </span>
         </div>
-        <div id="abList"></div>
+        <div id="sb-classfeatures">
+          <div id="abList"></div>
+        </div>
       </div>
+
+      <!-- BEASTS -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
       <div id="savedBeastsSection" style="display:none">
         <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
           <span>Beasts & Companions</span>
-          <button style="background:transparent;border:none;color:var(--text3);font-size:10px;font-family:'Cinzel',serif;cursor:pointer" onclick="switchTab('bestien')">+ Browser →</button>
+          <span style="display:flex;gap:6px;align-items:center">
+            <button style="background:transparent;border:none;color:var(--text3);font-size:10px;font-family:'Cinzel',serif;cursor:pointer" onclick="switchTab('bestien')">+ Browser →</button>
+            <button onclick="toggleInfoSection('sb-beasts','sb-beasts-btn')" id="sb-beasts-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+          </span>
         </div>
-        <div id="savedBeasts" style="margin-bottom:10px">
-          <div style="color:var(--text3);font-size:12px;font-family:'Cinzel',serif;text-align:center;padding:12px">No forms saved yet</div>
+        <div id="sb-beasts">
+          <div id="savedBeasts" style="margin-bottom:10px">
+            <div style="color:var(--text3);font-size:12px;font-family:'Cinzel',serif;text-align:center;padding:12px">No forms saved yet</div>
+          </div>
         </div>
       </div>
-      <div class="sec" id="featSec">Custom Features & Talents</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
-        
-        <button class="add-btn" style="flex:1;margin:0" onclick="addFeat()">+ Add Manually</button>
+
+      <!-- CUSTOM FEATURES -->
       </div>
-      <div id="featList"></div>
+
     </div>
 
     <!-- BESTIEN -->
@@ -741,7 +777,7 @@ let st={
   slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
   mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set(),
-  concActive:null
+  concActive:null, concActiveFeature:null
 };
 let zbFGrad='all',zbFSchool='all';
 
@@ -1034,7 +1070,18 @@ function togMySpellDetail(i,el){
   if(arrow) arrow.textContent=open?'▴':'▾';
 }
 function togPrep(i){st.mySpells[i].prep=!st.mySpells[i].prep;buildMySpells()}
-function togConc(i){st.concActive=(st.concActive===i)?null:i;buildMySpells();}
+function togConc(i){
+  st.concActive=(st.concActive===i)?null:i;
+  if(st.concActive!==null) st.concActiveFeature=null; // only one concentration at a time
+  buildMySpells();
+  buildAbilities();
+}
+function togConcFeature(id){
+  st.concActiveFeature=(st.concActiveFeature===id)?null:id;
+  if(st.concActiveFeature!==null) st.concActive=null; // only one concentration at a time
+  buildAbilities();
+  buildMySpells();
+}
 function delMySpell(i){
   const sp=st.mySpells[i];
   // Remove from zbAdded so it can be added again
@@ -2185,13 +2232,16 @@ function buildAbilities(){
       const restoreLabel=ab.restore==='short'?'Short/Long Rest':ab.restore==='long'?'Long Rest':'';
       usesHtml=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="ab-uses">${pips}</div>${restoreLabel?`<div style="font-size:8px;color:var(--text3);font-family:'Cinzel',serif">${restoreLabel}</div>`:''}</div>`;
     }
+    const isConc=ab.desc&&ab.desc.toLowerCase().includes('concentration');
+    const concFeatActive=st.concActiveFeature===ab.id;
     const card=document.createElement('div');
-    card.className='ab-card';
+    card.className='ab-card'+(concFeatActive?' conc-active-card':'');
     card.innerHTML=`
       <div class="ab-top" onclick="togAb('${ab.id}')">
         <div class="ab-icon ${iconClass}">${ab.icon}</div>
         <div class="ab-title">
-          <div class="ab-name">${ab.name}</div>
+          <div class="ab-name">${ab.name}${isConc?`<span class="sp-badge sp-conc${concFeatActive?' active':''}" onclick="event.stopPropagation();togConcFeature('${ab.id}')" title="Concentration" style="margin-left:6px">C</span>`:''}
+          </div>
           <div class="ab-tag">${tagLabel}</div>
         </div>
         ${usesHtml}
@@ -2723,14 +2773,13 @@ function switchTab(t){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+tabId));
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
-  if(tabId==='features'){buildFeats();buildAbilities();buildSavedBeasts();}
   if(tabId==='ausruestung'){renderItems();}
   if(tabId==='bestien'){bstInit();buildSavedBeasts();}
   if(tabId==='feats'){ftBuildFilters();}
   if(tabId==='hintergrund')bgInit();
-  if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();}
+  if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();buildFeats();buildAbilities();buildSavedBeasts();buildWeapons();}
   if(tabId==='spelllist'){slRender();}
-  if(tabId==='info'){buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();}
+  if(tabId==='info'){buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();buildAttrs();}
 }
 
 // LOCALSTORAGE / MEHRCHARAKTERE
@@ -3182,6 +3231,15 @@ function resetAllThemes(){
 }
 
 // INIT
+function toggleSection(headerId, bodyId){
+  const hdr = document.getElementById(headerId);
+  const body = document.getElementById(bodyId);
+  if(!hdr||!body) return;
+  const closing = !hdr.classList.contains('closed');
+  hdr.classList.toggle('closed', closing);
+  body.style.display = closing ? 'none' : '';
+}
+
 slBuildFilters();
 initApp();
 </script>
@@ -3196,20 +3254,17 @@ initApp();
   </div>
 </div>
 <nav class="bottom-nav" id="bottomNav">
-  <button class="bnav-btn on" data-tab="basis" onclick="switchTabAll('basis',this)">
-    <span class="bnav-icon">❤️</span><span class="bnav-label">Stats</span>
+  <button class="bnav-btn on" data-tab="info" onclick="switchTabAll('info',this)">
+    <span class="bnav-icon">📜</span><span class="bnav-label">Info</span>
   </button>
   <button class="bnav-btn" data-tab="skills" onclick="switchTabAll('skills',this)">
     <span class="bnav-icon">🎲</span><span class="bnav-label">Skills</span>
   </button>
   <button class="bnav-btn" data-tab="ausruestung" onclick="switchTabAll('ausruestung',this)">
-    <span class="bnav-icon">🗡️</span><span class="bnav-label">Equipment</span>
+    <span class="bnav-icon">🎒</span><span class="bnav-label">Items</span>
   </button>
   <button class="bnav-btn" data-tab="zauber" onclick="switchTabAll('zauber',this)">
-    <span class="bnav-icon">🔮</span><span class="bnav-label">Spells</span>
-  </button>
-  <button class="bnav-btn" data-tab="features" onclick="switchTabAll('features',this)">
-    <span class="bnav-icon">⭐</span><span class="bnav-label">Features</span>
+    <span class="bnav-icon">⚔️</span><span class="bnav-label">Combat</span>
   </button>
 </nav>
 
