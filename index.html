@@ -103,6 +103,40 @@ input[type=number]{-moz-appearance:textfield}
 .sk-name{font-size:15px;color:var(--text);flex:1}
 .sk-attr{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;min-width:28px}
 .sk-bon{font-size:14px;color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
+.sk-roll-ic{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
+.sk-roll-ic:active{transform:scale(.9)}
+
+/* DICE ROLLER */
+.dice-fab{position:fixed;right:16px;bottom:calc(74px + env(safe-area-inset-bottom));width:50px;height:50px;border-radius:50%;background:var(--purple3);border:1px solid var(--purple);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent}
+.dice-fab:active{transform:scale(.92)}
+.dice-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-end;justify-content:center}
+.dice-modal.on{display:flex}
+.dice-sheet{background:var(--bg1);border:1px solid var(--border);border-top-left-radius:16px;border-top-right-radius:16px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.dice-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dice-title{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:1px}
+.dice-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0 4px}
+.dice-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:120px;margin-bottom:14px;position:relative}
+.die-shape{width:84px;height:84px;border-radius:14px;background:linear-gradient(145deg,var(--purple3),var(--bg3));border:2px solid var(--purple);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:34px;font-weight:600;color:var(--text);transition:transform .12s ease-out}
+.die-shape.rolling{animation:dice-spin .55s ease-out}
+@keyframes dice-spin{
+  0%{transform:rotate(0deg) scale(1)}
+  30%{transform:rotate(190deg) scale(1.15)}
+  60%{transform:rotate(330deg) scale(.92)}
+  100%{transform:rotate(360deg) scale(1)}
+}
+.die-shape.crit{border-color:var(--green);box-shadow:0 0 14px rgba(110,190,110,.5)}
+.die-shape.fail{border-color:var(--red);box-shadow:0 0 14px rgba(224,85,85,.5)}
+.dice-total{font-family:'Cinzel',serif;font-size:13px;color:var(--text2);margin-top:8px;text-align:center;min-height:18px}
+.dice-breakdown{font-size:12px;color:var(--text3);text-align:center;margin-top:2px}
+.dice-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.dice-preset-btn{padding:10px 4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:13px;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.dice-preset-btn:active{background:var(--bg3)}
+.dice-custom-row{display:flex;gap:6px;align-items:center;margin-bottom:14px}
+.dice-custom-row input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:9px 10px;outline:none;font-family:'Cinzel',serif;text-align:center}
+.dice-custom-row button{padding:9px 16px;background:var(--purple3);border:1px solid var(--purple);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px;cursor:pointer}
+.dice-history{border-top:1px solid var(--border2);padding-top:10px}
+.dice-history-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);padding:4px 2px;border-bottom:1px solid var(--border2)}
+.dice-history-row .dh-result{color:var(--text2);font-weight:600}
 
 /* SPELL CARDS (Charakterbogen) */
 .spell-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;overflow:hidden}
@@ -837,8 +871,8 @@ function buildSaves(){
   ATTRS.forEach(a=>{
     const p=!!st.saveP[a.k];const b=md(st.attrs[a.k])+(p?prof():0);
     const r=document.createElement('div');r.className='sk-row';
-    r.innerHTML=`<div class="sk-pip${p?' p':''}"></div><span class="sk-name">${a.l}</span><span class="sk-attr">${a.k}</span><span class="sk-bon">${fmt(b)}</span>`;
-    r.onclick=()=>{st.saveP[a.k]=!st.saveP[a.k];buildSaves()};g.appendChild(r);
+    r.innerHTML=`<div class="sk-pip${p?' p':''}"></div><span class="sk-name">${a.l}</span><span class="sk-attr">${a.k}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${a.l} Save',${b})">🎲</span>`;
+    r.onclick=(e)=>{if(e.target.closest('.sk-roll-ic'))return;st.saveP[a.k]=!st.saveP[a.k];buildSaves()};g.appendChild(r);
   });
 }
 
@@ -869,9 +903,9 @@ function buildSkills(){
     r.style.flexWrap='wrap';
     const miscColor=misc>0?'var(--green)':misc<0?'var(--red)':'var(--text3)';
     const miscStr=misc!==0?`<span style="font-size:11px;color:${miscColor};font-family:'Cinzel',serif;margin-left:2px">(${misc>0?'+':''}${misc})</span>`:'';
-    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':''}"></div><span class="sk-name">${s.n}${miscStr}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span>`
+    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':''}"></div><span class="sk-name">${s.n}${miscStr}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${s.n}',${b})">🎲</span>`
       +(skEditMode?`<div style="width:100%;padding:4px 20px 2px;display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif">Misc</span><input type="number" value="${misc||''}" placeholder="0" oninput="st.skillMisc['${s.n}']=parseInt(this.value)||0;autoSave();buildSkills()" onclick="event.stopPropagation()" style="width:56px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;padding:3px 6px;outline:none;font-family:'Cinzel',serif"></div>`:'');
-    r.onclick=(e)=>{if(skEditMode||e.target.tagName==='INPUT')return;if(!p)st.skillP[s.n]='p';else if(p==='p')st.skillP[s.n]='e';else delete st.skillP[s.n];autoSave();buildSkills();};
+    r.onclick=(e)=>{if(skEditMode||e.target.tagName==='INPUT'||e.target.closest('.sk-roll-ic'))return;if(!p)st.skillP[s.n]='p';else if(p==='p')st.skillP[s.n]='e';else delete st.skillP[s.n];autoSave();buildSkills();};
     g.appendChild(r);
   });
 }
@@ -3281,6 +3315,105 @@ function toggleSection(headerId, bodyId){
   body.style.display = closing ? 'none' : '';
 }
 
+// DICE ROLLER
+const DICE_HISTORY_MAX=12;
+let diceHistory=[];
+let diceCurrentMod=0;
+let diceCurrentLabel='';
+
+function openDice(label,mod){
+  diceCurrentLabel=label||'';
+  diceCurrentMod=mod||0;
+  const modal=document.getElementById('diceModal');
+  if(!modal)return;
+  modal.classList.add('on');
+  const title=document.getElementById('diceTitle');
+  if(title) title.textContent=label?label:'Dice Roller';
+  const inp=document.getElementById('diceCustomInput');
+  if(inp) inp.value = mod ? `1d20${mod>=0?'+':''}${mod}` : '1d20';
+  renderDiceHistory();
+}
+function closeDice(){
+  const modal=document.getElementById('diceModal');
+  if(modal) modal.classList.remove('on');
+}
+function rollCheck(label,mod){
+  openDice(label,mod);
+  setTimeout(()=>doRoll(`1d20${mod>=0?'+':''}${mod}`),120);
+}
+function rollPreset(spec){
+  diceCurrentLabel='';
+  const t=document.getElementById('diceTitle');
+  if(t) t.textContent='Dice Roller';
+  const inp=document.getElementById('diceCustomInput');
+  if(inp) inp.value=spec;
+  doRoll(spec);
+}
+function rollCustom(){
+  diceCurrentLabel='';
+  const inp=document.getElementById('diceCustomInput');
+  if(!inp)return;
+  doRoll(inp.value);
+}
+function parseDiceSpec(spec){
+  const m=String(spec||'').trim().toLowerCase().match(/^(\d*)d(\d+)\s*([+-]\s*\d+)?$/);
+  if(!m) return null;
+  const count=Math.max(1,Math.min(20,parseInt(m[1])||1));
+  const sides=Math.max(2,Math.min(100,parseInt(m[2])));
+  const mod=m[3]?parseInt(m[3].replace(/\s/g,'')):0;
+  return {count,sides,mod};
+}
+function doRoll(spec){
+  const parsed=parseDiceSpec(spec);
+  const stage=document.getElementById('diceStage');
+  if(!stage)return;
+  if(!parsed){
+    stage.innerHTML='<div class="dice-total" style="color:var(--red)">Invalid format — try 1d20 or 2d6+3</div>';
+    return;
+  }
+  const {count,sides,mod}=parsed;
+  const rolls=[];
+  for(let i=0;i<count;i++) rolls.push(1+Math.floor(Math.random()*sides));
+  const sum=rolls.reduce((a,b)=>a+b,0)+mod;
+  const isD20=sides===20&&count===1;
+  stage.innerHTML='';
+  const die=document.createElement('div');
+  die.className='die-shape rolling';
+  die.textContent='?';
+  stage.appendChild(die);
+  const totalEl=document.createElement('div');
+  totalEl.className='dice-total';
+  stage.appendChild(totalEl);
+  const breakdownEl=document.createElement('div');
+  breakdownEl.className='dice-breakdown';
+  stage.appendChild(breakdownEl);
+  let ticks=0;
+  const ticker=setInterval(()=>{
+    die.textContent=1+Math.floor(Math.random()*sides);
+    ticks++;
+    if(ticks>6){
+      clearInterval(ticker);
+      die.classList.remove('rolling');
+      die.textContent=sum;
+      if(isD20&&rolls[0]===20) die.classList.add('crit');
+      else if(isD20&&rolls[0]===1) die.classList.add('fail');
+      totalEl.textContent=diceCurrentLabel||(count+'d'+sides);
+      breakdownEl.textContent = (count>1||mod)
+        ? ('d'+sides+': '+rolls.join(' + ')+(mod?(mod>=0?'  +'+mod+' mod':'  −'+Math.abs(mod)+' mod'):''))
+        : ('d'+sides+': '+rolls[0]);
+      diceHistory.unshift({spec:count+'d'+sides+(mod?(mod>=0?'+':'')+mod:''),label:diceCurrentLabel,total:sum});
+      if(diceHistory.length>DICE_HISTORY_MAX) diceHistory.length=DICE_HISTORY_MAX;
+      renderDiceHistory();
+    }
+  },55);
+}
+function renderDiceHistory(){
+  const wrap=document.getElementById('diceHistoryList');
+  if(!wrap)return;
+  if(!diceHistory.length){wrap.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:6px">No rolls yet</div>';return;}
+  wrap.innerHTML=diceHistory.map(h=>'<div class="dice-history-row"><span>'+(h.label?h.label+' — ':'')+h.spec+'</span><span class="dh-result">'+h.total+'</span></div>').join('');
+}
+
 slBuildFilters();
 initApp();
 </script>
@@ -3344,6 +3477,40 @@ initApp();
           <button onclick="resetClassTheme()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;width:100%;margin-bottom:6px">↺ Reset Class</button>
           <button onclick="resetAllThemes()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--red);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;width:100%">↺ Reset All</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DICE ROLLER -->
+  <button class="dice-fab" onclick="openDice('',0)" title="Dice Roller">🎲</button>
+  <div class="dice-modal" id="diceModal" onclick="if(event.target===this)closeDice()">
+    <div class="dice-sheet">
+      <div class="dice-hdr">
+        <span class="dice-title" id="diceTitle">Dice Roller</span>
+        <button class="dice-close" onclick="closeDice()">✕</button>
+      </div>
+      <div class="dice-stage" id="diceStage">
+        <div class="die-shape">20</div>
+        <div class="dice-total"></div>
+        <div class="dice-breakdown"></div>
+      </div>
+      <div class="dice-presets">
+        <button class="dice-preset-btn" onclick="rollPreset('1d4')">d4</button>
+        <button class="dice-preset-btn" onclick="rollPreset('1d6')">d6</button>
+        <button class="dice-preset-btn" onclick="rollPreset('1d8')">d8</button>
+        <button class="dice-preset-btn" onclick="rollPreset('1d10')">d10</button>
+        <button class="dice-preset-btn" onclick="rollPreset('1d12')">d12</button>
+        <button class="dice-preset-btn" onclick="rollPreset('1d20')">d20</button>
+        <button class="dice-preset-btn" onclick="rollPreset('2d6')">2d6</button>
+        <button class="dice-preset-btn" onclick="rollPreset('1d100')">d100</button>
+      </div>
+      <div class="dice-custom-row">
+        <input type="text" id="diceCustomInput" placeholder="z.B. 2d6+3">
+        <button onclick="rollCustom()">Roll</button>
+      </div>
+      <div class="dice-history">
+        <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:var(--text3);margin-bottom:6px;text-transform:uppercase">History</div>
+        <div id="diceHistoryList"></div>
       </div>
     </div>
   </div>
