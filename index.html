@@ -104,6 +104,18 @@ input[type=number]{-moz-appearance:textfield}
 .sk-attr{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;min-width:28px}
 .sk-bon{font-size:14px;color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
 .sk-roll-ic{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
+
+/* CLASS TABLE */
+.ct-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ct-tbl{border-collapse:collapse;font-size:12px;white-space:nowrap;min-width:100%}
+.ct-tbl th{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);font-weight:600;padding:7px 6px;border-bottom:1px solid var(--border);text-align:center;position:sticky;top:0;background:var(--bg2)}
+.ct-tbl th.ct-grp{color:var(--gold2);border-bottom:1px solid var(--border2);font-size:8px}
+.ct-tbl td{padding:6px;text-align:center;color:var(--text2);border-bottom:1px solid var(--border2)}
+.ct-tbl td.ct-lvl{font-family:'Cinzel',serif;color:var(--gold2);font-weight:600}
+.ct-tbl td.ct-feat{text-align:left;white-space:normal;min-width:150px;color:var(--purple);font-size:11px;line-height:1.4}
+.ct-tbl tr.ct-cur td{background:var(--purple3);color:var(--text)}
+.ct-tbl tr.ct-cur td.ct-lvl{color:var(--gold)}
+.ct-tbl td.ct-dash{color:var(--text3);opacity:.5}
 .sk-roll-ic:active{transform:scale(.9)}
 
 /* DICE ROLLER */
@@ -378,7 +390,7 @@ input[type=number]{-moz-appearance:textfield}
         <div class="ifield"><label>Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
-            <input type="number" id="lvl" onchange="buildAbilities()autoSave()" value="1" min="1" max="20" oninput="buildAbilities()" style="text-align:center;flex:1">
+            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable()" style="text-align:center;flex:1">
             <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
           </div></div>
         <div class="ifield"><label>Background</label><input id="bg" readonly placeholder="— select on Backgrounds tab —" onclick="switchTab('hintergrund')" style="cursor:pointer;caret-color:transparent" title="Go to Backgrounds tab"></div>
@@ -412,6 +424,13 @@ input[type=number]{-moz-appearance:textfield}
           <div id="coreTraitsList" style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:14px;line-height:1.8;color:var(--text2)"></div>
           <div class="nta-wrap" style="margin-top:6px"><textarea class="nta" id="n_class_traits" placeholder="Homebrew notes, custom traits..." style="min-height:60px"></textarea><button class="nta-expand" onclick="openNoteModal('n_class_traits','Class Traits Notes')">⛶</button></div>
         </div>
+      </div>
+      <div id="clsTableSection" style="display:none;margin-top:10px">
+        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+          <span id="clsTableTitle">Class Table</span>
+          <button onclick="toggleInfoSection('clsTableBody','clsTableBtn')" id="clsTableBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
+        </div>
+        <div id="clsTableBody" style="display:none"></div>
       </div>
       <div id="clsLoreSection" style="display:none;margin-top:10px">
         <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
@@ -854,7 +873,7 @@ function buildAttrs(){
 function chLvl(d){
   const el=document.getElementById('lvl');
   const v=Math.max(1,Math.min(20,(parseInt(el.value)||1)+d));
-  el.value=v;buildAbilities();
+  el.value=v;buildAbilities();buildClassTable();
 }
 function chAttr(k,d){
   st.attrs[k]=Math.max(1,Math.min(30,(st.attrs[k]||10)+d));
@@ -1025,6 +1044,74 @@ function setMySpellFilter(f){
   });
   buildMySpells();
 }
+// CLASS PROGRESSION TABLES
+// cols: [level, profBonus, features, wildShape, cantrips, preparedSpells, slots 1..9]
+const CLASS_TABLES={
+  'Druid':{
+    extra:[{k:'wild',l:'Wild Shape'},{k:'cantrips',l:'Cantrips'},{k:'prepared',l:'Prepared Spells'}],
+    rows:[
+      {lvl:1, pb:2, f:'Druidic, Primal Order, Spellcasting', wild:'—', cantrips:2, prepared:4,  slots:[2,0,0,0,0,0,0,0,0]},
+      {lvl:2, pb:2, f:'Wild Companion, Wild Shape',          wild:2,   cantrips:2, prepared:5,  slots:[3,0,0,0,0,0,0,0,0]},
+      {lvl:3, pb:2, f:'Druid Subclass',                      wild:2,   cantrips:2, prepared:6,  slots:[4,2,0,0,0,0,0,0,0]},
+      {lvl:4, pb:2, f:'Ability Score Improvement',           wild:2,   cantrips:3, prepared:7,  slots:[4,3,0,0,0,0,0,0,0]},
+      {lvl:5, pb:3, f:'Wild Resurgence',                     wild:2,   cantrips:3, prepared:9,  slots:[4,3,2,0,0,0,0,0,0]},
+      {lvl:6, pb:3, f:'Subclass Feature',                    wild:3,   cantrips:3, prepared:10, slots:[4,3,3,0,0,0,0,0,0]},
+      {lvl:7, pb:3, f:'Elemental Fury',                      wild:3,   cantrips:3, prepared:11, slots:[4,3,3,1,0,0,0,0,0]},
+      {lvl:8, pb:3, f:'Ability Score Improvement',           wild:3,   cantrips:3, prepared:12, slots:[4,3,3,2,0,0,0,0,0]},
+      {lvl:9, pb:4, f:'—',                                   wild:3,   cantrips:3, prepared:14, slots:[4,3,3,3,1,0,0,0,0]},
+      {lvl:10,pb:4, f:'Subclass Feature',                    wild:3,   cantrips:4, prepared:15, slots:[4,3,3,3,2,0,0,0,0]},
+      {lvl:11,pb:4, f:'—',                                   wild:3,   cantrips:4, prepared:16, slots:[4,3,3,3,2,1,0,0,0]},
+      {lvl:12,pb:4, f:'Ability Score Improvement',           wild:3,   cantrips:4, prepared:16, slots:[4,3,3,3,2,1,0,0,0]},
+      {lvl:13,pb:5, f:'—',                                   wild:3,   cantrips:4, prepared:17, slots:[4,3,3,3,2,1,1,0,0]},
+      {lvl:14,pb:5, f:'Subclass Feature',                    wild:3,   cantrips:4, prepared:17, slots:[4,3,3,3,2,1,1,0,0]},
+      {lvl:15,pb:5, f:'Improved Elemental Fury',             wild:3,   cantrips:4, prepared:18, slots:[4,3,3,3,2,1,1,1,0]},
+      {lvl:16,pb:5, f:'Ability Score Improvement',           wild:3,   cantrips:4, prepared:18, slots:[4,3,3,3,2,1,1,1,0]},
+      {lvl:17,pb:6, f:'—',                                   wild:4,   cantrips:4, prepared:19, slots:[4,3,3,3,2,1,1,1,1]},
+      {lvl:18,pb:6, f:'Beast Spells',                        wild:4,   cantrips:4, prepared:20, slots:[4,3,3,3,3,1,1,1,1]},
+      {lvl:19,pb:6, f:'Epic Boon',                           wild:4,   cantrips:4, prepared:21, slots:[4,3,3,3,3,2,1,1,1]},
+      {lvl:20,pb:6, f:'Archdruid',                           wild:4,   cantrips:4, prepared:22, slots:[4,3,3,3,3,2,2,1,1]}
+    ]
+  }
+};
+
+function buildClassTable(){
+  const sec=document.getElementById('clsTableSection');
+  const body=document.getElementById('clsTableBody');
+  const title=document.getElementById('clsTableTitle');
+  if(!sec||!body)return;
+  const cls=(document.getElementById('cls')?.value||'').trim();
+  const tbl=CLASS_TABLES[cls];
+  if(!tbl){sec.style.display='none';body.innerHTML='';return;}
+  sec.style.display='';
+  if(title) title.textContent=cls+' Table';
+  const curLvl=parseInt(document.getElementById('lvl')?.value)||1;
+  const ex=tbl.extra;
+  const slotHdr=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+  let html='<div class="ct-wrap"><table class="ct-tbl">';
+  html+='<tr><th colspan="'+(3+ex.length)+'"></th><th class="ct-grp" colspan="9">Spell Slots per Spell Level</th></tr>';
+  html+='<tr><th>Level</th><th>Prof.<br>Bonus</th><th>Features</th>'
+      + ex.map(e=>'<th>'+e.l.replace(' ','<br>')+'</th>').join('')
+      + slotHdr.map(s=>'<th>'+s+'</th>').join('')+'</tr>';
+  tbl.rows.forEach(r=>{
+    const cur=r.lvl===curLvl?' class="ct-cur"':'';
+    html+='<tr'+cur+'>';
+    html+='<td class="ct-lvl">'+ordinal(r.lvl)+'</td>';
+    html+='<td>+'+r.pb+'</td>';
+    html+='<td class="ct-feat">'+r.f+'</td>';
+    ex.forEach(e=>{html+='<td>'+r[e.k]+'</td>';});
+    r.slots.forEach(s=>{html+= s>0 ? '<td>'+s+'</td>' : '<td class="ct-dash">—</td>';});
+    html+='</tr>';
+  });
+  html+='</table></div>';
+  body.innerHTML=html;
+}
+
+function ctShort(z){
+  const t=String(z||'').trim();
+  if(!t) return '—';
+  if(/^bonus/i.test(t)) return 'Bonus Action';
+  return t;
+}
 function buildMySpells(){
   const list=document.getElementById('mySpells');if(!list)return;list.innerHTML='';
   const prepRank=p=>p==='free'?0:p?1:2;
@@ -1081,6 +1168,8 @@ function buildMySpells(){
       <div class="di"><label>Range</label><span>${dbSpell.reichweite}</span></div>
       <div class="di"><label>Duration</label><span>${dbSpell.dauer}</span></div>
       <div class="di"><label>Components</label><span>${dbSpell.komp||'—'}</span></div>
+      <div class="di"><label>School</label><span>${sp.school||'—'}</span></div>
+      <div class="di"><label>Level</label><span>${lbl}</span></div>
     </div>`:'';
     const descHtml=dbSpell?`<div class="desc-text">${formatSpellDesc(dbSpell.desc)}</div>`:'';
     const higherHtml=dbSpell&&dbSpell.higher?`<div class="higher-box"><label>At Higher Levels</label><p>${dbSpell.higher}</p></div>`:'';
@@ -1088,8 +1177,8 @@ function buildMySpells(){
     <div class="spell-main" onclick="togMySpellDetail(${i},this)" style="cursor:pointer">
       <span class="spell-name">${sp.name}</span>
       ${isConc?`<span class="sp-badge sp-conc${concIsActive?' active':''}" onclick="event.stopPropagation();togConc(${i})" title="Concentration">C</span>`:''}
-      <span class="sp-badge sp-info">${lbl}</span>
-      <span class="sp-badge sp-warn">${sp.school}</span>
+      <span class="sp-badge sp-info">${ctShort(dbSpell?dbSpell.zeit:'')}</span>
+      ${/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<span class="sp-badge sp-warn">Ritual</span>`:''}
       <div class="spell-prep${sp.prep==='free'?' free':sp.prep?' on':''}" onclick="event.stopPropagation();togPrep(${i})" style="margin-left:auto" title="${sp.prep==='free'?'Always prepared':sp.prep?'Prepared':'Not prepared'}">✦</div>
       <div class="fc-uses" id="fcu_${i}">${(sp.freeMax||0)>0?Array.from({length:sp.freeMax},(_,k)=>`<div class="fc-pip${k<(sp.freeUsed||0)?' used':''}" onclick="event.stopPropagation();togFreeUse(${i},${k})" title="Free cast (no slot)"></div>`).join(''):''}</div>
       <span class="expbtn" id="msbtn_${i}">▾</span>
@@ -1845,13 +1934,13 @@ function onClsChange(){
   buildAbilities();
   
   buildCoreTraits();
-  buildClsLore();
+  buildClsLore();buildClassTable();
   buildSubclsLore();
 }
 function onSubclsChange(){
   buildAbilities();
   
-  buildClsLore();
+  buildClsLore();buildClassTable();
   buildSubclsLore();
 }
 
@@ -2854,7 +2943,7 @@ function switchTab(t){
   if(tabId==='hintergrund')bgInit();
   if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();buildFeats();buildAbilities();buildSavedBeasts();buildWeapons();}
   if(tabId==='spelllist'){slRender();}
-  if(tabId==='info'){buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();buildAttrs();}
+  if(tabId==='info'){buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();buildAttrs();}
 }
 
 // LOCALSTORAGE / MEHRCHARAKTERE
@@ -2909,7 +2998,7 @@ function applyState(snap){
   // Trigger dependent UI (skip onClsChange - already called)
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
+  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
   const raceNotesEl=document.getElementById('n_race_custom');
   if(raceNotesEl) raceNotesEl.value=st.raceNotes||'';
   const skillNotesEl=document.getElementById('skillNotes');
@@ -3003,7 +3092,7 @@ function resetUI(){
   onClsChange();
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
+  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
   const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
 }
 
