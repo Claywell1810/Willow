@@ -1575,8 +1575,79 @@ function adjCur(id,d){
   autoSave();
 }
 
-// DRUIDEN-DATEN
-const DRUID_CLASS_FEATURES=[
+// KLASSEN-DATEN — eine Registry für alle Klassen
+// Schema: CLASS_DATA["Klasse"] = { special:[...], base:[{lvl,name,desc,tag}], subclass:{ "Subklasse":[...] } }
+// special: Marker für Sonder-UI (z. B. "beasts"). Keys = exakte Klassen-/Subklassennamen (Savegame-kompatibel).
+const CLASS_DATA={};
+function clsSpecial(cls,key){ return !!(CLASS_DATA[cls]&&(CLASS_DATA[cls].special||[]).includes(key)); }
+
+// DRUID
+CLASS_DATA["Druid"]={
+special:["beasts"],
+subclassList:["Circle of the Land (PHB)","Circle of the Moon (PHB)","Circle of the Sea (XPHB)","Circle of the Stars (XPHB)","Circle of Dreams (XGE)","Circle of the Shepherd (XGE)","Circle of Spores (TCE)","Circle of Wildfire (TCE)"],
+abilities:{
+    base:[
+      {id:"wildshape",name:"Wild Shape",tag:"bonus",icon:"🐺",uses:2,restore:"short",
+       desc:"As a Bonus Action, shape-shift into a known Beast form. Lasts hours equal to half your Druid level.\n• Temp HP equal to your Druid level when shifting.\n• You retain INT/WIS/CHA, class features, and proficiencies.\n• You cannot cast spells while shifted.\n• Max CR 1/4, no Fly Speed (Fly Speed allowed from level 8).\n• Known Forms: 4 (replace one on Long Rest)."},
+      {id:"wildcompanion",name:"Wild Companion",tag:"aktion",icon:"🦊",uses:null,restore:null,
+       desc:"Expend a spell slot or Wild Shape use to cast Find Familiar without Material components. The familiar is Fey and disappears on Long Rest."},
+      {id:"wildresurgence_ws",name:"Wild Resurgence → Spell Slot",tag:"bonus",icon:"🔄",uses:1,restore:"long",
+       desc:"Expend one Wild Shape use to gain a level 1 spell slot (once per Long Rest).",minLvl:5},
+    ],
+    "Circle of the Land":[
+      {id:"landsaid",name:"Land's Aid",tag:"aktion",icon:"🌿",uses:null,restore:null,
+       desc:"Expend a Wild Shape use. Choose a point within 60 ft: 10-ft Sphere appears. Each creature you choose makes CON save — 2d6 Necrotic on fail, half on success. One creature regains 2d6 HP.\n(3d6 at level 10, 4d6 at level 14)"},
+      {id:"naturalrecovery",name:"Natural Recovery",tag:"passiv",icon:"🍃",uses:1,restore:"long",
+       desc:"Cast one prepared Circle Spell without expending a slot (once per Long Rest).\nAfter a Short Rest: recover spell slots with combined levels ≤ half your Druid level (round up), none level 6+.",minLvl:6},
+      {id:"naturessanctuary",name:"Nature's Sanctuary",tag:"aktion",icon:"🌳",uses:null,restore:null,
+       desc:"Expend a Wild Shape use. Spectral trees and vines fill a 15-ft Cube within 120 ft for 1 minute. You and allies have Cover inside; allies gain your Nature's Ward Resistance.\nBonus Action: move the Cube up to 60 ft.",minLvl:14},
+    ],
+    "Circle of the Moon":[
+      {id:"moonlightstep",name:"Moonlight Step",tag:"bonus",icon:"🌙",uses:"wis",restore:"long",
+       desc:"Teleport up to 30 ft to an unoccupied space you can see. You have Advantage on your next attack roll before end of this turn.\nUses: WIS modifier (min 1). Also restore uses by expending a level 2+ spell slot per use.",minLvl:10},
+    ],
+    "Circle of the Sea":[
+      {id:"wrathofthesea",name:"Wrath of the Sea",tag:"bonus",icon:"🌊",uses:null,restore:null,
+       desc:"Expend a Wild Shape use to manifest a 5-ft Emanation of ocean spray for 10 minutes.\nAs a Bonus Action each turn: one creature in the Emanation makes CON save or take Cold damage (WIS modifier d6s, min 1d6) and be pushed 15 ft (Large or smaller).\n(Emanation grows to 10 ft at level 6)"},
+    ],
+    "Circle of the Stars":[
+      {id:"starryform",name:"Starry Form",tag:"bonus",icon:"⭐",uses:null,restore:null,
+       desc:"Expend a Wild Shape use to take a Starry Form for 10 minutes. Shed Bright Light 10 ft, Dim Light 10 ft more.\nChoose a constellation:\n• Archer: Bonus Action ranged spell attack (60 ft) — 1d8 + WIS Radiant.\n• Chalice: When you cast a healing spell, you or a creature within 30 ft regains 1d8 + WIS HP.\n• Dragon: Treat rolls of 9 or lower as 10 for INT/WIS checks and CON Concentration saves.\n(Archer and Chalice become 2d8 at level 10; Dragon gains Fly 20 ft)"},
+      {id:"cosmicomen",name:"Cosmic Omen",tag:"reaktion",icon:"🔮",uses:"wis",restore:"long",
+       desc:"After each Long Rest, roll a die:\n• Weal (even): Add 1d6 to a D20 Test of a creature you see within 30 ft.\n• Woe (odd): Subtract 1d6 from a D20 Test of a creature you see within 30 ft.\nUses: WIS modifier (min 1).",minLvl:6},
+    ],
+    "Circle of Dreams (XGE)":[
+      {id:"balmsc",name:"Balm of the Summer Court",tag:"bonus",icon:"🌸",uses:"level",restore:"long",
+       desc:"Pool of d6s equal to your Druid level. As a Bonus Action, spend up to half your Druid level in dice: one creature within 120 ft regains HP equal to total rolled + WIS modifier. A creature benefits once per rest."},
+      {id:"hiddenpaths",name:"Hidden Paths",tag:"bonus",icon:"🌀",uses:"wis",restore:"long",
+       desc:"Teleport up to 60 ft to an unoccupied space you can see. OR use your action to teleport one willing creature you touch up to 30 ft.\nUses: WIS modifier (min 1).",minLvl:10},
+    ],
+    "Circle of the Shepherd (XGE)":[
+      {id:"spirittotem",name:"Spirit Totem",tag:"bonus",icon:"🦅",uses:null,restore:null,
+       desc:"As a Bonus Action, summon an incorporeal spirit to a point within 60 ft. 30-ft radius aura for 1 minute (concentration).\n• Bear: Allies gain temp HP = 5 + Druid level; Advantage on STR checks and saves.\n• Hawk: Allies gain Advantage on attack rolls; Reaction to give Advantage on a Perception check.\n• Unicorn: Healing spells benefit all allies in aura; once per turn teleport one ally up to 30 ft."},
+      {id:"fungalinfestation2",name:"Faithful Summons",tag:"passiv",icon:"🐾",uses:1,restore:"long",
+       desc:"If reduced to 0 HP or incapacitated against your will: immediately gain Conjure Animals as a 9th-level spell (4 beasts CR 2 or lower, 1 hour, no concentration). Once per Long Rest.",minLvl:14},
+    ],
+    "Circle of Spores (TCE)":[
+      {id:"haloofspores",name:"Halo of Spores",tag:"reaktion",icon:"🍄",uses:null,restore:null,
+       desc:"When a creature moves into a space within 10 ft of you or starts its turn there, deal necrotic damage (no save):\n• Level 2: 1d4 • Level 6: 1d6 • Level 10: 1d8 • Level 14: 1d10"},
+      {id:"symbioticent",name:"Symbiotic Entity",tag:"aktion",icon:"🌑",uses:null,restore:null,
+       desc:"Expend a Wild Shape use (no transformation). Gain 4 temp HP per Druid level. While active:\n• Halo of Spores deals 1d6 extra damage.\n• Melee weapon attacks deal extra 1d6 Necrotic.\nLasts until temp HP run out or Wild Shape used."},
+      {id:"spreadingspores",name:"Spreading Spores",tag:"bonus",icon:"💨",uses:null,restore:null,
+       desc:"While Symbiotic Entity is active: hurl spores up to 30 ft, creating a 10-ft cube for 1 minute. Creatures entering or starting their turn there take Halo of Spores damage (CON save negates). Halo of Spores inactive while cube is up.",minLvl:10},
+      {id:"fungalinfestation",name:"Fungal Infestation",tag:"reaktion",icon:"☠",uses:"wis",restore:"long",
+       desc:"When a Small/Medium beast or humanoid dies within 10 ft of you: animate it as a zombie with 1 HP. Obeys verbal commands. Lasts 1 hour or until 0 HP.\nUses: WIS modifier (min 1).",minLvl:6},
+    ],
+    "Circle of Wildfire (TCE)":[
+      {id:"summonwildfire",name:"Summon Wildfire Spirit",tag:"aktion",icon:"🔥",uses:null,restore:null,
+       desc:"Expend a Wild Shape use to summon your wildfire spirit (no transformation). Appears within 30 ft, acts after you.\n• AC 13, HP = your max HP, immune to fire, Speed 40 ft, Fly 30 ft.\n• Flame Seed: ranged spell attack (60 ft), 1d6 + PB fire damage.\n• Fiery Teleportation (Reaction): teleport up to 15 ft; creatures within 5 ft of origin make DEX save or take 1d6 + PB fire damage.\nLasts 1 hour or until 0 HP."},
+      {id:"cauterizingflames",name:"Cauterizing Flames",tag:"bonus",icon:"🕯",uses:null,restore:null,
+       desc:"When a Small or larger creature dies within 30 ft of you or your spirit, a spectral flame appears for 1 minute. As a Bonus Action, extinguish one flame: choose a creature within 30 ft — regain 2d10 + WIS HP, or take 2d10 + WIS fire damage (DEX save for half).",minLvl:10},
+      {id:"blazingrevival",name:"Blazing Revival",tag:"passiv",icon:"🌋",uses:1,restore:"long",
+       desc:"If your spirit is within 120 ft when you drop to 0 HP: cause the spirit to drop to 0 HP instead. You regain half your HP and rise immediately. Once per Long Rest.",minLvl:14},
+    ],
+},
+base:[
   {lvl:1,name:"Druidic",desc:"You know Druidic, the secret language of Druids. While learning this ancient tongue, you also unlocked the magic of communicating with animals; you always have the Speak with Animals spell prepared.\nYou can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message. Others spot the message's presence with a successful DC 15 Intelligence (Investigation) check but can't decipher it without magic.",tag:"Passiv"},
   {lvl:1,name:"Primal Order",desc:"You have dedicated yourself to one of the following sacred roles of your choice.\n• Magician: You know one extra cantrip from the Druid spell list. Your mystical connection to nature gives a bonus to Intelligence (Arcana or Nature) checks equal to your Wisdom modifier (minimum +1).\n• Warden: Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.",tag:"Passiv"},
   {lvl:1,name:"Spellcasting",desc:"Wisdom is your spellcasting ability for Druid spells. You prepare spells equal to your Druid level + Wisdom modifier after each Long Rest. You can use a Druidic Focus as a Spellcasting Focus.",tag:"Passiv"},
@@ -1593,8 +1664,8 @@ const DRUID_CLASS_FEATURES=[
   {lvl:18,name:"Beast Spells",desc:"While using Wild Shape, you can cast spells in Beast form, except spells with a Material component that has a cost or is consumed.",tag:"Passiv"},
   {lvl:19,name:"Epic Boon",desc:"You gain an Epic Boon feat or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.",tag:"Passiv"},
   {lvl:20,name:"Archdruid",desc:"• Evergreen Wild Shape: Whenever you roll Initiative with no Wild Shape uses left, regain one use.\n• Nature Magician: Convert unexpended Wild Shape uses into a spell slot (each use = 2 spell levels, once per Long Rest).\n• Longevity: For every 10 years, your body ages only 1 year.",tag:"Passiv"}
-];
-const DRUID_SUBCLASS_FEATURES={
+],
+subclass:{
   "Circle of the Land":[
     {lvl:3,name:"Circle of the Land Spells",desc:"After each Long Rest, choose a land type: arid, polar, temperate, or tropical. You have the corresponding spells prepared for your Druid level.",tag:"Passiv"},
     {lvl:3,name:"Land's Aid",desc:"As a Magic action, expend a Wild Shape use. Choose a point within 60 feet — vitality flowers and life-draining thorns appear in a 10-foot Sphere. Each creature you choose makes a CON save (DC = spell save DC): 2d6 Necrotic on fail, half on success. One creature of your choice in the area regains 2d6 HP. Increases to 3d6 at level 10 and 4d6 at level 14.",tag:"Aktion"},
@@ -1649,20 +1720,44 @@ const DRUID_SUBCLASS_FEATURES={
     {lvl:10,name:"Cauterizing Flames",desc:"When a Small or larger creature dies within 30 feet of you or your wildfire spirit, a spectral flame appears in its space for 1 minute. As a Bonus Action, extinguish one such flame: choose one creature within 30 feet of the flame to either regain 2d10 + WIS modifier HP, or take 2d10 + WIS modifier fire damage (DEX save for half).",tag:"Bonusaktion"},
     {lvl:14,name:"Blazing Revival",desc:"If your wildfire spirit is within 120 feet when you drop to 0 HP and fall unconscious, you can cause the spirit to drop to 0 HP. You then regain half your HP and immediately rise. Once used, you must finish a long rest before using this feature again.",tag:"Passiv"}
   ]
+}
 };
-const SUBCLS_BY_CLASS={
-  "Barbarian":["Path of the Berserker (PHB)","Path of the Totem Warrior (PHB)","Path of the Wild Heart (XPHB)","Path of the World Tree (XPHB)","Path of the Battlerager (SCAG)","Path of the Ancestral Guardian (XGE)","Path of the Storm Herald (XGE)","Path of the Zealot (XGE)","Path of the Beast (TCE)","Path of Wild Magic (TCE)","Path of the Giant (BGG)"],
-  "Bard":["College of Lore (PHB)","College of Valor (PHB)","College of Dance (XPHB)","College of Glamour (XGE)","College of Swords (XGE)","College of Whispers (XGE)","College of Creation (TCE)","College of Eloquence (TCE)","College of Spirits (VRGR)"],
-  "Cleric":["Knowledge Domain (PHB)","Life Domain (PHB)","Light Domain (PHB)","Nature Domain (PHB)","Tempest Domain (PHB)","Trickery Domain (PHB)","War Domain (PHB)","Death Domain (DMG)","Arcana Domain (SCAG)","Forge Domain (XGE)","Grave Domain (XGE)","Order Domain (TCE)","Peace Domain (TCE)","Twilight Domain (TCE)"],
-  "Druid":["Circle of the Land (PHB)","Circle of the Moon (PHB)","Circle of the Sea (XPHB)","Circle of the Stars (XPHB)","Circle of Dreams (XGE)","Circle of the Shepherd (XGE)","Circle of Spores (TCE)","Circle of Wildfire (TCE)"],
-  "Fighter":["Battle Master (PHB)","Champion (PHB)","Eldritch Knight (PHB)","Arcane Archer (XGE)","Cavalier (XGE)","Samurai (XGE)","Echo Knight (EGW)","Psi Warrior (TCE)","Rune Knight (TCE)","Banneret (SCAG)"],
-  "Monk":["Way of the Open Hand (PHB)","Way of Shadow (PHB)","Way of the Four Elements (PHB)","Warrior of the Open Hand (XPHB)","Warrior of Shadow (XPHB)","Warrior of the Elements (XPHB)","Warrior of Mercy (XPHB)","Way of the Long Death (SCAG)","Way of the Drunken Master (XGE)","Way of the Kensei (XGE)","Way of the Sun Soul (XGE)","Way of Mercy (TCE)","Way of the Astral Self (TCE)","Way of the Ascendant Dragon (FTD)"],
-  "Paladin":["Oath of Devotion (PHB)","Oath of the Ancients (PHB)","Oath of Vengeance (PHB)","Oathbreaker (DMG)","Oath of the Crown (SCAG)","Oath of Conquest (XGE)","Oath of Redemption (XGE)","Oath of Glory (TCE)","Oath of the Watchers (TCE)"],
-  "Ranger":["Beast Master (PHB)","Hunter (PHB)","Gloom Stalker (XGE)","Horizon Walker (XGE)","Monster Slayer (XGE)","Fey Wanderer (TCE)","Swarmkeeper (TCE)","Drakewarden (FTD)"],
-  "Rogue":["Arcane Trickster (PHB)","Assassin (PHB)","Thief (PHB)","Inquisitive (XGE)","Mastermind (XGE)","Scout (XGE)","Swashbuckler (XGE)","Phantom (TCE)","Soulknife (TCE)"],
-  "Sorcerer":["Draconic Bloodline (PHB)","Wild Magic (PHB)","Draconic Sorcery (XPHB)","Wild Magic Sorcery (XPHB)","Aberrant Sorcery (XPHB)","Clockwork Sorcery (XPHB)","Divine Soul (XGE)","Shadow Magic (XGE)","Storm Sorcery (XGE)","Aberrant Mind (TCE)","Clockwork Soul (TCE)","Lunar Sorcery (DSotDQ)"],
-  "Warlock":["The Archfey (PHB)","The Fiend (PHB)","The Great Old One (PHB)","Archfey Patron (XPHB)","Fiend Patron (XPHB)","Great Old One Patron (XPHB)","Celestial Patron (XPHB)","The Undying (SCAG)","The Celestial (XGE)","The Hexblade (XGE)","The Fathomless (TCE)","The Genie (TCE)","The Undead (VRGR)"],
-  "Wizard":["School of Abjuration (PHB)","School of Conjuration (PHB)","School of Divination (PHB)","School of Enchantment (PHB)","School of Evocation (PHB)","School of Illusion (PHB)","School of Necromancy (PHB)","School of Transmutation (PHB)","Abjurer (XPHB)","Diviner (XPHB)","Evoker (XPHB)","Illusionist (XPHB)","War Magic (XGE)","Chronurgy Magic (EGW)","Graviturgy Magic (EGW)","Bladesinging (TCE)","Order of Scribes (TCE)"]
+// WEITERE KLASSEN — noch ohne Feature-Daten; beim Einpflegen hier erweitern (base, subclass, abilities)
+CLASS_DATA["Barbarian"]={
+special:[],
+subclassList:["Path of the Berserker (PHB)","Path of the Totem Warrior (PHB)","Path of the Wild Heart (XPHB)","Path of the World Tree (XPHB)","Path of the Battlerager (SCAG)","Path of the Ancestral Guardian (XGE)","Path of the Storm Herald (XGE)","Path of the Zealot (XGE)","Path of the Beast (TCE)","Path of Wild Magic (TCE)","Path of the Giant (BGG)"]
+};
+CLASS_DATA["Cleric"]={
+special:[],
+subclassList:["Knowledge Domain (PHB)","Life Domain (PHB)","Light Domain (PHB)","Nature Domain (PHB)","Tempest Domain (PHB)","Trickery Domain (PHB)","War Domain (PHB)","Death Domain (DMG)","Arcana Domain (SCAG)","Forge Domain (XGE)","Grave Domain (XGE)","Order Domain (TCE)","Peace Domain (TCE)","Twilight Domain (TCE)"]
+};
+CLASS_DATA["Fighter"]={
+special:[],
+subclassList:["Battle Master (PHB)","Champion (PHB)","Eldritch Knight (PHB)","Arcane Archer (XGE)","Cavalier (XGE)","Samurai (XGE)","Echo Knight (EGW)","Psi Warrior (TCE)","Rune Knight (TCE)","Banneret (SCAG)"]
+};
+CLASS_DATA["Monk"]={
+special:[],
+subclassList:["Way of the Open Hand (PHB)","Way of Shadow (PHB)","Way of the Four Elements (PHB)","Warrior of the Open Hand (XPHB)","Warrior of Shadow (XPHB)","Warrior of the Elements (XPHB)","Warrior of Mercy (XPHB)","Way of the Long Death (SCAG)","Way of the Drunken Master (XGE)","Way of the Kensei (XGE)","Way of the Sun Soul (XGE)","Way of Mercy (TCE)","Way of the Astral Self (TCE)","Way of the Ascendant Dragon (FTD)"]
+};
+CLASS_DATA["Paladin"]={
+special:[],
+subclassList:["Oath of Devotion (PHB)","Oath of the Ancients (PHB)","Oath of Vengeance (PHB)","Oathbreaker (DMG)","Oath of the Crown (SCAG)","Oath of Conquest (XGE)","Oath of Redemption (XGE)","Oath of Glory (TCE)","Oath of the Watchers (TCE)"]
+};
+CLASS_DATA["Ranger"]={
+special:[],
+subclassList:["Beast Master (PHB)","Hunter (PHB)","Gloom Stalker (XGE)","Horizon Walker (XGE)","Monster Slayer (XGE)","Fey Wanderer (TCE)","Swarmkeeper (TCE)","Drakewarden (FTD)"]
+};
+CLASS_DATA["Rogue"]={
+special:[],
+subclassList:["Arcane Trickster (PHB)","Assassin (PHB)","Thief (PHB)","Inquisitive (XGE)","Mastermind (XGE)","Scout (XGE)","Swashbuckler (XGE)","Phantom (TCE)","Soulknife (TCE)"]
+};
+CLASS_DATA["Sorcerer"]={
+special:[],
+subclassList:["Draconic Bloodline (PHB)","Wild Magic (PHB)","Draconic Sorcery (XPHB)","Wild Magic Sorcery (XPHB)","Aberrant Sorcery (XPHB)","Clockwork Sorcery (XPHB)","Divine Soul (XGE)","Shadow Magic (XGE)","Storm Sorcery (XGE)","Aberrant Mind (TCE)","Clockwork Soul (TCE)","Lunar Sorcery (DSotDQ)"]
+};
+CLASS_DATA["Warlock"]={
+special:[],
+subclassList:["The Archfey (PHB)","The Fiend (PHB)","The Great Old One (PHB)","Archfey Patron (XPHB)","Fiend Patron (XPHB)","Great Old One Patron (XPHB)","Celestial Patron (XPHB)","The Undying (SCAG)","The Celestial (XGE)","The Hexblade (XGE)","The Fathomless (TCE)","The Genie (TCE)","The Undead (VRGR)"]
 };
 
 
@@ -1785,8 +1880,8 @@ function buildClsLore(){
   const body=document.getElementById('clsLoreBody');
   const title=document.getElementById('clsLoreTitle');
   if(!sec||!body) return;
-  const clsData=CLASS_FEATURES[cls];
-  if(!clsData){sec.style.display='none';return;}
+  const clsData=CLASS_DATA[cls];
+  if(!clsData||!(clsData.base||[]).length){sec.style.display='none';return;}
   sec.style.display='';
   title.textContent='Class: '+cls;
   const all=[...(clsData.base||[])];
@@ -1886,7 +1981,7 @@ function buildSubclsLore(){
   const body=document.getElementById('subclsLoreBody');
   const title=document.getElementById('subclsLoreTitle');
   if(!sec||!body) return;
-  const clsData=CLASS_FEATURES[cls];
+  const clsData=CLASS_DATA[cls];
   if(!clsData||!subcls){sec.style.display='none';return;}
   // Try full name first, then strip source tag e.g. " (XPHB)"
   const subclsKey=clsData.subclass&&clsData.subclass[subcls]?subcls:subcls.replace(/\s*\([^)]+\)\s*$/,'').trim();
@@ -1932,10 +2027,12 @@ function onClsChange(){
   const cls=document.getElementById('cls').value;
   applyTheme(cls);
   const bstTab=document.getElementById('tabBestien');
-  if(bstTab) bstTab.style.display='';
+  const showBst=!cls||clsSpecial(cls,'beasts')||!!(st.savedBeasts&&st.savedBeasts.length);
+  if(bstTab) bstTab.style.display=showBst?'':'none';
+  if(!showBst&&document.getElementById('tab-bestien')?.classList.contains('on')) switchTab('info');
   const field=document.getElementById('subclsField');
   const sel=document.getElementById('subcls');
-  const opts=SUBCLS_BY_CLASS[cls]||[];
+  const opts=(CLASS_DATA[cls]&&CLASS_DATA[cls].subclassList)||[];
   if(opts.length){
     sel.innerHTML='<option value="">—</option>'+opts.map(o=>`<option>${o}</option>`).join('');
     field.style.display='';
@@ -2016,8 +2113,11 @@ function buildFeatsInfo(){
 }
 
 
-// CLASS_FEATURES registry — add other classes here later
-const WIZARD_CLASS_FEATURES=[
+// WIZARD
+CLASS_DATA["Wizard"]={
+special:[],
+subclassList:["School of Abjuration (PHB)","School of Conjuration (PHB)","School of Divination (PHB)","School of Enchantment (PHB)","School of Evocation (PHB)","School of Illusion (PHB)","School of Necromancy (PHB)","School of Transmutation (PHB)","Abjurer (XPHB)","Diviner (XPHB)","Evoker (XPHB)","Illusionist (XPHB)","War Magic (XGE)","Chronurgy Magic (EGW)","Graviturgy Magic (EGW)","Bladesinging (TCE)","Order of Scribes (TCE)"],
+base:[
   {lvl:1,name:"Arcane Recovery",desc:"You can regain some of your magical energy by studying your spellbook. When you finish a Short Rest, you can choose expended spell slots to recover. The spell slots can have a combined level equal to no more than half your Wizard level (round up), and none of the slots can be level 6 or higher. For example, if you're a level 4 Wizard, you can recover up to two levels' worth of spell slots, regaining either one level 2 spell slot or two level 1 spell slots.\nOnce you use this feature, you can't do so again until you finish a Long Rest.",tag:"Passiv"},
   {lvl:1,name:"Ritual Adept",desc:"You can cast any spell as a Ritual if that spell has the Ritual tag and the spell is in your spellbook. You needn't have the spell prepared, but you must read from the book to cast a spell in this way.",tag:"Passiv"},
   {lvl:1,name:"Spellcasting",desc:"As a student of arcane magic, you have learned to cast spells. See chapter 7 for the rules on spellcasting. The information below details how you use those rules with Wizard spells, which appear in the Wizard spell list later in the class's description.\n• Cantrips: You know three Wizard cantrips of your choice. Light, Mage Hand, and Ray of Frost are recommended. Whenever you finish a Long Rest, you can replace one of your cantrips from this feature with another Wizard cantrip of your choice.\nWhen you reach Wizard levels 4 and 10, you learn another Wizard cantrip of your choice, as shown in the Cantrips column of the Wizard Features table.\n• Spellbook: Your wizardly apprenticeship culminated in the creation of a unique book: your spellbook. It is a Tiny object that weighs 3 pounds, contains 100 pages, and can be read only by you or someone casting Identify. You determine the book's appearance and materials, such as a gilt-edged tome or a collection of vellum bound with twine.\nThe book contains the level 1+ spells you know. It starts with six level 1 Wizard spells of your choice. Detect Magic, Feather Fall, Mage Armor, Magic Missile, Sleep, and Thunderwave are recommended.\nWhenever you gain a Wizard level after 1, add two Wizard spells of your choice to your spellbook. Each of these spells must be of a level for which you have spell slots, as shown in the Wizard Features table. The spells are the culmination of arcane research you do regularly.\n• Spell Slots: The Wizard Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.\n• Prepared Spells of Level 1+: You prepare the list of level 1+ spells that are available for you to cast with this feature. To do so, choose four spells from your spellbook. The chosen spells must be of a level for which you have spell slots.\nThe number of spells on your list increases as you gain Wizard levels, as shown in the Prepared Spells column of the Wizard Features table. Whenever that number increases, choose additional Wizard spells until the number of spells on your list matches the number in the table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 3 Wizard, your list of prepared spells can include six spells of levels 1 and 2 in any combination, chosen from your spellbook.\nIf another Wizard feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Wizard spells for you.\n• Changing Your Prepared Spells: Whenever you finish a Long Rest, you can change your list of prepared spells, replacing any of the spells there with spells from your spellbook.\n• Spellcasting Ability: Intelligence is your spellcasting ability for your Wizard spells.\n• Spellcasting Focus: You can use an Arcane Focus or your spellbook as a Spellcasting Focus for your Wizard spells.",tag:"Passiv"},
@@ -2030,8 +2130,8 @@ const WIZARD_CLASS_FEATURES=[
   {lvl:18,name:"Spell Mastery",desc:"You have achieved such mastery over certain spells that you can cast them at will. Choose a level 1 and a level 2 spell in your spellbook that have a casting time of an action. You always have those spells prepared, and you can cast them at their lowest level without expending a spell slot. To cast either spell at a higher level, you must expend a spell slot.\nWhenever you finish a Long Rest, you can study your spellbook and replace one of those spells with an eligible spell of the same level from the book.",tag:"Passiv"},
   {lvl:19,name:"Epic Boon",desc:"You gain an Epic Boon feat or another feat of your choice for which you qualify. Boon of Spell Recall is recommended.",tag:"Passiv"},
   {lvl:20,name:"Signature Spells",desc:"Choose two level 3 spells in your spellbook as your signature spells. You always have these spells prepared, and you can cast each of them once at level 3 without expending a spell slot. When you do so, you can't cast them in this way again until you finish a Short Rest or Long Rest. To cast either spell at a higher level, you must expend a spell slot.",tag:"Passiv"}
-];
-const WIZARD_SUBCLASS_FEATURES={
+],
+subclass:{
   "Abjurer":[
   {lvl:3,name:"Abjuration Savant",desc:"Choose two Wizard spells from the Abjuration school, each of which must be no higher than level 2, and add them to your spellbook for free.\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Abjuration school to your spellbook for free. The chosen spell must be of a level for which you have spell slots.",tag:"Passiv"},
   {lvl:3,name:"Arcane Ward",desc:"You can weave magic around yourself for protection. When you cast an Abjuration spell with a spell slot, you can simultaneously use a strand of the spell's magic to create a magical ward on yourself that lasts until you finish a Long Rest. The ward has a Hit Points maximum equal to twice your Wizard level plus your Intelligence modifier. Whenever you take damage, the ward takes the damage instead, and if you have any Resistances or Vulnerabilities, apply them before reducing the ward's Hit Points. If the damage reduces the ward to 0 Hit Points, you take any remaining damage. While the ward has 0 Hit Points, it can't absorb damage, but its magic remains.\nWhenever you cast an Abjuration spell with a spell slot, the ward regains a number of Hit Points equal to twice the level of the spell slot. Alternatively, as a Bonus Action, you can expend a spell slot, and the ward regains a number of Hit Points equal to twice the level of the spell slot expended.\nOnce you create the ward, you can't create it again until you finish a Long Rest.",tag:"Passiv"},
@@ -2155,9 +2255,66 @@ const WIZARD_SUBCLASS_FEATURES={
     {lvl:10,name:"Master Scrivener",desc:"10th-level Order of Scribes feature\nWhenever you finish a long rest, you can create one magic scroll by touching your Wizardly Quill to a blank piece of paper or parchment and causing one spell from your Awakened Spellbook to be copied onto the scroll. The spellbook must be within 5 feet of you when you make the scroll.\nThe chosen spell must be of 1st or 2nd level and must have a casting time of 1 action. Once in the scroll, the spell's power is enhanced, counting as one level higher than normal. You can cast the spell from the scroll by reading it as an action. The scroll is unintelligible to anyone else, and the spell vanishes from the scroll when you cast it or when you finish your next long rest.\nYou are also adept at crafting spell scrolls, which are described in the treasure chapter of the Dungeon Master's Guide. The gold and time you must spend to make such a scroll are halved if you use your Wizardly Quill.",tag:"Passiv"},
     {lvl:14,name:"One with the Word",desc:"14th-level Order of Scribes feature\nYour connection to your Awakened Spellbook has become so profound that your soul has become entwined with it. While the book is on your person, you have advantage on all Intelligence (Arcana) checks, as the spellbook helps you remember magical lore.\nMoreover, if you take damage while your spellbook's mind is manifested, you can prevent all of that damage to you by using your reaction to dismiss the spectral mind, using its magic to save yourself. Then roll 3d6. The spellbook temporarily loses spells of your choice that have a combined spell level equal to that roll or higher. For example, if the roll's total is 9, spells vanish from the book that have a combined level of at least 9, which could mean one 9th-level spell, three 3rd-level spells, or some other combination. If there aren't enough spells in the book to cover this cost, you drop to 0 hit points.\nUntil you finish 1d6 long rests, you are incapable of casting the lost spells, even if you find them on a scroll or in another spellbook. After you finish the required number of rests, the spells reappear in the spellbook.\nOnce you use this reaction, you can't do so again until you finish a long rest.",tag:"Passiv"}
   ]
-
+}
 };
-const BARD_CLASS_FEATURES=[
+
+// BARD
+CLASS_DATA["Bard"]={
+special:[],
+subclassList:["College of Lore (PHB)","College of Valor (PHB)","College of Dance (XPHB)","College of Glamour (XGE)","College of Swords (XGE)","College of Whispers (XGE)","College of Creation (TCE)","College of Eloquence (TCE)","College of Spirits (VRGR)"],
+abilities:{
+    base:[
+      {id:"bardicinspiration",name:"Bardic Inspiration",tag:"bonus",icon:"🎵",uses:"cha",restore:"short",
+       desc:"As a Bonus Action, choose one creature within 60 feet who can hear you. That creature gains a Bardic Inspiration die (d6→d8→d10→d12 at levels 5/10/15).\nThey can roll it and add it to one D20 Test within 10 minutes.\nUses: CHA modifier (min 1). Regain all on Short Rest (level 5+)."},
+      {id:"jackofalltrades",name:"Jack of All Trades",tag:"passiv",icon:"🎲",uses:null,restore:null,
+       desc:"Add half your Proficiency (round down) to any ability check using a skill you're not proficient in.",minLvl:2},
+      {id:"countercharm",name:"Countercharm",tag:"aktion",icon:"🛡",uses:null,restore:null,
+       desc:"Start a performance lasting until end of your next turn. Each creature within 30 ft who can hear you has Advantage on saves against being Charmed or Frightened.",minLvl:7},
+    ],
+    "College of Lore":[
+      {id:"cuttingwords",name:"Cutting Words",tag:"reaktion",icon:"✂",uses:"cha",restore:"short",
+       desc:"When a creature within 60 ft makes a D20 Test, use your Reaction to expend a Bardic Inspiration die — subtract the roll from the creature's result."},
+    ],
+    "College of Glamour":[
+      {id:"mantleofinspiration",name:"Mantle of Inspiration",tag:"bonus",icon:"✨",uses:"cha",restore:"short",
+       desc:"Expend one Bardic Inspiration use. Up to CHA modifier (min 1) creatures within 60 ft gain Temp HP equal to Bardic die roll + CHA modifier, and can move up to their Speed without Opportunity Attacks."},
+      {id:"mantleofmajesty",name:"Mantle of Majesty",tag:"bonus",icon:"👑",uses:1,restore:"long",
+       desc:"Cast Command without a slot. For 1 minute (Concentration), each Bonus Action you can cast Command without a slot. Charmed creatures auto-fail saves.",minLvl:6},
+      {id:"unbreakablemajesty",name:"Unbreakable Majesty",tag:"bonus",icon:"🌟",uses:1,restore:"short",
+       desc:"Take on unearthly majesty for 1 minute (Concentration). Attackers make CHA save or choose a different target; success → Disadvantage against you until your next turn.",minLvl:14},
+    ],
+    "College of Swords":[
+      {id:"bladeflourish",name:"Blade Flourish",tag:"passiv",icon:"⚔",uses:null,restore:null,
+       desc:"Speed +10 ft on turns you attack with a weapon. Once per turn on a hit, expend a Bardic Inspiration die:\n• Defensive Flourish: extra damage + AC bonus.\n• Slashing Flourish: extra damage to target + one creature within 5 ft.\n• Mobile Flourish: extra damage; push target; move toward them."},
+    ],
+    "College of Whispers":[
+      {id:"psychicblades",name:"Psychic Blades",tag:"passiv",icon:"🔪",uses:null,restore:null,
+       desc:"When you hit with a weapon attack, expend one Bardic Inspiration die to deal extra Psychic damage equal to the die roll. (Once per round.)"},
+      {id:"mantleofwhispers",name:"Mantle of Whispers",tag:"reaktion",icon:"👤",uses:1,restore:"short",
+       desc:"When a humanoid dies within 30 ft, capture their shadow (1 hour). As an Action, disguise yourself as that creature with access to their surface memories.",minLvl:6},
+      {id:"shadowlore",name:"Shadow Lore",tag:"aktion",icon:"🌑",uses:1,restore:"long",
+       desc:"Whisper magic to one creature within 30 ft. WIS save or Frightened + Charmed for 8 hours, following your commands. No memory of compulsion afterward.",minLvl:14},
+    ],
+    "College of Creation":[
+      {id:"performanceofcreation",name:"Performance of Creation",tag:"aktion",icon:"🎨",uses:1,restore:"long",
+       desc:"Create one nonmagical item (max Medium, value ≤ 20 × Bard level GP) within 10 ft. Lasts PB hours. (Expend 2nd+ slot to use again before Long Rest.)"},
+      {id:"animatingperformance",name:"Animating Performance",tag:"aktion",icon:"💃",uses:1,restore:"long",
+       desc:"Animate a Large or smaller item within 30 ft for 1 hour (Concentration). Dancing Item: AC 16, HP = 10 × PB, Slam attack, grants Bardic Inspiration.",minLvl:6},
+    ],
+    "College of Eloquence":[
+      {id:"unsettlingwords",name:"Unsettling Words",tag:"bonus",icon:"💬",uses:"cha",restore:"short",
+       desc:"Expend one Bardic Inspiration die and roll it. One creature within 60 ft subtracts the result from its next saving throw.",minLvl:3},
+      {id:"infectiousinspiration",name:"Infectious Inspiration",tag:"reaktion",icon:"💡",uses:"cha",restore:"long",
+       desc:"When a creature successfully uses your Bardic Inspiration, give another creature within 60 ft a free Bardic Inspiration die. Uses: CHA modifier (min 1).",minLvl:14},
+    ],
+    "College of Spirits":[
+      {id:"talesfrombeyond",name:"Tales from Beyond",tag:"bonus",icon:"👻",uses:null,restore:null,
+       desc:"Expend one Bardic Inspiration use and roll on the Spirit Tales table. As a Bonus Action, expend a Bardic Inspiration die to cast the corresponding spell without a slot."},
+      {id:"spiritsession",name:"Spirit Session",tag:"passiv",icon:"🕯",uses:1,restore:"long",
+       desc:"Ritual (1 min) with up to PB willing creatures within 10 ft. Learn one divination or necromancy spell (level ≤ PB ÷ 2) as a permanent Bard spell until used again.",minLvl:6},
+    ],
+},
+base:[
   {lvl:1,name:"Bardic Inspiration",desc:"As a Bonus Action, choose one creature other than yourself within 60 feet who can hear you. That creature gains one Bardic Inspiration die, a d6.\nOnce within the next 10 minutes, the creature can roll that die and add the roll to one D20 Test it makes. The die grows as you gain Bard levels: d8 at level 5, d10 at level 10, d12 at level 15.\nNumber of uses: Charisma modifier (min 1). Regain all on Long Rest.\nAt level 5 (Font of Inspiration): regain all on Short Rest too.",tag:"Bonusaktion"},
   {lvl:1,name:"Spellcasting",desc:"Charisma is your spellcasting ability for Bard spells. You can use a Musical Instrument as a Spellcasting Focus.",tag:"Passiv"},
   {lvl:2,name:"Expertise",desc:"Choose two of your skill proficiencies. Your Proficiency is doubled for any ability check using either of the chosen skills.\nAt level 9, choose two more proficiencies to gain Expertise.",tag:"Passiv"},
@@ -2173,8 +2330,8 @@ const BARD_CLASS_FEATURES=[
   {lvl:16,name:"Ability Score Improvement",desc:"You gain the Ability Score Improvement feat or another feat of your choice for which you qualify.",tag:"Passiv"},
   {lvl:19,name:"Epic Boon",desc:"You gain an Epic Boon feat or another feat of your choice for which you qualify.",tag:"Passiv"},
   {lvl:20,name:"Words of Creation",desc:"You always have Power Word Heal and Power Word Kill prepared. When you cast either, you can target a second creature visible within range. (Once per Long Rest per spell.)",tag:"Passiv"}
-];
-const BARD_SUBCLASS_FEATURES={
+],
+subclass:{
   "College of Lore":[
     {lvl:3,name:"Bonus Proficiencies",desc:"You gain proficiency in three skills of your choice.",tag:"Passiv"},
     {lvl:3,name:"Cutting Words",desc:"When a creature within 60 feet makes a D20 Test, use your Reaction to expend one Bardic Inspiration die and subtract the roll from the creature's result. Works after the roll but before success or failure is determined.",tag:"Reaktion"},
@@ -2232,20 +2389,7 @@ const BARD_SUBCLASS_FEATURES={
     {lvl:6,name:"Spirit Session",desc:"Ritual (1 minute) with up to PB willing creatures within 10 ft. Learn one divination or necromancy spell (level ≤ PB ÷ 2) as a permanent Bard spell until used again. (Once per Long Rest.)",tag:"Passiv"},
     {lvl:14,name:"Mystical Connection",desc:"When you use Tales from Beyond, roll the die twice and choose which result to use.",tag:"Passiv"}
   ]
-};
-const CLASS_FEATURES={
-  "Bard":{
-    base: typeof BARD_CLASS_FEATURES!=="undefined"?BARD_CLASS_FEATURES:[],
-    subclass: typeof BARD_SUBCLASS_FEATURES!=="undefined"?BARD_SUBCLASS_FEATURES:{}
-  },
-  "Druid":{
-    base: typeof DRUID_CLASS_FEATURES!=='undefined'?DRUID_CLASS_FEATURES:[],
-    subclass: typeof DRUID_SUBCLASS_FEATURES!=='undefined'?DRUID_SUBCLASS_FEATURES:{}
-  },
-  "Wizard":{
-    base: typeof WIZARD_CLASS_FEATURES!=='undefined'?WIZARD_CLASS_FEATURES:[],
-    subclass: typeof WIZARD_SUBCLASS_FEATURES!=='undefined'?WIZARD_SUBCLASS_FEATURES:{}
-  }
+}
 };
 
 
@@ -2253,122 +2397,6 @@ const CLASS_FEATURES={
 
 // CLASS FEATURES DATA
 // tag: aktion|bonus|reaktion|passiv  uses: null=unbegrenzt, n=max uses  restore: 'short'|'long'
-const CLASS_ABILITIES={
-  "Bard":{
-    base:[
-      {id:"bardicinspiration",name:"Bardic Inspiration",tag:"bonus",icon:"🎵",uses:"cha",restore:"short",
-       desc:"As a Bonus Action, choose one creature within 60 feet who can hear you. That creature gains a Bardic Inspiration die (d6→d8→d10→d12 at levels 5/10/15).\nThey can roll it and add it to one D20 Test within 10 minutes.\nUses: CHA modifier (min 1). Regain all on Short Rest (level 5+)."},
-      {id:"jackofalltrades",name:"Jack of All Trades",tag:"passiv",icon:"🎲",uses:null,restore:null,
-       desc:"Add half your Proficiency (round down) to any ability check using a skill you're not proficient in.",minLvl:2},
-      {id:"countercharm",name:"Countercharm",tag:"aktion",icon:"🛡",uses:null,restore:null,
-       desc:"Start a performance lasting until end of your next turn. Each creature within 30 ft who can hear you has Advantage on saves against being Charmed or Frightened.",minLvl:7},
-    ],
-    "College of Lore":[
-      {id:"cuttingwords",name:"Cutting Words",tag:"reaktion",icon:"✂",uses:"cha",restore:"short",
-       desc:"When a creature within 60 ft makes a D20 Test, use your Reaction to expend a Bardic Inspiration die — subtract the roll from the creature's result."},
-    ],
-    "College of Glamour":[
-      {id:"mantleofinspiration",name:"Mantle of Inspiration",tag:"bonus",icon:"✨",uses:"cha",restore:"short",
-       desc:"Expend one Bardic Inspiration use. Up to CHA modifier (min 1) creatures within 60 ft gain Temp HP equal to Bardic die roll + CHA modifier, and can move up to their Speed without Opportunity Attacks."},
-      {id:"mantleofmajesty",name:"Mantle of Majesty",tag:"bonus",icon:"👑",uses:1,restore:"long",
-       desc:"Cast Command without a slot. For 1 minute (Concentration), each Bonus Action you can cast Command without a slot. Charmed creatures auto-fail saves.",minLvl:6},
-      {id:"unbreakablemajesty",name:"Unbreakable Majesty",tag:"bonus",icon:"🌟",uses:1,restore:"short",
-       desc:"Take on unearthly majesty for 1 minute (Concentration). Attackers make CHA save or choose a different target; success → Disadvantage against you until your next turn.",minLvl:14},
-    ],
-    "College of Swords":[
-      {id:"bladeflourish",name:"Blade Flourish",tag:"passiv",icon:"⚔",uses:null,restore:null,
-       desc:"Speed +10 ft on turns you attack with a weapon. Once per turn on a hit, expend a Bardic Inspiration die:\n• Defensive Flourish: extra damage + AC bonus.\n• Slashing Flourish: extra damage to target + one creature within 5 ft.\n• Mobile Flourish: extra damage; push target; move toward them."},
-    ],
-    "College of Whispers":[
-      {id:"psychicblades",name:"Psychic Blades",tag:"passiv",icon:"🔪",uses:null,restore:null,
-       desc:"When you hit with a weapon attack, expend one Bardic Inspiration die to deal extra Psychic damage equal to the die roll. (Once per round.)"},
-      {id:"mantleofwhispers",name:"Mantle of Whispers",tag:"reaktion",icon:"👤",uses:1,restore:"short",
-       desc:"When a humanoid dies within 30 ft, capture their shadow (1 hour). As an Action, disguise yourself as that creature with access to their surface memories.",minLvl:6},
-      {id:"shadowlore",name:"Shadow Lore",tag:"aktion",icon:"🌑",uses:1,restore:"long",
-       desc:"Whisper magic to one creature within 30 ft. WIS save or Frightened + Charmed for 8 hours, following your commands. No memory of compulsion afterward.",minLvl:14},
-    ],
-    "College of Creation":[
-      {id:"performanceofcreation",name:"Performance of Creation",tag:"aktion",icon:"🎨",uses:1,restore:"long",
-       desc:"Create one nonmagical item (max Medium, value ≤ 20 × Bard level GP) within 10 ft. Lasts PB hours. (Expend 2nd+ slot to use again before Long Rest.)"},
-      {id:"animatingperformance",name:"Animating Performance",tag:"aktion",icon:"💃",uses:1,restore:"long",
-       desc:"Animate a Large or smaller item within 30 ft for 1 hour (Concentration). Dancing Item: AC 16, HP = 10 × PB, Slam attack, grants Bardic Inspiration.",minLvl:6},
-    ],
-    "College of Eloquence":[
-      {id:"unsettlingwords",name:"Unsettling Words",tag:"bonus",icon:"💬",uses:"cha",restore:"short",
-       desc:"Expend one Bardic Inspiration die and roll it. One creature within 60 ft subtracts the result from its next saving throw.",minLvl:3},
-      {id:"infectiousinspiration",name:"Infectious Inspiration",tag:"reaktion",icon:"💡",uses:"cha",restore:"long",
-       desc:"When a creature successfully uses your Bardic Inspiration, give another creature within 60 ft a free Bardic Inspiration die. Uses: CHA modifier (min 1).",minLvl:14},
-    ],
-    "College of Spirits":[
-      {id:"talesfrombeyond",name:"Tales from Beyond",tag:"bonus",icon:"👻",uses:null,restore:null,
-       desc:"Expend one Bardic Inspiration use and roll on the Spirit Tales table. As a Bonus Action, expend a Bardic Inspiration die to cast the corresponding spell without a slot."},
-      {id:"spiritsession",name:"Spirit Session",tag:"passiv",icon:"🕯",uses:1,restore:"long",
-       desc:"Ritual (1 min) with up to PB willing creatures within 10 ft. Learn one divination or necromancy spell (level ≤ PB ÷ 2) as a permanent Bard spell until used again.",minLvl:6},
-    ],
-  },
-  "Druid":{
-    base:[
-      {id:"wildshape",name:"Wild Shape",tag:"bonus",icon:"🐺",uses:2,restore:"short",
-       desc:"As a Bonus Action, shape-shift into a known Beast form. Lasts hours equal to half your Druid level.\n• Temp HP equal to your Druid level when shifting.\n• You retain INT/WIS/CHA, class features, and proficiencies.\n• You cannot cast spells while shifted.\n• Max CR 1/4, no Fly Speed (Fly Speed allowed from level 8).\n• Known Forms: 4 (replace one on Long Rest)."},
-      {id:"wildcompanion",name:"Wild Companion",tag:"aktion",icon:"🦊",uses:null,restore:null,
-       desc:"Expend a spell slot or Wild Shape use to cast Find Familiar without Material components. The familiar is Fey and disappears on Long Rest."},
-      {id:"wildresurgence_ws",name:"Wild Resurgence → Spell Slot",tag:"bonus",icon:"🔄",uses:1,restore:"long",
-       desc:"Expend one Wild Shape use to gain a level 1 spell slot (once per Long Rest).",minLvl:5},
-    ],
-    "Circle of the Land":[
-      {id:"landsaid",name:"Land's Aid",tag:"aktion",icon:"🌿",uses:null,restore:null,
-       desc:"Expend a Wild Shape use. Choose a point within 60 ft: 10-ft Sphere appears. Each creature you choose makes CON save — 2d6 Necrotic on fail, half on success. One creature regains 2d6 HP.\n(3d6 at level 10, 4d6 at level 14)"},
-      {id:"naturalrecovery",name:"Natural Recovery",tag:"passiv",icon:"🍃",uses:1,restore:"long",
-       desc:"Cast one prepared Circle Spell without expending a slot (once per Long Rest).\nAfter a Short Rest: recover spell slots with combined levels ≤ half your Druid level (round up), none level 6+.",minLvl:6},
-      {id:"naturessanctuary",name:"Nature's Sanctuary",tag:"aktion",icon:"🌳",uses:null,restore:null,
-       desc:"Expend a Wild Shape use. Spectral trees and vines fill a 15-ft Cube within 120 ft for 1 minute. You and allies have Cover inside; allies gain your Nature's Ward Resistance.\nBonus Action: move the Cube up to 60 ft.",minLvl:14},
-    ],
-    "Circle of the Moon":[
-      {id:"moonlightstep",name:"Moonlight Step",tag:"bonus",icon:"🌙",uses:"wis",restore:"long",
-       desc:"Teleport up to 30 ft to an unoccupied space you can see. You have Advantage on your next attack roll before end of this turn.\nUses: WIS modifier (min 1). Also restore uses by expending a level 2+ spell slot per use.",minLvl:10},
-    ],
-    "Circle of the Sea":[
-      {id:"wrathofthesea",name:"Wrath of the Sea",tag:"bonus",icon:"🌊",uses:null,restore:null,
-       desc:"Expend a Wild Shape use to manifest a 5-ft Emanation of ocean spray for 10 minutes.\nAs a Bonus Action each turn: one creature in the Emanation makes CON save or take Cold damage (WIS modifier d6s, min 1d6) and be pushed 15 ft (Large or smaller).\n(Emanation grows to 10 ft at level 6)"},
-    ],
-    "Circle of the Stars":[
-      {id:"starryform",name:"Starry Form",tag:"bonus",icon:"⭐",uses:null,restore:null,
-       desc:"Expend a Wild Shape use to take a Starry Form for 10 minutes. Shed Bright Light 10 ft, Dim Light 10 ft more.\nChoose a constellation:\n• Archer: Bonus Action ranged spell attack (60 ft) — 1d8 + WIS Radiant.\n• Chalice: When you cast a healing spell, you or a creature within 30 ft regains 1d8 + WIS HP.\n• Dragon: Treat rolls of 9 or lower as 10 for INT/WIS checks and CON Concentration saves.\n(Archer and Chalice become 2d8 at level 10; Dragon gains Fly 20 ft)"},
-      {id:"cosmicomen",name:"Cosmic Omen",tag:"reaktion",icon:"🔮",uses:"wis",restore:"long",
-       desc:"After each Long Rest, roll a die:\n• Weal (even): Add 1d6 to a D20 Test of a creature you see within 30 ft.\n• Woe (odd): Subtract 1d6 from a D20 Test of a creature you see within 30 ft.\nUses: WIS modifier (min 1).",minLvl:6},
-    ],
-    "Circle of Dreams (XGE)":[
-      {id:"balmsc",name:"Balm of the Summer Court",tag:"bonus",icon:"🌸",uses:"level",restore:"long",
-       desc:"Pool of d6s equal to your Druid level. As a Bonus Action, spend up to half your Druid level in dice: one creature within 120 ft regains HP equal to total rolled + WIS modifier. A creature benefits once per rest."},
-      {id:"hiddenpaths",name:"Hidden Paths",tag:"bonus",icon:"🌀",uses:"wis",restore:"long",
-       desc:"Teleport up to 60 ft to an unoccupied space you can see. OR use your action to teleport one willing creature you touch up to 30 ft.\nUses: WIS modifier (min 1).",minLvl:10},
-    ],
-    "Circle of the Shepherd (XGE)":[
-      {id:"spirittotem",name:"Spirit Totem",tag:"bonus",icon:"🦅",uses:null,restore:null,
-       desc:"As a Bonus Action, summon an incorporeal spirit to a point within 60 ft. 30-ft radius aura for 1 minute (concentration).\n• Bear: Allies gain temp HP = 5 + Druid level; Advantage on STR checks and saves.\n• Hawk: Allies gain Advantage on attack rolls; Reaction to give Advantage on a Perception check.\n• Unicorn: Healing spells benefit all allies in aura; once per turn teleport one ally up to 30 ft."},
-      {id:"fungalinfestation2",name:"Faithful Summons",tag:"passiv",icon:"🐾",uses:1,restore:"long",
-       desc:"If reduced to 0 HP or incapacitated against your will: immediately gain Conjure Animals as a 9th-level spell (4 beasts CR 2 or lower, 1 hour, no concentration). Once per Long Rest.",minLvl:14},
-    ],
-    "Circle of Spores (TCE)":[
-      {id:"haloofspores",name:"Halo of Spores",tag:"reaktion",icon:"🍄",uses:null,restore:null,
-       desc:"When a creature moves into a space within 10 ft of you or starts its turn there, deal necrotic damage (no save):\n• Level 2: 1d4 • Level 6: 1d6 • Level 10: 1d8 • Level 14: 1d10"},
-      {id:"symbioticent",name:"Symbiotic Entity",tag:"aktion",icon:"🌑",uses:null,restore:null,
-       desc:"Expend a Wild Shape use (no transformation). Gain 4 temp HP per Druid level. While active:\n• Halo of Spores deals 1d6 extra damage.\n• Melee weapon attacks deal extra 1d6 Necrotic.\nLasts until temp HP run out or Wild Shape used."},
-      {id:"spreadingspores",name:"Spreading Spores",tag:"bonus",icon:"💨",uses:null,restore:null,
-       desc:"While Symbiotic Entity is active: hurl spores up to 30 ft, creating a 10-ft cube for 1 minute. Creatures entering or starting their turn there take Halo of Spores damage (CON save negates). Halo of Spores inactive while cube is up.",minLvl:10},
-      {id:"fungalinfestation",name:"Fungal Infestation",tag:"reaktion",icon:"☠",uses:"wis",restore:"long",
-       desc:"When a Small/Medium beast or humanoid dies within 10 ft of you: animate it as a zombie with 1 HP. Obeys verbal commands. Lasts 1 hour or until 0 HP.\nUses: WIS modifier (min 1).",minLvl:6},
-    ],
-    "Circle of Wildfire (TCE)":[
-      {id:"summonwildfire",name:"Summon Wildfire Spirit",tag:"aktion",icon:"🔥",uses:null,restore:null,
-       desc:"Expend a Wild Shape use to summon your wildfire spirit (no transformation). Appears within 30 ft, acts after you.\n• AC 13, HP = your max HP, immune to fire, Speed 40 ft, Fly 30 ft.\n• Flame Seed: ranged spell attack (60 ft), 1d6 + PB fire damage.\n• Fiery Teleportation (Reaction): teleport up to 15 ft; creatures within 5 ft of origin make DEX save or take 1d6 + PB fire damage.\nLasts 1 hour or until 0 HP."},
-      {id:"cauterizingflames",name:"Cauterizing Flames",tag:"bonus",icon:"🕯",uses:null,restore:null,
-       desc:"When a Small or larger creature dies within 30 ft of you or your spirit, a spectral flame appears for 1 minute. As a Bonus Action, extinguish one flame: choose a creature within 30 ft — regain 2d10 + WIS HP, or take 2d10 + WIS fire damage (DEX save for half).",minLvl:10},
-      {id:"blazingrevival",name:"Blazing Revival",tag:"passiv",icon:"🌋",uses:1,restore:"long",
-       desc:"If your spirit is within 120 ft when you drop to 0 HP: cause the spirit to drop to 0 HP instead. You regain half your HP and rise immediately. Once per Long Rest.",minLvl:14},
-    ],
-  }
-};
 
 // Uses state stored in st.abUses = {id: usedCount}
 function getAbUses(id){return (st.abUses=st.abUses||{})[id]||0;}
@@ -2383,16 +2411,17 @@ function buildAbilities(){
   if(!list)return;
   list.innerHTML='';
 
-  const clsData=CLASS_ABILITIES[cls];
+  const clsData=CLASS_DATA[cls]&&CLASS_DATA[cls].abilities;
   const bsec=document.getElementById('savedBeastsSection');
   if(!clsData){sec.style.display='none';if(bsec)bsec.style.display='none';return;}
   sec.style.display='';
-  if(bsec) bsec.style.display='';
+  if(bsec) bsec.style.display=(clsSpecial(cls,'beasts')||(st.savedBeasts&&st.savedBeasts.length))?'':'none';
 
   let abilities=[];
   (clsData.base||[]).forEach(a=>{if(!a.minLvl||lvl>=a.minLvl)abilities.push(a);});
-  if(subcls&&clsData[subcls]){
-    clsData[subcls].forEach(a=>{if(!a.minLvl||lvl>=a.minLvl)abilities.push(a);});
+  const abKey=subcls&&(clsData[subcls]?subcls:subcls.replace(/\s*\([^)]+\)\s*$/,'').trim());
+  if(abKey&&clsData[abKey]){
+    clsData[abKey].forEach(a=>{if(!a.minLvl||lvl>=a.minLvl)abilities.push(a);});
   }
 
   abilities.forEach(ab=>{
