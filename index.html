@@ -1605,6 +1605,14 @@ function adjCur(id,d){
 // special: Marker für Sonder-UI (z. B. "beasts"). Keys = exakte Klassen-/Subklassennamen (Savegame-kompatibel).
 const CLASS_DATA={};
 function clsSpecial(cls,key){ return !!(CLASS_DATA[cls]&&(CLASS_DATA[cls].special||[]).includes(key)); }
+// Anzeige-Namen im Subklassen-Dropdown: gespeicherter Wert bleibt der alte Name (Savegames!), angezeigt wird die
+// Quelle der tatsächlich hinterlegten Fassung. Nur eintragen, wenn die Daten nachweislich diese Fassung sind.
+const SUBCLASS_LABELS={
+  Cleric:{"Knowledge Domain (PHB)":"Knowledge Domain (FRHoF)","Life Domain (PHB)":"Life Domain (XPHB)","Light Domain (PHB)":"Light Domain (XPHB)","Trickery Domain (PHB)":"Trickery Domain (XPHB)","War Domain (PHB)":"War Domain (XPHB)","Arcana Domain (SCAG)":"Arcana Domain (AU)","Grave Domain (XGE)":"Grave Domain (RHW)"},
+  Druid:{"Circle of the Land (PHB)":"Circle of the Land (XPHB)","Circle of the Moon (PHB)":"Circle of the Moon (XPHB)"},
+  Bard:{"College of Lore (PHB)":"College of Lore (XPHB)","College of Valor (PHB)":"College of Valor (XPHB)"}
+};
+function subclsLabel(cls,sub){ return (SUBCLASS_LABELS[cls]&&SUBCLASS_LABELS[cls][sub])||sub; }
 
 // DRUID
 CLASS_DATA["Druid"]={
@@ -2228,7 +2236,7 @@ function buildSubclsLore(){
   const subclsKey=clsData.subclass&&clsData.subclass[subcls]?subcls:subcls.replace(/\s*\([^)]+\)\s*$/,'').trim();
   if(!clsData.subclass||!clsData.subclass[subclsKey]){sec.style.display='none';return;}
   sec.style.display='';
-  title.textContent='Subclass: '+subcls;
+  title.textContent='Subclass: '+subclsLabel(cls,subcls);
   const feats=clsData.subclass[subclsKey];
   const byLvl={};
   feats.forEach(f=>{(byLvl[f.lvl]=byLvl[f.lvl]||[]).push(f);});
@@ -2275,7 +2283,7 @@ function onClsChange(){
   const sel=document.getElementById('subcls');
   const opts=(CLASS_DATA[cls]&&CLASS_DATA[cls].subclassList)||[];
   if(opts.length){
-    sel.innerHTML='<option value="">—</option>'+opts.map(o=>`<option>${o}</option>`).join('');
+    sel.innerHTML='<option value="">—</option>'+opts.map(o=>`<option value="${o}">${subclsLabel(cls,o)}</option>`).join('');
     field.style.display='';
   } else {
     field.style.display='none';
@@ -3703,7 +3711,7 @@ function importChars(e){
 
 // SETTINGS
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
-const APP_VERSION = 'willow-app-2026-09-26b';
+const APP_VERSION = 'willow-app-2026-09-26c';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
