@@ -5412,7 +5412,7 @@ function importChars(e){
 
 // SETTINGS
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
-const APP_VERSION = 'willow-app-2026-09-27c';
+const APP_VERSION = 'willow-app-2026-09-27d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -5650,6 +5650,17 @@ function renderDiceHistory(){
 
 slBuildFilters();
 initApp();
+
+// SERVICE WORKER (offline + Updates; Registrierung fehlte seit 03.06.2026, wieder eingebaut 27.09.2026)
+// Übernimmt nach einem Update ein neuer Worker, wird die Seite einmal neu geladen → neue Version sofort sichtbar.
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+  const swHadCtrl=!!navigator.serviceWorker.controller;
+  let swReloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(swHadCtrl&&!swReloaded){swReloaded=true;try{autoSave();}catch(e){}location.reload();}
+  });
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').catch(()=>{});});
+}
 </script>
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">

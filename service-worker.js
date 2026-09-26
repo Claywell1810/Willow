@@ -1,4 +1,4 @@
-const CACHE_NAME = "willow-app-2026-09-27c";
+const CACHE_NAME = "willow-app-2026-09-27d";
 
 const FILES_TO_CACHE = [
   "./",
@@ -10,7 +10,8 @@ const FILES_TO_CACHE = [
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+    // cache: "reload" = immer frisch vom Server, nie aus dem Browser-Cache (sonst landet ggf. die alte index.html im neuen Cache)
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE.map(u => new Request(u, { cache: "reload" }))))
   );
   self.skipWaiting();
 });
