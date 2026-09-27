@@ -257,7 +257,7 @@ input[type=number]{-moz-appearance:textfield}
 .ab-pickinfo{font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif}
 .ab-body{display:none;padding:0 12px 10px;border-top:1px solid var(--border2)}
 .ab-body.on{display:block}
-.ab-desc{font-size:var(--fs-txt);color:var(--desc);line-height:1.6;white-space:pre-line;margin-top:8px}
+.ab-desc{font-size:var(--fs-txt);color:var(--desc);line-height:1.6;margin-top:8px}
 .ab-restore{font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif;margin-top:6px;letter-spacing:.5px}
 /* Combat-Tab-Umbau (27.09.2026): Gruppen nach Aktionsart, Kampfwerte-Karte */
 .ab-grp{display:flex;align-items:center;gap:8px;margin:12px 2px 6px;font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:1px;text-transform:uppercase;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -412,6 +412,24 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 .clr-grp{border:1px solid var(--border2);border-radius:8px;margin-bottom:8px;padding:0 10px}
 .clr-grp summary{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;text-transform:uppercase;color:var(--gold);padding:10px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .clr-grp[open] summary{margin-bottom:4px}
+/* ── Text-Formatierer fmtDesc (UI/Lesbarkeit 27.09.2026): Absätze, Listen, Blocknamen, Tabellen ── */
+.fd{overflow-wrap:break-word;word-break:break-word}
+.fd p{margin:0 0 .6em}
+.fd>:last-child,.fd li>:last-child{margin-bottom:0}
+.fd .fd-n{color:var(--text);font-weight:700;font-style:italic}
+.fd ul{margin:.1em 0 .7em;padding-left:1.1em;list-style:none}
+.fd li{position:relative;margin:0 0 .45em}
+.fd li::before{content:'';position:absolute;left:-.8em;top:.65em;width:5px;height:5px;border-radius:50%;background:var(--text3)}
+.fd li p.fd-cont{margin:.35em 0 0}
+.fd-cap{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:.9em 0 .35em}
+.fd-tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 .8em;max-width:100%}
+.fd-tbl{border-collapse:collapse;width:100%;font-size:var(--fs-md);line-height:1.4}
+.fd-tbl th,.fd-tbl td{border:1px solid var(--border2);padding:4px 7px;text-align:left;vertical-align:top}
+.fd-tbl th{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.4px;color:var(--text3);background:var(--bg3);font-weight:400}
+.fd-tbl td.fd-k{white-space:nowrap;width:1%;color:var(--text);font-weight:600}
+.fd-tbl tr:nth-child(even) td{background:color-mix(in srgb,var(--bg3) 45%,transparent)}
+.fd-tv{display:inline-block;font-size:var(--fs-xs);line-height:1.5;color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 45%,transparent);border-radius:10px;padding:0 7px;white-space:nowrap;font-style:normal;vertical-align:1px}
+.higher-box .fd p{margin-bottom:.3em}
 </style>
 <script>try{var _ts=localStorage.getItem('willow_textsize');if(_ts==='gross'||_ts==='sehrgross')document.documentElement.dataset.ts=_ts;}catch(e){}</script>
 </head>
@@ -484,7 +502,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="ifield"><label>Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
-            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();autoSave()" style="text-align:center;flex:1">
+            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();autoSave()" style="text-align:center;flex:1">
             <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
           </div></div>
         <div class="ifield"><label>Background</label><input id="bg" readonly placeholder="— select on Backgrounds tab —" onclick="switchTab('hintergrund')" style="cursor:pointer;caret-color:transparent" title="Go to Backgrounds tab"></div>
@@ -1098,46 +1116,84 @@ function chSlot(i,d){st.slotMax[i]=Math.max(0,Math.min(9,st.slotMax[i]+d));if(st
 function togSlot(i,j){const t=st.slotMax[i],u=Math.min(st.slotUsed[i],t);st.slotUsed[i]=j<t-u?u+1:Math.max(0,u-1);buildSlots();autoSave()}
 
 // MY SPELLS
-function formatSpellDesc(raw){
-  if(!raw)return'';
-  function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  function boldify(t){return escHtml(t);}
-  const sectionRe=/^([A-Z][^.]{1,50}?)\. (.+)/s;
-  const paragraphs=raw.split(/\n\n/);
-  let html='<div class="sdesc">';
-  for(let p of paragraphs){
-    p=p.trim();if(!p)continue;
-    const m=p.match(sectionRe);
-    if(m){
-      const items=m[2].split(/  +/);
-      if(items.length>1){
-        html+=`<div class="sdesc-section"><span class="sdesc-head">${escHtml(m[1])}</span><ul class="sdesc-list">`;
-        for(const item of items){
-          const it=item.trim();if(!it)continue;
-          const im=it.match(sectionRe);
-          html+=im?`<li><em>${escHtml(im[1])}</em>. ${boldify(im[2])}</li>`:`<li>${boldify(it)}</li>`;
-        }
-        html+=`</ul></div>`;
-      } else {
-        html+=`<div class="sdesc-section"><span class="sdesc-head">${escHtml(m[1])}</span><span class="sdesc-body"> ${boldify(m[2])}</span></div>`;
-      }
-    } else {
-      const items=p.split(/  +/);
-      if(items.length>2){
-        html+=`<p class="sdesc-p">${boldify(items[0])}</p><ul class="sdesc-list">`;
-        for(const item of items.slice(1)){
-          const it=item.trim();if(!it)continue;
-          const im=it.match(sectionRe);
-          html+=im?`<li><em>${escHtml(im[1])}</em>. ${boldify(im[2])}</li>`:`<li>${boldify(it)}</li>`;
-        }
-        html+=`</ul>`;
-      } else {
-        html+=`<p class="sdesc-p">${boldify(p)}</p>`;
-      }
-    }
-  }
-  return html+'</div>';
+// ── TEXT-FORMATIERER (UI/Lesbarkeit 27.09.2026) ──
+// fmtDesc(text, ctx?) macht aus Daten-Text (desc/d/higher) HTML: Absätze, Listen, fett gesetzte Blocknamen,
+// Tabellen (Zeilen mit " | ", "Überschrift:" + "• Schlüssel: Wert"), Fortsetzungszeilen in Listenpunkten.
+// Nur Anzeige – die Daten bleiben unverändert. Text wird HTML-sicher escaped.
+// ctx {cls,lvl}: Verweise „the X column of the <Klasse> Features table“ bekommen den Wert der Stufe (CLASS_TABLES).
+const FD_SMALL=new Set(['of','the','a','an','and','or','to','in','on','with','for','from','at','by','vs','vs.','into','upon','per','as','your','its','without','over','under']);
+function fdEsc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fdIsName(n){
+  const core=n.replace(/\([^)]*\)/g,' ').trim();
+  if(!core||core.length>48||/[,;!?]/.test(core))return false;
+  const w=core.split(/\s+/);
+  if(w.length>7||!/^[A-Z0-9"“'‘]/.test(w[0]))return false;
+  return w.every((x,i)=>/^[A-Z0-9"“'‘(]/.test(x)||(i>0&&FD_SMALL.has(x)));
 }
+const FD_NAMED=/^((?:[^.:()]|\([^)]*\)){1,60}?)([.:]) (\S[\s\S]*)$/;
+function fdTV(h,ctx){
+  if(!ctx||!ctx.cls||!ctx.lvl||typeof CLASS_TABLES==='undefined')return h;
+  const T=CLASS_TABLES[ctx.cls],r=T&&T.rows[ctx.lvl-1];if(!r)return h;
+  return h.replace(/the ([A-Z][\w'’ ]{1,30}?) column of the (\w+) Features table/g,(all,lab,c)=>{
+    if(c!==ctx.cls)return all;
+    const e=(T.extra||[]).find(x=>String(x.l).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()===lab);
+    const v=e?r[e.k]:undefined;
+    if(v===undefined||v===null||v==='')return all;
+    return all+` <span class="fd-tv">Level ${ctx.lvl}: ${fdEsc(v)}</span>`;
+  });
+}
+function fdNamed(t){const m=t.match(FD_NAMED);return!!m&&fdIsName(m[1]);}
+function fdInline(t,ctx){
+  const m=t.match(FD_NAMED);
+  return fdTV(m&&fdIsName(m[1])?`<b class="fd-n">${m[1]}${m[2]}</b> ${m[3]}`:t,ctx);
+}
+function fmtDesc(raw,ctx){
+  if(!raw)return'';
+  const L=[];
+  fdEsc(raw).split(/\n+/).forEach(l=>{
+    l=l.trim();if(!l)return;
+    if(l.startsWith('• ')){const t=l.slice(2).trim();L.push(t.includes(' | ')?{k:'row',c:t.split(' | '),b:1}:{k:'li',t});return;}
+    if(l.includes(' | ')){L.push({k:'row',c:l.split(' | ')});return;}
+    if(/:$/.test(l)&&l.length<=60&&fdIsName(l.slice(0,-1))){L.push({k:'cap',t:l.slice(0,-1)});return;}
+    const it=l.split(/ {2,}/);   // alte Zauber-Texte (CSV): Listenpunkte mit doppeltem Leerzeichen
+    if(it.length>2||(it.length>1&&fdNamed(it[0]))){L.push({k:'p',t:it[0]});it.slice(1).forEach(x=>L.push({k:'li',t:x}));return;}
+    L.push({k:'p',t:l});
+  });
+  const KV=/^([^:.]{1,16}): (\S[\s\S]*)$/;
+  let h='',i=0;
+  const cell=(x,tag,cls)=>`<${tag}${cls?` class="${cls}"`:''}>${fdTV(x.trim(),ctx)}</${tag}>`;
+  while(i<L.length){
+    const x=L[i];
+    if(x.k==='cap'){h+=`<div class="fd-cap">${x.t}</div>`;i++;
+      // „Überschrift:“ + „• Schlüssel: Wert“ → zweispaltige Tabelle
+      let j=i;while(j<L.length&&L[j].k==='li'&&KV.test(L[j].t))j++;
+      if(j>i&&(j===L.length||L[j].k!=='li')){
+        h+='<div class="fd-tw"><table class="fd-tbl fd-kv">'+L.slice(i,j).map(y=>{const m=y.t.match(KV);return`<tr>${cell(m[1],'td','fd-k')}${cell(m[2],'td')}</tr>`;}).join('')+'</table></div>';i=j;}
+      continue;}
+    if(x.k==='row'){
+      let j=i;while(j<L.length&&L[j].k==='row')j++;
+      const rows=L.slice(i,j),head=!rows[0].b&&rows.length>1?rows.shift():null;
+      h+='<div class="fd-tw"><table class="fd-tbl">'+(head?'<tr>'+head.c.map(c=>cell(c,'th')).join('')+'</tr>':'')+rows.map(r=>'<tr>'+r.c.map(c=>cell(c,'td')).join('')+'</tr>').join('')+'</table></div>';
+      i=j;continue;}
+    if(x.k==='li'){
+      let lis=[];
+      while(i<L.length){
+        const y=L[i];
+        if(y.k==='li'){lis.push(fdInline(y.t,ctx));i++;continue;}
+        // Fortsetzungszeilen: Absätze zwischen zwei langen/benannten Listenpunkten gehören zum vorigen Punkt
+        let k=i;while(k<L.length&&L[k].k==='p'&&!fdNamed(L[k].t))k++;
+        const last=L[i-1];
+        if(y.k==='p'&&k>i&&L[k]&&L[k].k==='li'&&(last.t.length>80||fdNamed(last.t))){
+          for(;i<k;i++)lis[lis.length-1]+=`<p class="fd-cont">${fdInline(L[i].t,ctx)}</p>`;continue;}
+        break;
+      }
+      h+='<ul>'+lis.map(t=>`<li>${t}</li>`).join('')+'</ul>';continue;}
+    h+=`<p>${fdInline(x.t,ctx)}</p>`;i++;
+  }
+  return '<div class="fd">'+h+'</div>';
+}
+// Zauber-Texte: seit 27.09.2026 über den gemeinsamen Formatierer
+function formatSpellDesc(raw){return fmtDesc(raw);}
 let _mySpellFilter='all';
 function setMySpellFilter(f){
   _mySpellFilter=f;
@@ -1552,7 +1608,7 @@ function buildMySpells(){
       <div class="di"><label>Level</label><span>${lbl}</span></div>
     </div>`:'';
     const descHtml=dbSpell?`<div class="desc-text">${formatSpellDesc(dbSpell.desc)}</div>`:'';
-    const higherHtml=dbSpell&&dbSpell.higher?`<div class="higher-box"><label>At Higher Levels</label><p>${dbSpell.higher}</p></div>`:'';
+    const higherHtml=dbSpell&&dbSpell.higher?`<div class="higher-box"><label>At Higher Levels</label>${fmtDesc(dbSpell.higher)}</div>`:'';
     inner.innerHTML=`
     <div class="spell-main" onclick="togMySpellDetail(${i},this)" style="cursor:pointer">
       <span class="spell-name">${sp.name}</span>
@@ -1647,7 +1703,7 @@ function buildFeats(){
   const list=document.getElementById('featList');if(!list)return;list.innerHTML='';
   st.feats.forEach((f,i)=>{
     const d=document.createElement('div');d.className='feat-card';
-    d.innerHTML=`<div class="feat-hdr"><span class="feat-name">${f.name}</span><div style="display:flex;gap:6px"><span class="feat-tag">${f.tag}</span><button class="delbtn" onclick="delFeat(${i})">✕</button></div></div>${f.desc?`<div class="feat-desc">${f.desc}</div>`:''}`;
+    d.innerHTML=`<div class="feat-hdr"><span class="feat-name">${f.name}</span><div style="display:flex;gap:6px"><span class="feat-tag">${f.tag}</span><button class="delbtn" onclick="delFeat(${i})">✕</button></div></div>${f.desc?`<div class="feat-desc">${fmtDesc(f.desc)}</div>`:''}`;
     list.appendChild(d);
   });
 }
@@ -1849,7 +1905,7 @@ function slMakeCard(sp,via){
       <div class="di"><label>Components</label><span>${sp.komp}</span></div>
     </div>
     <div class="desc-text">${formatSpellDesc(sp.desc||"")}</div>
-    ${sp.higher?`<div class="higher-box"><label>At Higher Levels</label><p>${sp.higher}</p></div>`:''}
+    ${sp.higher?`<div class="higher-box"><label>At Higher Levels</label>${fmtDesc(sp.higher)}</div>`:''}
     <button class="zb-addbtn${isAdded?' done':''}" id="slab_${idx}" onclick="slAdd(${idx},event)">
       ${isAdded?'✓ On Sheet':'+ Add to Sheet'}
     </button>
@@ -3821,7 +3877,7 @@ function buildClsLore(){
             <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}</span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
-          <div style="font-size:var(--fs-txt);color:var(--desc);white-space:pre-line;line-height:1.7">${f.desc}</div>
+          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fmtDesc(f.desc,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1})}</div>
         </div>`).join('')}
     </div>`).join('');
 }
@@ -3924,7 +3980,7 @@ function buildSubclsLore(){
             <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}</span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
-          <div style="font-size:var(--fs-txt);color:var(--desc);white-space:pre-line;line-height:1.7">${f.desc}</div>
+          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fmtDesc(f.desc,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1})}</div>
         </div>`).join('')}
     </div>`).join('');
 }
@@ -4032,7 +4088,7 @@ function buildFeatsInfo(){
   body.innerHTML=myFeats.map(f=>`
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
       <div style="color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-sm);margin-bottom:4px">${f.name}</div>
-      ${f.desc?`<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6;white-space:pre-line">${f.desc}</div>`:''}
+      ${f.desc?`<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fmtDesc(f.desc)}</div>`:''}
     </div>`).join('');
 }
 
@@ -4550,7 +4606,7 @@ function buildAbilities(){
         ${usesHtml}
       </div>${subsHtml}
       <div class="ab-body${isOpen?' on':''}" id="ab_${ab.id}">
-        <div class="ab-desc">${ab.desc}</div>
+        <div class="ab-desc">${fmtDesc(ab.desc,{cls,lvl})}</div>
       </div>`;
     items.push({tag:iconClass,lvl:ab.minLvl||1,ord:(trS.includes(ab)?10000:0)+abIdx,el:card});
   });
@@ -4573,7 +4629,7 @@ function buildAbilities(){
         </div>
       </div>
       <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
-        <div class="ab-desc">${x.f.desc}</div>
+        <div class="ab-desc">${fmtDesc(x.f.desc,{cls,lvl})}</div>
       </div>`;
     items.push({tag:k,lvl:x.lvl,ord:(x.grp==='s'?15000:5000)+x.i,el:card});
   });
@@ -4929,7 +4985,7 @@ function ftMakeCard(ft){
   const top=document.createElement('div');top.className='zb-top';top.style.cursor='pointer';
   top.innerHTML=`<span class="zb-name">${ft.n}</span> ${catLabel?`<span class="zb-badge zb-school">${catLabel}</span>`:''} ${ft.pre?`<span class="zb-badge zb-src" title="${ft.pre}">${ft.pre}</span>`:''}<span class="zb-badge zb-src">${ft.src}</span>`;
   const detail=document.createElement('div');detail.className='zb-detail';
-  const desc=document.createElement('div');desc.style.cssText='font-size:var(--fs-md);color:var(--desc);line-height:1.6;white-space:pre-line;margin-bottom:8px';desc.textContent=ft.d;
+  const desc=document.createElement('div');desc.style.cssText='font-size:var(--fs-md);color:var(--desc);line-height:1.6;margin-bottom:8px';desc.innerHTML=fmtDesc(ft.d);
   const btn=document.createElement('button');btn.className='add-btn';btn.style.cssText='margin:0'+(isMy?';background:rgba(122,154,90,0.2);border-color:var(--green);color:var(--green)':'');
   btn.textContent=isMy?'✓ My Feat':'+ Add to Sheet';
   btn.onclick=()=>ftToggle(ft.n,ft.d);
@@ -5636,7 +5692,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-27l';
+const APP_VERSION = 'willow-app-2026-09-27m';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
