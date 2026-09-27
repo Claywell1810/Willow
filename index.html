@@ -268,7 +268,9 @@ input[type=number]{-moz-appearance:textfield}
 .ab-grp-chev{margin-left:auto;color:var(--text3);font-size:12px}
 .ab-card.ab-feat .ab-name{color:var(--text)}
 .cst-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:12px}
-.cst-head{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.cst-head{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cst-head.closed{margin-bottom:0}
+.cst-chev{font-size:12px;letter-spacing:0}
 .cst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
 .cst-chip{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 8px;min-width:0}
 .cst-l{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.5px;color:var(--text3);line-height:1.25}
@@ -591,12 +593,6 @@ input[type=number]{-moz-appearance:textfield}
 
     <!-- COMBAT -->
     <div class="panel" id="tab-zauber">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-        <button onclick="switchTab('spelllist')" style="background:transparent;border:none;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;letter-spacing:.5px">📖 Spell List →</button>
-      </div>
-
-      <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026) -->
-      <div id="combatStats" class="cst-card" style="display:none"></div>
 
       <!-- HIT POINTS -->
       <div class="sec">Hit Points</div>
@@ -650,6 +646,9 @@ input[type=number]{-moz-appearance:textfield}
           </div>
         </div>
       </div>
+
+      <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026; unter Hit Points, zuklappbar) -->
+      <div id="combatStats" class="cst-card" style="display:none;margin-top:12px"></div>
 
       <!-- WEAPONS -->
       <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
@@ -4418,12 +4417,14 @@ function buildCombatStats(cls,subcls,lvl){
   const ac=combatUnarmoredAC(cls,subcls,lvl);
   if(ac)h+=chip('Unarmored AC',ac.ac,'cst-ac',ac.name);
   const sl=(row.slots||[]).map((n,i)=>n>0?`<span class="cst-slot"><b>${i+1}</b>${n}</span>`:'').join('');
-  el.innerHTML=`<div class="cst-head">Combat Stats · Level ${lvl}</div><div class="cst-grid">${h}</div>`+
-    (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'');
+  const closed=abGrpIsClosed('stats');
+  el.innerHTML=`<div class="cst-head${closed?' closed':''}" onclick="togAbGrp('stats')"><span>Combat Stats · Level ${lvl}</span><span class="cst-chev">${closed?'▸':'▾'}</span></div>`+
+    `<div class="cst-body"${closed?' style="display:none"':''}><div class="cst-grid">${h}</div>`+
+    (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'')+`</div>`;
   el.style.display='';
 }
 // Zugeklappte Gruppen pro Charakter (st.abGrpClosed, seit 27.09.2026); „Weitere“ startet zugeklappt
-function abGrpIsClosed(k){const g=st.abGrpClosed||{};return k in g?!!g[k]:k==='weitere';}
+function abGrpIsClosed(k){const g=st.abGrpClosed||{};return k in g?!!g[k]:(k==='weitere'||k==='stats');}
 function togAbGrp(k){st.abGrpClosed=st.abGrpClosed||{};st.abGrpClosed[k]=!abGrpIsClosed(k);buildAbilities();autoSave();}
 
 function buildAbilities(){
@@ -5560,7 +5561,7 @@ function importChars(e){
 
 // SETTINGS
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
-const APP_VERSION = 'willow-app-2026-09-27i';
+const APP_VERSION = 'willow-app-2026-09-27j';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
