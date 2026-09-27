@@ -253,6 +253,27 @@ input[type=number]{-moz-appearance:textfield}
 .ab-body.on{display:block}
 .ab-desc{font-size:14px;color:var(--text2);line-height:1.6;white-space:pre-line;margin-top:8px}
 .ab-restore{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;margin-top:6px;letter-spacing:.5px}
+/* Combat-Tab-Umbau (27.09.2026): Gruppen nach Aktionsart, Kampfwerte-Karte */
+.ab-grp{display:flex;align-items:center;gap:8px;margin:12px 2px 6px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.ab-grp:first-child{margin-top:2px}
+.ab-grp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ab-grp-dot.aktion{background:color-mix(in srgb, var(--red) 60%, transparent)}
+.ab-grp-dot.bonus{background:color-mix(in srgb, var(--gold) 60%, transparent)}
+.ab-grp-dot.reaktion{background:color-mix(in srgb, var(--blue) 60%, transparent)}
+.ab-grp-dot.passiv{background:color-mix(in srgb, var(--green) 50%, transparent)}
+.ab-grp-n{font-size:11px;color:var(--text3);letter-spacing:0}
+.ab-grp-chev{margin-left:auto;color:var(--text3);font-size:12px}
+.ab-card.ab-feat .ab-name{color:var(--text)}
+.cst-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.cst-head{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.cst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.cst-chip{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 8px;min-width:0}
+.cst-l{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.5px;color:var(--text3);line-height:1.25}
+.cst-v{font-size:17px;color:var(--gold);margin-top:2px;white-space:nowrap}
+.cst-chip.cst-ac .cst-v{color:var(--blue)}
+.cst-slots{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.cst-slot{display:inline-flex;align-items:baseline;gap:3px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:2px 7px;font-size:14px;color:var(--purple)}
+.cst-slot b{font-family:'Cinzel',serif;font-size:10px;color:var(--text3);font-weight:normal}
 
 /* BUTTONS */
 .add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;-webkit-tap-highlight-color:transparent;margin-top:4px}
@@ -570,6 +591,9 @@ input[type=number]{-moz-appearance:textfield}
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
         <button onclick="switchTab('spelllist')" style="background:transparent;border:none;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;letter-spacing:.5px">📖 Spell List →</button>
       </div>
+
+      <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026) -->
+      <div id="combatStats" class="cst-card" style="display:none"></div>
 
       <!-- HIT POINTS -->
       <div class="sec">Hit Points</div>
@@ -4310,12 +4334,101 @@ function abMaxUses(u,lvl){
   if(u&&typeof u==='object'){let m=0;Object.keys(u).forEach(k=>{if(lvl>=+k)m=u[k];});return m;}
   return u;
 }
+// ── COMBAT-TAB (Umbau 27.09.2026) ──
+// Passive Features ohne Kampfbezug, die im Combat-Tab fehlen (Ausschlussliste, Entscheidung Simon 27.09.2026).
+// Aktion/Bonusaktion/Reaktion erscheinen immer; im Info-Tab bleibt alles sichtbar.
+const COMBAT_SKIP_NAMES=new Set(["Ability Score Improvement","Epic Boon","Spellcasting","Expertise","Bonus Proficiencies","Bonus Proficiency",
+ "Bonus Cantrips","Thieves' Cant","Druidic","Scholar","Ritual Adept","Memorize Spell","Magical Secrets","Magical Discoveries",
+ "Eldritch Invocation Options","Expanded Spell List","Horizon Walker Magic","Monster Slayer Magic","Swarmkeeper Magic","Clockwork Magic",
+ "Divine Magic","Speech of the Woods","Animal Speaker","Nature Speaker","Wind Speaker","Silver Tongue","Knightly Envoy","Elegant Courtier",
+ "Master of Intrigue","Insightful Manipulator","Ear for Deceit","Infiltration Expertise","Assassin's Tools","Second-Story Work","Survivalist",
+ "Use Magic Device","Deft Explorer","Enchanting Conversationalist","Necromancy Spellbook","Master Scrivener","Student of Arcana",
+ "Blessings of Knowledge","Acolyte of Nature","Arcane Archer Lore","Student of War","Primal Knowledge","Restriction—Dwarves Only",
+ "Draconic Gift","Otherworldly Glamour","Additional Rune Known","Implement of Peace","Implements of Mercy","Whispers of the Dead"]);
+const COMBAT_SKIP_KEEP=new Set(["Beast Spells","Sculpt Spells","Share Spells"]); // enden auf „Spells“, sind aber Kampf-Features
+function combatSkip(f){
+  if(f.tag&&f.tag!=='Passiv')return false;
+  const n=f.name;
+  if(COMBAT_SKIP_KEEP.has(n))return false;
+  return COMBAT_SKIP_NAMES.has(n)||/ Subclass$/.test(n)||/ Savant$/.test(n)||/^Tenets of /.test(n)||/ Spells$/.test(n);
+}
+function clsSubKey(obj,subcls){
+  if(!obj||!subcls)return null;
+  if(obj[subcls])return subcls;
+  const k=subcls.replace(/\s*\([^)]+\)\s*$/,'').trim();
+  return obj[k]?k:null;
+}
+// Klassen-/Subklassen-Features der Stufe, die im Combat-Tab als eigene Karte erscheinen:
+// ohne Ausschlussliste, ohne Features mit Tracker-Karte (gleicher Name oder Text im Tracker enthalten, auch angehängte Verbesserungen),
+// gleicher Name mehrfach (Indomitable, Action Surge …) nur einmal (Text der höchsten erreichten Stufe, Stufe der ersten Fundstelle).
+function combatFeatures(cls,subcls,lvl,trB,trS){
+  const cd=CLASS_DATA[cls];if(!cd)return [];
+  const out=[];
+  const add=(arr,grp,trs)=>{
+    const byName=new Map();
+    (arr||[]).forEach((f,i)=>{
+      if(f.lvl>lvl)return;
+      const o=byName.get(f.name);
+      if(o){o.f=f;}else byName.set(f.name,{f,i,first:f.lvl});
+    });
+    byName.forEach(({f,i,first})=>{
+      if(combatSkip(f))return;
+      if(trs.some(t=>t.name===f.name))return;
+      const d=(f.desc||'').slice(0,200);
+      if(d.length>=40&&trs.some(t=>(t.desc||'').includes(d)))return;
+      out.push({f,grp,i,lvl:first});
+    });
+  };
+  add(cd.base,'b',trB);
+  const sk=clsSubKey(cd.subclass,subcls);
+  if(sk)add(cd.subclass[sk],'s',trS);
+  return out;
+}
+// AC ohne Rüstung aus dem Feature-Text (Unarmored Defense, Draconic Resilience, Dazzling Footwork) – nur Anzeige
+const AB_FULL={Strength:'STR',Dexterity:'DEX',Constitution:'CON',Intelligence:'INT',Wisdom:'WIS',Charisma:'CHA'};
+function combatUnarmoredAC(cls,subcls,lvl){
+  const cd=CLASS_DATA[cls];if(!cd)return null;
+  const sk=clsSubKey(cd.subclass,subcls);
+  const feats=(cd.base||[]).concat(sk?cd.subclass[sk]:[]).filter(f=>f.lvl<=lvl);
+  let best=null;
+  feats.forEach(f=>{
+    const m=/(?:base Armor Class|your AC) equals (\d+) (?:plus|\+) your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)(?: and (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma))? modifiers?(?!\s+if)/.exec(f.desc||'');
+    if(!m)return;
+    let ac=parseInt(m[1])+getAbilityMod(AB_FULL[m[2]])+(m[3]?getAbilityMod(AB_FULL[m[3]]):0);
+    if(!best||ac>best.ac)best={ac,name:f.name};
+  });
+  return best;
+}
+// Kampfwerte-Karte: Werte der aktuellen Stufe aus CLASS_TABLES (extra-Spalten, Übungsbonus, Zauberplätze)
+function buildCombatStats(cls,subcls,lvl){
+  const el=document.getElementById('combatStats');if(!el)return;
+  const t=cls&&CLASS_TABLES[cls];
+  const row=t&&(t.rows||[]).find(r=>+r.lvl===lvl);
+  if(!row){el.style.display='none';el.innerHTML='';return;}
+  const chip=(l,v,c,tt)=>`<div class="cst-chip${c?' '+c:''}"${tt?` title="${tt}"`:''}><div class="cst-l">${l}</div><div class="cst-v">${v}</div></div>`;
+  let h=chip('Proficiency Bonus','+'+row.pb);
+  (t.extra||[]).forEach(c=>{
+    const v=row[c.k];
+    if(v===undefined||v===null||v===''||v==='—'||v===0||v==='0')return;
+    h+=chip(c.l,v);
+  });
+  const ac=combatUnarmoredAC(cls,subcls,lvl);
+  if(ac)h+=chip('Unarmored AC',ac.ac,'cst-ac',ac.name);
+  const sl=(row.slots||[]).map((n,i)=>n>0?`<span class="cst-slot"><b>${i+1}</b>${n}</span>`:'').join('');
+  el.innerHTML=`<div class="cst-head">Combat Stats · Level ${lvl}</div><div class="cst-grid">${h}</div>`+
+    (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'');
+  el.style.display='';
+}
+let abGrpClosed={}; // zugeklappte Gruppen (nur Anzeige, nicht gespeichert)
+function togAbGrp(k){abGrpClosed[k]=!abGrpClosed[k];buildAbilities();}
+
 function buildAbilities(){
   const cls=document.getElementById('cls').value;
   const subcls=document.getElementById('subcls').value;
   const lvl=parseInt(document.getElementById('lvl').value)||1;
   const sec=document.getElementById('abilitiesSection');
   const list=document.getElementById('abList');
+  buildCombatStats(cls,subcls,lvl);
   if(!list)return;
   const openIds=[...list.querySelectorAll('.ab-body.on')].map(b=>b.id); // aufgeklappte Karten bleiben nach Klick offen
   list.innerHTML='';
@@ -4327,13 +4440,15 @@ function buildAbilities(){
   if(bsec) bsec.style.display=(clsSpecial(cls,'beasts')||(st.savedBeasts&&st.savedBeasts.length))?'':'none';
 
   let abilities=[];
-  (clsData.base||[]).forEach(a=>{if(!a.minLvl||lvl>=a.minLvl)abilities.push(a);});
+  const trB=[],trS=[];
+  (clsData.base||[]).forEach(a=>{if(!a.minLvl||lvl>=a.minLvl){abilities.push(a);trB.push(a);}});
   const abKey=subcls&&(clsData[subcls]?subcls:subcls.replace(/\s*\([^)]+\)\s*$/,'').trim());
   if(abKey&&clsData[abKey]){
-    clsData[abKey].forEach(a=>{if(!a.minLvl||lvl>=a.minLvl)abilities.push(a);});
+    clsData[abKey].forEach(a=>{if(!a.minLvl||lvl>=a.minLvl){abilities.push(a);trS.push(a);}});
   }
+  const items=[]; // {tag, lvl, ord, el} – wird unten nach Aktionsart gruppiert
 
-  abilities.forEach(ab=>{
+  abilities.forEach((ab,abIdx)=>{
     const iconClass=ab.tag==='aktion'?'aktion':ab.tag==='bonus'?'bonus':ab.tag==='reaktion'?'reaktion':'passiv';
     const tagLabel=ab.tag==='aktion'?'Aktion':ab.tag==='bonus'?'Bonusaktion':ab.tag==='reaktion'?'Reaktion':'Passiv';
     const maxUses=abMaxUses(ab.uses,lvl);
@@ -4380,7 +4495,46 @@ function buildAbilities(){
       <div class="ab-body${isOpen?' on':''}" id="ab_${ab.id}">
         <div class="ab-desc">${ab.desc}</div>
       </div>`;
-    list.appendChild(card);
+    items.push({tag:iconClass,lvl:ab.minLvl||1,ord:(trS.includes(ab)?10000:0)+abIdx,el:card});
+  });
+
+  // Features ohne Tracker (Aktion/Bonusaktion/Reaktion + kampfrelevante Passive)
+  const FTAG={Aktion:'aktion',Bonusaktion:'bonus',Reaktion:'reaktion'};
+  const FICON={aktion:'⚔️',bonus:'⚡',reaktion:'🛡️',passiv:'✧'};
+  combatFeatures(cls,subcls,lvl,trB,trS).forEach(x=>{
+    const k=FTAG[x.f.tag]||'passiv';
+    const fid='f_'+x.grp+'_'+x.f.name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    const isOpen=openIds.includes('ab_'+fid);
+    const card=document.createElement('div');
+    card.className='ab-card ab-feat'+(isOpen?' open':'');
+    card.innerHTML=`
+      <div class="ab-top" onclick="togAb('${fid}')">
+        <div class="ab-icon ${k}">${FICON[k]}</div>
+        <div class="ab-title">
+          <div class="ab-name">${x.f.name}</div>
+          <div class="ab-tag">Level ${x.lvl}${x.grp==='s'?' · '+(typeof subclsLabel==='function'?subclsLabel(cls,subcls):subcls).replace(/\s*\([^)]+\)\s*$/,''):''}</div>
+        </div>
+      </div>
+      <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
+        <div class="ab-desc">${x.f.desc}</div>
+      </div>`;
+    items.push({tag:k,lvl:x.lvl,ord:(x.grp==='s'?15000:5000)+x.i,el:card});
+  });
+
+  [['aktion','Aktion'],['bonus','Bonusaktion'],['reaktion','Reaktion'],['passiv','Passiv']].forEach(([k,l])=>{
+    const its=items.filter(x=>x.tag===k).sort((a,b)=>a.lvl-b.lvl||a.ord-b.ord);
+    if(!its.length)return;
+    const closed=!!abGrpClosed[k];
+    const h=document.createElement('div');
+    h.className='ab-grp'+(closed?' closed':'');h.dataset.grp=k;
+    h.setAttribute('onclick',`togAbGrp('${k}')`);
+    h.innerHTML=`<span class="ab-grp-dot ${k}"></span><span>${l}</span><span class="ab-grp-n">${its.length}</span><span class="ab-grp-chev">${closed?'▸':'▾'}</span>`;
+    list.appendChild(h);
+    const box=document.createElement('div');
+    box.className='ab-grp-box';box.dataset.grp=k;
+    if(closed)box.style.display='none';
+    its.forEach(x=>box.appendChild(x.el));
+    list.appendChild(box);
   });
 }
 
@@ -5403,7 +5557,7 @@ function importChars(e){
 
 // SETTINGS
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
-const APP_VERSION = 'willow-app-2026-09-27g';
+const APP_VERSION = 'willow-app-2026-09-27h';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
