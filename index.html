@@ -12,8 +12,9 @@ html{scrollbar-gutter:stable}
 :root{
   --bg0:#0d0b14;--bg1:#141020;--bg2:#1a1530;--bg3:#100e1c;
   --gold:#c9a84c;--gold2:#8a6f2e;
-  --purple:#b48be0;--purple2:#7c4dba;--purple3:#3a1f6b;
-  --text:#f0e8ff;--text2:#9b8fc0;--text3:#6b5f8a;
+  --purple:#ecd592;--purple2:#7c4dba;--purple3:#3a1f6b;
+  --text:#f0e8ff;--text2:#9b8fc0;--text3:#b8a06a;
+  --desc:#dfd6f2;--muted:#6b5f8a;   /* Beschreibungstext hell, gedämpfte Nebensachen (UI 27.09.2026) */
   --border:rgba(180,139,224,0.3);--border2:rgba(180,139,224,0.15);
   --green:#4caf7d;--red:#e05555;--blue:#5b9bd5;
   /* Typo-Skala (UI/Lesbarkeit 27.09.2026): kleinste Schrift 11px, Fließtext 15px */
@@ -34,7 +35,7 @@ input[type=number]{-moz-appearance:textfield}
 .rune{width:38px;height:38px;background:var(--purple3);border:1px solid var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .hdr-title{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:2px;color:var(--gold);margin-bottom:3px}
 .name-in{background:transparent;border:none;border-bottom:1px solid var(--border);font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--text);width:100%;outline:none;padding:2px 0}
-.name-in::placeholder{color:var(--text3)}
+.name-in::placeholder{color:var(--muted)}
 
 /* TABS */
 .tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));background:var(--bg1)}
@@ -44,7 +45,7 @@ input[type=number]{-moz-appearance:textfield}
 /* BODY */
 .body{padding:14px;padding-bottom:calc(64px + env(safe-area-inset-bottom));overflow-x:hidden}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border2);display:flex;z-index:200;padding-bottom:max(env(safe-area-inset-bottom), 8px)}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--text3);transition:color .2s;-webkit-tap-highlight-color:transparent;outline:none}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;-webkit-tap-highlight-color:transparent;outline:none}
 .bnav-btn:focus{outline:none}
 .bnav-btn.on{color:var(--purple)}
 .bnav-btn.on .bnav-icon{filter:drop-shadow(0 0 4px var(--purple))}
@@ -100,7 +101,7 @@ input[type=number]{-moz-appearance:textfield}
 /* SKILLS */
 .sk-list{display:flex;flex-direction:column;gap:4px}
 .sk-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.sk-pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--text3);flex-shrink:0}
+.sk-pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--muted);flex-shrink:0}
 .sk-pip.p{background:var(--gold);border-color:var(--gold)}
 .sk-pip.e{background:var(--green);border-color:var(--green)}
 .sk-name{font-size:var(--fs-txt);color:var(--text);flex:1}
@@ -118,7 +119,7 @@ input[type=number]{-moz-appearance:textfield}
 .ct-tbl td.ct-feat{text-align:left;white-space:normal;min-width:150px;color:var(--purple);font-size:var(--fs-xs);line-height:1.4}
 .ct-tbl tr.ct-cur td{background:var(--purple3);color:var(--text)}
 .ct-tbl tr.ct-cur td.ct-lvl{color:var(--gold)}
-.ct-tbl td.ct-dash{color:var(--text3);opacity:.5}
+.ct-tbl td.ct-dash{color:var(--muted);opacity:.5}
 .sk-roll-ic:active{transform:scale(.9)}
 
 /* DICE ROLLER */
@@ -186,7 +187,7 @@ input[type=number]{-moz-appearance:textfield}
 .feat-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .feat-name{font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)}
 .feat-tag{font-size:var(--fs-2xs);padding:2px 7px;border-radius:10px;background:color-mix(in srgb, var(--blue) 20%, transparent);color:var(--blue);font-family:'Cinzel',serif}
-.feat-desc{font-size:var(--fs-txt);color:var(--text2);line-height:1.5}
+.feat-desc{font-size:var(--fs-txt);color:var(--desc);line-height:1.5}
 
 /* SUBTABS */
 .subtab{padding:8px 14px;font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;white-space:nowrap;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent}
@@ -217,7 +218,7 @@ input[type=number]{-moz-appearance:textfield}
 .item-del:hover{background:color-mix(in srgb, var(--red) 15%, transparent)}
 
 
-.bg-desc{font-size:var(--fs-txt);color:var(--text2);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
+.bg-desc{font-size:var(--fs-txt);color:var(--desc);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
 .bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .bg-pill{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px}
 .bg-pill-label{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text3);letter-spacing:1px;margin-bottom:4px}
@@ -251,12 +252,12 @@ input[type=number]{-moz-appearance:textfield}
 .ab-sublbl{flex:1;font-size:var(--fs-sm);color:var(--text2);font-family:'Cinzel',serif}
 .ab-star{cursor:pointer;color:var(--text3);font-size:var(--fs-txt);width:16px;text-align:center;-webkit-tap-highlight-color:transparent}
 .ab-star.on{color:var(--gold)}
-.ab-sub.unpicked .ab-sublbl{color:var(--text3)}
+.ab-sub.unpicked .ab-sublbl{color:var(--muted)}
 .ab-card.ab-picked:not(.open) .ab-sub.unpicked{display:none}
 .ab-pickinfo{font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif}
 .ab-body{display:none;padding:0 12px 10px;border-top:1px solid var(--border2)}
 .ab-body.on{display:block}
-.ab-desc{font-size:var(--fs-txt);color:var(--text2);line-height:1.6;white-space:pre-line;margin-top:8px}
+.ab-desc{font-size:var(--fs-txt);color:var(--desc);line-height:1.6;white-space:pre-line;margin-top:8px}
 .ab-restore{font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif;margin-top:6px;letter-spacing:.5px}
 /* Combat-Tab-Umbau (27.09.2026): Gruppen nach Aktionsart, Kampfwerte-Karte */
 .ab-grp{display:flex;align-items:center;gap:8px;margin:12px 2px 6px;font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:1px;text-transform:uppercase;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -287,17 +288,17 @@ input[type=number]{-moz-appearance:textfield}
 .add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:1px;cursor:pointer;text-transform:uppercase;-webkit-tap-highlight-color:transparent;margin-top:4px}
 .delbtn{width:20px;height:20px;border-radius:50%;border:1px solid color-mix(in srgb, var(--red) 40%, transparent);background:transparent;color:var(--red);font-size:var(--fs-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .nta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:10px;resize:vertical;outline:none;line-height:1.6;margin-bottom:10px;min-height:60px}
-.nta::placeholder{color:var(--text3)}
+.nta::placeholder{color:var(--muted)}
 
 /* ===== ZAUBERBUCH ===== */
 .zb-controls{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
 .search-wrap{position:relative;display:flex;align-items:center}
 .search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:8px 36px 8px 32px;outline:none}
 .search-wrap input:focus{border-color:var(--purple)}
-.search-wrap input::placeholder{color:var(--text3)}
-.search-clear{position:absolute;right:8px;background:none;border:none;color:var(--text3);font-size:var(--fs-txt);cursor:pointer;padding:4px;line-height:1}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-clear{position:absolute;right:8px;background:none;border:none;color:var(--muted);font-size:var(--fs-txt);cursor:pointer;padding:4px;line-height:1}
 .search-clear:hover{color:var(--text)}
-.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:var(--fs-md);pointer-events:none}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:var(--fs-md);pointer-events:none}
 .nta-wrap{position:relative;display:flex;flex-direction:column}
 .nta-expand{position:absolute;top:6px;right:6px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:5px;color:var(--text3);font-size:var(--fs-txt);width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s;z-index:1;pointer-events:all}
 .nta-expand:hover{color:var(--gold);border-color:var(--gold)}
@@ -306,7 +307,7 @@ input[type=number]{-moz-appearance:textfield}
 .note-modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:600px;display:flex;flex-direction:column;gap:0;overflow:hidden;max-height:calc(90vh / var(--zf))}
 .note-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border2)}
 .note-modal-title{font-family:'Cinzel',serif;font-size:var(--fs-md);letter-spacing:1px;color:var(--gold)}
-.note-modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:0}
+.note-modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:0}
 .note-modal-close:hover{color:var(--red)}
 .note-modal textarea{flex:1;background:var(--bg3);border:none;color:var(--text);font-size:var(--fs-txt);padding:14px;resize:none;outline:none;min-height:300px;font-family:inherit;line-height:1.6}
 .filter-toggle{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:color .2s,border-color .2s}
@@ -337,7 +338,7 @@ input[type=number]{-moz-appearance:textfield}
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:0;padding-bottom:10px;border-bottom:1px solid var(--border2)}
 .di label{display:block;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text3);margin-bottom:2px;text-transform:uppercase}
 .di span{font-size:var(--fs-md);color:var(--text2)}
-.desc-text{font-size:var(--fs-txt);color:var(--text2);line-height:1.65;margin-top:10px;margin-bottom:8px;overflow-wrap:break-word;word-break:break-word}
+.desc-text{font-size:var(--fs-txt);color:var(--desc);line-height:1.65;margin-top:10px;margin-bottom:8px;overflow-wrap:break-word;word-break:break-word}
 .sdesc{font-size:inherit;color:inherit;line-height:inherit}
 .sdesc p.sdesc-p{margin:0 0 7px}
 .sdesc p.sdesc-p:last-child{margin-bottom:0}
@@ -349,9 +350,9 @@ input[type=number]{-moz-appearance:textfield}
 .sdesc strong{color:var(--text);font-weight:600}
 .higher-box{background:color-mix(in srgb, var(--blue) 10%, transparent);border:1px solid color-mix(in srgb, var(--blue) 30%, transparent);border-radius:6px;padding:7px 10px;margin-bottom:8px}
 .higher-box label{display:block;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--blue);margin-bottom:2px;text-transform:uppercase}
-.higher-box p{font-size:var(--fs-md);color:var(--text2);line-height:1.5}
+.higher-box p{font-size:var(--fs-md);color:var(--desc);line-height:1.5}
 .zb-addbtn{width:100%;padding:7px;background:color-mix(in srgb, var(--green) 15%, transparent);border:1px solid color-mix(in srgb, var(--green) 40%, transparent);border-radius:6px;color:var(--green);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.zb-addbtn.done{background:var(--bg3);border-color:var(--border2);color:var(--text3)}
+.zb-addbtn.done{background:var(--bg3);border-color:var(--border2);color:var(--muted)}
 
 /* CHARAKTER SWITCHER */
 .char-bar{display:flex;gap:6px;align-items:center;padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border2)}
@@ -408,6 +409,9 @@ html[data-ts="gross"]{zoom:1.15;--zf:1.15}
 html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 .ts-row{display:flex;gap:6px;margin-bottom:20px}
 .ts-row .fbtn{flex:1;text-align:center;padding:9px 4px}
+.clr-grp{border:1px solid var(--border2);border-radius:8px;margin-bottom:8px;padding:0 10px}
+.clr-grp summary{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;text-transform:uppercase;color:var(--gold);padding:10px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.clr-grp[open] summary{margin-bottom:4px}
 </style>
 <script>try{var _ts=localStorage.getItem('willow_textsize');if(_ts==='gross'||_ts==='sehrgross')document.documentElement.dataset.ts=_ts;}catch(e){}</script>
 </head>
@@ -452,7 +456,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <button class="tab" data-tab="notizen">Notes</button>
       <button class="tab" data-tab="log">Log</button>
     </div>
-    <button id="tabsToggleBtn" onclick="toggleTabs()" style="width:100%;background:none;border:none;border-top:1px solid var(--border2);color:var(--text3);font-size:var(--fs-2xs);font-family:'Cinzel',serif;letter-spacing:1px;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+    <button id="tabsToggleBtn" onclick="toggleTabs()" style="width:100%;background:none;border:none;border-top:1px solid var(--border2);color:var(--muted);font-size:var(--fs-2xs);font-family:'Cinzel',serif;letter-spacing:1px;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
       <span id="tabsToggleArrow">▴</span><span id="tabsToggleLabel">Collapse Nav</span>
     </button>
   </div>
@@ -511,7 +515,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <button onclick="toggleInfoSection('coreTraitsBody','coreTraitsBtn')" id="coreTraitsBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="coreTraitsBody" style="display:none">
-          <div id="coreTraitsList" style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:var(--fs-txt);line-height:1.8;color:var(--text2)"></div>
+          <div id="coreTraitsList" style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:var(--fs-txt);line-height:1.8;color:var(--desc)"></div>
           <div class="nta-wrap" style="margin-top:6px"><textarea class="nta" id="n_class_traits" placeholder="Homebrew notes, custom traits..." style="min-height:60px"></textarea><button class="nta-expand" onclick="openNoteModal('n_class_traits','Class Traits Notes')">⛶</button></div>
         </div>
       </div>
@@ -777,7 +781,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         </div>
         <div id="sb-beasts">
           <div id="savedBeasts" style="margin-bottom:10px">
-            <div style="color:var(--text3);font-size:var(--fs-sm);font-family:'Cinzel',serif;text-align:center;padding:12px">No forms saved yet</div>
+            <div style="color:var(--muted);font-size:var(--fs-sm);font-family:'Cinzel',serif;text-align:center;padding:12px">No forms saved yet</div>
           </div>
         </div>
       </div>
@@ -1037,7 +1041,7 @@ function delWeapon(i){
 }
 function buildWeapons(){
   const g=document.getElementById('weaponList');if(!g)return;
-  if(!st.weapons||!st.weapons.length){g.innerHTML='<div style="font-size:var(--fs-md);color:var(--text3);padding:6px 2px">No weapons added.</div>';return;}
+  if(!st.weapons||!st.weapons.length){g.innerHTML='<div style="font-size:var(--fs-md);color:var(--muted);padding:6px 2px">No weapons added.</div>';return;}
   g.innerHTML='';
   st.weapons.forEach((w,i)=>{
     const d=document.createElement('div');
@@ -1811,7 +1815,7 @@ function slRender(){
   });
   document.getElementById('slCount').textContent=f.length+' of '+ZB_SPELLS.length+' spells'+(slFClass==='mine'&&ctx.avail?' · '+ctx.cls:'');
   list.innerHTML='';
-  if(!f.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-family:\'Cinzel\',serif;font-size:var(--fs-xs)">No spells found</div>';return;}
+  if(!f.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-family:\'Cinzel\',serif;font-size:var(--fs-xs)">No spells found</div>';return;}
   const lvlNames=['Cantrips','1st Level','2nd Level','3rd Level','4th Level','5th Level','6th Level','7th Level','8th Level','9th Level'];
   const byLvl=Array.from({length:10},(_,i)=>f.filter(s=>s.grad===i));
   const multiLvl=byLvl.filter(g=>g.length).length>1;
@@ -3817,7 +3821,7 @@ function buildClsLore(){
             <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}</span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
-          <div style="font-size:var(--fs-txt);color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
+          <div style="font-size:var(--fs-txt);color:var(--desc);white-space:pre-line;line-height:1.7">${f.desc}</div>
         </div>`).join('')}
     </div>`).join('');
 }
@@ -3890,7 +3894,7 @@ function buildRaceLore(){
     groups.map(g=>
       '<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">'
       +(g.name?'<div style="font-family:Cinzel,serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:3px">'+g.name+'</div>':'')
-      +'<div style="font-size:var(--fs-txt);color:var(--text2);line-height:1.7">'+g.desc+'</div></div>'
+      +'<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.7">'+g.desc+'</div></div>'
     ).join('');
 }
 
@@ -3920,7 +3924,7 @@ function buildSubclsLore(){
             <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}</span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
-          <div style="font-size:var(--fs-txt);color:var(--text2);white-space:pre-line;line-height:1.7">${f.desc}</div>
+          <div style="font-size:var(--fs-txt);color:var(--desc);white-space:pre-line;line-height:1.7">${f.desc}</div>
         </div>`).join('')}
     </div>`).join('');
 }
@@ -4028,7 +4032,7 @@ function buildFeatsInfo(){
   body.innerHTML=myFeats.map(f=>`
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
       <div style="color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-sm);margin-bottom:4px">${f.name}</div>
-      ${f.desc?`<div style="font-size:var(--fs-txt);color:var(--text2);line-height:1.6;white-space:pre-line">${f.desc}</div>`:''}
+      ${f.desc?`<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6;white-space:pre-line">${f.desc}</div>`:''}
     </div>`).join('');
 }
 
@@ -4849,7 +4853,7 @@ function bgRenderMy(){
   if(bgInput) bgInput.value=st.bg||'';
   if(!el)return;
   if(!st.bg){
-    el.innerHTML='<div style="color:var(--text3);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">No background selected yet</div>';
+    el.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">No background selected yet</div>';
     return;
   }
   const bg=BG_DATA.find(b=>b.n===st.bg);
@@ -4925,7 +4929,7 @@ function ftMakeCard(ft){
   const top=document.createElement('div');top.className='zb-top';top.style.cursor='pointer';
   top.innerHTML=`<span class="zb-name">${ft.n}</span> ${catLabel?`<span class="zb-badge zb-school">${catLabel}</span>`:''} ${ft.pre?`<span class="zb-badge zb-src" title="${ft.pre}">${ft.pre}</span>`:''}<span class="zb-badge zb-src">${ft.src}</span>`;
   const detail=document.createElement('div');detail.className='zb-detail';
-  const desc=document.createElement('div');desc.style.cssText='font-size:var(--fs-md);color:var(--text2);line-height:1.6;white-space:pre-line;margin-bottom:8px';desc.textContent=ft.d;
+  const desc=document.createElement('div');desc.style.cssText='font-size:var(--fs-md);color:var(--desc);line-height:1.6;white-space:pre-line;margin-bottom:8px';desc.textContent=ft.d;
   const btn=document.createElement('button');btn.className='add-btn';btn.style.cssText='margin:0'+(isMy?';background:rgba(122,154,90,0.2);border-color:var(--green);color:var(--green)':'');
   btn.textContent=isMy?'✓ My Feat':'+ Add to Sheet';
   btn.onclick=()=>ftToggle(ft.n,ft.d);
@@ -4954,7 +4958,7 @@ function ftRenderMy(){
   const list=document.getElementById('ftMyList');if(!list)return;
   const myFeats=st.feats.filter(f=>f.tag==='Feat');
   if(!myFeats.length){
-    list.innerHTML='<div style="color:var(--text3);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">No feats selected yet</div>';
+    list.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">No feats selected yet</div>';
     return;
   }
   list.innerHTML='';
@@ -5032,8 +5036,8 @@ function bstMakeCard(b){
   top.innerHTML=`<span class="zb-name">${b.n}</span><span class="zb-badge zb-school">${b.type}</span><span class="zb-badge zb-src">CR ${b.cr}</span><span class="zb-badge zb-src">${SIZE_MAP[b.size]||b.size}</span>`;
   const detail=document.createElement('div');detail.className='zb-detail';
   const statMod=v=>{const m=Math.floor((v-10)/2);return (m>=0?'+':'')+m;};
-  const actHtml=b.actions.map(a=>`<div style="margin-bottom:4px"><strong style="color:var(--gold);font-size:var(--fs-sm)">${a.split(':')[0]}</strong><br><span style="font-size:var(--fs-txt);color:var(--text2);line-height:1.5">${a.split(':').slice(1).join(':').trim()}</span></div>`).join('');
-  const traitHtml=b.traits.map(t=>`<div style="margin-bottom:4px"><strong style="color:var(--purple);font-size:var(--fs-sm)">${t.split(':')[0]}</strong><br><span style="font-size:var(--fs-txt);color:var(--text2);line-height:1.5">${t.split(':').slice(1).join(':').trim()}</span></div>`).join('');
+  const actHtml=b.actions.map(a=>`<div style="margin-bottom:4px"><strong style="color:var(--gold);font-size:var(--fs-sm)">${a.split(':')[0]}</strong><br><span style="font-size:var(--fs-txt);color:var(--desc);line-height:1.5">${a.split(':').slice(1).join(':').trim()}</span></div>`).join('');
+  const traitHtml=b.traits.map(t=>`<div style="margin-bottom:4px"><strong style="color:var(--purple);font-size:var(--fs-sm)">${t.split(':')[0]}</strong><br><span style="font-size:var(--fs-txt);color:var(--desc);line-height:1.5">${t.split(':').slice(1).join(':').trim()}</span></div>`).join('');
 
   const inner=document.createElement('div');
   inner.innerHTML=`
@@ -5097,7 +5101,7 @@ function buildSavedBeasts(){
   st.savedBeasts=st.savedBeasts||[];
   if(list){
     if(!st.savedBeasts.length){
-      list.innerHTML='<div style="color:var(--text3);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">Noch keine Bestien markiert</div>';
+      list.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">Noch keine Bestien markiert</div>';
     } else {
       list.innerHTML='';
       st.savedBeasts.forEach(b=>{
@@ -5483,7 +5487,7 @@ function _pushLog(name,entries){
 function buildLog(){
   const box=document.getElementById('logList'); if(!box) return;
   const log=(st.log||[]).slice().reverse();
-  if(!log.length){ box.innerHTML='<div style="color:var(--text3);font-size:var(--fs-sm);padding:8px 2px">Noch keine Änderungen aufgezeichnet.</div>'; return; }
+  if(!log.length){ box.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 2px">Noch keine Änderungen aufgezeichnet.</div>'; return; }
   let lastDay='';
   let html='';
   log.forEach(e=>{
@@ -5536,8 +5540,19 @@ const CLASS_THEMES={"": {"gold": "#c9a84c", "gold2": "#8a6f2e", "purple": "#b48b
 
 const CLASS_RUNES={'Barbarian':'🪓','Bard':'🎭','Druid':'🌿','Warlock':'🕯','Ranger':'🏹','Cleric':'🕊','Fighter':'⚔','Wizard':'📜','Monk':'🥋','Paladin':'🛡','Rogue':'🗡','Sorcerer':'⭐'};
 
+// UI/Lesbarkeit (27.09.2026): Grundwerte je Theme. Highlight (purple) und Small Labels (text3) in hellem Gold (alle Themes),
+// desc = Beschreibungstext fast weiß mit leichter Theme-Tönung, muted = alter text3-Wert (Leiste inaktiv, Platzhalter).
+// Eigene Farben aus ⚙ (loadThemeOverrides) gehen weiter vor.
+const THEME_GOLD_HI='#ecd592', THEME_GOLD_LBL='#b8a06a';
+function hexMix(a,b,w){const h=x=>{x=String(x||'').replace('#','');if(x.length===3)x=x.split('').map(c=>c+c).join('');const n=parseInt(x,16);return isNaN(n)?[128,128,128]:[n>>16&255,n>>8&255,n&255];};
+  const A=h(a),B=h(b);return '#'+A.map((v,i)=>Math.round(v*(1-w)+B[i]*w).toString(16).padStart(2,'0')).join('');}
+function themeBase(cls){
+  const t=CLASS_THEMES[cls]||CLASS_THEMES[''];
+  return {...t, purple:THEME_GOLD_HI, text3:THEME_GOLD_LBL, muted:t.text3, desc:hexMix(t.text,t.text2,.2),
+    red:t.red||'#e05555', green:t.green||'#4caf7d', blue:t.blue||'#5b9bd5'};
+}
 function applyTheme(cls){
-  const base=CLASS_THEMES[cls]||CLASS_THEMES[''];
+  const base=themeBase(cls);
   const ov=loadThemeOverrides();
   const t={...base,...(ov[cls]||{})};
   const r=document.documentElement.style;
@@ -5555,6 +5570,8 @@ function applyTheme(cls){
   r.setProperty('--text',t.text);
   r.setProperty('--text2',t.text2);
   r.setProperty('--text3',t.text3);
+  r.setProperty('--desc',t.desc);
+  r.setProperty('--muted',t.muted);
   r.setProperty('--red',t.red||'#e05555');
   r.setProperty('--green',t.green||'#4caf7d');
   r.setProperty('--blue',t.blue||'#5b9bd5');
@@ -5619,10 +5636,13 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-27k';
+const APP_VERSION = 'willow-app-2026-09-27l';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
-const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
+const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
+const COLOR_GROUPS = [['Backgrounds',['bg0','bg1','bg2','bg3']],['Text',['text','desc','text2','text3','muted']],
+  ['Accents',['gold','gold2','purple','purple2']],['Status',['green','red','blue']]];
+const colorGrpOpen = new Set(['Text']);
 
 function loadThemeOverrides(){
   try{ return JSON.parse(localStorage.getItem(SETTINGS_LS)||'{}'); }catch(e){ return {}; }
@@ -5648,7 +5668,7 @@ function buildSettingsUI(){
     const key = c === '(Default)' ? '' : c;
     const isActive = key === settingsActiveClass;
     const hasOverride = ov[key] && Object.keys(ov[key]).length > 0;
-    const theme = {...(CLASS_THEMES[key]||CLASS_THEMES['']), ...(ov[key]||{})};
+    const theme = {...themeBase(key), ...(ov[key]||{})};
     return `<button onclick="setSettingsClass('${key}')" style="
       padding:5px 10px;border-radius:6px;font-family:'Cinzel',serif;font-size:var(--fs-2xs);
       letter-spacing:.5px;cursor:pointer;border:1px solid ${isActive?theme.gold:'rgba(255,255,255,0.15)'};
@@ -5666,12 +5686,14 @@ function setSettingsClass(cls){
 function buildColorPanel(){
   const panel = document.getElementById('settingsColorPanels');
   const ov = loadThemeOverrides();
-  const base = CLASS_THEMES[settingsActiveClass] || CLASS_THEMES[''];
+  const base = themeBase(settingsActiveClass);
   const current = {...base, ...(ov[settingsActiveClass]||{})};
   const clsLabel = settingsActiveClass || 'Default';
   panel.innerHTML = `
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text3);margin-bottom:10px;letter-spacing:1px">${clsLabel.toUpperCase()}</div>
-    ${Object.entries(COLOR_LABELS).map(([key, label]) => `
+    ${COLOR_GROUPS.map(([g, keys]) => `<details class="clr-grp" ${colorGrpOpen.has(g)?'open':''} ontoggle="colorGrpOpen[this.open?'add':'delete']('${g}')">
+      <summary>${g}</summary>
+      ${keys.map(key => [key, COLOR_LABELS[key]]).map(([key, label]) => `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
         <input type="color" value="${current[key]||'#888888'}" 
           oninput="previewColor('${key}',this.value)"
@@ -5682,7 +5704,8 @@ function buildColorPanel(){
           <div style="font-size:var(--fs-2xs);color:var(--text3)">${current[key]||'—'}</div>
         </div>
         ${(ov[settingsActiveClass]||{})[key] ? `<button onclick="resetColor('${key}')" style="background:none;border:none;color:var(--text3);font-size:var(--fs-xs);cursor:pointer">↺</button>` : ''}
-      </div>`).join('')}`;
+      </div>`).join('')}
+    </details>`).join('')}`;
 }
 
 function previewColor(key, val){
@@ -5718,7 +5741,7 @@ function resetColor(key){
 function applyThemeFrom(){
   const src = document.getElementById('copyThemeSel')?.value;
   if(src === undefined || src === null) return;
-  const srcTheme = CLASS_THEMES[src] || CLASS_THEMES[''];
+  const srcTheme = themeBase(src);
   const ov = loadThemeOverrides();
   ov[settingsActiveClass] = {...srcTheme};
   saveThemeOverrides(ov);
@@ -5852,7 +5875,7 @@ function doRoll(spec){
 function renderDiceHistory(){
   const wrap=document.getElementById('diceHistoryList');
   if(!wrap)return;
-  if(!diceHistory.length){wrap.innerHTML='<div style="font-size:var(--fs-sm);color:var(--text3);text-align:center;padding:6px">No rolls yet</div>';return;}
+  if(!diceHistory.length){wrap.innerHTML='<div style="font-size:var(--fs-sm);color:var(--muted);text-align:center;padding:6px">No rolls yet</div>';return;}
   wrap.innerHTML=diceHistory.map(h=>'<div class="dice-history-row"><span>'+(h.label?h.label+' — ':'')+h.spec+'</span><span class="dh-result">'+h.total+'</span></div>').join('');
 }
 
