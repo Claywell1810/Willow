@@ -176,7 +176,7 @@ input[type=number]{-moz-appearance:textfield}
 .slvl{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center}
 .slvl-lbl{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:var(--gold2);margin-bottom:5px;text-transform:uppercase}
 .slpip{width:13px;height:13px;border-radius:50%;border:1px solid var(--purple2);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-block;margin:2px}
-.slpip.u{background:var(--purple2)}
+.slpip.av{background:var(--purple2)} /* gefüllt = verfügbar (seit 27.09.2026) */
 
 /* FEATURES */
 .feat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:6px}
@@ -229,12 +229,14 @@ input[type=number]{-moz-appearance:textfield}
 .ab-icon.bonus{background:color-mix(in srgb, var(--gold) 20%, transparent);border:1px solid color-mix(in srgb, var(--gold) 40%, transparent)}
 .ab-icon.reaktion{background:color-mix(in srgb, var(--blue) 20%, transparent);border:1px solid color-mix(in srgb, var(--blue) 40%, transparent)}
 .ab-icon.passiv{background:color-mix(in srgb, var(--green) 15%, transparent);border:1px solid color-mix(in srgb, var(--green) 30%, transparent)}
+.ab-icon.weitere{background:color-mix(in srgb, var(--text3) 12%, transparent);border:1px solid color-mix(in srgb, var(--text3) 30%, transparent)}
 .ab-title{flex:1;min-width:0}
 .ab-name{font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
 .ab-tag{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;letter-spacing:.5px}
 .ab-uses{display:flex;gap:4px;align-items:center;flex-shrink:0}
 .ab-pip{width:14px;height:14px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
-.ab-pip.used{background:var(--purple2);border-color:var(--purple)}
+.ab-pip.avail{background:var(--purple2);border-color:var(--purple)} /* gefüllt = verfügbar (seit 27.09.2026) */
+.ab-pip.used{background:transparent}
 /* Pool-Zähler (pool:true) und Einzel-Tracker (sub) – seit 27.09.2026 */
 .ab-pool{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .ab-pbtn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:15px;line-height:1;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
@@ -261,6 +263,7 @@ input[type=number]{-moz-appearance:textfield}
 .ab-grp-dot.bonus{background:color-mix(in srgb, var(--gold) 60%, transparent)}
 .ab-grp-dot.reaktion{background:color-mix(in srgb, var(--blue) 60%, transparent)}
 .ab-grp-dot.passiv{background:color-mix(in srgb, var(--green) 50%, transparent)}
+.ab-grp-dot.weitere{background:color-mix(in srgb, var(--text3) 60%, transparent)}
 .ab-grp-n{font-size:11px;color:var(--text3);letter-spacing:0}
 .ab-grp-chev{margin-left:auto;color:var(--text3);font-size:12px}
 .ab-card.ab-feat .ab-name{color:var(--text)}
@@ -391,7 +394,7 @@ input[type=number]{-moz-appearance:textfield}
       <button class="tab on" data-tab="info">Info</button>
       <button class="tab" data-tab="skills">Skills</button>
       <button class="tab" data-tab="ausruestung">Items</button>
-      <button class="tab" data-tab="zauber">Combat</button>
+      <button class="tab" data-tab="zauber">Actions</button>
       <button class="tab" data-tab="bestien" id="tabBestien">Beasts</button>
       <button class="tab" data-tab="hintergrund">Background</button>
       <button class="tab" data-tab="feats">Feats</button>
@@ -661,6 +664,21 @@ input[type=number]{-moz-appearance:textfield}
         <div id="weaponList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
       </div>
 
+      <!-- CLASS FEATURES -->
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
+      <div id="abilitiesSection" style="display:none">
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Class Features</span>
+          <span style="display:flex;gap:6px;align-items:center">
+            <button style="background:transparent;border:none;color:var(--text3);font-size:10px;font-family:'Cinzel',serif;cursor:pointer" onclick="restoreAllUses()">↺ Reset</button>
+            <button onclick="toggleInfoSection('sb-classfeatures','sb-classfeatures-btn')" id="sb-classfeatures-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+          </span>
+        </div>
+        <div id="sb-classfeatures">
+          <div id="abList"></div>
+        </div>
+      </div>
+
       <!-- Spellcasting -->
       <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
       <div id="subpanel-meinezauber">
@@ -697,21 +715,6 @@ input[type=number]{-moz-appearance:textfield}
             <button class="filter-toggle" id="msf_reaction" onclick="setMySpellFilter('reaction')">Reaction</button>
           </div>
           <div id="mySpells"></div>
-        </div>
-      </div>
-
-      <!-- CLASS FEATURES -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div id="abilitiesSection" style="display:none">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Class Features</span>
-          <span style="display:flex;gap:6px;align-items:center">
-            <button style="background:transparent;border:none;color:var(--text3);font-size:10px;font-family:'Cinzel',serif;cursor:pointer" onclick="restoreAllUses()">↺ Reset</button>
-            <button onclick="toggleInfoSection('sb-classfeatures','sb-classfeatures-btn')" id="sb-classfeatures-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
-          </span>
-        </div>
-        <div id="sb-classfeatures">
-          <div id="abList"></div>
         </div>
       </div>
 
@@ -1028,7 +1031,7 @@ function buildSlots(){
   for(let i=0;i<9;i++){
     const tot=st.slotMax[i],used=st.slotUsed[i];
     const d=document.createElement('div');d.className='slvl';
-    let pips='';for(let j=0;j<tot;j++)pips+=`<div class="slpip${j<used?' u':''}" onclick="togSlot(${i},${j})"></div>`;
+    let pips='';for(let j=0;j<tot;j++)pips+=`<div class="slpip${j<tot-used?' av':' u'}" onclick="togSlot(${i},${j})"></div>`;
     d.innerHTML=`<div class="slvl-lbl">${i+1}. Level</div>
     <div style="display:flex;gap:4px;justify-content:center;align-items:center;margin-bottom:5px">
       <button class="hbtn" style="width:22px;height:22px;font-size:13px" onclick="chSlot(${i},-1)">−</button>
@@ -1040,7 +1043,8 @@ function buildSlots(){
   }
 }
 function chSlot(i,d){st.slotMax[i]=Math.max(0,Math.min(9,st.slotMax[i]+d));if(st.slotUsed[i]>st.slotMax[i])st.slotUsed[i]=st.slotMax[i];buildSlots();autoSave()}
-function togSlot(i,j){const u=st.slotUsed[i];st.slotUsed[i]=(j<u)?j:j+1;buildSlots();autoSave()}
+// gefüllter Kreis = verfügbar: antippen verbraucht einen Platz, leerer Kreis gibt einen zurück (gespeichert: Verbrauch)
+function togSlot(i,j){const t=st.slotMax[i],u=Math.min(st.slotUsed[i],t);st.slotUsed[i]=j<t-u?u+1:Math.max(0,u-1);buildSlots();autoSave()}
 
 // MY SPELLS
 function formatSpellDesc(raw){
@@ -4372,11 +4376,10 @@ function combatFeatures(cls,subcls,lvl,trB,trS){
       if(o){o.f=f;}else byName.set(f.name,{f,i,first:f.lvl});
     });
     byName.forEach(({f,i,first})=>{
-      if(combatSkip(f))return;
       if(trs.some(t=>t.name===f.name))return;
       const d=(f.desc||'').slice(0,200);
       if(d.length>=40&&trs.some(t=>(t.desc||'').includes(d)))return;
-      out.push({f,grp,i,lvl:first});
+      out.push({f,grp,i,lvl:first,more:combatSkip(f)}); // more = Gruppe „Weitere“ (Actions-Umbau 27.09.2026)
     });
   };
   add(cd.base,'b',trB);
@@ -4419,8 +4422,9 @@ function buildCombatStats(cls,subcls,lvl){
     (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'');
   el.style.display='';
 }
-let abGrpClosed={}; // zugeklappte Gruppen (nur Anzeige, nicht gespeichert)
-function togAbGrp(k){abGrpClosed[k]=!abGrpClosed[k];buildAbilities();}
+// Zugeklappte Gruppen pro Charakter (st.abGrpClosed, seit 27.09.2026); „Weitere“ startet zugeklappt
+function abGrpIsClosed(k){const g=st.abGrpClosed||{};return k in g?!!g[k]:k==='weitere';}
+function togAbGrp(k){st.abGrpClosed=st.abGrpClosed||{};st.abGrpClosed[k]=!abGrpIsClosed(k);buildAbilities();autoSave();}
 
 function buildAbilities(){
   const cls=document.getElementById('cls').value;
@@ -4456,7 +4460,7 @@ function buildAbilities(){
     const restoreLabel=ab.restore==='short'?'Short/Long Rest':ab.restore==='long'?'Long Rest':'';
     const restoreHtml=restoreLabel?`<div style="font-size:8px;color:var(--text3);font-family:'Cinzel',serif">${restoreLabel}</div>`:'';
     const pipRow=(uid,max,u)=>Array.from({length:max},(_,i)=>
-        `<div class="ab-pip${i<u?' used':''}" onclick="togAbUse('${uid}',${i},${max})"></div>`
+        `<div class="ab-pip${i<max-u?' avail':' used'}" onclick="togAbUse('${uid}',${i},${max})"></div>`
       ).join('');
     let usesHtml='', subsHtml='', picked=0;
     if(ab.sub){ // Einzel-Tracker: eine Pip-Zeile je Objekt (Rune, Arcanum-Grad, Mondphase), Nutzung unter st.abUses["id.k"]
@@ -4500,9 +4504,9 @@ function buildAbilities(){
 
   // Features ohne Tracker (Aktion/Bonusaktion/Reaktion + kampfrelevante Passive)
   const FTAG={Aktion:'aktion',Bonusaktion:'bonus',Reaktion:'reaktion'};
-  const FICON={aktion:'⚔️',bonus:'⚡',reaktion:'🛡️',passiv:'✧'};
+  const FICON={aktion:'⚔️',bonus:'⚡',reaktion:'🛡️',passiv:'✧',weitere:'📜'};
   combatFeatures(cls,subcls,lvl,trB,trS).forEach(x=>{
-    const k=FTAG[x.f.tag]||'passiv';
+    const k=x.more?'weitere':(FTAG[x.f.tag]||'passiv');
     const fid='f_'+x.grp+'_'+x.f.name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
     const isOpen=openIds.includes('ab_'+fid);
     const card=document.createElement('div');
@@ -4521,10 +4525,10 @@ function buildAbilities(){
     items.push({tag:k,lvl:x.lvl,ord:(x.grp==='s'?15000:5000)+x.i,el:card});
   });
 
-  [['aktion','Aktion'],['bonus','Bonusaktion'],['reaktion','Reaktion'],['passiv','Passiv']].forEach(([k,l])=>{
+  [['aktion','Aktion'],['bonus','Bonusaktion'],['reaktion','Reaktion'],['passiv','Passiv'],['weitere','Weitere']].forEach(([k,l])=>{
     const its=items.filter(x=>x.tag===k).sort((a,b)=>a.lvl-b.lvl||a.ord-b.ord);
     if(!its.length)return;
-    const closed=!!abGrpClosed[k];
+    const closed=abGrpIsClosed(k);
     const h=document.createElement('div');
     h.className='ab-grp'+(closed?' closed':'');h.dataset.grp=k;
     h.setAttribute('onclick',`togAbGrp('${k}')`);
@@ -4545,10 +4549,9 @@ function togAb(id){
 }
 
 function togAbUse(id,i,max){
-  const used=getAbUses(id);
-  // click used pip → unmark from end; click unused pip → mark
-  const newUsed=i<used?i:i+1;
-  setAbUses(id,Math.min(newUsed,max));
+  const used=Math.min(getAbUses(id),max);
+  // gefüllter Kreis (i < Rest) = verfügbar → antippen verbraucht eine Nutzung; leerer Kreis → eine zurück
+  setAbUses(id,i<max-used?used+1:Math.max(0,used-1));
   buildAbilities();autoSave();
 }
 
@@ -5125,7 +5128,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},savedBeasts:[],items:[],raceNotes:""
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -5229,7 +5232,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -5258,7 +5261,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent=_name;
   TEXT_IDS.forEach(id=>{
@@ -5557,7 +5560,7 @@ function importChars(e){
 
 // SETTINGS
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
-const APP_VERSION = 'willow-app-2026-09-27h';
+const APP_VERSION = 'willow-app-2026-09-27i';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -5828,7 +5831,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
     <span class="bnav-icon">🎒</span><span class="bnav-label">Items</span>
   </button>
   <button class="bnav-btn" data-tab="zauber" onclick="switchTabAll('zauber',this)">
-    <span class="bnav-icon">⚔️</span><span class="bnav-label">Combat</span>
+    <span class="bnav-icon">⚔️</span><span class="bnav-label">Actions</span>
   </button>
 </nav>
 
