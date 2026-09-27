@@ -302,6 +302,7 @@ input[type=number]{-moz-appearance:textfield}
 .zb-1{background:color-mix(in srgb, var(--blue) 20%, transparent);color:var(--blue)}
 .zb-school{background:color-mix(in srgb, var(--gold) 15%, transparent);color:var(--gold)}
 .zb-src{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+.sl-via{background:color-mix(in srgb, var(--gold) 8%, transparent);color:var(--gold);border:1px dashed color-mix(in srgb, var(--gold) 45%, transparent)}
 .zb-detail{display:none;border-top:1px solid var(--border2);padding:10px 11px}
 .zb-detail.on{display:block}
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:0;padding-bottom:10px;border-bottom:1px solid var(--border2)}
@@ -860,7 +861,6 @@ let st={
   zbAdded:new Set(),
   concActive:null, concActiveFeature:null
 };
-let zbFGrad='all',zbFSchool='all';
 
 const md=v=>Math.floor((v-10)/2);
 const fmt=n=>(n>=0?'+':'')+n;
@@ -1610,113 +1610,46 @@ const ZB_SCHOOLS=[...new Set(ZB_SPELLS.map(s=>s.school))].sort();
 const ZB_GRADS=[...new Set(ZB_SPELLS.map(s=>s.grad))].sort((a,b)=>a-b);
 
 function ordinal(n){return n===1?'1st':n===2?'2nd':n===3?'3rd':n+'th';}
-function zbBuildFilters(){
-  const gf=document.getElementById('zbGradFilters');if(!gf)return;
-  const sf=document.getElementById('zbSchoolFilters');
-  const allG=document.createElement('button');
-  allG.className='fbtn on';allG.textContent='All Levels';allG.dataset.val='all';
-  allG.onclick=()=>{zbFGrad='all';gf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val==='all'));zbRender()};
-  gf.appendChild(allG);
-  ZB_GRADS.forEach(g=>{
-    const b=document.createElement('button');
-    b.className='fbtn';b.textContent=g===0?'Cantrips':ordinal(g)+' Lvl';b.dataset.val=g;
-    b.onclick=()=>{zbFGrad=g;gf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val==g));zbRender()};
-    gf.appendChild(b);
-  });
-  const allS=document.createElement('button');
-  allS.className='fbtn school on';allS.textContent='All Schools';allS.dataset.val='all';
-  allS.onclick=()=>{zbFSchool='all';sf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val==='all'));zbRender()};
-  sf.appendChild(allS);
-  ZB_SCHOOLS.forEach(s=>{
-    const b=document.createElement('button');
-    b.className='fbtn school';b.textContent=s;b.dataset.val=s;
-    b.onclick=()=>{zbFSchool=s;sf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val===s));zbRender()};
-    sf.appendChild(b);
-  });
-}
-
-// Class spell lists - maps class name to allowed classes field values
+// Zauberlisten je Klasse: Klasse des Charakters → Werte in ZB_SPELLS.classes (Spell-List-Filter „Meine Klasse“)
 const CLASS_SPELL_MAP={'Druid':['Druid'],'Wizard':['Wizard'],'Cleric':['Cleric'],'Bard':['Bard'],'Warlock':['Warlock'],'Paladin':['Paladin'],'Ranger':['Ranger'],'Sorcerer':['Sorcerer'],'Fighter':['Wizard'],'Rogue':['Wizard']};
 
-function zbRender(){
-  const qEl=document.getElementById('zbQ');if(!qEl)return;
-  const q=qEl.value.toLowerCase().trim();
+// SUBCLASS_SPELLS-START (erzeugt von subclass_spells.py aus 5e.tools additionalSpells; nicht von Hand ändern)
+const SUBCLASS_SPELLS={"Barbarian":{"Path of the Totem Warrior":{"src":"PHB","spells":["Beast Sense","Commune with Nature","Speak with Animals"]},"Path of the Wild Heart":{"src":"XPHB","spells":["Beast Sense","Commune with Nature","Speak with Animals"]},"Path of the Ancestral Guardian":{"src":"XGE","spells":["Augury","Clairvoyance"]},"Path of the Giant":{"src":"BGG","spells":["Druidcraft","Thaumaturgy"]}},"Bard":{"College of Lore":{"src":"XPHB","filters":[{"grad":[0,1,2,3],"cls":["Cleric","Druid","Wizard"]}]},"College of Glamour":{"src":"XPHB","spells":["Charm Person","Command","Mirror Image"]},"College of Spirits":{"src":"RHW","spells":["Spirit Guardians"]}},"Cleric":{"Knowledge Domain":{"src":"FRHoF","spells":["Arcane Eye","Banishment","Command","Comprehend Languages","Confusion","Detect Magic","Detect Thoughts","Dispel Magic","Identify","Legend Lore","Mind Spike","Nondetection","Scrying","Synaptic Static","Tongues"]},"Life Domain":{"src":"XPHB","spells":["Aid","Aura of Life","Bless","Cure Wounds","Death Ward","Greater Restoration","Lesser Restoration","Mass Cure Wounds","Mass Healing Word","Revivify"]},"Light Domain":{"src":"XPHB","spells":["Arcane Eye","Burning Hands","Daylight","Faerie Fire","Fireball","Flame Strike","Scorching Ray","Scrying","See Invisibility","Wall of Fire"]},"Nature Domain":{"src":"PHB","spells":["Animal Friendship","Barkskin","Dominate Beast","Grasping Vine","Insect Plague","Plant Growth","Speak with Animals","Spike Growth","Tree Stride","Wind Wall"],"filters":[{"grad":[0],"cls":["Druid"]}]},"Tempest Domain":{"src":"PHB","spells":["Call Lightning","Control Water","Destructive Wave","Fog Cloud","Gust of Wind","Ice Storm","Insect Plague","Shatter","Sleet Storm","Thunderwave"]},"Trickery Domain":{"src":"XPHB","spells":["Charm Person","Confusion","Dimension Door","Disguise Self","Dominate Person","Hypnotic Pattern","Invisibility","Modify Memory","Nondetection","Pass without Trace"]},"War Domain":{"src":"XPHB","spells":["Crusader's Mantle","Fire Shield","Freedom of Movement","Guiding Bolt","Hold Monster","Magic Weapon","Shield of Faith","Spirit Guardians","Spiritual Weapon","Steel Wind Strike"]},"Death Domain":{"src":"DMG","spells":["Animate Dead","Antilife Shell","Blight","Blindness/Deafness","Cloudkill","Death Ward","False Life","Ray of Enfeeblement","Ray of Sickness","Vampiric Touch"],"filters":[{"grad":[0],"school":["Necromancy"]}]},"Arcana Domain":{"src":"AU","spells":["Arcane Eye","Bigby's Hand","Counterspell","Detect Magic","Dispel Magic","Leomund's Secret Chest","Magic Missile","Magic Weapon","Nystul's Magic Aura","Teleportation Circle"],"filters":[{"grad":[0,6,7,8,9],"cls":["Wizard"]}]},"Forge Domain":{"src":"XGE","spells":["Animate Objects","Creation","Elemental Weapon","Fabricate","Heat Metal","Identify","Magic Weapon","Protection from Energy","Searing Smite","Wall of Fire"]},"Grave Domain":{"src":"RHW","spells":["Blight","Death Ward","Detect Evil and Good","Dispel Evil and Good","False Life","Gentle Repose","Raise Dead","Ray of Enfeeblement","Revivify","Spare the Dying","Vampiric Touch"]},"Order Domain":{"src":"TCE","spells":["Command","Commune","Compulsion","Dominate Person","Heroism","Hold Person","Locate Creature","Mass Healing Word","Slow","Zone of Truth"]},"Peace Domain":{"src":"TCE","spells":["Aid","Aura of Purity","Beacon of Hope","Greater Restoration","Heroism","Otiluke's Resilient Sphere","Rary's Telepathic Bond","Sanctuary","Sending","Warding Bond"]},"Twilight Domain":{"src":"TCE","spells":["Aura of Life","Aura of Vitality","Circle of Power","Faerie Fire","Greater Invisibility","Leomund's Tiny Hut","Mislead","Moonbeam","See Invisibility","Sleep"]}},"Druid":{"Circle of the Land":{"src":"XPHB","spells":["Acid Splash","Blight","Blur","Burning Hands","Cone of Cold","Fire Bolt","Fireball","Fog Cloud","Freedom of Movement","Hold Person","Ice Storm","Insect Plague","Lightning Bolt","Misty Step","Polymorph","Ray of Frost","Ray of Sickness","Shocking Grasp","Sleep","Sleet Storm","Stinking Cloud","Tree Stride","Wall of Stone","Web"]},"Circle of the Moon":{"src":"XPHB","spells":["Conjure Animals","Cure Wounds","Fount of Moonlight","Mass Cure Wounds","Moonbeam","Starry Wisp"]},"Circle of the Sea":{"src":"XPHB","spells":["Conjure Elemental","Control Water","Fog Cloud","Gust of Wind","Hold Monster","Ice Storm","Lightning Bolt","Ray of Frost","Shatter","Thunderwave","Water Breathing"]},"Circle of the Stars":{"src":"XPHB","spells":["Guidance","Guiding Bolt"]},"Circle of Spores (TCE)":{"src":"TCE","spells":["Animate Dead","Blight","Blindness/Deafness","Chill Touch","Cloudkill","Confusion","Contagion","Gaseous Form","Gentle Repose"]},"Circle of Wildfire (TCE)":{"src":"TCE","spells":["Aura of Life","Burning Hands","Cure Wounds","Fire Shield","Flame Strike","Flaming Sphere","Mass Cure Wounds","Plant Growth","Revivify","Scorching Ray"]}},"Fighter":{"Arcane Archer":{"src":"AU","spells":["Druidcraft","Prestidigitation"]},"Psi Warrior":{"src":"XPHB","spells":["Telekinesis"]},"Banneret":{"src":"FRHoF","spells":["Comprehend Languages"]}},"Monk":{"Way of the Open Hand":{"src":"PHB","spells":["Sanctuary"]},"Way of Shadow":{"src":"PHB","spells":["Darkness","Darkvision","Minor Illusion","Pass without Trace","Silence"]},"Warrior of Shadow":{"src":"XPHB","spells":["Darkness","Minor Illusion"]},"Warrior of the Elements":{"src":"XPHB","spells":["Elementalism"]},"Way of the Sun Soul":{"src":"XGE","spells":["Burning Hands"]}},"Paladin":{"Oath of Devotion":{"src":"XPHB","spells":["Aid","Beacon of Hope","Commune","Dispel Magic","Flame Strike","Freedom of Movement","Guardian of Faith","Protection from Evil and Good","Shield of Faith","Zone of Truth"]},"Oath of the Ancients":{"src":"XPHB","spells":["Commune with Nature","Ensnaring Strike","Ice Storm","Misty Step","Moonbeam","Plant Growth","Protection from Energy","Speak with Animals","Stoneskin","Tree Stride"]},"Oath of Vengeance":{"src":"XPHB","spells":["Bane","Banishment","Dimension Door","Haste","Hold Monster","Hold Person","Hunter's Mark","Misty Step","Protection from Energy","Scrying"]},"Oathbreaker":{"src":"DMG","spells":["Animate Dead","Bestow Curse","Blight","Confusion","Contagion","Crown of Madness","Darkness","Dominate Person","Hellish Rebuke","Inflict Wounds"]},"Oath of the Crown":{"src":"SCAG","spells":["Aura of Vitality","Banishment","Circle of Power","Command","Compelled Duel","Geas","Guardian of Faith","Spirit Guardians","Warding Bond","Zone of Truth"]},"Oath of Conquest":{"src":"XGE","spells":["Armor of Agathys","Bestow Curse","Cloudkill","Command","Dominate Beast","Dominate Person","Fear","Hold Person","Spiritual Weapon","Stoneskin"]},"Oath of Redemption":{"src":"XGE","spells":["Calm Emotions","Counterspell","Hold Monster","Hold Person","Hypnotic Pattern","Otiluke's Resilient Sphere","Sanctuary","Sleep","Stoneskin","Wall of Force"]},"Oath of Glory":{"src":"XPHB","spells":["Compulsion","Enhance Ability","Freedom of Movement","Guiding Bolt","Haste","Heroism","Legend Lore","Magic Weapon","Protection from Energy","Yolande's Regal Presence"]},"Oath of the Watchers":{"src":"TCE","spells":["Alarm","Aura of Purity","Banishment","Counterspell","Detect Magic","Hold Monster","Moonbeam","Nondetection","Scrying","See Invisibility"]}},"Ranger":{"Gloom Stalker":{"src":"XPHB","spells":["Disguise Self","Fear","Greater Invisibility","Rope Trick","Seeming"]},"Horizon Walker":{"src":"XGE","spells":["Banishment","Haste","Misty Step","Protection from Evil and Good","Teleportation Circle"]},"Monster Slayer":{"src":"XGE","spells":["Banishment","Hold Monster","Magic Circle","Protection from Evil and Good","Zone of Truth"]},"Fey Wanderer":{"src":"XPHB","spells":["Charm Person","Dimension Door","Mislead","Misty Step","Summon Fey"]},"Swarmkeeper":{"src":"TCE","spells":["Arcane Eye","Faerie Fire","Gaseous Form","Insect Plague","Mage Hand","Web"]},"Drakewarden":{"src":"FTD","spells":["Thaumaturgy"]}},"Rogue":{"Arcane Trickster":{"src":"XPHB","spells":["Mage Hand"]},"Phantom":{"src":"RHW","spells":["Speak with Dead"]}},"Sorcerer":{"Draconic Sorcery":{"src":"XPHB","spells":["Alter Self","Arcane Eye","Charm Monster","Chromatic Orb","Command","Dragon's Breath","Fear","Fly","Legend Lore","Summon Dragon"]},"Aberrant Sorcery":{"src":"XPHB","spells":["Arms of Hadar","Calm Emotions","Detect Thoughts","Dissonant Whispers","Evard's Black Tentacles","Hunger of Hadar","Mind Sliver","Rary's Telepathic Bond","Sending","Summon Aberration","Telekinesis"]},"Clockwork Sorcery":{"src":"XPHB","spells":["Aid","Alarm","Dispel Magic","Freedom of Movement","Greater Restoration","Lesser Restoration","Protection from Energy","Protection from Evil and Good","Summon Construct","Wall of Force"]},"Divine Soul":{"src":"XGE","spells":["Bane","Bless","Cure Wounds","Inflict Wounds","Protection from Evil and Good"],"filters":[{"grad":[0,1,2,3,4,5,6,7,8,9],"cls":["Cleric"]}]},"Shadow Magic":{"src":"RHW","spells":["Bane","Contagion","Creation","Darkness","Greater Invisibility","Hunger of Hadar","Inflict Wounds","Nondetection","Pass without Trace","Phantasmal Killer","Summon Beast"]},"Aberrant Mind":{"src":"TCE","spells":["Arms of Hadar","Calm Emotions","Detect Thoughts","Dissonant Whispers","Evard's Black Tentacles","Hunger of Hadar","Mind Sliver","Rary's Telepathic Bond","Sending","Summon Aberration","Telekinesis"]},"Clockwork Soul":{"src":"TCE","spells":["Aid","Alarm","Dispel Magic","Freedom of Movement","Greater Restoration","Lesser Restoration","Protection from Energy","Protection from Evil and Good","Summon Construct","Wall of Force"]},"Lunar Sorcery":{"src":"DSotDQ","spells":["Alter Self","Blindness/Deafness","Color Spray","Confusion","Death Ward","Dispel Magic","Hallucinatory Terrain","Hold Monster","Lesser Restoration","Mislead","Phantom Steed","Rary's Telepathic Bond","Ray of Sickness","Shield","Vampiric Touch"]}},"Warlock":{"The Archfey":{"src":"PHB","spells":["Blink","Calm Emotions","Dominate Beast","Dominate Person","Faerie Fire","Greater Invisibility","Phantasmal Force","Plant Growth","Seeming","Sleep"]},"The Fiend":{"src":"PHB","spells":["Blindness/Deafness","Burning Hands","Command","Fire Shield","Fireball","Flame Strike","Hallow","Scorching Ray","Stinking Cloud","Wall of Fire"]},"The Great Old One":{"src":"PHB","spells":["Clairvoyance","Detect Thoughts","Dissonant Whispers","Dominate Beast","Dominate Person","Evard's Black Tentacles","Phantasmal Force","Sending","Tasha's Hideous Laughter","Telekinesis"]},"Archfey Patron":{"src":"XPHB","spells":["Blink","Calm Emotions","Dominate Beast","Dominate Person","Faerie Fire","Greater Invisibility","Misty Step","Phantasmal Force","Plant Growth","Seeming","Sleep"]},"Fiend Patron":{"src":"XPHB","spells":["Burning Hands","Command","Fire Shield","Fireball","Geas","Insect Plague","Scorching Ray","Stinking Cloud","Suggestion","Wall of Fire"]},"Great Old One Patron":{"src":"XPHB","spells":["Clairvoyance","Confusion","Detect Thoughts","Dissonant Whispers","Hex","Hunger of Hadar","Modify Memory","Phantasmal Force","Summon Aberration","Tasha's Hideous Laughter","Telekinesis"]},"Celestial Patron":{"src":"XPHB","spells":["Aid","Cure Wounds","Daylight","Greater Restoration","Guardian of Faith","Guiding Bolt","Lesser Restoration","Light","Revivify","Sacred Flame","Summon Celestial","Wall of Fire"]},"The Undying":{"src":"SCAG","spells":["Aura of Life","Blindness/Deafness","Contagion","Death Ward","False Life","Feign Death","Legend Lore","Ray of Sickness","Silence","Spare the Dying","Speak with Dead"]},"The Celestial":{"src":"XGE","spells":["Cure Wounds","Daylight","Flame Strike","Flaming Sphere","Greater Restoration","Guardian of Faith","Guiding Bolt","Lesser Restoration","Light","Revivify","Sacred Flame","Wall of Fire"]},"The Hexblade":{"src":"XGE","spells":["Banishing Smite","Blink","Blur","Cone of Cold","Elemental Weapon","Phantasmal Killer","Shield","Staggering Smite","Wrathful Smite"]},"The Fathomless":{"src":"TCE","spells":["Bigby's Hand","Cone of Cold","Control Water","Create or Destroy Water","Evard's Black Tentacles","Gust of Wind","Lightning Bolt","Silence","Sleet Storm","Summon Elemental","Thunderwave"]},"The Genie":{"src":"TCE","spells":["Blur","Burning Hands","Cone of Cold","Control Water","Create Food and Water","Creation","Detect Evil and Good","Fire Shield","Fireball","Flame Strike","Fog Cloud","Greater Invisibility","Gust of Wind","Meld into Stone","Phantasmal Force","Phantasmal Killer","Sanctuary","Scorching Ray","Seeming","Sleet Storm","Spike Growth","Stone Shape","Thunderwave","Wall of Stone","Wind Wall","Wish"]},"The Undead":{"src":"RHW","spells":["Antilife Shell","Bane","Blindness/Deafness","Cloudkill","Greater Invisibility","Phantasmal Force","Phantasmal Killer","Ray of Sickness","Speak with Dead","Summon Undead"]}},"Wizard":{"School of Illusion":{"src":"PHB","spells":["Minor Illusion"]},"School of Necromancy":{"src":"AU","spells":["Animate Dead","Find Familiar"]},"School of Transmutation":{"src":"AU","spells":["Alter Self","Polymorph"]},"Abjurer":{"src":"XPHB","spells":["Counterspell","Dispel Magic"]},"Diviner":{"src":"XPHB","spells":["See Invisibility"]},"Illusionist":{"src":"XPHB","spells":["Minor Illusion","Summon Beast","Summon Fey"]},"Chronurgy Magic":{"src":"EGW","filters":[{"src":["EGW"]}]},"Graviturgy Magic":{"src":"EGW","filters":[{"src":["EGW"]}]}}};
+const CLASS_SPELL_EXTRA={"Paladin":[{"via":"Blessed Warrior","lvl":2,"grad":[0],"cls":["Cleric"]}],"Ranger":[{"via":"Druidic Warrior","lvl":2,"grad":[0],"cls":["Druid"]}],"Bard":[{"via":"Magical Secrets","lvl":10,"grad":[1,2,3,4,5,6,7,8,9],"cls":["Cleric","Druid","Wizard"]}],"Druid":[{"via":"Wild Companion","lvl":2,"spells":["Find Familiar"]}]};
+// SUBCLASS_SPELLS-END
+
+// „Meine Klasse“: eigene Liste (CLASS_SPELL_MAP) + Zusatzzauber (CLASS_SPELL_EXTRA ab Stufe, SUBCLASS_SPELLS der gewählten Subklasse)
+function slMySpellCtx(){
   const cls=document.getElementById('cls')?.value||'';
-  const clsFilter=CLASS_SPELL_MAP[cls]||null;
-  const f=ZB_SPELLS.filter(s=>{
-    const gOk=zbFGrad==='all'||s.grad==zbFGrad;
-    const sOk=zbFSchool==='all'||s.school===zbFSchool;
-    const qOk=!q||s.name.toLowerCase().includes(q)||s.school.toLowerCase().includes(q)||s.desc.toLowerCase().includes(q);
-    const clsOk=!clsFilter||!s.classes||clsFilter.some(c=>s.classes.includes(c));
-    return gOk&&sOk&&qOk&&clsOk;
-  });
-  const total=clsFilter?ZB_SPELLS.filter(s=>!s.classes||clsFilter.some(c=>s.classes.includes(c))).length:ZB_SPELLS.length;
-  document.getElementById('zbCount').textContent=f.length+' of '+total+' spells'+(cls?' ('+cls+')':'');
-  const list=document.getElementById('zbList');list.innerHTML='';
-  if(!f.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-family:\'Cinzel\',serif;font-size:11px">No spells found</div>';return;}
-  const lvlNames=['Cantrips','1st Level','2nd Level','3rd Level','4th Level','5th Level','6th Level','7th Level','8th Level','9th Level'];
-  const byLvl=Array.from({length:10},(_,i)=>f.filter(s=>s.grad===i));
-  const multiLvl=byLvl.filter(g=>g.length).length>1;
-  if(multiLvl){
-    byLvl.forEach((grp,i)=>{if(grp.length){const dv=document.createElement('div');dv.className='zb-divider';dv.textContent=lvlNames[i];list.appendChild(dv);grp.forEach(sp=>list.appendChild(zbMakeCard(sp)));}});
-  } else {
-    f.forEach(sp=>list.appendChild(zbMakeCard(sp)));
+  const sub=document.getElementById('subcls')?.value||'';
+  const lvl=parseInt(document.getElementById('lvl')?.value)||1;
+  const base=CLASS_SPELL_MAP[cls]||[];
+  const fixed=[],filt=[];
+  (CLASS_SPELL_EXTRA[cls]||[]).forEach(e=>{if(lvl>=(e.lvl||1))(e.spells?fixed:filt).push(e);});
+  const sd=SUBCLASS_SPELLS[cls]||{};
+  const key=sd[sub]?sub:sub.replace(/\s*\([^)]+\)\s*$/,'').trim();
+  if(sub&&sd[key]){
+    const via=key.replace(/\s*\([^)]+\)\s*$/,'').trim(),e=sd[key];
+    if(e.spells)fixed.push({via,spells:e.spells});
+    (e.filters||[]).forEach(f=>filt.push(Object.assign({via},f)));
   }
+  return {cls,base,fixed,filt,avail:!!(base.length||fixed.length||filt.length)};
 }
-
-function zbMakeCard(sp){
-  const idx=ZB_SPELLS.indexOf(sp);
-  const card=document.createElement('div');card.className='zb-card';
-  const gradLabel=sp.grad===0?'Cantrip':ordinal(sp.grad)+' Level';
-  const gradClass=sp.grad===0?'zb-c':'zb-1';
-  const isAdded=st.zbAdded.has(idx);
-  card.innerHTML=`
-  <div class="zb-top" onclick="zbTog(${idx})">
-    <span class="zb-name">${sp.name}</span>
-    <span class="zb-badge ${gradClass}">${gradLabel}</span>
-    <span class="zb-badge zb-school">${sp.school}</span>
-    <span class="zb-badge zb-src">${sp.src}</span>
-    <button class="expbtn" aria-label="Details">▾</button>
-  </div>
-  <div class="zb-detail" id="zbd_${idx}">
-    <div class="dgrid">
-      <div class="di"><label>Casting Time</label><span>${sp.zeit}</span></div>
-      <div class="di"><label>Range</label><span>${sp.reichweite}</span></div>
-      <div class="di"><label>Duration</label><span>${sp.dauer}</span></div>
-      <div class="di"><label>Components</label><span>${sp.komp}</span></div>
-    </div>
-    <div class="desc-text">${formatSpellDesc(sp.desc)}</div>
-    ${sp.higher?`<div class="higher-box"><label>At Higher Levels</label><p>${sp.higher}</p></div>`:''}
-    <button class="zb-addbtn${isAdded?' done':''}" id="zbab_${idx}" onclick="zbAdd(${idx},event)">
-      ${isAdded?'✓ On Sheet':'+ Add to Sheet'}
-    </button>
-  </div>`;
-  return card;
+function slFilterHit(f,s){
+  return (!f.grad||f.grad.includes(s.grad))&&(!f.cls||(s.classes||[]).some(c=>f.cls.includes(c)))
+    &&(!f.school||f.school.some(x=>s.school.startsWith(x)))&&(!f.src||f.src.includes(s.src));
 }
-
-function zbTog(idx){
-  const d=document.getElementById('zbd_'+idx);
-  const wasOn=d.classList.contains('on');
-  document.querySelectorAll('.zb-detail').forEach(x=>{x.classList.remove('on');const b=x.previousElementSibling.querySelector('.expbtn');if(b)b.textContent='▾'});
-  if(!wasOn){d.classList.add('on');const b=d.previousElementSibling.querySelector('.expbtn');if(b)b.textContent='▴';}
+// '' = eigene Klassenliste, Text = Herkunft (Subklasse/Feature), null = nicht auf „meiner“ Liste
+function slMyVia(ctx,s){
+  for(const e of ctx.fixed)if(e.spells.includes(s.name))return e.via;
+  if((s.classes||[]).some(c=>ctx.base.includes(c)))return '';
+  for(const e of ctx.filt)if(slFilterHit(e,s))return e.via;
+  return null;
 }
-
-function zbAdd(idx,e){
-  e.stopPropagation();
-  const sp=ZB_SPELLS[idx];
-  if(st.zbAdded.has(idx)){showToast('Already added');return;}
-  st.zbAdded.add(idx);
-  st.mySpells.push({name:sp.name,grad:sp.grad,school:sp.school,prep:false,notes:''});
-  const btn=document.getElementById('zbab_'+idx);
-  if(btn){btn.className='zb-addbtn done';btn.textContent='✓ On Sheet';}
-  showToast('✦ '+sp.name+' added');
-  buildMySpells();
-}
-
 
 // SPELL LIST (full browser, all classes)
 const SL_CLASSES=['All','Cleric','Druid','Bard','Wizard','Paladin','Ranger','Sorcerer','Warlock'];
-let slFGrad='all',slFSchool='all',slFClass='all';
+let slFGrad='all',slFSchool='all',slFClass='mine';
 
 function slToggleSection(rowId,arrowId){
   const row=document.getElementById(rowId);
@@ -1731,7 +1664,9 @@ function slUpdateFilterBadge(){
   const cb=document.getElementById('slClassBadge');
   const gb=document.getElementById('slGradBadge');
   const sb=document.getElementById('slSchoolBadge');
-  if(slFClass!=='all'){parts.push(slFClass);if(cb)cb.textContent='· '+slFClass;}else{if(cb)cb.textContent='';}
+  const myCls=slMySpellCtx();
+  if(slFClass==='mine'&&myCls.avail){if(cb)cb.textContent='· ★ '+myCls.cls;}
+  else if(slFClass!=='all'&&slFClass!=='mine'){parts.push(slFClass);if(cb)cb.textContent='· '+slFClass;}else{if(cb)cb.textContent='';}
   if(slFGrad!=='all'){const l=slFGrad===0?'Cantrip':ordinal(slFGrad);parts.push(l);if(gb)gb.textContent='· '+l;}else{if(gb)gb.textContent='';}
   if(slFSchool!=='all'){parts.push(slFSchool);if(sb)sb.textContent='· '+slFSchool;}else{if(sb)sb.textContent='';}
   const af=document.getElementById('slActiveFilters');
@@ -1740,17 +1675,18 @@ function slUpdateFilterBadge(){
   if(cf)cf.style.display=parts.length?'':'none';
 }
 function slClearAllFilters(){
-  slFGrad='all';slFSchool='all';slFClass='all';
-  document.querySelectorAll('#slClassRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val==='all'));
+  slFGrad='all';slFSchool='all';slFClass='mine';
+  document.querySelectorAll('#slClassRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val==='mine'));
   document.querySelectorAll('#slGradRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val==='all'));
   document.querySelectorAll('#slSchoolRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val==='all'));
   slUpdateFilterBadge();slRender();
 }
 function slBuildFilters(){
   const cf=document.getElementById('slClassRow');
-  SL_CLASSES.forEach(c=>{
+  ['mine'].concat(SL_CLASSES).forEach(c=>{
     const b=document.createElement('button');
-    b.className='fbtn'+(c==='All'?' on':'');b.textContent=c;b.dataset.val=c==='All'?'all':c;
+    b.className='fbtn'+(c==='mine'?' on':'');b.textContent=c==='mine'?'★ My Class':c;b.dataset.val=c==='All'?'all':c;
+    if(c==='mine')b.id='slMineBtn';
     b.onclick=()=>{slFClass=b.dataset.val;cf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val===b.dataset.val));slUpdateFilterBadge();slRender();};
     cf.appendChild(b);
   });
@@ -1783,27 +1719,35 @@ function slRender(){
   const list=document.getElementById('slList');
   if(!list)return;
   slUpdateFilterBadge();
+  const ctx=slMySpellCtx();
+  const mb=document.getElementById('slMineBtn');
+  if(mb){mb.style.display=ctx.avail?'':'none';mb.textContent='★ '+(ctx.cls||'My Class');}
+  // ohne eigene Zauber (z. B. Monk ohne Subklassen-Zauber) zeigt „mine“ alles
+  if(slFClass==='mine'&&!ctx.avail)document.querySelectorAll('#slClassRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val==='all'));
+  else if(slFClass==='mine')document.querySelectorAll('#slClassRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val==='mine'));
+  const via=new Map();
+  if(ctx.avail)ZB_SPELLS.forEach(s=>via.set(s,slMyVia(ctx,s)));
   const f=ZB_SPELLS.filter(s=>{
     const gOk=slFGrad==='all'||s.grad==slFGrad;
     const sOk=slFSchool==='all'||s.school===slFSchool;
-    const cOk=slFClass==='all'||(s.classes&&s.classes.includes(slFClass));
+    const cOk=slFClass==='all'||(slFClass==='mine'?(!ctx.avail||via.get(s)!==null):(s.classes&&s.classes.includes(slFClass)));
     const qOk=!q||s.name.toLowerCase().includes(q)||s.school.toLowerCase().includes(q)||(s.desc&&s.desc.toLowerCase().includes(q));
     return gOk&&sOk&&cOk&&qOk;
   });
-  document.getElementById('slCount').textContent=f.length+' of '+ZB_SPELLS.length+' spells';
+  document.getElementById('slCount').textContent=f.length+' of '+ZB_SPELLS.length+' spells'+(slFClass==='mine'&&ctx.avail?' · '+ctx.cls:'');
   list.innerHTML='';
   if(!f.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-family:\'Cinzel\',serif;font-size:11px">No spells found</div>';return;}
   const lvlNames=['Cantrips','1st Level','2nd Level','3rd Level','4th Level','5th Level','6th Level','7th Level','8th Level','9th Level'];
   const byLvl=Array.from({length:10},(_,i)=>f.filter(s=>s.grad===i));
   const multiLvl=byLvl.filter(g=>g.length).length>1;
   if(multiLvl){
-    byLvl.forEach((grp,i)=>{if(grp.length){const dv=document.createElement('div');dv.className='zb-divider';dv.textContent=lvlNames[i];list.appendChild(dv);grp.forEach(sp=>list.appendChild(slMakeCard(sp)));}});
+    byLvl.forEach((grp,i)=>{if(grp.length){const dv=document.createElement('div');dv.className='zb-divider';dv.textContent=lvlNames[i];list.appendChild(dv);grp.forEach(sp=>list.appendChild(slMakeCard(sp,via.get(sp))));}});
   } else {
-    f.forEach(sp=>list.appendChild(slMakeCard(sp)));
+    f.forEach(sp=>list.appendChild(slMakeCard(sp,via.get(sp))));
   }
 }
 
-function slMakeCard(sp){
+function slMakeCard(sp,via){
   const idx=ZB_SPELLS.indexOf(sp);
   const card=document.createElement('div');card.className='zb-card';
   const gradLabel=sp.grad===0?'Cantrip':ordinal(sp.grad)+' Level';
@@ -1813,7 +1757,7 @@ function slMakeCard(sp){
   card.innerHTML=`
   <div class="zb-top" onclick="slTog(${idx})">
     <span class="zb-name">${sp.name}</span>
-    <span class="zb-badge ${gradClass}">${gradLabel}</span>
+    <span class="zb-badge ${gradClass}">${gradLabel}</span>${via?`<span class="zb-badge sl-via">✦ ${via}</span>`:''}
     <span class="zb-badge zb-school">${sp.school}</span>
     ${clsBadges}
     <button class="expbtn" aria-label="Details">▾</button>
@@ -1851,9 +1795,6 @@ function slAdd(idx,e){
   st.mySpells.push({name:sp.name,grad:sp.grad,school:sp.school,prep:false,notes:''});
   const btn=document.getElementById('slab_'+idx);
   if(btn){btn.className='zb-addbtn done';btn.textContent='✓ On Sheet';}
-  // Also sync zb button if visible
-  const zbBtn=document.getElementById('zbab_'+idx);
-  if(zbBtn){zbBtn.className='zb-addbtn done';zbBtn.textContent='✓ On Sheet';}
   showToast('✦ '+sp.name+' added');
   buildMySpells();autoSave();
 }
@@ -5462,7 +5403,7 @@ function importChars(e){
 
 // SETTINGS
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
-const APP_VERSION = 'willow-app-2026-09-27f';
+const APP_VERSION = 'willow-app-2026-09-27g';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',text2:'Secondary Text',text3:'Small Labels / Nav',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
