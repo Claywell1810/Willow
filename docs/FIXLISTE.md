@@ -18,7 +18,7 @@ Die offenen Punkte sind zu Paketen gebündelt; **je Paket ein eigener Chat** (Mo
 - „Ranger – Beast Master / Drakewarden“ (Code / UI) – Stat-Block-Anzeige `sbHtml` und Konverter `bst_convert.py` sind vorhanden
 - „Stat-Blöcke: offene Reste“ (Code / UI) – Klassen-Features mit Kreatur, Beispiel-Zauber (Dämonen), Homunculus Servant
 
-~~**B – UI-Kleinkram (Opus Mittel).**~~ ✔ (28.09.2026, `willow-app-2026-09-28b`): Expand-Knopf, Attribute oben/Character Info zuklappbar, Combat Stats, Death Saves/Inspiration, Websuche per Lupe (Details unter „Erledigt“ in `docs/FIXLISTE_INFO.md`). Optional offen geblieben: „Text-Formatierer – nicht umgestellt“.
+~~**B – UI-Kleinkram (Opus Mittel).**~~ ✔ (28.09.2026, `willow-app-2026-09-28b`): Expand-Knopf, Attribute oben/Character Info zuklappbar, Combat Stats, Death Saves/Inspiration, Websuche per Lupe (Details unter „Erledigt“ in `docs/FIXLISTE_INFO.md`). Optionaler Punkt „Text-Formatierer“ direkt danach erledigt (`willow-app-2026-09-28c`).
 
 **C – Info-Tab verbunden (Opus Hoch; erst Planungs-Chat, dann Bau in Teilen).** Prompt: „Arbeite die Fixliste ab: Paket C, zuerst Planung.“
 - „Info-Tab → Skills/Saves verbinden“ (Code / UI)
@@ -65,4 +65,3 @@ Empfohlene Reihenfolge: 1 + 2 zusammen, dann 3 + 7 zusammen, 4, 5. Nur Regeltext
 Wünsche und Beobachtungen zur Oberfläche hier sammeln. Grundsatz: nur die Anzeige ändern, Daten bleiben unverändert.
 **Reihenfolge (Entscheidung Simon, 27.09.2026):** Schriftgröße/Bedienbarkeit (✔), Beschreibungstexte hell + Farben (✔), Text-Formatierer (✔), Sonnet-Kleinpunkte (✔, `a9fd1bb`, `…27n`). A6 Punkt 9 damit abgeschlossen. Vor dem Veröffentlichen sieht Simon Vorher/Nachher-Fotos (`ui_shots.py`, `theme_shots.py`, Anleitung B8).
 - [ ] [Sonnet] Lesbarkeit allgemein – Wünsche von Simon hier ergänzen (Schriftgröße, Kontrast, Abstände, lange Texte einklappbar …) (27.09.2026)
-- [ ] [Sonnet] Text-Formatierer – nicht umgestellt (eigene, schon strukturierte Anzeige): Rassen-Traits im Info-Tab (Karten je „• Name: …“) und Background-Texte (`renderBgText`, `**fett**`). Bei Bedarf auf `fmtDesc` umstellen (27.09.2026, Text-Formatierer). Stat-Blöcke (Bestien, Zauber-Kreaturen) haben seit Paket A eine eigene Anzeige (`sbHtml`/`sbEntry`, Anleitung B11), absichtlich nicht `fmtDesc`

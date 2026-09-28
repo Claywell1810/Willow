@@ -437,6 +437,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 .fd li{position:relative;margin:0 0 .45em}
 .fd li::before{content:'';position:absolute;left:-.8em;top:.65em;width:5px;height:5px;border-radius:50%;background:var(--text3)}
 .fd li p.fd-cont{margin:.35em 0 0}
+.bg-cap{color:var(--gold);font-weight:bold;font-family:'Cinzel',serif;font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;margin:.2em 0 .4em}
 .fd-cap{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:.9em 0 .35em}
 .fd-tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 .8em;max-width:100%}
 .fd-tbl{border-collapse:collapse;width:100%;font-size:var(--fs-md);line-height:1.4}
@@ -3991,22 +3992,15 @@ function buildRaceLore(){
   sec.style.display='';
   title.textContent='Race: '+race;
 
-  // Group traits: continuation lines (no •) attach to previous trait card
+  // Group traits: „• Name: …“ beginnt eine Karte; Folgezeilen und Aufzählungen ohne Namen (z. B. Aasimar-Verwandlungen)
+  // bleiben in der Karte davor und werden mit fmtDesc als Absätze/Liste gezeigt (seit 28.09.2026)
   const raw = r.traits.split('\n').filter(t=>t.trim());
   const groups = [];
   for(const t of raw){
-    if(t.startsWith('• ')){
-      const colon = t.indexOf(': ');
-      if(colon>2){
-        groups.push({name: t.slice(2,colon), desc: t.slice(colon+2)});
-      } else {
-        groups.push({name:'', desc: t.slice(2)});
-      }
-    } else {
-      // continuation — append to last group's desc
-      if(groups.length) groups[groups.length-1].desc += ' '+t;
-      else groups.push({name:'', desc: t});
-    }
+    const m = t.startsWith('• ') ? t.slice(2).match(/^([^:]{1,48}): (\S[\s\S]*)$/) : null;
+    if(m && fdIsName(m[1])) groups.push({name: m[1], desc: m[2]});
+    else if(groups.length) groups[groups.length-1].desc += '\n'+t;
+    else groups.push({name:'', desc: t});
   }
 
   const meta = [];
@@ -4020,7 +4014,7 @@ function buildRaceLore(){
     groups.map(g=>
       '<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">'
       +(g.name?'<div style="font-family:Cinzel,serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:3px">'+g.name+'</div>':'')
-      +'<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.7">'+g.desc+'</div></div>'
+      +'<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">'+fmtDesc(g.desc)+'</div></div>'
     ).join('');
 }
 
@@ -4114,9 +4108,16 @@ function onSubclsChange(){
 
 function renderBgText(raw){
   if(!raw)return'';
-  // **bold** → <strong>
-  return raw.replace(/\*\*([^*]+)\*\*/g,'<strong style="color:var(--gold);font-family:\'Cinzel\',serif;font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px">$1</strong>')
-            .replace(/\n/g,'<br>');
+  // Zeilen „**Überschrift**“ → goldene Überschrift, der Rest über den gemeinsamen Formatierer fmtDesc (seit 28.09.2026)
+  let h='',buf=[];
+  const flush=()=>{if(buf.length){h+=fmtDesc(buf.join('\n'));buf=[];}};
+  raw.split('\n').forEach(l=>{
+    const m=l.trim().match(/^\*\*([^*]+)\*\*$/);
+    if(m){flush();h+=`<div class="bg-cap">${fdEsc(m[1])}</div>`;}
+    else buf.push(l.replace(/\*\*([^*]+)\*\*/g,'$1'));
+  });
+  flush();
+  return h;
 }
 
 function buildBgLore(){
@@ -4150,7 +4151,7 @@ function buildBgLore(){
 
   // Feature text
   if(extra&&extra.f){
-    html+=`<div style="line-height:1.65">${renderBgText(extra.f)}</div>`;
+    html+=`<div style="line-height:1.6;color:var(--desc)">${renderBgText(extra.f)}</div>`;
   }
 
   html+='</div>';
@@ -5793,7 +5794,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-28b';
+const APP_VERSION = 'willow-app-2026-09-28c';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

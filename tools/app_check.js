@@ -817,6 +817,22 @@ const REGRESSION = [
       w.closeWebSearch();
       return true;
     } },
+  { name: 'Text-Formatierer auch für Rassen-Traits und Background-Texte (Aasimar-Verwandlungen als Liste in Celestial Revelation, keine **-Reste)', datum: '28.09.2026',
+    run: ({ w, d, set }) => {
+      set('race', 'Aasimar'); w.onRaceChange && w.onRaceChange(); w.buildRaceLore();
+      const body = d.getElementById('raceLoreBody');
+      const names = [...body.querySelectorAll('div[style*="Cinzel"]')].map(x => x.textContent);
+      if (names.join('|') !== 'Celestial Resistance|Darkvision|Healing Hands|Light Bearer|Celestial Revelation') return 'Aasimar-Karten: ' + names.join('|');
+      if (!body.querySelector('.fd ul') || body.querySelectorAll('.fd ul li').length !== 3) return 'Aasimar-Verwandlungen nicht als Liste';
+      set('race', 'Elf'); w.buildRaceLore();
+      if (body.querySelectorAll('.fd p').length < 6) return 'Elf: Folgeabsätze fehlen';
+      w.eval("st.bg='Acolyte'"); w.buildBgLore();
+      const bg = d.getElementById('bgLoreBody');
+      if (bg.innerHTML.includes('**') || !bg.querySelector('.bg-cap') || bg.querySelector('.bg-cap').textContent !== 'Feature: Shelter of the Faithful') return 'Background-Überschrift';
+      if (bg.querySelectorAll('.fd p').length < 2 || bg.innerHTML.includes('<br>')) return 'Background-Absätze nicht über fmtDesc';
+      w.eval("st.bg=''"); set('race', '');
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
