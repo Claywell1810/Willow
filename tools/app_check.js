@@ -907,6 +907,69 @@ const REGRESSION = [
       w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
+  { name: 'Paket C2: Feature-Auswahl (Primal Order · Magician mit +WIS auf Arcana/Nature, Storm Aura → Storm Soul, wechselbar mit ↻), Expertise nur auf geübte Skills (Rogue L1/L6), Jack of All Trades (½), Bonus-Skills und Saves aus Features, nur ab Feature-Stufe und bei passender Subklasse', datum: '29.09.2026',
+    run: ({ w, d, sel, set }) => {
+      if (typeof w.fpHtml !== 'function' || !w.eval('typeof FEATURE_PICKS==="object"&&Object.keys(FEATURE_PICKS).length>40')) return 'FEATURE_PICKS/fpHtml fehlen';
+      // Daten: jeder Schlüssel trifft genau ein Feature, jede Option (außer nt) hat Text im desc
+      const bad = w.eval(`Object.entries(FEATURE_PICKS).map(([k,e])=>{const [c,g,n0]=k.split('|'),[n,at]=n0.split('@');const cd=CLASS_DATA[c];const fs=cd&&(g==='base'?cd.base:(cd.subclass||{})[g]);if(!fs)return k+': Gruppe';const h=fs.filter(f=>f.name===n&&(!at||f.lvl===+at));if(h.length!==1)return k+': '+h.length+'x';if(h[0].lvl!==e.l)return k+': Stufe';if(e.t==='opt'&&!e.nt){const o=e.o.find(o=>!fpOptText(h[0].desc,o));if(o)return k+': ohne Text '+o;}return '';}).filter(x=>x)`);
+      if (bad.length) return 'Daten: ' + bad.join('; ');
+      const sk = n => [...d.querySelectorAll('#skillsGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === n);
+      const sv = l => [...d.querySelectorAll('#savesGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === l);
+      const pip = r => r.querySelector('.sk-pip').className.replace('sk-pip', '').trim();
+      const bdg = r => [...r.querySelectorAll('.sk-bdg')].map(b => b.textContent).join(',');
+      const bon = r => r.querySelector('.sk-bon').textContent;
+      const card = n => [...d.querySelectorAll('#abList .ab-card')].find(c => c.querySelector('.ab-name').firstChild.textContent === n);
+      const chip = (root, o) => root && [...root.querySelectorAll('.pk-chip')].find(c => c.dataset.o === o);
+      w.resetUI();
+      w.applyState({ attrs: { STR: 10, DEX: 14, CON: 10, INT: 10, WIS: 16, CHA: 8 }, _f_prof: '2' });
+      // Druid L1: Primal Order – Chips in der Actions-Karte, Wahl im Titel, Text der Wahl, andere Optionen aufklappbar
+      sel('Druid', '', 1);
+      const po = card('Primal Order'); if (!po) return 'Karte Primal Order fehlt';
+      if (!po.textContent.includes('Choose 1 (0/1)')) return 'offene Wahl nicht gezeigt';
+      chip(po, 'Magician').click();
+      if (JSON.stringify(w.eval("st.picks['feat:Druid|base|Primal Order']")) !== '["Magician"]') return 'Wahl nicht gespeichert';
+      const po2 = card('Primal Order');
+      if (po2.querySelector('.ab-name').textContent.trim() !== 'Primal Order · Magician') return 'Titel: ' + po2.querySelector('.ab-name').textContent;
+      if (!po2.querySelector('.fp-sel') || !po2.querySelector('.fp-sel').textContent.startsWith('Magician:') || po2.querySelector('.fp-sel').textContent.includes('Warden')) return 'Text der Wahl';
+      const more = po2.querySelector('details.fp-more'); if (!more || !more.textContent.includes('Warden')) return '„Other options“ fehlt';
+      if (!d.getElementById('clsLoreBody').textContent.includes('Primal Order · Magician')) return 'Info-Tab zeigt Wahl nicht';
+      if (bdg(sk('Arcana')) !== 'Magician +3' || bon(sk('Arcana')) !== '+3' || bdg(sk('Nature')) !== 'Magician +3' || bdg(sk('History')) !== '') return 'Magician-Bonus: ' + bdg(sk('Arcana')) + ' ' + bon(sk('Arcana'));
+      w.eval('st.attrs.WIS=8'); w.buildSkills(); if (bdg(sk('Arcana')) !== 'Magician +1') return 'Magician min. +1';
+      w.eval('st.attrs.WIS=16');
+      chip(card('Primal Order'), 'Warden').click(); w.buildSkills();
+      if (bdg(sk('Arcana')) !== '' || card('Primal Order').querySelector('.ab-name').textContent.trim() !== 'Primal Order · Warden') return 'Wechsel auf Warden';
+      // Stufe: Elemental Fury (L7) wirkt erst ab L7, Expertise/Saves ebenso
+      // Barbarian Storm Herald: Storm Aura wählen → Storm Soul (verknüpft) zeigt die Wahl; ↻ im Kopf
+      sel('Barbarian', 'Path of the Storm Herald (XGE)', 6);
+      const sa = card('Storm Aura'); if (!sa || !sa.textContent.includes('↻ Level up')) return 'Storm Aura ohne ↻';
+      chip(sa, 'Sea').click();
+      const ss = card('Storm Soul'); if (!ss || ss.querySelector('.ab-name').textContent.trim() !== 'Storm Soul · Sea' || !ss.querySelector('.fp-sel').textContent.includes('lightning')) return 'Storm Soul verknüpft: ' + (ss && ss.querySelector('.ab-name').textContent);
+      sel('Barbarian', 'Path of the Berserker (PHB)', 6); if (card('Storm Soul')) return 'fremde Subklasse';
+      // Rogue: Expertise nur aus geübten Skills; L6-Expertise erst ab L6; Slippery Mind ab L15
+      sel('Rogue', '', 5);
+      const ex = card('Expertise'); if (!ex) return 'Karte Expertise fehlt';
+      if (!ex.textContent.includes('No eligible skill proficiency')) return 'Expertise ohne geübte Skills';
+      const ct = d.getElementById('coreTraitsList');
+      ['Stealth', 'Perception', 'Acrobatics', 'Insight'].forEach(o => chip(ct, o).click());
+      const ex2 = card('Expertise'); if (chip(ex2, 'Arcana') || !chip(ex2, 'Stealth')) return 'Expertise-Optionen';
+      chip(ex2, 'Stealth').click(); chip(card('Expertise'), 'Perception').click();
+      if (pip(sk('Stealth')) !== 'e' || bdg(sk('Stealth')) !== 'Class,Expertise' || bon(sk('Stealth')) !== '+6') return 'Expertise nicht wirksam: ' + pip(sk('Stealth')) + ' ' + bdg(sk('Stealth')) + ' ' + bon(sk('Stealth'));
+      if (card('Expertise').textContent.includes('Level 6')) return 'L6-Expertise vor Stufe 6';
+      sel('Rogue', '', 6); if (!card('Expertise').textContent.includes('Level 6')) return 'L6-Expertise fehlt';
+      if (pip(sv('Wisdom')) !== '') return 'Slippery Mind vor L15';
+      sel('Rogue', '', 15); if (pip(sv('Wisdom')) !== 'p' || bdg(sv('Wisdom')) !== 'Slippery Mind') return 'Slippery Mind';
+      // Scout: Survivalist fest Nature + Survival mit Expertise
+      sel('Rogue', 'Scout (XGE)', 3); if (pip(sk('Survival')) !== 'e' || bdg(sk('Survival')) !== 'Survivalist') return 'Survivalist';
+      // Bard L2: Jack of All Trades = halber Übungsbonus auf nicht geübte Skills, ohne Abzeichen
+      set('prof', '2'); sel('Bard', '', 2);
+      if (pip(sk('History')) !== 'h' || bon(sk('History')) !== '+1' || bdg(sk('History')) !== '') return 'Jack of All Trades: ' + pip(sk('History')) + ' ' + bon(sk('History'));
+      sel('Bard', '', 1); if (pip(sk('History')) !== '') return 'Jack of All Trades vor L2';
+      // Speichern/Laden, Charakterwechsel
+      const snap = w.eval('collectState()'); if (!snap.picks['feat:Rogue|base|Expertise@1']) return 'feat-picks nicht gespeichert';
+      w.applyState({ attrs: {}, _f_cls: 'Rogue', _f_lvl: '6' }); if (bdg(sk('Stealth')).includes('Expertise')) return 'Charakterwechsel übernimmt feat-picks';
+      w.resetUI();
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
