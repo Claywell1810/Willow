@@ -833,6 +833,64 @@ const REGRESSION = [
       w.eval("st.bg=''"); set('race', '');
       return true;
     } },
+  { name: 'Paket C1: st.picks + calcGrants – Klassen-Saves automatisch, Klassen-/Background-Skill-Wahl, Doppel-Hinweis mit Ersatz, Attributs-Abzeichen (nicht aufgerechnet), alte Saves/manuelle Skills unverändert, kein Übertrag beim Charakterwechsel, BG_DATA vollständig', datum: '28.09.2026',
+    run: ({ w, d, sel }) => {
+      if (typeof w.calcGrants !== 'function' || typeof w.pickUI !== 'function') return 'calcGrants/pickUI fehlen';
+      const sk = n => [...d.querySelectorAll('#skillsGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === n);
+      const sv = l => [...d.querySelectorAll('#savesGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === l);
+      const pip = r => r.querySelector('.sk-pip').className.replace('sk-pip', '').trim();
+      const bdg = r => [...r.querySelectorAll('.sk-bdg')].map(b => b.textContent).join(',');
+      // Daten: alle Background-Skills bekannt, Faction Agent/Planar Philosopher vollständig (5e.tools)
+      const SK = w.eval('SKILLS.map(s=>s.n)'), BG = w.eval('BG_DATA');
+      for (const b of BG) { const sp = w.bgSkillSpec(b); for (const x of [...sp.fest, ...sp.wahl.flatMap(v => v.from)]) if (!SK.includes(x)) return `Skill unbekannt: ${b.n} „${x}"`; if (b.s.some(x => x.includes('...'))) return 'abgeschnitten: ' + b.n; }
+      if (w.bgSkillSpec(BG.find(b => b.n === 'Faction Agent')).wahl[0].from.length !== 13 || w.bgSkillSpec(BG.find(b => b.n === 'Planar Philosopher')).wahl[0].from.length !== 12) return 'Faction Agent/Planar Philosopher unvollständig';
+      // alter Save ohne picks: lädt unverändert, manuelle Ebene bleibt
+      w.resetUI();
+      w.applyState({ attrs: { STR: 10, DEX: 14, CON: 10, INT: 16, WIS: 10, CHA: 10 }, saveP: { DEX: true }, skillP: { Stealth: 'e', Arcana: 'p' }, _f_cls: '', _f_prof: '2' });
+      if (JSON.stringify(w.eval('st.picks')) !== '{}') return 'alter Save: picks nicht leer';
+      if (pip(sk('Stealth')) !== 'e' || pip(sk('Arcana')) !== 'p' || bdg(sk('Arcana')) !== '' || pip(sv('Dexterity')) !== 'p' || pip(sv('Intelligence')) !== '') return 'alter Save: manuelle Werte verändert';
+      // Klasse: Saves automatisch mit Abzeichen, Antippen nimmt sie nicht weg
+      sel('Wizard', '', 1);
+      if (pip(sv('Intelligence')) !== 'p' || bdg(sv('Intelligence')) !== 'Class' || pip(sv('Wisdom')) !== 'p' || pip(sv('Dexterity')) !== 'p') return 'Wizard-Saves';
+      if (sv('Intelligence').querySelector('.sk-bon').textContent !== '+5') return 'Save-Bonus INT: ' + sv('Intelligence').querySelector('.sk-bon').textContent;
+      sv('Intelligence').click(); if (pip(sv('Intelligence')) !== 'p') return 'Antippen nimmt Klassen-Save weg';
+      // Klassen-Skill-Wahl über Chips (Info-Tab)
+      const chip = (root, o) => [...d.querySelectorAll(root + ' .pk-chip')].find(c => c.dataset.o === o);
+      if (!d.getElementById('coreTraitsList').textContent.includes('Choose 2 (0/2)') || d.getElementById('coreTraitsPend').textContent !== '● Choose') return 'offene Klassen-Wahl nicht gezeigt';
+      if (!d.getElementById('pkHints').textContent.includes('Class skills 0/2')) return 'Hinweis im Skills-Tab fehlt';
+      chip('#coreTraitsList', 'History').click(); chip('#coreTraitsList', 'Investigation').click(); chip('#coreTraitsList', 'Nature').click();
+      if (JSON.stringify(w.eval("st.picks['cls:Wizard:skills']")) !== '["History","Investigation"]') return 'Klassen-Wahl: ' + JSON.stringify(w.eval('st.picks'));
+      if (pip(sk('History')) !== 'p' || bdg(sk('History')) !== 'Class' || d.getElementById('coreTraitsPend').textContent !== '' || d.getElementById('pkHints').textContent !== '') return 'Klassen-Skill nicht wirksam';
+      if (JSON.stringify(w.eval('st.skillP')) !== '{"Stealth":"e","Arcana":"p"}') return 'manuelle Skills verändert';
+      // Antippen bei Auto-p: nur manuelle Ebene → Expertise
+      sk('History').click(); if (pip(sk('History')) !== 'e' || w.eval("st.skillP.History") !== 'e') return 'Antippen Auto-Skill → e';
+      sk('History').click(); if (pip(sk('History')) !== 'p' || w.eval("'History' in st.skillP")) return 'Antippen zurück → p';
+      // Background Sage: History doppelt → Hinweis + Ersatzwahl; Attributswahl als Abzeichen
+      w.bgSelect('Sage');
+      if (bdg(sk('History')) !== 'Class,Background' || bdg(sk('Arcana')) !== 'Background') return 'Background-Skills: ' + bdg(sk('History'));
+      const dup = [...d.querySelectorAll('#pkHints .pk-dup')].find(x => x.textContent.includes('twice'));
+      if (!dup || !dup.textContent.includes('History twice (Class + Background)')) return 'Doppel-Hinweis fehlt';
+      if (chip('#pkHints', 'Arcana') || !chip('#pkHints', 'Medicine')) return 'Ersatzwahl bietet schon geübte Skills an';
+      chip('#pkHints', 'Medicine').click();
+      if (bdg(sk('Medicine')) !== 'Replacement' || pip(sk('Medicine')) !== 'p') return 'Ersatz nicht wirksam';
+      const ab = v => [...d.querySelectorAll('#bgLoreBody .pk-chip')].find(c => c.dataset.v === v);
+      if (!d.getElementById('bgLorePend').textContent) return 'offene Attributswahl nicht markiert';
+      ab('+2/+1').click(); ab('INT:+2').click(); ab('WIS:+1').click();
+      const aB = k => { const c = d.getElementById('a_' + k).closest('.acard').querySelector('.a-bdg'); return c ? c.textContent : ''; };
+      if (aB('INT') !== '+2 BG' || aB('WIS') !== '+1 BG' || aB('CON') !== '' || w.eval('st.attrs.INT') !== 16) return 'Attributs-Abzeichen / Wert verändert';
+      if (d.getElementById('bgLorePend').textContent) return 'Attributswahl fertig, Marker bleibt';
+      ab('+1/+1/+1').click(); if (aB('CON') !== '+1 BG' || aB('INT') !== '+1 BG') return '+1/+1/+1';
+      // Klassenwechsel und zurück: Wahl bleibt, wird nur nicht ausgewertet
+      sel('Fighter', '', 1); if (bdg(sk('Investigation')) !== '' || pip(sv('Strength')) !== 'p' || pip(sv('Intelligence')) !== '') return 'Fighter: fremde Wahl ausgewertet';
+      sel('Wizard', '', 1); if (bdg(sk('Investigation')) !== 'Class') return 'Wechsel zurück: Wahl verloren';
+      // Speichern/Laden, Charakterwechsel ohne Übertrag
+      const snap = w.eval('collectState()'); if (!snap.picks || !snap.picks['bg:Sage:ability']) return 'picks nicht gespeichert';
+      w.resetUI(); if (JSON.stringify(w.eval('st.picks')) !== '{}') return 'resetUI: picks bleiben';
+      w.applyState(snap); if (bdg(sk('Medicine')) !== 'Replacement') return 'Laden: Ersatz fehlt';
+      w.applyState({ attrs: {}, _f_cls: 'Wizard' }); if (JSON.stringify(w.eval('st.picks')) !== '{}' || bdg(sk('Investigation')) !== '') return 'Charakterwechsel übernimmt fremde picks';
+      w.resetUI();
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
