@@ -4290,8 +4290,9 @@ function buildBgLore(){
   sec.style.display='block';
 
   // Look up extra data — prefer entry with feature text
+  // nur der Eintrag derselben Quelle (seit 28.09.2026: XPHB-Backgrounds haben kein Feature, vorher kam der PHB-2014-Text)
   const extras=BG_EXTRA.filter(e=>e.n===bgName);
-  const extra=extras.find(e=>e.f)||extras[0]||null;
+  const extra=extras.find(e=>e.s===data.src)||extras.find(e=>e.f)||extras[0]||null;
 
   let html='<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:var(--fs-txt);color:var(--text2)">';
 
@@ -5964,7 +5965,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-28c';
+const APP_VERSION = 'willow-app-2026-09-28d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

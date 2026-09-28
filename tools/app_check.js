@@ -826,9 +826,10 @@ const REGRESSION = [
       if (!body.querySelector('.fd ul') || body.querySelectorAll('.fd ul li').length !== 3) return 'Aasimar-Verwandlungen nicht als Liste';
       set('race', 'Elf'); w.buildRaceLore();
       if (body.querySelectorAll('.fd p').length < 6) return 'Elf: Folgeabsätze fehlen';
-      w.eval("st.bg='Acolyte'"); w.buildBgLore();
+      // seit 28.09.2026 (Paket C1) mit SCAG-Background: der XPHB-Acolyte hat kein Feature mehr (vorher fälschlich der PHB-Text)
+      w.eval("st.bg='Cloistered Scholar'"); w.buildBgLore();
       const bg = d.getElementById('bgLoreBody');
-      if (bg.innerHTML.includes('**') || !bg.querySelector('.bg-cap') || bg.querySelector('.bg-cap').textContent !== 'Feature: Shelter of the Faithful') return 'Background-Überschrift';
+      if (bg.innerHTML.includes('**') || !bg.querySelector('.bg-cap') || !bg.querySelector('.bg-cap').textContent.startsWith('Feature: ')) return 'Background-Überschrift';
       if (bg.querySelectorAll('.fd p').length < 2 || bg.innerHTML.includes('<br>')) return 'Background-Absätze nicht über fmtDesc';
       w.eval("st.bg=''"); set('race', '');
       return true;
@@ -894,6 +895,16 @@ const REGRESSION = [
       w.applyState(snap); if (bdg(sk('Medicine')) !== 'Replacement') return 'Laden: Ersatz fehlt';
       w.applyState({ attrs: {}, _f_cls: 'Wizard' }); if (JSON.stringify(w.eval('st.picks')) !== '{}' || bdg(sk('Investigation')) !== '') return 'Charakterwechsel übernimmt fremde picks';
       w.resetUI();
+      return true;
+    } },
+  { name: 'Background-Text nur aus derselben Quelle: XPHB-Sage ohne 2014-„Feature: Researcher“, PHB-Backgrounds behalten ihr Feature', datum: '28.09.2026',
+    run: ({ w, d }) => {
+      const body = d.getElementById('bgLoreBody');
+      w.eval("st.bg='Sage'"); w.buildBgLore();
+      if (body.textContent.includes('Researcher')) return 'XPHB-Sage zeigt 2014-Feature';
+      w.eval("st.bg='Cloistered Scholar'"); w.buildBgLore();
+      if (!body.querySelector('.bg-cap') || !body.querySelector('.bg-cap').textContent.startsWith('Feature')) return 'SCAG-Background ohne Feature';
+      w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
