@@ -1153,14 +1153,16 @@ function calcGrants(){
     sp.wahl.forEach((w,i)=>pkValid(pkKeyBg(bg.n,i),w.from,w.n).forEach(x=>add('skill',x,'p','Background')));
     bgAbility(bg).list.forEach(e=>add('attr',e.k,e.v,'Background'));
   }
-  // Doppelte Skills (PHB 2014: statt doppelter Proficiency eine andere derselben Art wählen) → Hinweis + Ersatzwahl dup:<Skill>
+  // Doppelte Skills: PHB 2014 erlaubt statt doppelter Proficiency eine andere derselben Art → Ersatzwahl dup:<Skill>,
+  // aber nur bei 2014-Backgrounds (ohne Attributswahl). PHB 2024 kennt die Regel nicht → nur Hinweis (Entscheidung Simon 28.09.2026)
+  const legacy=!!bg&&bgAbOpts(bg).length!==3;
   const src={};g.filter(x=>x.art==='skill').forEach(x=>{(src[x.ziel]=src[x.ziel]||[]).push(x.quelle);});
   const have=new Set(Object.keys(src));g.dups=[];
   Object.keys(src).filter(k=>src[k].length>1).forEach(k=>{
-    const opts=SKILLS.map(x=>x.n).filter(n=>!have.has(n));
+    const opts=legacy?SKILLS.map(x=>x.n).filter(n=>!have.has(n)):[];
     const r=pkValid('dup:'+k,opts,1);
     r.forEach(x=>{add('skill',x,'p','Replacement');have.add(x);});
-    g.dups.push({skill:k,quellen:src[k],opts,key:'dup:'+k});
+    g.dups.push({skill:k,quellen:src[k],opts,key:'dup:'+k,legacy});
   });
   return g;
 }
@@ -1220,13 +1222,13 @@ function pkOpen(){
   return r;
 }
 function dupUI(G){
-  return (G.dups||[]).map(d=>`<div class="pk-dup"><div style="font-size:var(--fs-txt);color:var(--text2);margin-bottom:4px"><b style="color:var(--gold)">${pkEsc(d.skill)}</b> twice (${d.quellen.join(' + ')}) – you may choose another skill instead.</div>`+
-    pickUI(d.key,d.opts,1,{head:'Replacement'})+'</div>').join('');
+  return (G.dups||[]).map(d=>`<div class="pk-dup"><div style="font-size:var(--fs-txt);color:var(--text2);margin-bottom:4px"><b style="color:var(--gold)">${pkEsc(d.skill)}</b> twice (${d.quellen.join(' + ')}) – `+
+    (d.legacy?`you may choose another skill instead (PHB 2014 rule).</div>`+pickUI(d.key,d.opts,1,{head:'Replacement'}):`no replacement in the 2024 rules. Pick a different class skill instead.</div>`)+'</div>').join('');
 }
 function buildPkHints(G){
   const el=document.getElementById('pkHints');if(!el)return;
   const op=pkOpen();
-  const cp=document.getElementById('coreTraitsPend');if(cp)cp.textContent=op.some(x=>x.wo==='cls')||(G.dups||[]).length?'● Choose':'';
+  const cp=document.getElementById('coreTraitsPend');if(cp)cp.textContent=op.some(x=>x.wo==='cls')||(G.dups||[]).some(d=>d.legacy)?'● Choose':'';
   const bp=document.getElementById('bgLorePend');if(bp)bp.textContent=op.some(x=>x.wo==='bg')?'● Choose':'';
   el.innerHTML=(op.length?`<div class="pk-dup" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:var(--fs-txt);color:var(--gold);flex:1">Open choices: ${op.map(x=>x.txt).join(' · ')}</span><button type="button" class="pk-chip" onclick="switchTab('info')">→ Info</button></div>`:'')+dupUI(G);
 }

@@ -869,10 +869,8 @@ const REGRESSION = [
       w.bgSelect('Sage');
       if (bdg(sk('History')) !== 'Class,Background' || bdg(sk('Arcana')) !== 'Background') return 'Background-Skills: ' + bdg(sk('History'));
       const dup = [...d.querySelectorAll('#pkHints .pk-dup')].find(x => x.textContent.includes('twice'));
-      if (!dup || !dup.textContent.includes('History twice (Class + Background)')) return 'Doppel-Hinweis fehlt';
-      if (chip('#pkHints', 'Arcana') || !chip('#pkHints', 'Medicine')) return 'Ersatzwahl bietet schon geübte Skills an';
-      chip('#pkHints', 'Medicine').click();
-      if (bdg(sk('Medicine')) !== 'Replacement' || pip(sk('Medicine')) !== 'p') return 'Ersatz nicht wirksam';
+      if (!dup || !dup.textContent.includes('History twice (Class + Background)') || !dup.textContent.includes('2024')) return 'Doppel-Hinweis (2024) fehlt';
+      if (dup.querySelector('.pk-chip')) return '2024-Background: Ersatzwahl darf nicht erscheinen (Regel nur PHB 2014)';
       const ab = v => [...d.querySelectorAll('#bgLoreBody .pk-chip')].find(c => c.dataset.v === v);
       if (!d.getElementById('bgLorePend').textContent) return 'offene Attributswahl nicht markiert';
       ab('+2/+1').click(); ab('INT:+2').click(); ab('WIS:+1').click();
@@ -880,6 +878,13 @@ const REGRESSION = [
       if (aB('INT') !== '+2 BG' || aB('WIS') !== '+1 BG' || aB('CON') !== '' || w.eval('st.attrs.INT') !== 16) return 'Attributs-Abzeichen / Wert verändert';
       if (d.getElementById('bgLorePend').textContent) return 'Attributswahl fertig, Marker bleibt';
       ab('+1/+1/+1').click(); if (aB('CON') !== '+1 BG' || aB('INT') !== '+1 BG') return '+1/+1/+1';
+      // 2014-Background (Cloistered Scholar, History fest): Ersatzwahl nach PHB 2014
+      w.bgSelect('Cloistered Scholar');
+      const dup14 = [...d.querySelectorAll('#pkHints .pk-dup')].find(x => x.textContent.includes('twice'));
+      if (!dup14 || !dup14.textContent.includes('PHB 2014')) return 'Doppel-Hinweis (2014) fehlt';
+      if (chip('#pkHints', 'Investigation') || !chip('#pkHints', 'Medicine')) return 'Ersatzwahl bietet schon geübte Skills an';
+      chip('#pkHints', 'Medicine').click();
+      if (bdg(sk('Medicine')) !== 'Replacement' || pip(sk('Medicine')) !== 'p') return 'Ersatz nicht wirksam';
       // Klassenwechsel und zurück: Wahl bleibt, wird nur nicht ausgewertet
       sel('Fighter', '', 1); if (bdg(sk('Investigation')) !== '' || pip(sv('Strength')) !== 'p' || pip(sv('Intelligence')) !== '') return 'Fighter: fremde Wahl ausgewertet';
       sel('Wizard', '', 1); if (bdg(sk('Investigation')) !== 'Class') return 'Wechsel zurück: Wahl verloren';
