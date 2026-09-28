@@ -126,6 +126,16 @@ input[type=number]{-moz-appearance:textfield}
 .sk-bdg{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.3px;color:var(--purple);border:1px solid color-mix(in srgb, var(--purple) 45%, transparent);border-radius:8px;padding:0 5px;margin-left:5px;white-space:nowrap;vertical-align:middle}
 .a-bdg{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);margin-top:1px}
 #pkHints:empty{display:none}
+/* Paket C2: Feature-Auswahl (fpHtml) */
+.sk-pip.h{background:linear-gradient(90deg,var(--gold) 50%,transparent 50%);border-color:var(--gold)}
+.fp-suf{color:var(--text2)}
+.fp-sel{border-left:2px solid var(--gold);padding:2px 0 2px 8px;margin:2px 0 6px}
+.fp-more{margin-top:4px}
+.fp-more>summary{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--text3);cursor:pointer;padding:6px 0;list-style:none;-webkit-tap-highlight-color:transparent}
+.fp-more>summary::-webkit-details-marker{display:none}
+.fp-more>summary::before{content:'▸ '}
+.fp-more[open]>summary::before{content:'▾ '}
+.fp-lv{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);margin-top:6px}
 .sk-bon{font-size:var(--fs-txt);color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
 .sk-roll-ic{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
 
@@ -578,7 +588,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="ifield"><label>Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
-            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();autoSave()" style="text-align:center;flex:1">
+            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildSaves();buildSkills();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildSaves();buildSkills();autoSave()" style="text-align:center;flex:1">
             <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
           </div></div>
         <div class="ifield"><label>Background</label><input id="bg" readonly placeholder="— select on Backgrounds tab —" onclick="switchTab('hintergrund')" style="cursor:pointer;caret-color:transparent" title="Go to Backgrounds tab"></div>
@@ -1081,7 +1091,7 @@ function buildAttrs(){
 function chLvl(d){
   const el=document.getElementById('lvl');
   const v=Math.max(1,Math.min(20,(parseInt(el.value)||1)+d));
-  el.value=v;buildAbilities();buildClassTable();
+  el.value=v;buildAbilities();buildClassTable();buildSaves();buildSkills();
 }
 function chAttr(k,d){
   st.attrs[k]=Math.max(1,Math.min(30,(st.attrs[k]||10)+d));
@@ -1112,6 +1122,7 @@ function buildSaves(){
 // st.saveP/st.skillP/st.skillMisc bleiben die manuelle Ebene; wirksam = höhere Stufe aus Auto und Manuell.
 const ATTR_BY_NAME={Strength:'STR',Dexterity:'DEX',Constitution:'CON',Intelligence:'INT',Wisdom:'WIS',Charisma:'CHA'};
 const PK_RANK={'':0,half:0.5,p:1,e:2};
+const pkProfMul=r=>r==='e'?2:r==='p'?1:0;
 const pkEsc=x=>String(x).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 function pkGet(k){const v=st.picks&&st.picks[k];return Array.isArray(v)?v:[];}
 function pkValid(k,opts,n){const r=[];pkGet(k).forEach(x=>{if(opts.includes(x)&&!r.includes(x)&&r.length<n)r.push(x);});return r;}
@@ -1164,10 +1175,11 @@ function calcGrants(){
     r.forEach(x=>{add('skill',x,'p','Replacement');have.add(x);});
     g.dups.push({skill:k,quellen:src[k],opts,key:'dup:'+k,legacy});
   });
+  fpGrants(g,cls);
   return g;
 }
 function grantLvl(G,art,ziel){let r='';G.forEach(x=>{if(x.art===art&&x.ziel===ziel&&PK_RANK[x.stufe]>PK_RANK[r])r=x.stufe;});return r;}
-function grantSrc(G,art,ziel){return [...new Set(G.filter(x=>x.art===art&&x.ziel===ziel).map(x=>x.quelle))];}
+function grantSrc(G,art,ziel){return [...new Set(G.filter(x=>x.art===art&&x.ziel===ziel&&x.stufe!=='half').map(x=>x.quelle))];}
 // Gemeinsame Auswahl-UI: antippbare Chips, offene Wahl gold „Choose N (x/N)“; marks = {Option: 'BG'} als Hinweis
 function pickUI(key,opts,count,o){
   o=o||{};const sel=pkValid(key,opts,count),full=sel.length>=count,marks=o.marks||{};
@@ -1198,7 +1210,7 @@ function pkAb(el){
   }
   st.picks[k]=a;pkRefresh();
 }
-function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildAttrs();buildSaves();buildSkills();}
+function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildAbilities();}
 function bgAbilityUI(bg){
   const opts=bgAbOpts(bg);if(opts.length!==3)return '';
   const k=pkEsc(pkKeyBgAb(bg.n)),{mode,list}=bgAbility(bg),done=mode==='+1/+1/+1'||list.length===2;
@@ -1219,6 +1231,7 @@ function pkOpen(){
     bgSkillSpec(bg).wahl.forEach((w,i)=>{const c=pkValid(pkKeyBg(bg.n,i),w.from,w.n).length;if(c<w.n)r.push({wo:'bg',txt:`Background skills ${c}/${w.n}`});});
     const ab=bgAbility(bg);if(bgAbOpts(bg).length===3&&!(ab.mode==='+1/+1/+1'||ab.list.length===2))r.push({wo:'bg',txt:'Background ability scores'});
   }
+  fpOpen(cls).forEach(x=>r.push(x));
   return r;
 }
 function dupUI(G){
@@ -1231,6 +1244,124 @@ function buildPkHints(G){
   const cp=document.getElementById('coreTraitsPend');if(cp)cp.textContent=op.some(x=>x.wo==='cls')||(G.dups||[]).some(d=>d.legacy)?'● Choose':'';
   const bp=document.getElementById('bgLorePend');if(bp)bp.textContent=op.some(x=>x.wo==='bg')?'● Choose':'';
   el.innerHTML=(op.length?`<div class="pk-dup" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:var(--fs-txt);color:var(--gold);flex:1">Open choices: ${op.map(x=>x.txt).join(' · ')}</span><button type="button" class="pk-chip" onclick="switchTab('info')">→ Info</button></div>`:'')+dupUI(G);
+}
+
+// ── Paket C2 (29.09.2026): Feature-Auswahl, Bonus-Skills, Expertise, Saves ────────────────────
+// FEATURE_PICKS wird von tools/feature_picks.py erzeugt (kuratiert, gegen 5e.tools geprüft). Schlüssel 'Klasse|Gruppe|Feature'
+// (Gruppe = 'base' oder Subklassen-Key; gleichnamige Features mit '@Stufe'). Wahl in st.picks['feat:<Schlüssel>']
+// (Zusatzwahl einer Option: 'feat:<Schlüssel>:<Option>'). Wirkung nur ab Feature-Stufe und bei passender Subklasse.
+// FEATURE_PICKS-START
+const FEATURE_PICKS={"Druid|base|Primal Order":{"t":"opt","fx":{"Magician":{"b":["Arcana","Nature"],"a":"WIS","m":1}},"l":1,"o":["Magician","Warden"]},"Druid|base|Elemental Fury":{"t":"opt","l":7,"o":["Potent Spellcasting","Primal Strike"]},"Cleric|base|Divine Order":{"t":"opt","fx":{"Thaumaturge":{"b":["Arcana","Religion"],"a":"WIS","m":1}},"l":1,"o":["Protector","Thaumaturge"]},"Cleric|base|Blessed Strikes":{"t":"opt","l":7,"o":["Divine Strike","Potent Spellcasting"]},"Druid|Circle of the Land|Circle of the Land Spells":{"t":"opt","o":["Arid Land","Polar Land","Temperate Land","Tropical Land"],"sw":"Long Rest","lk":["Nature's Ward"],"l":3},"Barbarian|Path of the Totem Warrior|Totem Spirit":{"t":"opt","l":3,"o":["Bear","Eagle","Elk","Tiger","Wolf"]},"Barbarian|Path of the Totem Warrior|Aspect of the Beast":{"t":"opt","fx":{"Tiger":{"p":{"n":2,"f":["Athletics","Acrobatics","Stealth","Survival"]}}},"l":6,"o":["Bear","Eagle","Elk","Tiger","Wolf"]},"Barbarian|Path of the Totem Warrior|Totemic Attunement":{"t":"opt","l":14,"o":["Bear","Eagle","Elk","Tiger","Wolf"]},"Barbarian|Path of the Wild Heart|Aspect of the Wilds":{"t":"opt","sw":"Long Rest","l":6,"o":["Owl","Panther","Salmon"]},"Barbarian|Path of the Storm Herald|Storm Aura":{"t":"opt","sw":"Level up","lk":["Storm Soul","Raging Storm"],"l":3,"o":["Desert","Sea","Tundra"]},"Ranger|Hunter|Hunter's Prey":{"t":"opt","sw":"Short or Long Rest","l":3,"o":["Colossus Slayer","Horde Breaker"]},"Ranger|Hunter|Defensive Tactics":{"t":"opt","sw":"Short or Long Rest","l":7,"o":["Escape the Horde","Multiattack Defense"]},"Sorcerer|Draconic Bloodline|Dragon Ancestor":{"t":"opt","lk":["Elemental Affinity"],"l":3,"o":["Black","Blue","Brass","Bronze","Copper","Gold","Green","Red","Silver","White"]},"Sorcerer|Draconic Sorcery|Elemental Affinity":{"t":"opt","o":["Acid","Cold","Fire","Lightning","Poison"],"nt":1,"l":6},"Sorcerer|Divine Soul|Divine Magic":{"t":"opt","l":3,"o":["Good","Evil","Law","Chaos","Neutrality"]},"Bard|College of Swords|Fighting Style":{"t":"opt","l":3,"o":["Dueling","Two-Weapon Fighting"]},"Warlock|The Genie|Expanded Spell List":{"t":"opt","o":["Dao","Djinni","Efreeti","Marid"],"nt":1,"lk":["Genie's Vessel","Elemental Gift"],"l":3},"Barbarian|base|Primal Knowledge":{"t":"skill","n":1,"f":"cls","l":3},"Bard|College of Lore|Bonus Proficiencies":{"t":"skill","n":3,"f":"any","l":3},"Cleric|Knowledge Domain|Blessings of Knowledge":{"t":"skill","n":2,"f":["Arcana","History","Nature","Religion"],"e":1,"l":3},"Cleric|Nature Domain|Acolyte of Nature":{"t":"skill","n":1,"f":["Animal Handling","Nature","Survival"],"l":3},"Cleric|Arcana Domain|Student of Arcana":{"t":"skill","n":1,"f":["Arcana","@cls"],"l":3},"Cleric|Order Domain|Bonus Proficiencies":{"t":"skill","n":1,"f":["Intimidation","Persuasion"],"l":3},"Cleric|Peace Domain|Implement of Peace":{"t":"skill","n":1,"f":["Insight","Performance","Persuasion"],"l":3},"Fighter|Battle Master|Student of War":{"t":"skill","n":1,"f":"cls","l":3},"Fighter|Arcane Archer|Arcane Archer Lore":{"t":"skill","fix":["Arcana","Nature"],"l":3},"Fighter|Cavalier|Bonus Proficiency":{"t":"skill","n":1,"f":["Animal Handling","History","Insight","Performance","Persuasion"],"l":3},"Fighter|Samurai|Bonus Proficiency":{"t":"skill","n":1,"f":["History","Insight","Performance","Persuasion"],"l":3},"Fighter|Banneret|Knightly Envoy":{"t":"skill","n":1,"f":["Insight","Intimidation","Persuasion","Performance"],"l":3},"Monk|Warrior of Mercy|Implements of Mercy":{"t":"skill","fix":["Insight","Medicine"],"l":3},"Monk|Way of Mercy|Implements of Mercy":{"t":"skill","fix":["Insight","Medicine"],"l":3},"Monk|Way of the Drunken Master|Bonus Proficiencies":{"t":"skill","fix":["Performance"],"l":3},"Ranger|Fey Wanderer|Otherworldly Glamour":{"t":"skill","n":1,"f":["Deception","Performance","Persuasion"],"l":3},"Rogue|Scout|Survivalist":{"t":"skill","fix":["Nature","Survival"],"e":1,"l":3},"Wizard|School of Enchantment|Enchanting Conversationalist":{"t":"skill","n":1,"f":["Deception","Intimidation","Persuasion"],"l":3},"Wizard|Bladesinging|Training in War and Song":{"t":"skill","n":1,"f":["Acrobatics","Athletics","Performance","Persuasion"],"l":3},"Rogue|base|Expertise@1":{"t":"exp","n":2,"l":1},"Rogue|base|Expertise@6":{"t":"exp","n":2,"l":6},"Bard|base|Expertise@2":{"t":"exp","n":2,"l":2},"Bard|base|Expertise@9":{"t":"exp","n":2,"l":9},"Ranger|base|Deft Explorer":{"t":"exp","n":1,"l":2},"Ranger|base|Expertise":{"t":"exp","n":2,"l":9},"Wizard|base|Scholar":{"t":"exp","n":1,"f":["Arcana","History","Investigation","Medicine","Nature","Religion"],"l":2},"Bard|base|Jack of All Trades":{"t":"half","l":2},"Cleric|Knowledge Domain|Unfettered Mind":{"t":"save","fix":["INT"],"l":6},"Fighter|Samurai|Elegant Courtier":{"t":"save","fix":["WIS"],"l":7},"Monk|base|Disciplined Survivor":{"t":"save","fix":["STR","DEX","CON","INT","WIS","CHA"],"l":14},"Ranger|Gloom Stalker|Iron Mind":{"t":"save","fix":["WIS"],"l":7},"Rogue|base|Slippery Mind":{"t":"save","fix":["WIS","CHA"],"l":15}};
+// FEATURE_PICKS-END
+function fpKey(k){return 'feat:'+k;}
+function fpName(k){return k.split('|')[2].replace(/@\d+$/,'');}
+function fpLvl(){return parseInt(document.getElementById('lvl')?.value)||1;}
+function fpSubKey(cls){const cd=CLASS_DATA[cls];return cd?clsSubKey(cd.subclass,document.getElementById('subcls')?.value||''):null;}
+// aktive Einträge: Klasse, Basis oder aktuelle Subklasse, Feature-Stufe erreicht
+function fpActive(cls){
+  const sk=fpSubKey(cls),lvl=fpLvl(),r=[];
+  Object.keys(FEATURE_PICKS).forEach(k=>{const [c,g]=k.split('|'),e=FEATURE_PICKS[k];
+    if(c===cls&&(g==='base'||g===sk)&&e.l<=lvl)r.push({k,e});});
+  return r;
+}
+function fpFrom(e,cls){
+  const cl=(CLASS_CORE_TRAITS[cls]&&CLASS_CORE_TRAITS[cls].skillProficiencies||{}).from||[];
+  if(e.f==='any')return SKILLS.map(x=>x.n);
+  if(e.f==='cls')return cl.slice();
+  const r=[];(e.f||[]).forEach(x=>(x==='@cls'?cl:[x]).forEach(y=>{if(!r.includes(y))r.push(y);}));return r;
+}
+// Expertise: nur geübte Skills (Auto oder von Hand), ggf. eingeschränkt
+function fpExpOpts(e,prof){return SKILLS.map(x=>x.n).filter(n=>prof.has(n)&&(!e.f||e.f.includes(n)));}
+function fpGrants(g,cls){
+  const add=(art,ziel,stufe,quelle)=>g.push({art,ziel,stufe,quelle,fp:1});
+  const act=fpActive(cls);
+  act.forEach(({k,e})=>{
+    const q=fpName(k),key=fpKey(k);
+    if(e.t==='skill'){
+      const sel=(e.fix||[]).concat(e.n?pkValid(key,fpFrom(e,cls),e.n):[]);
+      sel.forEach(x=>{add('skill',x,'p',q);if(e.e)add('skill',x,'e',q);});
+    }else if(e.t==='save')(e.fix||[]).forEach(a=>add('save',a,'p',q));
+    else if(e.t==='half')SKILLS.forEach(x=>add('skill',x.n,'half',q));
+    else if(e.t==='opt')pkValid(key,e.o,e.n||1).forEach(o=>{
+      const fx=e.fx&&e.fx[o];if(!fx)return;
+      if(fx.b)(fx.b).forEach(x=>add('bonus',x,Math.max(fx.m||0,md(st.attrs[fx.a])),o));
+      if(fx.p)pkValid(key+':'+o,fx.p.f,fx.p.n).forEach(x=>add('skill',x,'p',q));
+    });
+  });
+  const ps=new Set(SKILLS.map(x=>x.n).filter(n=>PK_RANK[st.skillP[n]||'']>=1||PK_RANK[grantLvl(g,'skill',n)]>=1));
+  g.prof=ps;
+  act.filter(x=>x.e.t==='exp').forEach(({k,e})=>pkValid(fpKey(k),fpExpOpts(e,ps),e.n).forEach(x=>add('skill',x,'e',fpName(k))));
+}
+function fpOpen(cls){
+  const r=[],G=calcGrants();
+  fpActive(cls).forEach(({k,e})=>{
+    const key=fpKey(k),q=fpName(k)+(/@\d+$/.test(k)?' (L'+e.l+')':'');
+    if(e.t==='skill'&&e.n){const c=pkValid(key,fpFrom(e,cls),e.n).length;if(c<e.n)r.push({wo:'feat',txt:`${q} ${c}/${e.n}`});}
+    if(e.t==='opt'&&e.fx){const c=pkValid(key,e.o,e.n||1);if(!c.length)r.push({wo:'feat',txt:`${q} 0/1`});
+      c.forEach(o=>{const p=e.fx[o]&&e.fx[o].p;if(p){const n=pkValid(key+':'+o,p.f,p.n).length;if(n<p.n)r.push({wo:'feat',txt:`${q} · ${o} ${n}/${p.n}`});}});}
+    if(e.t==='exp'){const n=pkValid(key,fpExpOpts(e,G.prof||new Set()),e.n).length;if(n<e.n)r.push({wo:'feat',txt:`${q} ${n}/${e.n}`});}
+  });
+  return r;
+}
+// Text einer Option im desc: Zeile „• Name: …“ / „Name. …“ oder Überschrift „Name:“ mit den folgenden „• …“-Zeilen
+function fpOptText(desc,o){
+  const L=String(desc||'').split('\n'),rx=new RegExp('^(?:• )?'+o.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:[.:] |:$)');
+  for(let i=0;i<L.length;i++){const l=L[i].trim();if(!rx.test(l))continue;
+    if(/:$/.test(l)){const r=[l];for(let j=i+1;j<L.length&&L[j].trim().startsWith('• ');j++)r.push(L[j].trim());return r.join('\n');}
+    return l.replace(/^• /,'');}
+  const w=o.split(' ')[0];return w!==o?fpOptText(desc,w):'';
+}
+// Einträge zu einem Feature: exakt (Info-Tab, eine Stufe) bzw. alle gleichnamigen bis maxLvl (Actions-Karte fasst sie zusammen)
+function fpKeysFor(cls,grp,name,lvl,maxLvl){
+  const b=cls+'|'+grp+'|'+name;
+  if(FEATURE_PICKS[b])return [b];
+  return Object.keys(FEATURE_PICKS).filter(k=>{if(!k.startsWith(b+'@'))return false;const n=+k.slice(b.length+1);return maxLvl?n<=maxLvl:n===lvl;}).sort((x,y)=>FEATURE_PICKS[x].l-FEATURE_PICKS[y].l);
+}
+function fpLinkOf(cls,grp,name){
+  const k=Object.keys(FEATURE_PICKS).find(k=>{const [c,g]=k.split('|');return c===cls&&g===grp&&(FEATURE_PICKS[k].lk||[]).includes(name);});
+  return k?{k,e:FEATURE_PICKS[k]}:null;
+}
+// Anzeige eines Features mit Auswahl: {suf: Zusatz zum Titel, body: HTML statt fmtDesc(desc)}
+function fpHtml(cls,grp,f,ctx,maxLvl){
+  const desc=fmtDesc(f.desc,ctx),keys=grp?fpKeysFor(cls,grp,f.name,f.lvl,maxLvl):[];
+  const more=(lbl,inner)=>`<details class="fp-more"><summary>${lbl}</summary>${inner}</details>`;
+  if(!keys.length){
+    const L=grp&&fpLinkOf(cls,grp,f.name);if(!L)return {suf:'',body:desc};
+    const sel=pkValid(fpKey(L.k),L.e.o,L.e.n||1)[0];
+    if(!sel)return {suf:'',body:`<div class="pk-note" style="margin:0 0 4px">Choice in ${pkEsc(fpName(L.k))}</div>`+desc};
+    const t=fpOptText(f.desc,sel);
+    return {suf:' · '+sel,body:t?`<div class="fp-sel">${fmtDesc(t,ctx)}</div>`+more('All options',desc):desc};
+  }
+  const G=calcGrants(),suf=[];let top='',bot='';
+  keys.forEach(k=>{
+    const e=FEATURE_PICKS[k],key=fpKey(k),lv=keys.length>1?`<div class="fp-lv">Level ${e.l}</div>`:'';
+    const own=new Set(pkGet(key)),marks={};G.prof&&G.prof.forEach(x=>{if(!own.has(x))marks[x]='✓';});
+    if(e.t==='opt'){
+      const n=e.n||1,sel=pkValid(key,e.o,n),full=sel.length>=n;
+      const chips=pickUI(key,e.o,n,{head:(n>1?`Choose ${n}`:'Choose 1')+(e.sw?` · ↻ ${e.sw}`:'')});
+      let fxh='';sel.forEach(o=>{const p=e.fx&&e.fx[o]&&e.fx[o].p;if(p)fxh+=pickUI(key+':'+o,p.f,p.n,{head:`${o}: choose ${p.n} skills`,marks});
+        const b=e.fx&&e.fx[o]&&e.fx[o].b;if(b)fxh+=`<div class="pk-note">Skills tab: +${Math.max(e.fx[o].m||0,md(st.attrs[e.fx[o].a]))} (${e.fx[o].a} mod., min. ${e.fx[o].m}) on ${b.join(' and ')}.</div>`;});
+      if(full){suf.push(sel.join(', '));
+        const t=sel.map(o=>fpOptText(f.desc,o)).filter(x=>x).join('\n');
+        top+=lv+(t?`<div class="fp-sel">${fmtDesc(t,ctx)}</div>`:'')+fxh;
+        bot=more(e.sw?`↻ Change (${e.sw}) · other options`:'Other options / change',chips+desc);
+      }else{top+=lv+chips+fxh;bot=desc;}
+    }else if(e.t==='skill'){
+      let h='';
+      if(e.fix)h+=`<div class="pk-note">Proficiency${e.e?' + Expertise':''}: ${e.fix.join(', ')} (Skills tab)</div>`;
+      if(e.n){const sel=pkValid(key,fpFrom(e,cls),e.n);if(sel.length>=e.n)suf.push(sel.join(', '));
+        h+=pickUI(key,fpFrom(e,cls),e.n,{head:`Skill${e.n>1?'s':''}: choose ${e.n}`+(e.e?' (with Expertise)':''),marks,note:'✓ = already proficient'});}
+      top+=lv+h;
+    }else if(e.t==='exp'){
+      const opts=fpExpOpts(e,G.prof||new Set()),sel=pkValid(key,opts,e.n),em={};
+      opts.forEach(x=>{if(!own.has(x)&&grantLvl(G,'skill',x)==='e'||st.skillP[x]==='e'&&!own.has(x))em[x]='E';});
+      if(sel.length>=e.n)suf.push(sel.join(', '));
+      top+=lv+(opts.length?pickUI(key,opts,e.n,{head:`Expertise: choose ${e.n}`,marks:em,note:'Only skills you are proficient in. E = already Expertise.'})
+        :`<div class="pk"><div class="pk-h open">Expertise: choose ${e.n}</div><div class="pk-note">No eligible skill proficiency yet – choose your class and background skills first.</div></div>`);
+    }else if(e.t==='save')top+=lv+`<div class="pk-note">Saving throw proficiency: ${e.fix.join(', ')} (Skills tab)</div>`;
+    else if(e.t==='half')top+=lv+`<div class="pk-note">Applied in the Skills tab: half proficiency bonus on skills you lack (half pip).</div>`;
+  });
+  return {suf:suf.length?' · '+suf.join(' · '):'',body:(bot?top+bot:top+desc)};
 }
 
 let skEditMode=false;
@@ -1255,14 +1386,15 @@ function buildSkills(){
       g.appendChild(h);
     }
     const man=st.skillP[s.n]||'',auto=grantLvl(G,'skill',s.n),p=PK_RANK[auto]>PK_RANK[man]?auto:man;
-    const bd=grantSrc(G,'skill',s.n).map(q=>`<span class="sk-bdg">${q}</span>`).join('');
+    const ab=G.filter(x=>x.art==='bonus'&&x.ziel===s.n),autoB=ab.reduce((t,x)=>t+x.stufe,0);
+    const bd=grantSrc(G,'skill',s.n).map(q=>`<span class="sk-bdg">${q}</span>`).join('')+ab.map(x=>`<span class="sk-bdg">${pkEsc(x.quelle)} +${x.stufe}</span>`).join('');
     const misc=parseInt(st.skillMisc&&st.skillMisc[s.n])||0;
-    const b=md(st.attrs[s.a])+(p==='e'?prof()*2:p==='p'?prof():0)+misc;
+    const b=md(st.attrs[s.a])+(p==='half'?Math.floor(prof()/2):prof()*pkProfMul(p))+misc+autoB;
     const r=document.createElement('div');r.className='sk-row';
     r.style.flexWrap='wrap';
     const miscColor=misc>0?'var(--green)':misc<0?'var(--red)':'var(--text3)';
     const miscStr=misc!==0?`<span style="font-size:var(--fs-xs);color:${miscColor};font-family:'Cinzel',serif;margin-left:2px">(${misc>0?'+':''}${misc})</span>`:'';
-    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':''}"></div><span class="sk-name">${s.n}${miscStr}${bd}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${s.n}',${b})">🎲</span>`
+    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':p==='half'?' h':''}"${p==='half'?' title="Half proficiency (Jack of All Trades)"':''}></div><span class="sk-name">${s.n}${miscStr}${bd}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${s.n}',${b})">🎲</span>`
       +(skEditMode?`<div style="width:100%;padding:4px 20px 2px;display:flex;align-items:center;gap:6px"><span style="font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif">Misc</span><input type="number" value="${misc||''}" placeholder="0" oninput="st.skillMisc['${s.n}']=parseInt(this.value)||0;autoSave();buildSkills()" onclick="event.stopPropagation()" style="width:56px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:var(--fs-md);padding:3px 6px;outline:none;font-family:'Cinzel',serif"></div>`:'');
     r.onclick=(e)=>{if(skEditMode||e.target.tagName==='INPUT'||e.target.closest('.sk-roll-ic'))return;const cyc=['','p','e'];let i=cyc.indexOf(man);do{i=(i+1)%3;}while(i&&PK_RANK[cyc[i]]<=PK_RANK[auto]);if(cyc[i])st.skillP[s.n]=cyc[i];else delete st.skillP[s.n];autoSave();buildSkills();};
     g.appendChild(r);
@@ -4097,14 +4229,14 @@ function buildClsLore(){
   body.innerHTML=Object.entries(byLvl).map(([lvl,feats])=>`
     <div style="margin-bottom:8px">
       <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">LEVEL ${lvl}</div>
-      ${feats.map(f=>`
+      ${feats.map(f=>{const fp=fpHtml(cls,'base',f,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1});return `
         <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}</span>
+            <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}<span class="fp-suf">${fp.suf}</span></span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
-          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fmtDesc(f.desc,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1})}</div>
-        </div>`).join('')}
+          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fp.body}</div>
+        </div>`;}).join('')}
     </div>`).join('');
 }
 
@@ -4193,14 +4325,14 @@ function buildSubclsLore(){
   body.innerHTML=Object.entries(byLvl).map(([lvl,fs])=>`
     <div style="margin-bottom:8px">
       <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">LEVEL ${lvl}</div>
-      ${fs.map(f=>`
+      ${fs.map(f=>{const fp=fpHtml(cls,subclsKey,f,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1});return `
         <div style="background:var(--bg2);border:1px solid var(--border2);border-left:2px solid var(--purple2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}</span>
+            <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}<span class="fp-suf">${fp.suf}</span></span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
           </div>
-          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fmtDesc(f.desc,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1})}</div>
-        </div>`).join('')}
+          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fp.body}</div>
+        </div>`;}).join('')}
     </div>`).join('');
 }
 
@@ -4260,6 +4392,7 @@ function onSubclsChange(){
   
   buildClsLore();buildClassTable();
   buildSubclsLore();
+  buildSaves();buildSkills();
 }
 
 function renderBgText(raw){
@@ -4809,6 +4942,7 @@ function buildAbilities(){
     clsData[abKey].forEach(a=>{if(!a.minLvl||lvl>=a.minLvl){abilities.push(a);trS.push(a);}});
   }
   const items=[]; // {tag, lvl, ord, el} – wird unten nach Aktionsart gruppiert
+  const skA=clsSubKey(CLASS_DATA[cls]&&CLASS_DATA[cls].subclass,subcls); // Gruppe für FEATURE_PICKS (Paket C2)
 
   abilities.forEach((ab,abIdx)=>{
     const iconClass=ab.tag==='aktion'?'aktion':ab.tag==='bonus'?'bonus':ab.tag==='reaktion'?'reaktion':'passiv';
@@ -4843,19 +4977,20 @@ function buildAbilities(){
     const concFeatActive=isConc&&st.concActiveFeature===ab.id; // alte Saves: Markierung ohne conc:true ignorieren
     const card=document.createElement('div');
     const isOpen=openIds.includes('ab_'+ab.id);
+    const fpT=fpHtml(cls,trS.includes(ab)?skA:'base',{name:ab.name,lvl:ab.minLvl||1,desc:ab.desc},{cls,lvl},lvl);
     card.className='ab-card'+(concFeatActive?' conc-active-card':'')+(picked?' ab-picked':'')+(isOpen?' open':'');
     card.innerHTML=`
       <div class="ab-top" onclick="togAb('${ab.id}')">
         <div class="ab-icon ${iconClass}">${ab.icon}</div>
         <div class="ab-title">
-          <div class="ab-name">${ab.name}${isConc?`<span class="sp-badge sp-conc${concFeatActive?' active':''}" onclick="event.stopPropagation();togConcFeature('${ab.id}')" title="Concentration" style="margin-left:6px">C</span>`:''}
+          <div class="ab-name">${ab.name}<span class="fp-suf">${fpT.suf}</span>${isConc?`<span class="sp-badge sp-conc${concFeatActive?' active':''}" onclick="event.stopPropagation();togConcFeature('${ab.id}')" title="Concentration" style="margin-left:6px">C</span>`:''}
           </div>
           <div class="ab-tag">${tagLabel}</div>
         </div>
         ${usesHtml}
       </div>${subsHtml}
       <div class="ab-body${isOpen?' on':''}" id="ab_${ab.id}">
-        <div class="ab-desc">${fmtDesc(ab.desc,{cls,lvl})}</div>
+        <div class="ab-desc">${fpT.body}</div>
       </div>`;
     items.push({tag:iconClass,lvl:ab.minLvl||1,ord:(trS.includes(ab)?10000:0)+abIdx,el:card});
   });
@@ -4867,18 +5002,19 @@ function buildAbilities(){
     const k=x.more?'weitere':(FTAG[x.f.tag]||'passiv');
     const fid='f_'+x.grp+'_'+x.f.name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
     const isOpen=openIds.includes('ab_'+fid);
+    const fpF=fpHtml(cls,x.grp==='s'?skA:'base',x.f,{cls,lvl},lvl);
     const card=document.createElement('div');
     card.className='ab-card ab-feat'+(isOpen?' open':'');
     card.innerHTML=`
       <div class="ab-top" onclick="togAb('${fid}')">
         <div class="ab-icon ${k}">${FICON[k]}</div>
         <div class="ab-title">
-          <div class="ab-name">${x.f.name}</div>
+          <div class="ab-name">${x.f.name}<span class="fp-suf">${fpF.suf}</span></div>
           <div class="ab-tag">Level ${x.lvl}${x.grp==='s'?' · '+(typeof subclsLabel==='function'?subclsLabel(cls,subcls):subcls).replace(/\s*\([^)]+\)\s*$/,''):''}</div>
         </div>
       </div>
       <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
-        <div class="ab-desc">${fmtDesc(x.f.desc,{cls,lvl})}</div>
+        <div class="ab-desc">${fpF.body}</div>
       </div>`;
     items.push({tag:k,lvl:x.lvl,ord:(x.grp==='s'?15000:5000)+x.i,el:card});
   });
@@ -5965,7 +6101,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-28d';
+const APP_VERSION = 'willow-app-2026-09-29a';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
