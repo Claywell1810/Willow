@@ -90,12 +90,17 @@ input[type=number]{-moz-appearance:textfield}
 .sbox{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center;min-width:0}
 
 /* DEATH SAVES */
-.ds-row{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 12px;margin-bottom:10px;flex-wrap:wrap}
+.ds-row{display:flex;gap:8px;align-items:stretch;margin-bottom:10px;flex-wrap:wrap}
+.ds-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ds-death{flex:1 1 auto}.ds-insp{flex:0 0 auto}
+.ds-groups{display:flex;gap:14px}
+.ds-sub{font-size:var(--fs-2xs);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;white-space:nowrap}
+.ds-pips{display:flex;gap:6px}
 .ds-lbl{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text2);text-transform:uppercase}
 .dspip{width:20px;height:20px;border-radius:50%;border:1px solid;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dspip.s{border-color:var(--green)}.dspip.s.f{background:var(--green)}
 .dspip.x{border-color:var(--red)}.dspip.x.f{background:var(--red)}
-.inspip{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold2);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.inspip{width:20px;height:20px;border-radius:50%;border:1px solid var(--gold2);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .inspip.f{background:var(--gold);border-color:var(--gold)}
 
 /* SKILLS */
@@ -275,14 +280,14 @@ input[type=number]{-moz-appearance:textfield}
 .cst-head{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .cst-head.closed{margin-bottom:0}
 .cst-chev{font-size:var(--fs-sm);letter-spacing:0}
-.cst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
-.cst-chip{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 8px;min-width:0}
+.cst-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cst-chip{flex:1 1 92px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 8px;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
 .cst-l{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--text3);line-height:1.25}
-.cst-v{font-size:17px;color:var(--gold);margin-top:2px;white-space:nowrap}
+.cst-v{font-size:17px;color:var(--gold);white-space:nowrap}
 .cst-chip.cst-ac .cst-v{color:var(--blue)}
 .cst-slots{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
 .cst-slot{display:inline-flex;align-items:baseline;gap:3px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:2px 7px;font-size:var(--fs-txt);color:var(--purple)}
-.cst-slot b{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);font-weight:normal}
+.cst-slot b{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);font-weight:normal;margin-right:2px}
 
 /* BUTTONS */
 .add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:1px;cursor:pointer;text-transform:uppercase;-webkit-tap-highlight-color:transparent;margin-top:4px}
@@ -310,7 +315,7 @@ input[type=number]{-moz-appearance:textfield}
 .note-modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:0}
 .note-modal-close:hover{color:var(--red)}
 .note-modal textarea{flex:1;background:var(--bg3);border:none;color:var(--text);font-size:var(--fs-txt);padding:14px;resize:none;outline:none;min-height:300px;font-family:inherit;line-height:1.6}
-.filter-toggle{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:color .2s,border-color .2s}
+.filter-toggle{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;transition:color .2s,border-color .2s}
 .filter-toggle:hover{color:var(--gold);border-color:var(--gold)}
 .filter-toggle.on{color:var(--gold);border-color:var(--gold)}
 .filter-collapsible{display:none;flex-direction:column;gap:5px}
@@ -363,6 +368,16 @@ input[type=number]{-moz-appearance:textfield}
 .char-btn.danger{color:var(--red);border-color:rgba(224,85,85,0.3)}
 
 /* TOAST */
+.ws-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:flex-start;justify-content:center;padding:70px 16px 16px}
+.ws-overlay.on{display:flex}
+.ws-box{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:14px;width:100%;max-width:420px}
+.ws-head{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;text-transform:uppercase;color:var(--gold2);margin-bottom:10px}
+.ws-pre{display:flex;align-items:center;padding:0 9px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-size:var(--fs-txt);white-space:nowrap}
+#webSearchIn{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:8px 9px;outline:none}
+.ws-recent{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ws-chip{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:4px 10px;color:var(--text2);font-size:var(--fs-txt);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);padding:8px 14px;cursor:pointer}
+.ws-go{border-color:var(--gold2);color:var(--gold)}
 .toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--purple3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text);letter-spacing:1px;transition:transform .3s;z-index:999;white-space:nowrap;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
@@ -373,12 +388,13 @@ input[type=number]{-moz-appearance:textfield}
 .ab-uses{gap:5px}
 .slpip{width:15px;height:15px;margin:3px}
 .slpip::after{content:'';position:absolute;inset:-7px -3px}
-.dspip{width:24px;height:24px}.inspip{width:26px;height:26px}
+.dspip{width:24px;height:24px}.inspip{width:24px;height:24px}
 .dspip::after,.inspip::after{content:'';position:absolute;inset:-6px -3px}
 .delbtn{width:24px;height:24px}
 .delbtn::after{content:'';position:absolute;inset:-8px}
 .spell-prep{width:26px;height:26px}
 .ab-star{width:26px;font-size:16px}
+.sec>span:first-child{min-width:0;overflow-wrap:anywhere}.sec:has(>.filter-toggle){gap:10px}
 .sec .filter-toggle::after,.expbtn::after{content:'';position:absolute;inset:-8px -2px}
 .hbtn{width:30px;height:30px}
 .hbtn.slbtn{width:28px;height:28px;font-size:var(--fs-md)}
@@ -470,6 +486,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div class="hdr-title">D&D 5e · Character Sheet</div>
       <div class="name-in" id="charName" style="cursor:default;border-bottom:1px solid var(--border);padding:2px 0;min-height:26px"></div>
     </div>
+    <button onclick="openWebSearch()" id="webSearchBtn" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px 2px;line-height:1;color:var(--text2);-webkit-tap-highlight-color:transparent" title="Web search" aria-label="Web search">🔍</button>
     <button onclick="openSettings()" style="background:none;border:none;font-size:22px;cursor:pointer;padding:4px 2px;line-height:1;color:var(--text2);-webkit-tap-highlight-color:transparent" title="Settings">⚙️</button>
   </div>
 
@@ -512,7 +529,21 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 
     <!-- INFO TAB -->
     <div class="panel on" id="tab-info">
-      <div class="sec" style="margin-top:0">Character Info</div>
+      <!-- ATTRIBUTE (seit Paket B 28.09.2026 oben) -->
+      <div class="sec" style="margin-top:0">Attribute</div>
+      <div class="attr-grid" id="attrGrid"></div>
+      <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
+      <div class="stat3">
+        <div class="sbox"><div class="hp-lbl">Armor (AC)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ac',-1)">−</button><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"><button class="hbtn" onclick="chStat('ac',1)">+</button></div></div>
+        <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
+        <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
+      </div>
+
+      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
+      <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+        <span>Character Info</span>
+        <button onclick="togCharInfo()" id="charInfoBtn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+      </div>
       <div id="charInfoBody">
       <div class="igrid">
         <div class="ifield"><label>Class</label>
@@ -541,17 +572,6 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <select id="align"><option value="">—</option><option>Lawful Good</option><option>Neutral Good</option><option>Chaotic Good</option><option>Lawful Neutral</option><option>Neutral</option><option>Chaotic Neutral</option><option>Lawful Evil</option><option>Neutral Evil</option><option>Chaotic Evil</option></select></div>
         <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
       </div>
-      </div>
-
-      <!-- ATTRIBUTE -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div class="sec" style="margin-top:0">Attribute</div>
-      <div class="attr-grid" id="attrGrid"></div>
-      <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
-      <div class="stat3">
-        <div class="sbox"><div class="hp-lbl">Armor (AC)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ac',-1)">−</button><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"><button class="hbtn" onclick="chStat('ac',1)">+</button></div></div>
-        <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
-        <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
       </div>
 
       <!-- EXPAND SECTIONS -->
@@ -723,26 +743,27 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         </div>
       </div>
       <div class="ds-row">
-        <div>
-          <div class="ds-lbl" style="margin-bottom:5px">Death Saves</div>
-          <div style="display:flex;gap:14px">
-            <div><div style="font-size:var(--fs-2xs);color:var(--green);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:3px">SUCCESSES</div>
-              <div style="display:flex;gap:5px" id="dsS">
+        <div class="ds-box ds-death">
+          <div class="ds-lbl">Death Saves</div>
+          <div class="ds-groups">
+            <div><div class="ds-sub" style="color:var(--green)">Successes</div>
+              <div class="ds-pips" id="dsS">
                 <div class="dspip s" onclick="togDS('s',0)"></div><div class="dspip s" onclick="togDS('s',1)"></div><div class="dspip s" onclick="togDS('s',2)"></div>
               </div></div>
-            <div><div style="font-size:var(--fs-2xs);color:var(--red);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:3px">FAILURES</div>
-              <div style="display:flex;gap:5px" id="dsF">
+            <div><div class="ds-sub" style="color:var(--red)">Failures</div>
+              <div class="ds-pips" id="dsF">
                 <div class="dspip x" onclick="togDS('x',0)"></div><div class="dspip x" onclick="togDS('x',1)"></div><div class="dspip x" onclick="togDS('x',2)"></div>
               </div></div>
           </div>
         </div>
-        <div style="margin-left:auto;text-align:center">
-          <div class="ds-lbl" style="margin-bottom:5px">Inspiration</div>
-          <div style="display:flex;gap:5px">
-            <div class="inspip" id="ins0" onclick="togIns(0)"></div>
-            <div class="inspip" id="ins1" onclick="togIns(1)"></div>
-            <div class="inspip" id="ins2" onclick="togIns(2)"></div>
-          </div>
+        <div class="ds-box ds-insp">
+          <div class="ds-lbl">Inspiration</div>
+          <div class="ds-groups"><div><div class="ds-sub" aria-hidden="true">&nbsp;</div>
+            <div class="ds-pips">
+              <div class="inspip" id="ins0" onclick="togIns(0)"></div>
+              <div class="inspip" id="ins1" onclick="togIns(1)"></div>
+              <div class="inspip" id="ins2" onclick="togIns(2)"></div>
+            </div></div></div>
         </div>
       </div>
 
@@ -989,6 +1010,26 @@ let st={
 const md=v=>Math.floor((v-10)/2);
 const fmt=n=>(n>=0?'+':'')+n;
 const prof=()=>parseInt(document.getElementById('prof')?.value||2);
+
+// Websuche per Lupe (Paket B, 28.09.2026): nur Link zu Google öffnen, keine Daten übernehmen; letzte Suchen pro Gerät
+const WS_KEY='willow_websearch';
+function wsRecent(){try{const a=JSON.parse(localStorage.getItem(WS_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function wsUrl(q){return 'https://www.google.com/search?q='+encodeURIComponent('D&D 5e '+q);}
+function openWebSearch(){
+  const m=document.getElementById('webSearchModal'),inp=document.getElementById('webSearchIn');
+  const r=wsRecent(),box=document.getElementById('webSearchRecent');
+  box.innerHTML=r.map((q,i)=>`<button class="ws-chip" onclick="runWebSearch(wsRecent()[${i}])">${q.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</button>`).join('');
+  inp.value='';m.classList.add('on');setTimeout(()=>inp.focus(),30);
+}
+function closeWebSearch(){document.getElementById('webSearchModal').classList.remove('on');}
+function runWebSearch(q){
+  q=(q!==undefined?q:document.getElementById('webSearchIn').value).trim();
+  if(!q) return;
+  if(navigator.onLine===false){showToast('Keine Internetverbindung');return;}
+  try{const r=wsRecent().filter(x=>x.toLowerCase()!==q.toLowerCase());r.unshift(q);localStorage.setItem(WS_KEY,JSON.stringify(r.slice(0,8)));}catch(e){}
+  window.open(wsUrl(q),'_blank','noopener');
+  closeWebSearch();
+}
 
 function showToast(msg){
   const t=document.getElementById('toast');
@@ -4014,6 +4055,15 @@ function buildSubclsLore(){
     </div>`).join('');
 }
 
+// Character Info zuklappbar, Zustand pro Charakter (st.charInfoClosed, Standard offen; Paket B 28.09.2026)
+function syncCharInfo(){
+  const b=document.getElementById('charInfoBody'),btn=document.getElementById('charInfoBtn');
+  const c=!!st.charInfoClosed;
+  if(b) b.style.display=c?'none':'';
+  if(btn) btn.textContent=c?'▾ Expand':'▴ Collapse';
+}
+function togCharInfo(){st.charInfoClosed=!st.charInfoClosed;syncCharInfo();autoSave();}
+
 function toggleInfoSection(bodyId, btnId){
   const body=document.getElementById(bodyId);
   const btn=document.getElementById(btnId);
@@ -4545,7 +4595,7 @@ function buildCombatStats(cls,subcls,lvl){
   const row=t&&(t.rows||[]).find(r=>+r.lvl===lvl);
   if(!row){el.style.display='none';el.innerHTML='';return;}
   const chip=(l,v,c,tt)=>`<div class="cst-chip${c?' '+c:''}"${tt?` title="${tt}"`:''}><div class="cst-l">${l}</div><div class="cst-v">${v}</div></div>`;
-  let h=chip('Proficiency Bonus','+'+row.pb);
+  let h=chip('Prof. Bonus','+'+row.pb,'','Proficiency Bonus');
   (t.extra||[]).forEach(c=>{
     const v=row[c.k];
     if(v===undefined||v===null||v===''||v==='—'||v===0||v==='0')return;
@@ -4553,7 +4603,7 @@ function buildCombatStats(cls,subcls,lvl){
   });
   const ac=combatUnarmoredAC(cls,subcls,lvl);
   if(ac)h+=chip('Unarmored AC',ac.ac,'cst-ac',ac.name);
-  const sl=(row.slots||[]).map((n,i)=>n>0?`<span class="cst-slot"><b>${i+1}</b>${n}</span>`:'').join('');
+  const sl=(row.slots||[]).map((n,i)=>n>0?`<span class="cst-slot" title="${n} slots of level ${i+1}"><b>${['1st','2nd','3rd'][i]||(i+1)+'th'}</b>${n}</span>`:'').join('');
   const closed=abGrpIsClosed('stats');
   el.innerHTML=`<div class="cst-head${closed?' closed':''}" onclick="togAbGrp('stats')"><span>Combat Stats · Level ${lvl}</span><span class="cst-chev">${closed?'▸':'▾'}</span></div>`+
     `<div class="cst-body"${closed?' style="display:none"':''}><div class="cst-grid">${h}</div>`+
@@ -5252,7 +5302,7 @@ function switchTab(t){
   if(tabId==='zauber'){buildSlots();buildMySpells();calcSpell();buildFeats();buildAbilities();buildSavedBeasts();buildWeapons();}
   if(tabId==='spelllist'){slRender();}
   if(tabId==='log'){buildLog();}
-  if(tabId==='info'){buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();buildAttrs();}
+  if(tabId==='info'){buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();buildAttrs();}
 }
 
 // LOCALSTORAGE / MEHRCHARAKTERE
@@ -5288,7 +5338,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},charInfoClosed:false,savedBeasts:[],items:[],raceNotes:""
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -5307,7 +5357,7 @@ function applyState(snap){
   // Trigger dependent UI (skip onClsChange - already called)
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
+  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();
   const raceNotesEl=document.getElementById('n_race_custom');
   if(raceNotesEl) raceNotesEl.value=st.raceNotes||'';
   const skillNotesEl=document.getElementById('skillNotes');
@@ -5392,7 +5442,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},charInfoClosed:false,savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -5406,7 +5456,7 @@ function resetUI(){
   onClsChange();
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();
+  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();
   const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
 }
 
@@ -5421,7 +5471,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},charInfoClosed:false,savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent=_name;
   TEXT_IDS.forEach(id=>{
@@ -5743,7 +5793,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-28a';
+const APP_VERSION = 'willow-app-2026-09-28b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -6000,6 +6050,21 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').catch(()=>{});});
 }
 </script>
+<!-- WEBSUCHE (Lupe in der Kopfzeile, Google mit Präfix „D&D 5e“, Paket B 28.09.2026) -->
+<div id="webSearchModal" class="ws-overlay" onclick="if(event.target===this)closeWebSearch()">
+  <div class="ws-box">
+    <div class="ws-head">Web search · Google</div>
+    <form onsubmit="runWebSearch();return false" style="display:flex;gap:6px">
+      <div class="ws-pre">D&amp;D 5e</div>
+      <input id="webSearchIn" type="search" enterkeyhint="search" autocomplete="off" placeholder="z. B. Fireball">
+    </form>
+    <div id="webSearchRecent" class="ws-recent"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="ws-btn" onclick="closeWebSearch()">Abbrechen</button>
+      <button class="ws-btn ws-go" onclick="runWebSearch()">Suchen</button>
+    </div>
+  </div>
+</div>
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:8px">Delete Character?</div>

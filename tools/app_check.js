@@ -504,7 +504,7 @@ const REGRESSION = [
       // Monk L7: Martial Arts 1d8, Unarmored AC 10+3+2, Gruppen in fester Reihenfolge
       sel('Monk', 'Warrior of the Open Hand (XPHB)', 7);
       if (cs().style.display === 'none') return 'Kampfwerte-Karte unsichtbar';
-      if (chip('Martial Arts') !== '1d8' || chip('Focus Points') !== '7' || chip('Unarmored Movement') !== '+15 ft.' || chip('Proficiency Bonus') !== '+3') return 'Monk L7 Kampfwerte falsch: ' + cs().textContent;
+      if (chip('Martial Arts') !== '1d8' || chip('Focus Points') !== '7' || chip('Unarmored Movement') !== '+15 ft.' || chip('Prof. Bonus') !== '+3') return 'Monk L7 Kampfwerte falsch: ' + cs().textContent;
       if (chip('Unarmored AC') !== '15') return 'Monk Unarmored AC ' + chip('Unarmored AC') + ' statt 15 (DEX 16, WIS 14)';
       if (JSON.stringify(grps()) !== '["bonus","reaktion","passiv","weitere"]') return 'Monk-Gruppen: ' + JSON.stringify(grps());
       if (!inGrp('reaktion', 'Deflect Attacks') || !inGrp('passiv', 'Evasion') || !inGrp('passiv', 'Stunning Strike') || !inGrp('bonus', 'Martial Arts')) return 'Monk-Features fehlen/falsche Gruppe';
@@ -527,7 +527,7 @@ const REGRESSION = [
       sel('Warlock', 'Fiend Patron (XPHB)', 20); if (cnt('Eldritch Master')) return 'Eldritch Master doppelt (steht im Tracker Magical Cunning)';
       // Wizard L5: Zauberplätze 4/3/2, Spells-Listen/Savant ausgeblendet, Sculpt Spells sichtbar
       sel('Wizard', 'Evoker (XPHB)', 6);
-      if ([...cs().querySelectorAll('.cst-slot')].map(x => x.textContent).join(',') !== '14,23,33') return 'Wizard L6 Zauberplätze: ' + [...cs().querySelectorAll('.cst-slot')].map(x => x.textContent);
+      if ([...cs().querySelectorAll('.cst-slot')].map(x => x.textContent).join(',') !== '1st4,2nd3,3rd3') return 'Wizard L6 Zauberplätze: ' + [...cs().querySelectorAll('.cst-slot')].map(x => x.textContent);
       if (cnt('Evocation Savant') || cnt('Spellcasting') || cnt('Ritual Adept') || !cnt('Sculpt Spells')) return 'Wizard: Ausschlussliste falsch';
       sel('Cleric', 'Life Domain (PHB)', 3); if (cnt('Life Domain Spells') || cnt('Domain Spells')) return 'Cleric: Domain Spells sichtbar';
       // Barbarian: Unarmored AC mit CON, Gruppe zuklappen
@@ -781,6 +781,40 @@ const REGRESSION = [
       const ms = d.getElementById('msn_' + (w.eval('st.mySpells.length') - 1));
       if (!ms || !ms.querySelector('.sb-det')) return 'My Spells: Stat-Block fehlt';
       w.eval('st.mySpells.pop()'); w.buildMySpells();
+      return true;
+    } },
+  { name: 'Paket B: Expand-Knopf einzeilig, Attribute oben + Character Info zuklappbar (pro Charakter), Combat Stats (Prof. Bonus, 1st/2nd…), Death Saves/Inspiration getrennt, Websuche per Lupe', datum: '28.09.2026',
+    run: ({ w, d, sel }) => {
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      const ft = (css.match(/\.filter-toggle\{[^}]*\}/) || [''])[0];
+      if (!ft.includes('white-space:nowrap') || !ft.includes('flex-shrink:0')) return '.filter-toggle bricht noch um';
+      const info = d.getElementById('tab-info'), ag = d.getElementById('attrGrid'), cb = d.getElementById('charInfoBody');
+      if (!(ag.compareDocumentPosition(cb) & 4)) return 'Attribute stehen nicht über Character Info';
+      if (!(d.getElementById('ac').compareDocumentPosition(cb) & 4)) return 'AC/Initiative/Speed nicht über Character Info';
+      if (!info.contains(d.getElementById('charInfoBtn'))) return 'Knopf für Character Info fehlt';
+      w.resetUI();
+      if (cb.style.display === 'none' || w.eval('st.charInfoClosed') !== false) return 'Character Info startet nicht offen';
+      w.togCharInfo();
+      if (cb.style.display !== 'none' || !w.eval('collectState().charInfoClosed')) return 'Zuklappen wirkt/speichert nicht';
+      const snap = w.eval('collectState()'); w.resetUI();
+      if (cb.style.display === 'none') return 'resetUI klappt nicht wieder auf';
+      w.applyState(snap);
+      if (cb.style.display !== 'none' || d.getElementById('charInfoBtn').textContent !== '▾ Expand') return 'Zustand nicht geladen';
+      w.applyState({ attrs: {} });
+      if (cb.style.display === 'none') return 'alter Save ohne Feld: nicht offen';
+      sel('Druid', '', 7);
+      const cs = d.getElementById('combatStats');
+      if (!cs.textContent.includes('Prof. Bonus') || ![...cs.querySelectorAll('.cst-slot b')].map(b => b.textContent).join(',').startsWith('1st,2nd,3rd,4th')) return 'Combat Stats Beschriftung: ' + cs.textContent;
+      if (d.querySelectorAll('.ds-row .ds-box').length !== 2 || d.querySelectorAll('#dsS .dspip').length !== 3 || !d.getElementById('ins2')) return 'Death Saves/Inspiration-Aufbau';
+      w.togIns(1); if (!d.getElementById('ins1').classList.contains('f')) return 'togIns wirkt nicht'; w.togIns(1);
+      let opened = null; w.open = u => { opened = u; };
+      w.localStorage.removeItem('willow_websearch');
+      if (!d.getElementById('webSearchBtn')) return 'Lupe fehlt';
+      w.openWebSearch(); d.getElementById('webSearchIn').value = 'Fireball'; w.runWebSearch();
+      if (opened !== 'https://www.google.com/search?q=D%26D%205e%20Fireball') return 'Such-URL: ' + opened;
+      if (JSON.parse(w.localStorage.getItem('willow_websearch'))[0] !== 'Fireball') return 'letzte Suche nicht gemerkt';
+      w.openWebSearch(); if (d.querySelectorAll('#webSearchRecent .ws-chip').length !== 1) return 'letzte Suchen nicht angezeigt';
+      w.closeWebSearch();
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
