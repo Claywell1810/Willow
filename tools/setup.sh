@@ -5,6 +5,7 @@
 #   bash willow/tools/setup.sh klassen      # + 12 class-*.json, optionalfeatures/feats/items.json nach src/
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium für BST_DATA und SPELL_STATBLOCKS (+ spells)
+#   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
 #   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen (ui_shots.py, theme_shots.py)
 #   bash willow/tools/setup.sh alle         # alles
 # Mehrere Angaben gehen zusammen: bash willow/tools/setup.sh klassen zauber
@@ -24,7 +25,7 @@ echo "   Arbeitskopie DnD_Character_App.html + ALT.html ($(wc -c < DnD_Character
 if [ ! -d node_modules/jsdom ]; then npm i jsdom@24 --silent >/dev/null 2>&1 && echo "   jsdom installiert"; else echo "   jsdom vorhanden"; fi
 
 get() { mkdir -p src; [ -s "src/$(basename "$1")" ] || curl -sSf -o "src/$(basename "$1")" "$B/$1"; }
-if has klassen zauber bestien; then
+if has klassen zauber bestien rassen; then
   echo "== 5e.tools main: $(git ls-remote https://github.com/5etools-mirror-3/5etools-src refs/heads/main | cut -c1-8)"
 fi
 if has klassen; then
@@ -36,6 +37,10 @@ if has zauber bestien; then
   get spells/index.json; get generated/gendata-spell-source-lookup.json
   for f in $(python3 -c "import json;print(' '.join(json.load(open('src/index.json')).values()))"); do get "spells/$f"; done
   echo "   Zauber-Quellen in src/ ($(ls src/spells-*.json | wc -l) Dateien)"
+fi
+if has rassen; then
+  get races.json; get spells/spells-xphb.json; get spells/spells-phb.json
+  echo "   Rassen-Quellen in src/ (races.json + spells-xphb/phb)"
 fi
 if has bestien; then
   get bestiary/fluff-bestiary-xmm.json

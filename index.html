@@ -136,6 +136,18 @@ input[type=number]{-moz-appearance:textfield}
 .fp-more>summary::before{content:'▸ '}
 .fp-more[open]>summary::before{content:'▾ '}
 .fp-lv{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);margin-top:6px}
+/* Paket C3: Rassen (rcCard, buildRaceStats) */
+.rc-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:8px}
+.rc-lbl{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-right:2px}
+.rc-chip{font-size:var(--fs-xs);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)}
+.rc-chip.warn{border-color:color-mix(in srgb, var(--gold) 55%, transparent);color:var(--gold)}
+.rc-sp{display:flex;gap:8px;font-size:var(--fs-txt);color:var(--desc);line-height:1.5}
+.rc-sp.off{opacity:.5}
+.rc-spl{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);min-width:52px;padding-top:2px}
+.rc-dc{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--purple);margin-top:4px}
+.rc-hint{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);margin-top:3px}
+#raceStats:empty,#saveAdv:empty,#hpMHint:empty{display:none}
+#saveAdv{font-size:var(--fs-sm);color:var(--text3);margin:6px 2px 0;line-height:1.5}
 .sk-bon{font-size:var(--fs-txt);color:var(--purple);font-weight:600;font-family:'Cinzel',serif;min-width:24px;text-align:right}
 .sk-roll-ic{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
 
@@ -564,6 +576,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
         <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
       </div>
+      <div id="raceStats"></div>
 
       <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
       <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
@@ -588,7 +601,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="ifield"><label>Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
-            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildSaves();buildSkills();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildSaves();buildSkills();autoSave()" style="text-align:center;flex:1">
+            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();autoSave()" style="text-align:center;flex:1">
             <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
           </div></div>
         <div class="ifield"><label>Background</label><input id="bg" readonly placeholder="— select on Backgrounds tab —" onclick="switchTab('hintergrund')" style="cursor:pointer;caret-color:transparent" title="Go to Backgrounds tab"></div>
@@ -635,7 +648,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       </div>
       <div id="raceLoreSection" style="display:none;margin-top:10px">
         <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
-          <span id="raceLoreTitle">Race: —</span>
+          <span><span id="raceLoreTitle">Race: —</span><span class="pk-pend" id="raceLorePend"></span></span>
           <button onclick="toggleInfoSection('raceLoreBody','raceLoreBtn')" id="raceLoreBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="raceLoreBody" style="display:none"></div>
@@ -684,6 +697,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div id="pkHints"></div>
       <div class="sec">Saving Throws <span style="color:var(--text3);font-size:var(--fs-2xs)">(tap = proficiency)</span></div>
       <div class="sk-list" id="savesGrid"></div>
+      <div id="saveAdv"></div>
       <div class="sec" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">
         <span>Skills <span style="color:var(--text3);font-size:var(--fs-2xs)">(1x prof · 2x expert)</span></span>
         <button id="skEditBtn" onclick="toggleSkEdit()" style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);padding:3px 8px;cursor:pointer">Edit</button>
@@ -759,6 +773,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
             <input class="hpin" type="number" id="hpM" value="10" min="1" oninput="onHpMChange()">
             <button class="hbtn" onclick="chHpM(1)">+</button>
           </div>
+          <div class="rc-hint" id="hpMHint"></div>
         </div>
         <div class="hpbox" style="border-color:rgba(180,139,224,0.35)">
           <div class="hp-lbl">Temp</div>
@@ -1070,7 +1085,7 @@ function buildAttrs(){
   const G=calcGrants();
   ATTRS.forEach(a=>{
     const v=st.attrs[a.k],m=md(v);
-    const bon=G.filter(x=>x.art==='attr'&&x.ziel===a.k).reduce((t,x)=>t+x.stufe,0);
+    const bg=G.filter(x=>x.art==='attr'&&x.ziel===a.k&&!x.rc).reduce((t,x)=>t+x.stufe,0),rb=G.filter(x=>x.art==='attr'&&x.ziel===a.k&&x.rc).reduce((t,x)=>t+x.stufe,0);
     const d=document.createElement('div');d.className='acard';
     d.innerHTML=`<div class="aname">${a.l}</div>
       <div style="display:flex;align-items:center;justify-content:center;gap:2px">
@@ -1078,12 +1093,12 @@ function buildAttrs(){
         <input class="aval" type="number" min="1" max="30" value="${v}" id="a_${a.k}" style="width:38px">
         <button class="hbtn" onclick="chAttr('${a.k}',1)" style="width:22px;height:22px;font-size:var(--fs-txt)">+</button>
       </div>
-      <div class="amod" id="m_${a.k}">${fmt(m)}</div>${bon?`<div class="a-bdg" title="Background bonus – not added to the score">+${bon} BG</div>`:''}`;
+      <div class="amod" id="m_${a.k}">${fmt(m)}</div>${bg?`<div class="a-bdg" title="Background bonus – not added to the score">+${bg} BG</div>`:''}${rb?`<div class="a-bdg" title="Race bonus (PHB 2014) – not added to the score">+${rb} Race</div>`:''}`;
     g.appendChild(d);
     d.querySelector('input').addEventListener('input',e=>{
       st.attrs[a.k]=parseInt(e.target.value)||10;
       document.getElementById('m_'+a.k).textContent=fmt(md(st.attrs[a.k]));
-      buildSaves();buildSkills();calcSpell();
+      buildSaves();buildSkills();calcSpell();buildRaceLore();
     });
   });
 }
@@ -1091,14 +1106,14 @@ function buildAttrs(){
 function chLvl(d){
   const el=document.getElementById('lvl');
   const v=Math.max(1,Math.min(20,(parseInt(el.value)||1)+d));
-  el.value=v;buildAbilities();buildClassTable();buildSaves();buildSkills();
+  el.value=v;buildAbilities();buildClassTable();buildRaceLore();buildSaves();buildSkills();
 }
 function chAttr(k,d){
   st.attrs[k]=Math.max(1,Math.min(30,(st.attrs[k]||10)+d));
   const inp=document.getElementById('a_'+k);
   if(inp) inp.value=st.attrs[k];
   document.getElementById('m_'+k).textContent=fmt(md(st.attrs[k]));
-  buildSaves();buildSkills();calcSpell();autoSave();
+  buildSaves();buildSkills();calcSpell();buildRaceLore();autoSave();
 }
 
 function chStat(id,d){const el=document.getElementById(id);if(!el)return;el.value=parseInt(el.value||0)+d;el.dispatchEvent(new Event('input'));}
@@ -1108,11 +1123,13 @@ function buildSaves(){
   const G=calcGrants();
   ATTRS.forEach(a=>{
     const auto=grantLvl(G,'save',a.k),p=!!st.saveP[a.k]||!!auto;const b=md(st.attrs[a.k])+(p?prof():0);
-    const bd=grantSrc(G,'save',a.k).map(q=>`<span class="sk-bdg">${q}</span>`).join('');
+    const bd=grantSrc(G,'save',a.k).map(q=>`<span class="sk-bdg">${q}</span>`).join('')+rcAdv().filter(x=>(x.s||[]).includes(a.k)).map(x=>`<span class="sk-bdg" title="${pkEsc(x.t)}">Adv</span>`).join('');
     const r=document.createElement('div');r.className='sk-row';
     r.innerHTML=`<div class="sk-pip${p?' p':''}"></div><span class="sk-name">${a.l}${bd}</span><span class="sk-attr">${a.k}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${a.l} Save',${b})">🎲</span>`;
     r.onclick=(e)=>{if(e.target.closest('.sk-roll-ic'))return;if(auto){if(st.saveP[a.k])delete st.saveP[a.k];showToast(`${a.l}: proficient from Class`);}else st.saveP[a.k]=!st.saveP[a.k];buildSaves();autoSave()};g.appendChild(r);
   });
+  const av=document.getElementById('saveAdv');
+  if(av){const A=rcAdv(),race=rcRace();av.innerHTML=A.length?`<b style="color:var(--text2)">${pkEsc(race)}:</b> `+A.map(x=>`${pkEsc(x.t)} – Advantage `+(x.s?`on ${x.s.join(', ')} saves`:`vs. ${pkEsc(x.c)}`)).join(' · '):'';}
 }
 
 // ── Paket C1 (28.09.2026): Info-Tab verbunden ────────────────────────────────
@@ -1164,9 +1181,10 @@ function calcGrants(){
     sp.wahl.forEach((w,i)=>pkValid(pkKeyBg(bg.n,i),w.from,w.n).forEach(x=>add('skill',x,'p','Background')));
     bgAbility(bg).list.forEach(e=>add('attr',e.k,e.v,'Background'));
   }
+  rcGrants(g);
   // Doppelte Skills: PHB 2014 erlaubt statt doppelter Proficiency eine andere derselben Art → Ersatzwahl dup:<Skill>,
   // aber nur bei 2014-Backgrounds (ohne Attributswahl). PHB 2024 kennt die Regel nicht → nur Hinweis (Entscheidung Simon 28.09.2026)
-  const legacy=!!bg&&bgAbOpts(bg).length!==3;
+  const legacy=(!!bg&&bgAbOpts(bg).length!==3)||rcLegacy();
   const src={};g.filter(x=>x.art==='skill').forEach(x=>{(src[x.ziel]=src[x.ziel]||[]).push(x.quelle);});
   const have=new Set(Object.keys(src));g.dups=[];
   Object.keys(src).filter(k=>src[k].length>1).forEach(k=>{
@@ -1210,7 +1228,7 @@ function pkAb(el){
   }
   st.picks[k]=a;pkRefresh();
 }
-function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildAbilities();}
+function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildRaceLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildAbilities();}
 function bgAbilityUI(bg){
   const opts=bgAbOpts(bg);if(opts.length!==3)return '';
   const k=pkEsc(pkKeyBgAb(bg.n)),{mode,list}=bgAbility(bg),done=mode==='+1/+1/+1'||list.length===2;
@@ -1232,18 +1250,112 @@ function pkOpen(){
     const ab=bgAbility(bg);if(bgAbOpts(bg).length===3&&!(ab.mode==='+1/+1/+1'||ab.list.length===2))r.push({wo:'bg',txt:'Background ability scores'});
   }
   fpOpen(cls).forEach(x=>r.push(x));
+  rcOpen().forEach(x=>r.push(x));
   return r;
 }
 function dupUI(G){
   return (G.dups||[]).map(d=>`<div class="pk-dup"><div style="font-size:var(--fs-txt);color:var(--text2);margin-bottom:4px"><b style="color:var(--gold)">${pkEsc(d.skill)}</b> twice (${d.quellen.join(' + ')}) – `+
-    (d.legacy?`you may choose another skill instead (PHB 2014 rule).</div>`+pickUI(d.key,d.opts,1,{head:'Replacement'}):`no replacement in the 2024 rules. Pick a different class skill instead.</div>`)+'</div>').join('');
+    (d.legacy?`you may choose another skill instead (PHB 2014 rule).</div>`+pickUI(d.key,d.opts,1,{head:'Replacement'}):`no replacement in the 2024 rules. Pick a different skill instead.</div>`)+'</div>').join('');
 }
 function buildPkHints(G){
   const el=document.getElementById('pkHints');if(!el)return;
   const op=pkOpen();
   const cp=document.getElementById('coreTraitsPend');if(cp)cp.textContent=op.some(x=>x.wo==='cls')||(G.dups||[]).some(d=>d.legacy)?'● Choose':'';
   const bp=document.getElementById('bgLorePend');if(bp)bp.textContent=op.some(x=>x.wo==='bg')?'● Choose':'';
+  const rp=document.getElementById('raceLorePend');if(rp)rp.textContent=op.some(x=>x.wo==='race')?'● Choose':'';
   el.innerHTML=(op.length?`<div class="pk-dup" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:var(--fs-txt);color:var(--gold);flex:1">Open choices: ${op.map(x=>x.txt).join(' · ')}</span><button type="button" class="pk-chip" onclick="switchTab('info')">→ Info</button></div>`:'')+dupUI(G);
+}
+
+// ── Paket C3 (29.09.2026): Rassen – Auswahl und Werte ───────────────────────────────────────
+// RACE_PICKS wird von tools/race_convert.py aus 5e.tools races.json erzeugt (REFERENZ B13). Wahl in st.picks:
+//   race:<Trait> (Elven Lineage, Gnomish Lineage, Fiendish Legacy, Draconic Ancestry, Giant Ancestry, Keen Senses, Skillful,
+//   Skill Versatility), race:<Trait>:ability (Zauberattribut), race:size (Small/Medium), race:Ability Score Increase (Half-Elf).
+// Speed/Size/Darkvision/Resistenzen werden nur angezeigt (Entscheidung 4), Attributsboni nur als Abzeichen (Entscheidung 1).
+const RC_SIZE={S:'Small',M:'Medium',L:'Large'};
+function rcRace(){const r=document.getElementById('race')?.value||'';return typeof RACE_PICKS!=='undefined'&&RACE_PICKS[r]?r:'';}
+function rcKey(t){return 'race:'+t;}
+function rcLegacy(){const r=rcRace();return !!r&&RACE_PICKS[r].src==='PHB';}
+function rcOpt(c){const n=pkValid(rcKey(c.t),c.o.map(x=>x.n),1)[0];return n?c.o.find(x=>x.n===n):null;}
+function rcSkOpts(sk){return sk.fix||sk.f||SKILLS.map(x=>x.n);}
+function rcSkN(sk){return sk.fix?0:(sk.n||sk.any||0);}
+function rcAsiOpts(a){return a&&a.ch?a.ch.f.filter(x=>!(x in a.fix)):[];}
+function rcAdv(){const r=rcRace();return r?(RACE_PICKS[r].adv||[]):[];}
+// wirksame Werte: Grundwert der Rasse, durch die Wahl geändert (Wood Elf 35 ft, Drow 120 ft, Tiefling-Resistenz …)
+function rcVals(race){
+  const rp=RACE_PICKS[race];if(!rp)return null;
+  const v={speed:rp.speed,dv:rp.dv||0,res:(rp.res||[]).slice(),size:rp.size.length===1?RC_SIZE[rp.size[0]]:(pkValid('race:size',rp.size.map(x=>RC_SIZE[x]),1)[0]||''),by:{}};
+  (rp.ch||[]).forEach(c=>{const o=rcOpt(c);if(!o)return;
+    if(o.speed){v.speed=o.speed;v.by.speed=o.n;}
+    if(o.dv){v.dv=o.dv;v.by.dv=o.n;}
+    (o.res||[]).forEach(x=>{if(!v.res.includes(x))v.res.push(x);});});
+  return v;
+}
+function rcGrants(g){
+  const race=rcRace();if(!race)return;const rp=RACE_PICKS[race];
+  const add=(art,ziel,stufe)=>g.push({art,ziel,stufe,quelle:race,rc:1});
+  const sk=rp.sk;
+  if(sk){if(sk.fix)sk.fix.forEach(x=>add('skill',x,'p'));else pkValid(rcKey(sk.t),rcSkOpts(sk),rcSkN(sk)).forEach(x=>add('skill',x,'p'));}
+  const a=rp.asi;
+  if(a){Object.keys(a.fix).forEach(k=>add('attr',k,a.fix[k]));if(a.ch)pkValid(rcKey('Ability Score Increase'),rcAsiOpts(a),a.ch.n).forEach(k=>add('attr',k,a.ch.v));}
+}
+function rcOpen(){
+  const r=[],race=rcRace();if(!race)return r;const rp=RACE_PICKS[race];
+  if(rp.size.length>1&&!rcVals(race).size)r.push({wo:'race',txt:'Race size'});
+  (rp.ch||[]).forEach(c=>{if(!rcOpt(c))r.push({wo:'race',txt:c.t});else if(c.ab&&!pkValid(rcKey(c.t)+':ability',c.ab,1).length)r.push({wo:'race',txt:c.t+' ability'});});
+  if(rp.sk&&!rp.sk.fix){const n=rcSkN(rp.sk),c=pkValid(rcKey(rp.sk.t),rcSkOpts(rp.sk),n).length;if(c<n)r.push({wo:'race',txt:`${rp.sk.t} ${c}/${n}`});}
+  if(rp.asi&&rp.asi.ch){const n=rp.asi.ch.n,c=pkValid(rcKey('Ability Score Increase'),rcAsiOpts(rp.asi),n).length;if(c<n)r.push({wo:'race',txt:`Race ability scores ${c}/${n}`});}
+  return r;
+}
+// Zauber einer Lineage/Legacy nach Charakterstufe (noch nicht erreichte Stufen blass)
+function rcSpellsHtml(sp){
+  const lvl=fpLvl();
+  return Object.keys(sp).sort((a,b)=>a-b).map(L=>`<div class="rc-sp${lvl<+L?' off':''}"><span class="rc-spl">Level ${L}</span><span>${sp[L].map(pkEsc).join(', ')}</span></div>`).join('');
+}
+// Karte eines Rassen-Traits mit Wahl: {suf, body} wie fpHtml
+function rcCard(race,g){
+  const rp=RACE_PICKS[race],desc=fmtDesc(g.desc),more=(l,x)=>`<details class="fp-more"><summary>${l}</summary>${x}</details>`;
+  const c=(rp.ch||[]).find(x=>x.t===g.name);
+  if(c){
+    const key=rcKey(c.t),o=rcOpt(c),marks={};c.o.forEach(x=>{if(x.dmg)marks[x.n]=x.dmg;});
+    const chips=pickUI(key,c.o.map(x=>x.n),1,{head:'Choose 1',marks}),full=fmtDesc(g.desc+(c.tbl?'\n'+c.tbl:''));
+    if(!o)return {suf:'',body:chips+full};
+    let h='';
+    if(o.txt)h+=`<div class="fp-sel">${fmtDesc(o.txt)}</div>`;
+    if(o.dmg)h+=`<div class="fp-sel">${fmtDesc('Damage type: '+o.dmg)}</div>`;
+    if(o.sp)h+=`<div style="margin:2px 0 6px">${rcSpellsHtml(o.sp)}</div>`;
+    if(c.ab){const ab=pkValid(key+':ability',c.ab,1)[0];
+      h+=pickUI(key+':ability',c.ab,1,{head:'Spellcasting ability'});
+      if(ab){const m=md(st.attrs[ab]);h+=`<div class="rc-dc">Spell save DC ${8+prof()+m} · Spell attack ${fmt(prof()+m)} (${ab})</div>`;}}
+    return {suf:' · '+o.n,body:h+more('Other options / change',chips+full)};
+  }
+  const L=(rp.ch||[]).find(x=>(x.lk||[]).includes(g.name));
+  if(L){const o=rcOpt(L);
+    return o?{suf:' · '+o.dmg,body:`<div class="fp-sel">${fmtDesc('Damage type: '+o.dmg+' ('+L.t+': '+o.n+')')}</div>`+desc}
+            :{suf:'',body:`<div class="pk-note" style="margin:0 0 4px">Choice in ${pkEsc(L.t)}</div>`+desc};}
+  const sk=rp.sk;
+  if(sk&&sk.t===g.name){
+    if(sk.fix)return {suf:'',body:desc+`<div class="pk-note">Proficiency: ${sk.fix.join(', ')} (Skills tab)</div>`};
+    const G=calcGrants(),n=rcSkN(sk),opts=rcSkOpts(sk),own=new Set(pkGet(rcKey(sk.t))),marks={};
+    G.filter(x=>x.art==='skill'&&!x.rc&&PK_RANK[x.stufe]>=1).forEach(x=>{marks[x.ziel]='✓';});
+    Object.keys(st.skillP||{}).forEach(k=>{if(PK_RANK[st.skillP[k]]>=1&&!own.has(k))marks[k]='✓';});
+    const sel=pkValid(rcKey(sk.t),opts,n);
+    return {suf:sel.length>=n?' · '+sel.join(', '):'',body:desc+pickUI(rcKey(sk.t),opts,n,{head:`Skill${n>1?'s':''}: choose ${n}`,marks,note:'✓ = already proficient from another source'})};
+  }
+  return {suf:'',body:desc};
+}
+// Werte-Zeile unter AC/Initiative/Speed (Info-Tab) und Hinweis bei Max HP (Actions-Tab)
+function buildRaceStats(){
+  const el=document.getElementById('raceStats'),hp=document.getElementById('hpMHint');
+  const race=rcRace(),v=race&&rcVals(race),rp=race&&RACE_PICKS[race];
+  if(hp)hp.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}`:'';
+  if(!el)return;if(!v){el.innerHTML='';return;}
+  const spd=parseInt(document.getElementById('spd')?.value)||0,ch=[];
+  ch.push(`<span class="rc-chip${spd!==v.speed?' warn':''}" title="${spd!==v.speed?'Speed field: '+spd+' ft (set by hand)':''}">Speed ${v.speed} ft</span>`);
+  ch.push(v.size?`<span class="rc-chip">${v.size}</span>`:`<span class="rc-chip warn">Size: ${rp.size.map(x=>RC_SIZE[x]).join(' or ')}</span>`);
+  if(v.dv)ch.push(`<span class="rc-chip">Darkvision ${v.dv} ft</span>`);
+  if(v.res.length)ch.push(`<span class="rc-chip">Resistance: ${v.res.join(', ')}</span>`);
+  (rp.ch||[]).forEach(c=>{if(!rcOpt(c))ch.push(`<span class="rc-chip warn">${pkEsc(c.t)}: choose</span>`);});
+  el.innerHTML=`<div class="rc-row"><span class="rc-lbl">${pkEsc(race)}</span>${ch.join('')}</div>`;
 }
 
 // ── Paket C2 (29.09.2026): Feature-Auswahl, Bonus-Skills, Expertise, Saves ────────────────────
@@ -3805,19 +3917,23 @@ subclass:{
 
 // CORE TRAITS DATA
 const RACE_DATA={
-  "Aasimar":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Celestial Resistance: You have Resistance to Necrotic damage and Radiant damage.\n• Darkvision: You have Darkvision with a range of 60 feet.\n• Healing Hands: As a Magic action, you touch a creature and roll a number of d4s equal to your Proficiency. The creature regains a number of Hit Points equal to the total rolled. Once you use this trait, you can't use it again until you finish a Long Rest.\n• Light Bearer: You know the Light cantrip. Charisma is your spellcasting ability for it.\n• Celestial Revelation: When you reach character level 3, you can transform as a Bonus Action using one of the options below (choose the option each time you transform). The transformation lasts for 1 minute or until you end it (no action required). Once you transform, you can't do so again until you finish a Long Rest.\nOnce on each of your turns before the transformation ends, you can deal extra damage to one target when you deal damage to it with an attack or a spell. The extra damage equals your Proficiency, and the extra damage's type is either Necrotic for Necrotic Shroud or Radiant for Heavenly Wings and Inner Radiance.\nHere are the transformation options:\n• Two spectral wings sprout from your back temporarily. Until the transformation ends, you have a Fly Speed equal to your Speed.\n• Searing light temporarily radiates from your eyes and mouth. For the duration, you shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet, and at the end of each of your turns, each creature within 10 feet of you takes Radiant damage equal to your Proficiency.\n• Your eyes briefly become pools of darkness, and flightless wings sprout from your back temporarily. Creatures other than your allies within 10 feet of you must succeed on a Charisma saving throw (8 plus your Charisma modifier and Proficiency) or have the Frightened condition until the end of your next turn."},
+  "Aasimar":{src:"XPHB",speed:30,size:"S/M",ability:"",traits:"• Celestial Resistance: You have Resistance to Necrotic damage and Radiant damage.\n• Darkvision: You have Darkvision with a range of 60 feet.\n• Healing Hands: As a Magic action, you touch a creature and roll a number of d4s equal to your Proficiency. The creature regains a number of Hit Points equal to the total rolled. Once you use this trait, you can't use it again until you finish a Long Rest.\n• Light Bearer: You know the Light cantrip. Charisma is your spellcasting ability for it.\n• Celestial Revelation: When you reach character level 3, you can transform as a Bonus Action using one of the options below (choose the option each time you transform). The transformation lasts for 1 minute or until you end it (no action required). Once you transform, you can't do so again until you finish a Long Rest.\nOnce on each of your turns before the transformation ends, you can deal extra damage to one target when you deal damage to it with an attack or a spell. The extra damage equals your Proficiency, and the extra damage's type is either Necrotic for Necrotic Shroud or Radiant for Heavenly Wings and Inner Radiance.\nHere are the transformation options:\n• Two spectral wings sprout from your back temporarily. Until the transformation ends, you have a Fly Speed equal to your Speed.\n• Searing light temporarily radiates from your eyes and mouth. For the duration, you shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet, and at the end of each of your turns, each creature within 10 feet of you takes Radiant damage equal to your Proficiency.\n• Your eyes briefly become pools of darkness, and flightless wings sprout from your back temporarily. Creatures other than your allies within 10 feet of you must succeed on a Charisma saving throw (8 plus your Charisma modifier and Proficiency) or have the Frightened condition until the end of your next turn."},
   "Dragonborn":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Draconic Ancestry: Your lineage stems from a dragon progenitor. Choose the kind of dragon from the Draconic Ancestors table. Your choice affects your Breath Weapon and Damage Resistance traits as well as your appearance.\n• Breath Weapon: When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone [Area of Effect] or a 30-foot Line [Area of Effect] that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (8 plus your Constitution modifier and Proficiency). On a failed save, a creature takes 1d10 damage of the type determined by your Draconic Ancestry trait. On a successful save, a creature takes half as much damage. This damage increases by 1d10 when you reach character levels 5 (2d10), 11 (3d10), and 17 (4d10).\nYou can use this Breath Weapon a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest.\n• Damage Resistance: You have Resistance to the damage type determined by your Draconic Ancestry trait.\n• Darkvision: You have Darkvision with a range of 60 feet.\n• Draconic Flight: When you reach character level 5, you can channel draconic magic to give yourself temporary flight. As a Bonus Action, you sprout spectral wings on your back that last for 10 minutes or until you retract the wings (no action required) or have the Incapacitated condition. During that time, you have a Fly Speed equal to your Speed. Your wings appear to be made of the same energy as your Breath Weapon. Once you use this trait, you can't use it again until you finish a Long Rest."},
   "Dwarf":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Darkvision: You have Darkvision with a range of 120 feet.\n• Dwarven Resilience: You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.\n• Dwarven Toughness: Your Hit Points maximum increases by 1, and it increases by 1 again whenever you gain a level.\n• Stonecunning: As a Bonus Action, you gain Tremorsense with a range of 60 feet for 10 minutes. You must be on a stone surface or touching a stone surface to use this Tremorsense. The stone can be natural or worked.\nYou can use this Bonus Action a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest."},
   "Elf":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Elven Lineage: You are part of a lineage that grants you supernatural abilities. Choose a lineage from the Elven Lineages table. You gain the level 1 benefit of that lineage.\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).\n• Fey Ancestry: You have Advantage on saving throws you make to avoid or end the Charmed condition.\n• Keen Senses: You have proficiency in the Insight, Perception, or Survival skill.\n• Trance: You don't need to sleep, and magic can't put you to sleep. You can finish a Long Rest in 4 hours if you spend those hours in a trancelike meditation, during which you retain consciousness."},
   "Gnome":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Gnomish Cunning: You have Advantage on Intelligence, Wisdom, and Charisma saving throws.\n• Gnomish Lineage: You are part of a lineage that grants you supernatural abilities. Choose one of the following options; whichever one you choose, Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage):\n• You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.\n• You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action."},
   "Goliath":{src:"XPHB",speed:35,size:"M",ability:"",traits:"• Giant Ancestry: You are descended from Giants. Choose one of the following benefits—a supernatural boon from your ancestry; you can use the chosen benefit a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest:\n• As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.\n• When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.\n• When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.\n• When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.\n• When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.\n• When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.\n• Large Form: Starting at character level 5, you can change your size to Large as a Bonus Action if you're in a big enough space. This transformation lasts for 10 minutes or until you end it (no action required). For that duration, you have Advantage on Strength checks, and your Speed increases by 10 feet. Once you use this trait, you can't use it again until you finish a Long Rest.\n• Powerful Build: You have Advantage on any ability check you make to end the Grappled condition. You also count as one size larger when determining your carrying capacity."},
-  "Half-Elf":{src:"PHB",speed:30,size:"M",ability:"+2 cha, +2 to any",traits:"• Age: Half-elves mature at the same rate humans do and reach adulthood around the age of 20. They live much longer than humans, however, often exceeding 180 years.\n• Size: Half-elves are about the same size as humans, ranging from 5 to 6 feet tall. Your size is Medium.\n• Darkvision: Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.\n• Fey Ancestry: You have advantage on saving throws against being charmed, and magic can't put you to sleep.\n• Skill Versatility: You gain proficiency in two skills of your choice.\n• Languages: You can speak, read, and write Common, Elvish, and one extra language of your choice."},
+  "Half-Elf":{src:"PHB",speed:30,size:"M",ability:"+2 cha, +1 to two others",traits:"• Age: Half-elves mature at the same rate humans do and reach adulthood around the age of 20. They live much longer than humans, however, often exceeding 180 years.\n• Size: Half-elves are about the same size as humans, ranging from 5 to 6 feet tall. Your size is Medium.\n• Darkvision: Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.\n• Fey Ancestry: You have advantage on saving throws against being charmed, and magic can't put you to sleep.\n• Skill Versatility: You gain proficiency in two skills of your choice.\n• Languages: You can speak, read, and write Common, Elvish, and one extra language of your choice."},
   "Half-Orc":{src:"PHB",speed:30,size:"M",ability:"+2 str, +1 con",traits:"• Age: Half-orcs mature a little faster than humans, reaching adulthood around age 14. They age noticeably faster and rarely live longer than 75 years.\n• Size: Half-orcs are somewhat larger and bulkier than humans, and they range from 5 to well over 6 feet tall. Your size is Medium.\n• Darkvision: Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.\n• Menacing: You gain proficiency in the Intimidation skill.\n• Relentless Endurance: When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.\n• Savage Attacks: When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit.\n• Languages: You can speak, read, and write Common and Orc. Orc is a harsh, grating language with hard consonants. It has no script of its own but is written in the Dwarvish script."},
   "Halfling":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Brave: You have Advantage on saving throws you make to avoid or end the Frightened condition.\n• Halfling Nimbleness: You can move through the space of any creature that is a size larger than you, but you can't stop in the same space.\n• Luck: When you roll a 1 on the d20 of a D20 Test, you can reroll the die, and you must use the new roll.\n• Naturally Stealthy: You can take the Hide action even when you are obscured only by a creature that is at least one size larger than you."},
-  "Human":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Resourceful: You gain Heroic Inspiration whenever you finish a Long Rest.\n• Skillful: You gain proficiency in one skill of your choice.\n• Versatile: You gain an Origin feat of your choice."},
+  "Human":{src:"XPHB",speed:30,size:"S/M",ability:"",traits:"• Resourceful: You gain Heroic Inspiration whenever you finish a Long Rest.\n• Skillful: You gain proficiency in one skill of your choice.\n• Versatile: You gain an Origin feat of your choice."},
   "Orc":{src:"XPHB",speed:30,size:"M",ability:"",traits:"• Adrenaline Rush: You can take the Dash action as a Bonus Action. When you do so, you gain a number of Temporary Hit Points equal to your Proficiency.\nYou can use this trait a number of times equal to your Proficiency, and you regain all expended uses when you finish a Short Rest or Long Rest.\n• Darkvision: You have Darkvision with a range of 120 feet.\n• Relentless Endurance: When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Points instead. Once you use this trait, you can't do so again until you finish a Long Rest."},
-  "Tiefling":{src:"XPHB",speed:30,size:"S",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Fiendish Legacy: You are the recipient of a legacy that grants you supernatural abilities. Choose a legacy from the Fiendish Legacies table. You gain the level 1 benefit of the chosen legacy.\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level. Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).\n• Otherworldly Presence: You know the Thaumaturgy cantrip. When you cast it with this trait, the spell uses the same spellcasting ability you use for your Fiendish Legacy Trait."}
+  "Tiefling":{src:"XPHB",speed:30,size:"S/M",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Fiendish Legacy: You are the recipient of a legacy that grants you supernatural abilities. Choose a legacy from the Fiendish Legacies table. You gain the level 1 benefit of the chosen legacy.\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level. Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).\n• Otherworldly Presence: You know the Thaumaturgy cantrip. When you cast it with this trait, the spell uses the same spellcasting ability you use for your Fiendish Legacy Trait."}
 };
+
+// RACE_PICKS-START
+const RACE_PICKS={"Aasimar":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"res":["Necrotic","Radiant"]},"Dragonborn":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"ch":[{"t":"Draconic Ancestry","o":[{"n":"Black","dmg":"Acid","res":["Acid"]},{"n":"Blue","dmg":"Lightning","res":["Lightning"]},{"n":"Brass","dmg":"Fire","res":["Fire"]},{"n":"Bronze","dmg":"Lightning","res":["Lightning"]},{"n":"Copper","dmg":"Acid","res":["Acid"]},{"n":"Gold","dmg":"Fire","res":["Fire"]},{"n":"Green","dmg":"Poison","res":["Poison"]},{"n":"Red","dmg":"Fire","res":["Fire"]},{"n":"Silver","dmg":"Cold","res":["Cold"]},{"n":"White","dmg":"Cold","res":["Cold"]}],"lk":["Breath Weapon","Damage Resistance"],"tbl":"Draconic Ancestors:\n• Black: Acid\n• Blue: Lightning\n• Brass: Fire\n• Bronze: Lightning\n• Copper: Acid\n• Gold: Fire\n• Green: Poison\n• Red: Fire\n• Silver: Cold\n• White: Cold"}]},"Dwarf":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"res":["Poison"],"adv":[{"t":"Dwarven Resilience","c":"Poisoned"}],"hp":{"t":"Dwarven Toughness","per":1}},"Elf":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Keen Senses","f":["Insight","Perception","Survival"],"n":1},"ch":[{"t":"Elven Lineage","o":[{"n":"Drow","txt":"You are part of a lineage that grants you supernatural abilities. The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.\nWhen you reach character level 3, you learn the Faerie Fire spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","dv":120,"sp":{"1":["Dancing Lights"],"3":["Faerie Fire"],"5":["Darkness"]}},{"n":"High Elf","txt":"You are part of a lineage that grants you supernatural abilities. You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list.\nWhen you reach character level 3, you learn the Detect Magic spell. When you reach character level 5, you also learn the Misty Step spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","sp":{"1":["Prestidigitation"],"3":["Detect Magic"],"5":["Misty Step"]}},{"n":"Wood Elf","txt":"You are part of a lineage that grants you supernatural abilities. Your Speed increases to 35 feet. You also know the Druidcraft cantrip.\nWhen you reach character level 3, you learn the Longstrider spell. When you reach character level 5, you also learn the Pass without Trace spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","speed":35,"sp":{"1":["Druidcraft"],"3":["Longstrider"],"5":["Pass without Trace"]}}],"ab":["INT","WIS","CHA"],"tbl":"Elven Lineages:\nLineage | Level 1 | Level 3 | Level 5\n• Drow | The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip. | Faerie Fire | Darkness\n• High Elf | You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. | Detect Magic | Misty Step\n• Wood Elf | Your Speed increases to 35 feet. You also know the Druidcraft cantrip. | Longstrider | Pass without Trace"}],"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Gnome":{"src":"XPHB","size":["S"],"speed":30,"dv":60,"ch":[{"t":"Gnomish Lineage","o":[{"n":"Forest Gnome","txt":"You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.","sp":{"1":["Minor Illusion","Speak with Animals"]}},{"n":"Rock Gnome","txt":"You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.","sp":{"1":["Mending","Prestidigitation"]}}],"ab":["INT","WIS","CHA"]}],"adv":[{"t":"Gnomish Cunning","s":["INT","WIS","CHA"]}]},"Goliath":{"src":"XPHB","size":["M"],"speed":35,"ch":[{"t":"Giant Ancestry","o":[{"n":"Cloud's Jaunt","anc":"Cloud","txt":"As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see."},{"n":"Fire's Burn","anc":"Fire","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target."},{"n":"Frost's Chill","anc":"Frost","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn."},{"n":"Hill's Tumble","anc":"Hill","txt":"When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition."},{"n":"Stone's Endurance","anc":"Stone","txt":"When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total."},{"n":"Storm's Thunder","anc":"Storm","txt":"When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature."}]}]},"Half-Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Skill Versatility","any":2},"asi":{"fix":{"CHA":2},"ch":{"f":["STR","DEX","CON","INT","WIS"],"n":2,"v":1}},"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Half-Orc":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Menacing","fix":["Intimidation"]},"asi":{"fix":{"STR":2,"CON":1}}},"Halfling":{"src":"XPHB","size":["S"],"speed":30,"adv":[{"t":"Brave","c":"Frightened"}]},"Human":{"src":"XPHB","size":["S","M"],"speed":30,"sk":{"t":"Skillful","any":1}},"Orc":{"src":"XPHB","size":["M"],"speed":30,"dv":120},"Tiefling":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"ch":[{"t":"Fiendish Legacy","o":[{"n":"Abyssal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Poison damage. You also know the Poison Spray cantrip.\nWhen you reach character level 3, you learn the Ray of Sickness spell. When you reach character level 5, you also learn the Hold Person spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Poison"],"sp":{"1":["Poison Spray"],"3":["Ray of Sickness"],"5":["Hold Person"]}},{"n":"Chthonic","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.\nWhen you reach character level 3, you learn the False Life spell. When you reach character level 5, you also learn the Ray of Enfeeblement spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Necrotic"],"sp":{"1":["Chill Touch"],"3":["False Life"],"5":["Ray of Enfeeblement"]}},{"n":"Infernal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Fire damage. You also know the Fire Bolt cantrip.\nWhen you reach character level 3, you learn the Hellish Rebuke spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Fire"],"sp":{"1":["Fire Bolt"],"3":["Hellish Rebuke"],"5":["Darkness"]}}],"ab":["INT","WIS","CHA"],"tbl":"Fiendish Legacies:\nLegacy | Level 1 | Level 3 | Level 5\n• Abyssal | You have Resistance to Poison damage. You also know the Poison Spray cantrip. | Ray of Sickness | Hold Person\n• Chthonic | You have Resistance to Necrotic damage. You also know the Chill Touch cantrip. | False Life | Ray of Enfeeblement\n• Infernal | You have Resistance to Fire damage. You also know the Fire Bolt cantrip. | Hellish Rebuke | Darkness"}]}};
+// RACE_PICKS-END
 
 const CLASS_CORE_TRAITS = {
   "Warlock": {
@@ -4244,13 +4360,13 @@ function onRaceChange(){
   const race = document.getElementById('race')?.value;
   const customInput = document.getElementById('raceCustom');
   if(customInput) customInput.style.display = race==='custom' ? '' : 'none';
-  buildRaceLore();
-  autoSave();
+  pkRefresh();   // Paket C3: Rasse wirkt auf Skills, Saves, Attribut-Abzeichen, Werte-Zeile (baut auch buildRaceLore)
 }
 
 // Also rebuild race lore when custom name changes
 document.addEventListener('input', e=>{
   if(e.target.id==='raceCustom') buildRaceLore();
+  if(e.target.id==='spd') buildRaceStats();
 });
 
 function buildRaceLore(){
@@ -4270,12 +4386,13 @@ function buildRaceLore(){
     const saved=document.getElementById('n_race_custom');
     if(saved && typeof st.raceNotes!=='undefined') saved.value=st.raceNotes||'';
     if(saved) saved.addEventListener('input',()=>{st.raceNotes=saved.value;autoSave();});
+    buildRaceStats();
     return;
   }
 
-  if(!race){sec.style.display='none';return;}
+  if(!race){sec.style.display='none';buildRaceStats();return;}
   const r = RACE_DATA[race];
-  if(!r){sec.style.display='none';return;}
+  if(!r){sec.style.display='none';buildRaceStats();return;}
   sec.style.display='';
   title.textContent='Race: '+race;
 
@@ -4290,19 +4407,36 @@ function buildRaceLore(){
     else groups.push({name:'', desc: t});
   }
 
-  const meta = [];
-  if(r.speed) meta.push('Speed: '+r.speed+' ft');
-  if(r.size) meta.push('Size: '+(r.size==='M'?'Medium':r.size==='S'?'Small':r.size));
+  const meta = [], rv = rcRace()===race ? rcVals(race) : null, rp = rv ? RACE_PICKS[race] : null;
+  if(rv){
+    meta.push('Speed: '+rv.speed+' ft'+(rv.by.speed?' ('+rv.by.speed+')':''));
+    meta.push('Size: '+(rv.size||rp.size.map(x=>RC_SIZE[x]).join(' or ')));
+    if(rv.dv) meta.push('Darkvision: '+rv.dv+' ft'+(rv.by.dv?' ('+rv.by.dv+')':''));
+    if(rv.res.length) meta.push('Resistance: '+rv.res.join(', '));
+  }else{
+    if(r.speed) meta.push('Speed: '+r.speed+' ft');
+    if(r.size) meta.push('Size: '+String(r.size).split('/').map(x=>RC_SIZE[x]||x).join(' or '));
+  }
   if(r.ability) meta.push('Ability Scores: '+r.ability);
   if(r.src) meta.push(r.src);
+  // Paket C3: Wahl der Größe und (PHB 2014) der Attributsboni als eigene Karten oben
+  const top = [];
+  if(rp && rp.size.length>1) top.push({name:'Size', body:pickUI('race:size',rp.size.map(x=>RC_SIZE[x]),1,{head:'Choose 1',note:'Chosen when you select this species (5e.tools).'})});
+  if(rp && rp.asi){
+    const a=rp.asi, fx=Object.keys(a.fix).map(k=>'+'+a.fix[k]+' '+k).join(', ');
+    top.push({name:'Ability Score Increase', body:`<div class="fd"><p>${fx}${a.ch?` (fixed), +${a.ch.v} to ${a.ch.n} others of your choice`:''}.</p></div>`
+      +(a.ch?pickUI(rcKey('Ability Score Increase'),rcAsiOpts(a),a.ch.n,{head:`+${a.ch.v}: choose ${a.ch.n}`}):'')
+      +`<div class="pk-note">Legacy rule (PHB 2014) – in the 2024 rules ability boosts come from the background. Shown as a badge (“+1 Race”) on the ability, not added to the score.</div>`});
+  }
 
   body.innerHTML =
     (meta.length?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+meta.map(m=>'<span style="font-size:var(--fs-xs);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)">'+m+'</span>').join('')+'</div>':'') +
-    groups.map(g=>
+    top.concat(groups.map(g=>{const c=rp&&g.name?rcCard(race,g):{suf:'',body:fmtDesc(g.desc)};return {name:g.name,suf:c.suf,body:c.body};})).map(g=>
       '<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">'
-      +(g.name?'<div style="font-family:Cinzel,serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:3px">'+g.name+'</div>':'')
-      +'<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">'+fmtDesc(g.desc)+'</div></div>'
+      +(g.name?'<div style="font-family:Cinzel,serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:3px">'+g.name+(g.suf?'<span class="fp-suf">'+pkEsc(g.suf)+'</span>':'')+'</div>':'')
+      +'<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">'+g.body+'</div></div>'
     ).join('');
+  buildRaceStats();
 }
 
 function buildSubclsLore(){
@@ -6101,7 +6235,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-29a';
+const APP_VERSION = 'willow-app-2026-09-29b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

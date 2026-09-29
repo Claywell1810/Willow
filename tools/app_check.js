@@ -822,7 +822,7 @@ const REGRESSION = [
       set('race', 'Aasimar'); w.onRaceChange && w.onRaceChange(); w.buildRaceLore();
       const body = d.getElementById('raceLoreBody');
       const names = [...body.querySelectorAll('div[style*="Cinzel"]')].map(x => x.textContent);
-      if (names.join('|') !== 'Celestial Resistance|Darkvision|Healing Hands|Light Bearer|Celestial Revelation') return 'Aasimar-Karten: ' + names.join('|');
+      if (names.join('|') !== 'Size|Celestial Resistance|Darkvision|Healing Hands|Light Bearer|Celestial Revelation')  /* Size-Karte seit Paket C3 */ return 'Aasimar-Karten: ' + names.join('|');
       if (!body.querySelector('.fd ul') || body.querySelectorAll('.fd ul li').length !== 3) return 'Aasimar-Verwandlungen nicht als Liste';
       set('race', 'Elf'); w.buildRaceLore();
       if (body.querySelectorAll('.fd p').length < 6) return 'Elf: Folgeabsätze fehlen';
@@ -967,6 +967,66 @@ const REGRESSION = [
       // Speichern/Laden, Charakterwechsel
       const snap = w.eval('collectState()'); if (!snap.picks['feat:Rogue|base|Expertise@1']) return 'feat-picks nicht gespeichert';
       w.applyState({ attrs: {}, _f_cls: 'Rogue', _f_lvl: '6' }); if (bdg(sk('Stealth')).includes('Expertise')) return 'Charakterwechsel übernimmt feat-picks';
+      w.resetUI();
+      return true;
+    } },
+  { name: 'Paket C3: Rassen – Wahl (Elven Lineage mit Tabelle, Keen Senses, Draconic Ancestry, Size, Half-Elf-Boni) in st.picks, Werte-Zeile (Speed/Size/Darkvision/Resistenz), Rassen-Skills mit Abzeichen, Vorteile an Saves, Dwarven Toughness, RACE_DATA-Fehler behoben', datum: '29.09.2026',
+    run: ({ w, d, set }) => {
+      if (!w.eval('typeof RACE_PICKS==="object"&&Object.keys(RACE_PICKS).length===12') || typeof w.rcCard !== 'function') return 'RACE_PICKS/rcCard fehlen';
+      const sk = n => [...d.querySelectorAll('#skillsGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === n);
+      const sv = l => [...d.querySelectorAll('#savesGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === l);
+      const pip = r => r.querySelector('.sk-pip').className.replace('sk-pip', '').trim();
+      const bdg = r => [...r.querySelectorAll('.sk-bdg')].map(b => b.textContent).join(',');
+      const body = d.getElementById('raceLoreBody'), stats = () => d.getElementById('raceStats').textContent;
+      const rcard = n => [...body.children].find(c => { const h = c.querySelector('div[style*="Cinzel"]'); return h && h.textContent.split(' · ')[0] === n; });
+      const chip = (root, o) => root && [...root.querySelectorAll('.pk-chip')].find(c => c.dataset.o === o);
+      const race = r => { set('race', r); w.onRaceChange(); };
+      w.resetUI();
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 14, CHA: 10 }, _f_prof: '2', _f_lvl: '3' });
+      // Elf: offene Wahl, Tabelle „Elven Lineages“ (fehlte im Trait-Text), Drow → Darkvision 120, Zauber nach Stufe
+      race('Elf');
+      if (d.getElementById('raceLorePend').textContent !== '● Choose') return 'offene Rassen-Wahl nicht markiert';
+      const el = rcard('Elven Lineage'); if (!el || !el.querySelector('.fd-tbl') || !el.textContent.includes('Elven Lineages')) return 'Tabelle Elven Lineages fehlt';
+      if (!stats().includes('Darkvision 60 ft') || !stats().includes('Elven Lineage: choose')) return 'Werte-Zeile Elf: ' + stats();
+      chip(rcard('Elven Lineage'), 'Drow').click();
+      if (JSON.stringify(w.eval("st.picks['race:Elven Lineage']")) !== '["Drow"]') return 'Lineage nicht gespeichert';
+      const dr = rcard('Elven Lineage');
+      if (dr.querySelector('div[style*="Cinzel"]').textContent !== 'Elven Lineage · Drow') return 'Titel: ' + dr.querySelector('div[style*="Cinzel"]').textContent;
+      if (!stats().includes('Darkvision 120 ft')) return 'Drow Darkvision: ' + stats();
+      const sp = [...dr.querySelectorAll('.rc-sp')].map(x => x.className + ':' + x.textContent);
+      if (sp.join('|') !== 'rc-sp:Level 1Dancing Lights|rc-sp:Level 3Faerie Fire|rc-sp off:Level 5Darkness') return 'Zauber nach Stufe: ' + sp.join('|');
+      chip(rcard('Elven Lineage'), 'WIS').click();
+      if (!rcard('Elven Lineage').querySelector('.rc-dc') || rcard('Elven Lineage').querySelector('.rc-dc').textContent !== 'Spell save DC 12 · Spell attack +4 (WIS)') return 'DC-Zeile';
+      // Keen Senses → Perception geübt mit Abzeichen „Elf“; Wood Elf → Speed 35, Feld 30 = Hinweis
+      chip(rcard('Keen Senses'), 'Perception').click();
+      if (pip(sk('Perception')) !== 'p' || bdg(sk('Perception')) !== 'Elf') return 'Keen Senses: ' + pip(sk('Perception')) + ' ' + bdg(sk('Perception'));
+      if (d.getElementById('raceLorePend').textContent !== '') return 'Marker bleibt nach vollständiger Wahl';
+      chip(rcard('Elven Lineage'), 'Wood Elf').click();
+      if (!stats().includes('Speed 35 ft') || !d.querySelector('#raceStats .rc-chip.warn') || stats().includes('Darkvision 120')) return 'Wood Elf: ' + stats();
+      // Rassenwechsel: fremde Wahl wirkt nicht, bleibt aber gespeichert
+      race('Dwarf');
+      if (pip(sk('Perception')) !== '' || !w.eval("st.picks['race:Keen Senses']")) return 'Rassenwechsel: Keen Senses';
+      if (!d.getElementById('saveAdv').textContent.includes('Poisoned') || !stats().includes('Resistance: Poison')) return 'Dwarf: Vorteil/Resistenz';
+      if (d.getElementById('hpMHint').textContent !== 'Dwarven Toughness +3') return 'Dwarven Toughness: ' + d.getElementById('hpMHint').textContent;
+      race('Gnome'); if (bdg(sv('Intelligence')) !== 'Adv' || bdg(sv('Strength')) !== '') return 'Gnomish Cunning an Saves';
+      // Dragonborn: Farbe → Resistenz und Breath Weapon mit Schadensart
+      race('Dragonborn'); chip(rcard('Draconic Ancestry'), 'Red').click();
+      if (!stats().includes('Resistance: Fire') || rcard('Breath Weapon').querySelector('div[style*="Cinzel"]').textContent !== 'Breath Weapon · Fire') return 'Dragonborn: ' + stats();
+      // Human: Size-Wahl (war fälschlich „S“), Skillful
+      race('Human'); if (!stats().includes('Size: Small or Medium')) return 'Human Size offen: ' + stats();
+      chip(rcard('Size'), 'Medium').click(); if (!stats().includes('Medium')) return 'Human Size';
+      // Half-Orc (PHB): Intimidation fest, +2 STR/+1 CON nur als Abzeichen; Half-Elf: +2 CHA fest, +1/+1 Wahl
+      race('Half-Orc');
+      if (pip(sk('Intimidation')) !== 'p' || bdg(sk('Intimidation')) !== 'Half-Orc') return 'Menacing';
+      const ab = k => [...d.querySelectorAll('#attrGrid .acard')].find(c => c.querySelector('input').id === 'a_' + k);
+      if (ab('STR').querySelector('.a-bdg').textContent !== '+2 Race' || ab('CON').querySelector('.a-bdg').textContent !== '+1 Race' || w.eval('st.attrs.STR') !== 10) return 'Half-Orc-Boni';
+      race('Half-Elf'); if (!body.textContent.includes('+2 CHA (fixed), +1 to 2 others')) return 'Half-Elf ASI-Karte';
+      chip(rcard('Ability Score Increase'), 'DEX').click(); chip(rcard('Ability Score Increase'), 'WIS').click();
+      if (ab('DEX').querySelector('.a-bdg').textContent !== '+1 Race' || ab('CHA').querySelector('.a-bdg').textContent !== '+2 Race') return 'Half-Elf-Boni';
+      if (w.eval('RACE_DATA["Half-Elf"].ability') !== '+2 cha, +1 to two others' || w.eval('RACE_DATA.Tiefling.size') !== 'S/M') return 'RACE_DATA-Fehler';
+      // Speichern/Laden, alter Save ohne Rassen-picks, Charakterwechsel
+      const snap = w.eval('collectState()'); if (!snap.picks['race:Elven Lineage'] || !snap.picks['race:Ability Score Increase']) return 'race-picks nicht gespeichert';
+      w.applyState({ attrs: {}, _f_race: 'Elf' }); if (pip(sk('Perception')) !== '' || !stats().includes('Elven Lineage: choose')) return 'Charakterwechsel übernimmt race-picks';
       w.resetUI();
       return true;
     } },
