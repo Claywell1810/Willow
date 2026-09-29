@@ -223,6 +223,42 @@ input[type=number]{-moz-appearance:textfield}
 .slvl-lbl{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--gold2);margin-bottom:5px;text-transform:uppercase}
 .slpip{width:13px;height:13px;border-radius:50%;border:1px solid var(--purple2);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-block;margin:2px}
 .slpip.av{background:var(--purple2)} /* gefüllt = verfügbar (seit 27.09.2026) */
+/* Paket D (29.09.2026): Zauberplätze nach Stufe, Rast, Hit Dice, Zaubern */
+.sl-pips{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.sl-ed{display:flex;gap:4px;justify-content:center;align-items:center;margin-bottom:5px}
+.sl-n{font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);min-width:16px;text-align:center}
+.sl-hint{font-size:var(--fs-2xs);color:var(--text3);margin-top:3px}
+.slvl.sl-adj{border-color:var(--gold2)}
+.slvl.sl-pact{border-color:var(--purple2)}
+.sl-none{grid-column:1/-1;font-size:var(--fs-sm);color:var(--text3);padding:6px 2px}
+.rest-row{display:flex;gap:8px;align-items:stretch;margin-bottom:10px;flex-wrap:wrap}
+.hd-box{flex:1 1 150px;min-width:0}
+.hd-pips{display:flex;flex-wrap:wrap;align-items:center}
+.slpip.hdpip{border-color:var(--green)}
+.slpip.hdpip.av{background:var(--green)}
+.hd-n{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text3);margin-left:6px}
+.rest-btns{display:flex;flex-direction:column;gap:6px;flex:1 0 auto;justify-content:center}
+.rest-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;padding:8px 12px;cursor:pointer;white-space:nowrap;min-height:38px}
+.rest-btn.long{border-color:var(--gold2);color:var(--gold)}
+.rest-box{max-height:calc(80vh / var(--zf));overflow:auto}
+.rest-sec{border-top:1px solid var(--border2);padding:8px 0}
+.rest-h{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.rest-hp{font-size:var(--fs-txt);color:var(--text2);margin-bottom:6px}
+.rest-hp b{color:var(--text)}
+.rest-act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.rest-act input{width:92px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:7px 8px;outline:none}
+.rest-last{margin-top:6px;font-size:var(--fs-txt);color:var(--green)}
+.rest-note{font-size:var(--fs-sm);color:var(--text3);margin-top:4px;line-height:1.45}
+.rest-note.warn{color:var(--red)}
+.rest-list{margin:0;padding:0 0 0 18px;font-size:var(--fs-txt);color:var(--text2);line-height:1.6}
+.rest-list span{color:var(--gold);font-size:var(--fs-xs);margin-left:4px}
+.rest-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.sp-cast{flex-shrink:0;background:transparent;border:1px solid var(--gold2);border-radius:10px;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;padding:3px 9px;cursor:pointer;margin-left:auto}
+.cast-sub{font-size:var(--fs-sm);color:var(--text3);margin:-4px 0 8px}
+.cast-opts{display:flex;flex-direction:column;gap:6px}
+.cast-opt{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:var(--fs-txt);padding:10px 12px;cursor:pointer;text-align:left;font-family:inherit}
+.cast-opt span{color:var(--text3);font-size:var(--fs-xs);white-space:nowrap}
+.cast-opt:disabled{opacity:.4;cursor:default}
 
 /* FEATURES */
 .feat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:6px}
@@ -809,6 +845,15 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         </div>
       </div>
 
+      <!-- HIT DICE + RAST (Paket D, 29.09.2026): Short Rest / Long Rest ersetzen „↺ Reset“ -->
+      <div class="rest-row">
+        <div class="ds-box hd-box" id="hdBox" style="display:none"><div class="ds-lbl" id="hdLbl">Hit Dice</div><div class="hd-pips" id="hdPips"></div></div>
+        <div class="rest-btns">
+          <button class="rest-btn" onclick="openRest('short')">☾ Short Rest</button>
+          <button class="rest-btn long" onclick="openRest('long')">☀ Long Rest</button>
+        </div>
+      </div>
+
       <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026; unter Hit Points, zuklappbar) -->
       <div id="combatStats" class="cst-card" style="display:none;margin-top:12px"></div>
 
@@ -831,7 +876,6 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
           <span>Class Features</span>
           <span style="display:flex;gap:6px;align-items:center">
-            <button style="background:transparent;border:none;color:var(--text3);font-size:var(--fs-2xs);font-family:'Cinzel',serif;cursor:pointer" onclick="restoreAllUses()">↺ Reset</button>
             <button onclick="toggleInfoSection('sb-classfeatures','sb-classfeatures-btn')" id="sb-classfeatures-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
           </span>
         </div>
@@ -858,7 +902,10 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 
         <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
           <span>Spell Slots</span>
-          <button onclick="toggleInfoSection('sb-spellslots','sb-spellslots-btn')" id="sb-spellslots-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+          <span style="display:flex;gap:6px;align-items:center">
+            <button onclick="togSlotEdit()" id="slotEditBtn" class="filter-toggle" style="padding:3px 10px" title="−/+ as correction to the class table">✎ Adjust</button>
+            <button onclick="toggleInfoSection('sb-spellslots','sb-spellslots-btn')" id="sb-spellslots-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+          </span>
         </div>
         <div id="sb-spellslots">
           <div class="slot-g" id="spSlots"></div>
@@ -1043,7 +1090,7 @@ let st={
   attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
   saveP:{},skillP:{},skillMisc:{},skillNotes:'',
   hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
-  slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
+  slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,
   mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set(),
   concActive:null, concActiveFeature:null
@@ -1618,24 +1665,63 @@ function calcSpell(){
   if(dc)dc.value=8+p+m;if(atk)atk.value=fmt(p+m);
 }
 
-// SLOTS
-function buildSlots(){
-  const g=document.getElementById('spSlots');if(!g)return;g.innerHTML='';
-  for(let i=0;i<9;i++){
-    const tot=st.slotMax[i],used=st.slotUsed[i];
-    const d=document.createElement('div');d.className='slvl';
-    let pips='';for(let j=0;j<tot;j++)pips+=`<div class="slpip${j<tot-used?' av':' u'}" onclick="togSlot(${i},${j})"></div>`;
-    d.innerHTML=`<div class="slvl-lbl">${i+1}. Level</div>
-    <div style="display:flex;gap:4px;justify-content:center;align-items:center;margin-bottom:5px">
-      <button class="hbtn slbtn" onclick="chSlot(${i},-1)">−</button>
-      <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);min-width:16px;text-align:center">${tot}</span>
-      <button class="hbtn slbtn" onclick="chSlot(${i},1)">+</button>
-    </div>
-    <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap">${pips}</div>`;
-    g.appendChild(d);
-  }
+// SLOTS (Paket D, 29.09.2026): Maximum je Grad aus der Class Table der Stufe (Klasse, sonst SUBCLASS_TABLES wie
+// Eldritch Knight/Arcane Trickster) + Handkorrektur st.slotAdj (−/+ nur im Modus „✎ Adjust“). st.slotMax wird berechnet
+// (alte Saves: gespeichertes slotMax wird überschrieben). st.slotUsed wird NICHT gekürzt, sondern überall über slotUsedEff(i)
+// auf das Maximum begrenzt (applyState ruft onClsChange vor Stufe/Subklasse auf → sonst ginge Verbrauch verloren). Grade mit 0 fehlen.
+// Warlock: Pakt-Plätze = Tracker wl_pactslots (Grad aus Spalte „Slot Level“), eigene Kachel.
+let slotEdit=false;
+const SLOT_ORD=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+function curCls(){return (document.getElementById('cls')?.value||'').trim();}
+function curSub(){return document.getElementById('subcls')?.value||'';}
+function curLvl(){return Math.max(1,Math.min(20,parseInt(document.getElementById('lvl')?.value)||1));}
+function scTable(cls,sub){const t=typeof SUBCLASS_TABLES!=='undefined'&&SUBCLASS_TABLES[cls];const k=t&&clsSubKey(t,sub);return k?t[k]:null;}
+function slotTableRow(){
+  const cls=curCls(),lvl=curLvl();
+  const r=((CLASS_TABLES[cls]||{}).rows||[]).find(x=>+x.lvl===lvl);
+  let a=r&&r.slots?r.slots.slice(0,9):[];
+  if(!a.some(n=>n>0)){const t=scTable(cls,curSub()),q=t&&t.rows.find(x=>+x.lvl===lvl);if(q)a=q.slots.slice(0,9);}
+  while(a.length<9)a.push(0);
+  return a;
 }
-function chSlot(i,d){st.slotMax[i]=Math.max(0,Math.min(9,st.slotMax[i]+d));if(st.slotUsed[i]>st.slotMax[i])st.slotUsed[i]=st.slotMax[i];buildSlots();autoSave()}
+function slotAdjArr(){if(!Array.isArray(st.slotAdj)||st.slotAdj.length!==9)st.slotAdj=[0,0,0,0,0,0,0,0,0];return st.slotAdj;}
+function syncSlotMax(){
+  const t=slotTableRow(),a=slotAdjArr();
+  st.slotMax=t.map((n,i)=>Math.max(0,Math.min(9,n+(+a[i]||0))));
+  if(!Array.isArray(st.slotUsed)||st.slotUsed.length!==9)st.slotUsed=[0,1,2,3,4,5,6,7,8].map(i=>+(st.slotUsed||[])[i]||0);
+  return t;
+}
+function slotUsedEff(i){return Math.max(0,Math.min(+st.slotUsed[i]||0,st.slotMax[i]||0));}
+function pactInfo(){
+  if(curCls()!=='Warlock')return null;
+  const lvl=curLvl(),ab=(((CLASS_DATA.Warlock||{}).abilities||{}).base||[]).find(a=>a.id==='wl_pactslots');
+  if(!ab)return null;
+  const max=abMaxUses(ab.uses,lvl),r=((CLASS_TABLES.Warlock||{}).rows||[]).find(x=>+x.lvl===lvl);
+  return max>0?{id:ab.id,max,used:Math.min(getAbUses(ab.id),max),lv:Math.max(1,Math.min(9,parseInt(r&&r.slot)||1))}:null;
+}
+function buildSlots(){
+  const g=document.getElementById('spSlots');if(!g)return;
+  const tb=syncSlotMax(),adj=slotAdjArr(),pk=pactInfo();
+  const eb=document.getElementById('slotEditBtn');if(eb){eb.classList.toggle('on',slotEdit);eb.textContent=slotEdit?'✓ Done':'✎ Adjust';}
+  let h='';
+  if(pk){
+    let pips='';for(let j=0;j<pk.max;j++)pips+=`<div class="slpip${j<pk.max-pk.used?' av':' u'}" onclick="togAbUse('${pk.id}',${j},${pk.max})"></div>`;
+    h+=`<div class="slvl sl-pact"><div class="slvl-lbl">Pact · ${SLOT_ORD[pk.lv-1]}</div><div class="sl-pips">${pips}</div><div class="sl-hint">Short/Long Rest</div></div>`;
+  }
+  for(let i=0;i<9;i++){
+    const tot=st.slotMax[i],used=slotUsedEff(i),a=+adj[i]||0;
+    if(!slotEdit&&!tot)continue;
+    let pips='';for(let j=0;j<tot;j++)pips+=`<div class="slpip${j<tot-used?' av':' u'}" onclick="togSlot(${i},${j})"></div>`;
+    h+=`<div class="slvl${a?' sl-adj':''}"><div class="slvl-lbl">${SLOT_ORD[i]} Level</div>`+
+      (slotEdit?`<div class="sl-ed"><button class="hbtn slbtn" onclick="chSlot(${i},-1)">−</button><span class="sl-n">${tot}</span><button class="hbtn slbtn" onclick="chSlot(${i},1)">+</button></div>`:'')+
+      `<div class="sl-pips">${pips}</div>`+(a?`<div class="sl-hint">Table ${tb[i]} · ${a>0?'+':'−'}${Math.abs(a)}</div>`:'')+`</div>`;
+  }
+  if(!h)h=`<div class="sl-none">No spell slots at this level. Tap ✎ Adjust to add slots by hand.</div>`;
+  g.innerHTML=h;
+}
+// −/+ ändert nur die Korrektur st.slotAdj (Tabelle bleibt Basis)
+function chSlot(i,d){const a=slotAdjArr(),t=slotTableRow()[i],m=Math.max(0,Math.min(9,t+(+a[i]||0)+d));a[i]=m-t;syncSlotMax();buildSlots();autoSave()}
+function togSlotEdit(){slotEdit=!slotEdit;buildSlots();}
 // gefüllter Kreis = verfügbar: antippen verbraucht einen Platz, leerer Kreis gibt einen zurück (gespeichert: Verbrauch)
 function togSlot(i,j){const t=st.slotMax[i],u=Math.min(st.slotUsed[i],t);st.slotUsed[i]=j<t-u?u+1:Math.max(0,u-1);buildSlots();autoSave()}
 
@@ -2041,25 +2127,31 @@ function buildClassTable(){
   const tbl=CLASS_TABLES[cls];
   if(!tbl){sec.style.display='none';body.innerHTML='';return;}
   sec.style.display='';
-  if(title) title.textContent=cls+' Table';
+  const sub=document.getElementById('subcls')?.value||'';
+  const sx=scTable(cls,sub); // Paket D: Zauber-Spalten der Subklasse (Eldritch Knight, Arcane Trickster) aus SUBCLASS_TABLES
+  if(title) title.textContent=cls+' Table'+(sx?' · '+sub.replace(/\s*\([^)]+\)\s*$/,''):'');
   const curLvl=parseInt(document.getElementById('lvl')?.value)||1;
-  const ex=tbl.extra;
+  const ex=tbl.extra.concat(sx?sx.extra.map(e=>({k:e.k,l:e.l,sc:1})):[]);
+  const scRow=r=>sx&&sx.rows.find(x=>+x.lvl===+r.lvl);
+  const rowSlots=r=>{const a=r.slots||[];if(a.some(x=>x>0)||!sx)return a;const q=scRow(r);return q?q.slots:a;};
   const slotHdr=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
   // Nicht-Zauberer (alle slots 0): keine Zauberplatz-Spalten
-  const hasSlots=tbl.rows.some(r=>(r.slots||[]).some(x=>x>0));
+  const hasSlots=tbl.rows.some(r=>rowSlots(r).some(x=>x>0));
+  // Subklassen-Plätze (EK/AT): nur Spalten bis zum höchsten Grad (1st–4th); Klassen-Tabellen unverändert 9
+  const nSl=sx&&!tbl.rows.some(r=>(r.slots||[]).some(x=>x>0))?Math.max(...tbl.rows.map(r=>rowSlots(r).reduce((m,x,i)=>x>0?i+1:m,0))):9;
   let html='<div class="ct-wrap"><table class="ct-tbl">';
-  if(hasSlots) html+='<tr><th colspan="'+(3+ex.length)+'"></th><th class="ct-grp" colspan="9">Spell Slots per Spell Level</th></tr>';
+  if(hasSlots) html+='<tr><th colspan="'+(3+ex.length)+'"></th><th class="ct-grp" colspan="'+nSl+'">Spell Slots per Spell Level</th></tr>';
   html+='<tr><th>Level</th><th>Prof.<br>Bonus</th><th>Features</th>'
       + ex.map(e=>'<th>'+e.l.replace(' ','<br>')+'</th>').join('')
-      + (hasSlots?slotHdr.map(s=>'<th>'+s+'</th>').join(''):'')+'</tr>';
+      + (hasSlots?slotHdr.slice(0,nSl).map(s=>'<th>'+s+'</th>').join(''):'')+'</tr>';
   tbl.rows.forEach(r=>{
     const cur=r.lvl===curLvl?' class="ct-cur"':'';
     html+='<tr'+cur+'>';
     html+='<td class="ct-lvl">'+ordinal(r.lvl)+'</td>';
     html+='<td>+'+r.pb+'</td>';
     html+='<td class="ct-feat">'+r.f+'</td>';
-    ex.forEach(e=>{html+='<td>'+r[e.k]+'</td>';});
-    if(hasSlots) r.slots.forEach(s=>{html+= s>0 ? '<td>'+s+'</td>' : '<td class="ct-dash">—</td>';});
+    ex.forEach(e=>{const q=e.sc?scRow(r):r;html+='<td>'+(q?q[e.k]:'—')+'</td>';});
+    if(hasSlots) rowSlots(r).slice(0,nSl).forEach(s=>{html+= s>0 ? '<td>'+s+'</td>' : '<td class="ct-dash">—</td>';});
     html+='</tr>';
   });
   html+='</table></div>';
@@ -2139,7 +2231,8 @@ function buildMySpells(){
       ${isConc?`<span class="sp-badge sp-conc${concIsActive?' active':''}" onclick="event.stopPropagation();togConc(${i})" title="Concentration">C</span>`:''}
       <span class="sp-badge sp-info">${ctShort(dbSpell?dbSpell.zeit:'')}</span>
       ${/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<span class="sp-badge sp-warn">Ritual</span>`:''}
-      <div class="spell-prep${sp.prep==='free'?' free':sp.prep?' on':''}" onclick="event.stopPropagation();togPrep(${i})" style="margin-left:auto" title="${sp.prep==='free'?'Always prepared':sp.prep?'Prepared':'Not prepared'}">✦</div>
+      <button class="sp-cast" onclick="event.stopPropagation();openCast(${i})" title="Cast: use a spell slot">Cast</button>
+      <div class="spell-prep${sp.prep==='free'?' free':sp.prep?' on':''}" onclick="event.stopPropagation();togPrep(${i})" title="${sp.prep==='free'?'Always prepared':sp.prep?'Prepared':'Not prepared'}">✦</div>
       <div class="fc-uses" id="fcu_${i}">${(sp.freeMax||0)>0?Array.from({length:sp.freeMax},(_,k)=>`<div class="fc-pip${k<(sp.freeUsed||0)?' used':''}" onclick="event.stopPropagation();togFreeUse(${i},${k})" title="Free cast (no slot)"></div>`).join(''):''}</div>
       <span class="expbtn" id="msbtn_${i}">▾</span>
     </div>
@@ -3995,6 +4088,9 @@ const RACE_DATA={
 // RACE_PICKS-START
 const RACE_PICKS={"Aasimar":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"res":["Necrotic","Radiant"],"tr":[{"id":"rc_healinghands","t":"Healing Hands","tag":"aktion","uses":1,"restore":"long","ic":"✋"},{"id":"rc_celestialrevelation","t":"Celestial Revelation","tag":"bonus","uses":1,"restore":"long","ic":"🌟","minLvl":3}],"spk":[{"t":"Light Bearer","s":["Light"]}]},"Dragonborn":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"ch":[{"t":"Draconic Ancestry","o":[{"n":"Black","dmg":"Acid","res":["Acid"]},{"n":"Blue","dmg":"Lightning","res":["Lightning"]},{"n":"Brass","dmg":"Fire","res":["Fire"]},{"n":"Bronze","dmg":"Lightning","res":["Lightning"]},{"n":"Copper","dmg":"Acid","res":["Acid"]},{"n":"Gold","dmg":"Fire","res":["Fire"]},{"n":"Green","dmg":"Poison","res":["Poison"]},{"n":"Red","dmg":"Fire","res":["Fire"]},{"n":"Silver","dmg":"Cold","res":["Cold"]},{"n":"White","dmg":"Cold","res":["Cold"]}],"lk":["Breath Weapon","Damage Resistance"],"tbl":"Draconic Ancestors:\n• Black: Acid\n• Blue: Lightning\n• Brass: Fire\n• Bronze: Lightning\n• Copper: Acid\n• Gold: Fire\n• Green: Poison\n• Red: Fire\n• Silver: Cold\n• White: Cold"}],"tr":[{"id":"rc_breathweapon","t":"Breath Weapon","tag":"aktion","uses":"pb","restore":"long","ic":"🐉"},{"id":"rc_draconicflight","t":"Draconic Flight","tag":"bonus","uses":1,"restore":"long","ic":"🕊️","minLvl":5}]},"Dwarf":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"res":["Poison"],"adv":[{"t":"Dwarven Resilience","c":"Poisoned"}],"hp":{"t":"Dwarven Toughness","per":1},"tr":[{"id":"rc_stonecunning","t":"Stonecunning","tag":"bonus","uses":"pb","restore":"long","ic":"⛰️"}]},"Elf":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Keen Senses","f":["Insight","Perception","Survival"],"n":1},"ch":[{"t":"Elven Lineage","o":[{"n":"Drow","txt":"You are part of a lineage that grants you supernatural abilities. The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.\nWhen you reach character level 3, you learn the Faerie Fire spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","dv":120,"inn":[{"s":"Faerie Fire","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Dancing Lights"],"3":["Faerie Fire"],"5":["Darkness"]}},{"n":"High Elf","txt":"You are part of a lineage that grants you supernatural abilities. You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list.\nWhen you reach character level 3, you learn the Detect Magic spell. When you reach character level 5, you also learn the Misty Step spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","inn":[{"s":"Detect Magic","l":3,"u":1},{"s":"Misty Step","l":5,"u":1}],"sp":{"1":["Prestidigitation"],"3":["Detect Magic"],"5":["Misty Step"]}},{"n":"Wood Elf","txt":"You are part of a lineage that grants you supernatural abilities. Your Speed increases to 35 feet. You also know the Druidcraft cantrip.\nWhen you reach character level 3, you learn the Longstrider spell. When you reach character level 5, you also learn the Pass without Trace spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","speed":35,"inn":[{"s":"Longstrider","l":3,"u":1},{"s":"Pass without Trace","l":5,"u":1}],"sp":{"1":["Druidcraft"],"3":["Longstrider"],"5":["Pass without Trace"]}}],"ab":["INT","WIS","CHA"],"tbl":"Elven Lineages:\nLineage | Level 1 | Level 3 | Level 5\n• Drow | The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip. | Faerie Fire | Darkness\n• High Elf | You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. | Detect Magic | Misty Step\n• Wood Elf | Your Speed increases to 35 feet. You also know the Druidcraft cantrip. | Longstrider | Pass without Trace"}],"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Gnome":{"src":"XPHB","size":["S"],"speed":30,"dv":60,"ch":[{"t":"Gnomish Lineage","o":[{"n":"Forest Gnome","txt":"You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.","inn":[{"s":"Speak with Animals","l":1,"u":"pb"}],"sp":{"1":["Minor Illusion","Speak with Animals"]}},{"n":"Rock Gnome","txt":"You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.","sp":{"1":["Mending","Prestidigitation"]}}],"ab":["INT","WIS","CHA"]}],"adv":[{"t":"Gnomish Cunning","s":["INT","WIS","CHA"]}]},"Goliath":{"src":"XPHB","size":["M"],"speed":35,"ch":[{"t":"Giant Ancestry","o":[{"n":"Cloud's Jaunt","anc":"Cloud","txt":"As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.","tag":"bonus"},{"n":"Fire's Burn","anc":"Fire","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.","tag":"passiv"},{"n":"Frost's Chill","anc":"Frost","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.","tag":"passiv"},{"n":"Hill's Tumble","anc":"Hill","txt":"When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.","tag":"passiv"},{"n":"Stone's Endurance","anc":"Stone","txt":"When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.","tag":"reaktion"},{"n":"Storm's Thunder","anc":"Storm","txt":"When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.","tag":"reaktion"}]}],"tr":[{"id":"rc_giantancestry","t":"Giant Ancestry","tag":"passiv","uses":"pb","restore":"long","ic":"🗿"},{"id":"rc_largeform","t":"Large Form","tag":"bonus","uses":1,"restore":"long","ic":"🏔️","minLvl":5}]},"Half-Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Skill Versatility","any":2},"asi":{"fix":{"CHA":2},"ch":{"f":["STR","DEX","CON","INT","WIS"],"n":2,"v":1}},"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Half-Orc":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Menacing","fix":["Intimidation"]},"asi":{"fix":{"STR":2,"CON":1}},"tr":[{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Halfling":{"src":"XPHB","size":["S"],"speed":30,"adv":[{"t":"Brave","c":"Frightened"}]},"Human":{"src":"XPHB","size":["S","M"],"speed":30,"sk":{"t":"Skillful","any":1}},"Orc":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"tr":[{"id":"rc_adrenalinerush","t":"Adrenaline Rush","tag":"bonus","uses":"pb","restore":"short","ic":"💨"},{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Tiefling":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"ch":[{"t":"Fiendish Legacy","o":[{"n":"Abyssal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Poison damage. You also know the Poison Spray cantrip.\nWhen you reach character level 3, you learn the Ray of Sickness spell. When you reach character level 5, you also learn the Hold Person spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Poison"],"inn":[{"s":"Ray of Sickness","l":3,"u":1},{"s":"Hold Person","l":5,"u":1}],"sp":{"1":["Poison Spray"],"3":["Ray of Sickness"],"5":["Hold Person"]}},{"n":"Chthonic","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.\nWhen you reach character level 3, you learn the False Life spell. When you reach character level 5, you also learn the Ray of Enfeeblement spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Necrotic"],"inn":[{"s":"False Life","l":3,"u":1},{"s":"Ray of Enfeeblement","l":5,"u":1}],"sp":{"1":["Chill Touch"],"3":["False Life"],"5":["Ray of Enfeeblement"]}},{"n":"Infernal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Fire damage. You also know the Fire Bolt cantrip.\nWhen you reach character level 3, you learn the Hellish Rebuke spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Fire"],"inn":[{"s":"Hellish Rebuke","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Fire Bolt"],"3":["Hellish Rebuke"],"5":["Darkness"]}}],"ab":["INT","WIS","CHA"],"tbl":"Fiendish Legacies:\nLegacy | Level 1 | Level 3 | Level 5\n• Abyssal | You have Resistance to Poison damage. You also know the Poison Spray cantrip. | Ray of Sickness | Hold Person\n• Chthonic | You have Resistance to Necrotic damage. You also know the Chill Touch cantrip. | False Life | Ray of Enfeeblement\n• Infernal | You have Resistance to Fire damage. You also know the Fire Bolt cantrip. | Hellish Rebuke | Darkness"}],"spk":[{"t":"Otherworldly Presence","s":["Thaumaturgy"]}]}};
 // RACE_PICKS-END
+// SUBCLASS_TABLES-START (tools/subclass_tables.py, 5e.tools subclassTableGroups; Paket D 29.09.2026)
+const SUBCLASS_TABLES={"Fighter":{"Eldritch Knight":{"src":"XPHB","extra":[{"k":"spells","l":"Spells Prepared"}],"rows":[{"lvl":1,"slots":[0,0,0,0,0,0,0,0,0],"spells":"—"},{"lvl":2,"slots":[0,0,0,0,0,0,0,0,0],"spells":"—"},{"lvl":3,"slots":[2,0,0,0,0,0,0,0,0],"spells":3},{"lvl":4,"slots":[3,0,0,0,0,0,0,0,0],"spells":4},{"lvl":5,"slots":[3,0,0,0,0,0,0,0,0],"spells":4},{"lvl":6,"slots":[3,0,0,0,0,0,0,0,0],"spells":4},{"lvl":7,"slots":[4,2,0,0,0,0,0,0,0],"spells":5},{"lvl":8,"slots":[4,2,0,0,0,0,0,0,0],"spells":6},{"lvl":9,"slots":[4,2,0,0,0,0,0,0,0],"spells":6},{"lvl":10,"slots":[4,3,0,0,0,0,0,0,0],"spells":7},{"lvl":11,"slots":[4,3,0,0,0,0,0,0,0],"spells":8},{"lvl":12,"slots":[4,3,0,0,0,0,0,0,0],"spells":8},{"lvl":13,"slots":[4,3,2,0,0,0,0,0,0],"spells":9},{"lvl":14,"slots":[4,3,2,0,0,0,0,0,0],"spells":10},{"lvl":15,"slots":[4,3,2,0,0,0,0,0,0],"spells":10},{"lvl":16,"slots":[4,3,3,0,0,0,0,0,0],"spells":11},{"lvl":17,"slots":[4,3,3,0,0,0,0,0,0],"spells":11},{"lvl":18,"slots":[4,3,3,0,0,0,0,0,0],"spells":11},{"lvl":19,"slots":[4,3,3,1,0,0,0,0,0],"spells":12},{"lvl":20,"slots":[4,3,3,1,0,0,0,0,0],"spells":13}]}},"Rogue":{"Arcane Trickster":{"src":"XPHB","extra":[{"k":"prepared","l":"Prepared Spells"}],"rows":[{"lvl":1,"slots":[0,0,0,0,0,0,0,0,0],"prepared":"—"},{"lvl":2,"slots":[0,0,0,0,0,0,0,0,0],"prepared":"—"},{"lvl":3,"slots":[2,0,0,0,0,0,0,0,0],"prepared":3},{"lvl":4,"slots":[3,0,0,0,0,0,0,0,0],"prepared":4},{"lvl":5,"slots":[3,0,0,0,0,0,0,0,0],"prepared":4},{"lvl":6,"slots":[3,0,0,0,0,0,0,0,0],"prepared":4},{"lvl":7,"slots":[4,2,0,0,0,0,0,0,0],"prepared":5},{"lvl":8,"slots":[4,2,0,0,0,0,0,0,0],"prepared":6},{"lvl":9,"slots":[4,2,0,0,0,0,0,0,0],"prepared":6},{"lvl":10,"slots":[4,3,0,0,0,0,0,0,0],"prepared":7},{"lvl":11,"slots":[4,3,0,0,0,0,0,0,0],"prepared":8},{"lvl":12,"slots":[4,3,0,0,0,0,0,0,0],"prepared":8},{"lvl":13,"slots":[4,3,2,0,0,0,0,0,0],"prepared":9},{"lvl":14,"slots":[4,3,2,0,0,0,0,0,0],"prepared":10},{"lvl":15,"slots":[4,3,2,0,0,0,0,0,0],"prepared":10},{"lvl":16,"slots":[4,3,3,0,0,0,0,0,0],"prepared":11},{"lvl":17,"slots":[4,3,3,0,0,0,0,0,0],"prepared":11},{"lvl":18,"slots":[4,3,3,0,0,0,0,0,0],"prepared":11},{"lvl":19,"slots":[4,3,3,1,0,0,0,0,0],"prepared":12},{"lvl":20,"slots":[4,3,3,1,0,0,0,0,0],"prepared":13}]}}};
+// SUBCLASS_TABLES-END
 
 const CLASS_CORE_TRAITS = {
   "Warlock": {
@@ -5092,9 +5188,15 @@ function buildCombatStats(cls,subcls,lvl){
     if(v===undefined||v===null||v===''||v==='—'||v===0||v==='0')return;
     h+=chip(c.l,v);
   });
+  const sx=scTable(cls,subcls),sxr=sx&&sx.rows.find(r=>+r.lvl===lvl); // Paket D: Eldritch Knight/Arcane Trickster
+  (sx?sx.extra:[]).forEach(c=>{
+    const v=sxr&&sxr[c.k];
+    if(v===undefined||v===null||v===''||v==='—'||v===0||v==='0')return;
+    h+=chip(c.l,v);
+  });
   const ac=combatUnarmoredAC(cls,subcls,lvl);
   if(ac)h+=chip('Unarmored AC',ac.ac,'cst-ac',ac.name);
-  const sl=(row.slots||[]).map((n,i)=>n>0?`<span class="cst-slot" title="${n} slots of level ${i+1}"><b>${['1st','2nd','3rd'][i]||(i+1)+'th'}</b>${n}</span>`:'').join('');
+  const sl=((row.slots||[]).some(n=>n>0)||!sxr?(row.slots||[]):sxr.slots).map((n,i)=>n>0?`<span class="cst-slot" title="${n} slots of level ${i+1}"><b>${['1st','2nd','3rd'][i]||(i+1)+'th'}</b>${n}</span>`:'').join('');
   const closed=abGrpIsClosed('stats');
   el.innerHTML=`<div class="cst-head${closed?' closed':''}" onclick="togAbGrp('stats')"><span>Combat Stats · Level ${lvl}</span><span class="cst-chev">${closed?'▸':'▾'}</span></div>`+
     `<div class="cst-body"${closed?' style="display:none"':''}><div class="cst-grid">${h}</div>`+
@@ -5112,6 +5214,7 @@ function buildAbilities(){
   const sec=document.getElementById('abilitiesSection');
   const list=document.getElementById('abList');
   buildCombatStats(cls,subcls,lvl);
+  buildSlots();buildHitDice(); // Paket D: Plätze/Hit Dice hängen an Klasse, Subklasse, Stufe und Pakt-Tracker
   if(!list)return;
   const openIds=[...list.querySelectorAll('.ab-body.on')].map(b=>b.id); // aufgeklappte Karten bleiben nach Klick offen
   list.innerHTML='';
@@ -5140,7 +5243,7 @@ function buildAbilities(){
     const tagLabel=ab.tag==='aktion'?'Aktion':ab.tag==='bonus'?'Bonusaktion':ab.tag==='reaktion'?'Reaktion':'Passiv';
     const maxUses=abMaxUses(ab.uses,lvl);
     const used=getAbUses(ab.id);
-    const restoreLabel=ab.restore==='short'?'Short/Long Rest':ab.restore==='long'?'Long Rest':'';
+    const rk=restKind(ab,lvl),restoreLabel=rk==='short'?'Short/Long Rest':rk==='one'?'Short Rest +1 · Long Rest':rk==='long'?'Long Rest':'';
     const restoreHtml=restoreLabel?`<div style="font-size:var(--fs-2xs);color:var(--text3);font-family:'Cinzel',serif">${restoreLabel}</div>`:'';
     const pipRow=(uid,max,u)=>Array.from({length:max},(_,i)=>
         `<div class="ab-pip${i<max-u?' avail':' used'}" onclick="togAbUse('${uid}',${i},${max})"></div>`
@@ -5287,6 +5390,176 @@ function getAbilityMod(key){
   return Math.floor((v-10)/2);
 }
 function getWisMod(){ return getAbilityMod('WIS'); }
+
+// ── RAST UND HIT DICE (Paket D, 29.09.2026) ──
+// Short Rest: Tracker mit restore:"short" voll; Ausnahmen je Stufe (REST_SHORT_FROM: Font of Inspiration L5, Improved Warding Flare L6);
+// Features mit „regain one expended use when you finish a Short Rest“ +1 (REST_SHORT_ONE, Entscheidung Simon 29.09.2026);
+// wahlweise Teil-Rückgewinnung (REST_MANUAL) nur als Hinweis. Hit Dice: Würfel aus CLASS_CORE_TRAITS[k].hd, Anzahl = Stufe,
+// App würfelt oder eigenes Ergebnis, + CON-Mod., mind. 1 HP (XPHB „Short Rest“). Long Rest (XPHB): alle HP, alle Hit Dice,
+// Temp HP enden, alle Zauberplätze, alle Tracker, Free Casts; Death Saves zurück (HP zurückgewonnen).
+const REST_SHORT_FROM={bardicinspiration:5,lt_wardingflare:6};
+const REST_SHORT_ONE=new Set(['wildshape','bb_rage','channeldivinity','secondwind','pw_psionicdice','sn_psionicdice']);
+const REST_MANUAL=new Set(['wz_arcanerecovery','sorcerousrestoration','wl_magicalcunning','naturalrecovery']);
+function restKind(ab,lvl){
+  if(ab.id in REST_SHORT_FROM)return lvl>=REST_SHORT_FROM[ab.id]?'short':'long';
+  if(REST_SHORT_ONE.has(ab.id))return 'one';
+  return ab.restore||null;
+}
+function restTrackers(){
+  const cls=curCls(),lvl=curLvl(),ab=(CLASS_DATA[cls]&&CLASS_DATA[cls].abilities)||{},out=[];
+  const ok=a=>!a.minLvl||lvl>=a.minLvl;
+  (ab.base||[]).forEach(a=>{if(ok(a))out.push(a);});
+  const k=clsSubKey(ab,curSub());
+  if(k&&k!=='base')(ab[k]||[]).forEach(a=>{if(ok(a))out.push(a);});
+  const race=rcRace();if(race)out.push(...rcTrackers(race,lvl));
+  return out.filter(a=>a.sub||(a.uses!==null&&a.uses!==undefined));
+}
+function restIds(ab,lvl){return ab.sub?ab.sub.filter(x=>!x.minLvl||lvl>=x.minLvl).map(x=>ab.id+'.'+x.k):[ab.id];}
+function shortRestPlan(){
+  const lvl=curLvl(),full=[],one=[],manual=[];
+  restTrackers().forEach(ab=>{
+    const ids=restIds(ab,lvl),used=ids.reduce((n,id)=>n+getAbUses(id),0),k=restKind(ab,lvl);
+    if(REST_MANUAL.has(ab.id)){if(used<abMaxUses(ab.uses,lvl))manual.push(ab);return;}
+    if(!used)return;
+    if(k==='short')full.push({ab,ids});else if(k==='one')one.push({ab,ids});
+  });
+  return {full,one,manual};
+}
+function hdInfo(){
+  const t=typeof CLASS_CORE_TRAITS!=='undefined'&&CLASS_CORE_TRAITS[curCls()],m=t&&/d(\d+)/.exec(t.hd||'');
+  if(!m)return null;
+  const max=curLvl(),used=Math.max(0,Math.min(+st.hdUsed||0,max));
+  return {die:+m[1],max,used,left:max-used};
+}
+function buildHitDice(){
+  const box=document.getElementById('hdBox');if(!box)return;
+  const h=hdInfo();
+  if(!h){box.style.display='none';return;}
+  box.style.display='';
+  document.getElementById('hdLbl').textContent='Hit Dice · d'+h.die;
+  document.getElementById('hdPips').innerHTML=Array.from({length:h.max},(_,i)=>`<div class="slpip hdpip${i<h.left?' av':' u'}" onclick="togHD(${i})"></div>`).join('')+`<span class="hd-n">${h.left}/${h.max}</span>`;
+}
+function togHD(i){const h=hdInfo();if(!h)return;st.hdUsed=i<h.left?h.used+1:Math.max(0,h.used-1);buildHitDice();autoSave();}
+function hpMaxVal(){return parseInt(document.getElementById('hpM')?.value)||10;}
+function restLog(m){const n=document.getElementById('charName')?.textContent.trim();if(n)_pushLog(n,[m]);}
+function resetDeathSaves(){st.dsS=[0,0,0];st.dsF=[0,0,0];['dsS','dsF'].forEach(id=>document.getElementById(id)?.querySelectorAll('.dspip').forEach(p=>p.classList.remove('f')));}
+let _restMode=null,_restLast='',_castIdx=null;
+function openRest(mode){_restMode=mode;_restLast='';renderRest();document.getElementById('restModal').classList.add('on');}
+function closeRest(){document.getElementById('restModal').classList.remove('on');_restMode=null;_castIdx=null;}
+function hdSpend(own){
+  const h=hdInfo();if(!h||h.left<=0){showToast('No Hit Dice left');return;}
+  let r;
+  if(own===null||own===undefined)r=1+Math.floor(Math.random()*h.die);
+  else{r=parseInt(own);if(!(r>=1&&r<=h.die)){showToast('Enter a roll from 1 to '+h.die);return;}}
+  const con=getAbilityMod('CON'),gain=Math.max(1,r+con),m=hpMaxVal(),before=st.hpC;
+  st.hpC=Math.min(m,st.hpC+gain);st.hdUsed=h.used+1;
+  document.getElementById('hpC').textContent=st.hpC;updBar();buildHitDice();
+  const cs=con?(con>0?' + ':' − ')+Math.abs(con)+' CON':'';
+  if(own===null||own===undefined){diceHistory.unshift({spec:'1d'+h.die+(con?(con>0?'+':'')+con:''),label:'Hit Die',total:r+con});if(diceHistory.length>DICE_HISTORY_MAX)diceHistory.length=DICE_HISTORY_MAX;renderDiceHistory();}
+  _restLast=`d${h.die}: ${r}${cs} → +${gain} HP${before+gain>m?' (max reached)':''}`;
+  autoSave();restLog(`Hit Die ausgegeben: d${h.die} ${r}${cs} → +${gain} HP (${before} → ${st.hpC})`);
+  renderRest();
+}
+function renderRest(){
+  const box=document.getElementById('restBox');if(!box||!_restMode)return;
+  if(_restMode==='cast'){renderCast(box);return;}
+  const m=hpMaxVal(),h=hdInfo(),lvl=curLvl();
+  const warn=st.hpC<1?`<div class="rest-note warn">Rules: you need at least 1 Hit Point to start a rest.</div>`:'';
+  let body='';
+  if(_restMode==='short'){
+    const p=shortRestPlan(),con=getAbilityMod('CON');
+    if(h){
+      const act=h.left>0&&st.hpC<m
+        ?`<div class="rest-act"><button class="ws-btn ws-go" onclick="hdSpend(null)">🎲 Roll 1d${h.die}${con?(con>0?'+':'')+con:''}</button><input id="hdOwn" type="number" min="1" max="${h.die}" inputmode="numeric" placeholder="own roll"><button class="ws-btn" onclick="hdSpend(document.getElementById('hdOwn').value)">Add</button></div>`
+        :`<div class="rest-note">${h.left>0?'Hit Points are full.':'No Hit Dice left.'}</div>`;
+      body+=`<div class="rest-sec"><div class="rest-h">Spend Hit Dice · d${h.die}${con?(con>0?' + ':' − ')+Math.abs(con)+' CON':''}</div>
+        <div class="rest-hp">HP <b>${st.hpC}</b> / ${m} · Hit Dice <b>${h.left}</b> / ${h.max}</div>${act}${_restLast?`<div class="rest-last">${_restLast}</div>`:''}</div>`;
+    }
+    const li=p.full.map(x=>`<li>${x.ab.name}<span>full</span></li>`).concat(p.one.map(x=>`<li>${x.ab.name}<span>+1</span></li>`));
+    body+=`<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Nothing to recover.</div>`}`+
+      (p.manual.length?`<div class="rest-note">Use by hand if you want (see feature text): ${p.manual.map(a=>a.name).join(', ')}</div>`:'')+`</div>`;
+    box.innerHTML=`<div class="ws-head">☾ Short Rest · 1 hour</div>${warn}${body}<div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doShortRest()">Finish Short Rest</button></div>`;
+  }else{
+    const li=[];
+    if(st.hpC<m)li.push(`<li>Hit Points<span>${st.hpC} → ${m}</span></li>`);
+    if((parseInt(document.getElementById('hpT')?.value)||0)>0)li.push(`<li>Temporary Hit Points end<span>→ 0</span></li>`);
+    if(h&&h.used)li.push(`<li>Hit Dice<span>${h.left} → ${h.max}</span></li>`);
+    syncSlotMax();
+    const su=st.slotMax.reduce((a,_,i)=>a+slotUsedEff(i),0);if(su)li.push(`<li>Spell slots<span>+${su}</span></li>`);
+    restTrackers().forEach(ab=>{if(restIds(ab,lvl).some(id=>getAbUses(id)>0))li.push(`<li>${ab.name}<span>full</span></li>`);});
+    const fc=(st.mySpells||[]).filter(x=>(x.freeUsed||0)>0);if(fc.length)li.push(`<li>Free casts<span>${fc.map(x=>x.name).join(', ')}</span></li>`);
+    if((st.dsS||[]).some(Boolean)||(st.dsF||[]).some(Boolean))li.push(`<li>Death Saves<span>reset</span></li>`);
+    box.innerHTML=`<div class="ws-head">☀ Long Rest · 8 hours</div>${warn}<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Everything is already full.</div>`}</div><div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doLongRest()">Finish Long Rest</button></div>`;
+  }
+}
+function doShortRest(){
+  const p=shortRestPlan();
+  p.full.forEach(x=>x.ids.forEach(id=>{delete st.abUses[id];}));
+  p.one.forEach(x=>x.ids.forEach(id=>{const u=getAbUses(id);if(u>0)setAbUses(id,u-1);}));
+  const names=p.full.map(x=>x.ab.name).concat(p.one.map(x=>x.ab.name+' +1'));
+  closeRest();buildAbilities();autoSave();
+  restLog('Short Rest'+(names.length?': '+names.join(', '):''));showToast('☾ Short Rest finished');
+}
+function doLongRest(){
+  st.hpC=hpMaxVal();document.getElementById('hpC').textContent=st.hpC;
+  const t=document.getElementById('hpT');if(t)t.value=0;
+  st.hdUsed=0;st.slotUsed=[0,0,0,0,0,0,0,0,0];st.abUses={};
+  (st.mySpells||[]).forEach(x=>{if(x.freeUsed)x.freeUsed=0;});
+  resetDeathSaves();updBar();
+  closeRest();buildAbilities();buildMySpells();autoSave();
+  restLog('Long Rest');showToast('☀ Long Rest finished');
+}
+
+// ── ZAUBERN (Paket D, 29.09.2026): „Cast“ in My Spells verbraucht einen Platz ──
+// Grad ab Zaubergrad aufwärts (nur Grade mit Plätzen; ohne freie = ausgegraut), Warlock-Pakt-Platz (Tracker wl_pactslots),
+// Mystic Arcanum (wl_mysticarcanum.<Grad>), Free Cast (freeMax/freeUsed), Ritual und Cantrip ohne Platz.
+// Konzentrations-Zauber setzen die Markierung (st.concActive); Log-Eintrag.
+function castOptions(i){
+  const sp=st.mySpells[i];if(!sp)return [];
+  const db=ZB_SPELLS.find(x=>x.name===sp.name),g=+sp.grad||0,lvl=curLvl(),out=[];
+  if(g===0)return [{k:'cantrip',l:'Cast cantrip · no slot'}];
+  syncSlotMax();
+  for(let j=g-1;j<9;j++){const tot=st.slotMax[j];if(!tot)continue;const n=tot-slotUsedEff(j);out.push({k:'s'+j,l:`${SLOT_ORD[j]}-level slot`,n,dis:n<=0});}
+  const pk=pactInfo();if(pk&&g<=pk.lv){const n=pk.max-pk.used;out.push({k:'pact',l:`Pact slot (${SLOT_ORD[pk.lv-1]} level)`,n,dis:n<=0});}
+  if(curCls()==='Warlock'&&g>=6){
+    const ab=(((CLASS_DATA.Warlock||{}).abilities||{}).base||[]).find(a=>a.id==='wl_mysticarcanum');
+    const x=ab&&(!ab.minLvl||lvl>=ab.minLvl)&&(ab.sub||[]).find(y=>y.k===String(g)&&(!y.minLvl||lvl>=y.minLvl));
+    if(x){const id=ab.id+'.'+x.k,max=abMaxUses(x.uses!==undefined?x.uses:ab.uses,lvl),n=max-Math.min(getAbUses(id),max);out.push({k:'arc',id,l:`Mystic Arcanum (${SLOT_ORD[g-1]} level)`,n,dis:n<=0});}
+  }
+  if((sp.freeMax||0)>0){const n=sp.freeMax-(sp.freeUsed||0);out.push({k:'free',l:'Free cast · no slot',n,dis:n<=0});}
+  if(db&&/ritual/i.test(db.school||''))out.push({k:'ritual',l:'As a Ritual · +10 minutes, no slot'});
+  return out;
+}
+function openCast(i){_restMode='cast';_castIdx=i;renderRest();document.getElementById('restModal').classList.add('on');}
+function spellIsConc(sp){const db=ZB_SPELLS.find(x=>x.name===sp.name);return !!(db&&/concentration/i.test(db.dauer||''));}
+function renderCast(box){
+  const i=_castIdx,sp=st.mySpells[i];if(!sp){closeRest();return;}
+  const db=ZB_SPELLS.find(x=>x.name===sp.name),g=+sp.grad||0,opts=castOptions(i);
+  const lbl=g===0?'Cantrip':ordinal(g)+' Level';
+  let conc='';
+  if(spellIsConc(sp)){
+    const cur=st.concActive!==null&&st.concActive!==undefined&&st.concActive!==i&&st.mySpells[st.concActive]?st.mySpells[st.concActive].name:(st.concActiveFeature?'a feature':'');
+    conc=`<div class="rest-note">Concentration: marks this spell${cur?` and ends concentration on ${cur}`:''}.</div>`;
+  }
+  const none=!opts.some(o=>!o.dis)?`<div class="rest-note warn">No slot of level ${g} or higher left.</div>`:'';
+  box.innerHTML=`<div class="ws-head">✧ Cast ${sp.name}</div><div class="cast-sub">${lbl}${db?' · '+ctShort(db.zeit):''}</div>`+
+    `<div class="cast-opts">${opts.map(o=>`<button class="cast-opt" ${o.dis?'disabled':''} onclick="doCast('${o.k}')"><b style="font-weight:normal">${o.l}</b>${o.n!==undefined?`<span>${o.n} left</span>`:''}</button>`).join('')}</div>`+
+    none+conc+`<div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button></div>`;
+}
+function doCast(k){
+  const i=_castIdx,sp=st.mySpells[i];if(!sp)return;
+  const o=castOptions(i).find(x=>x.k===k);if(!o||o.dis)return;
+  let how=o.l.split(' · ')[0],logHow='';
+  if(k[0]==='s'){const j=+k.slice(1);st.slotUsed[j]=slotUsedEff(j)+1;logHow=`Platz ${j+1}. Grad`;}
+  else if(k==='pact'){const pk=pactInfo();setAbUses(pk.id,pk.used+1);logHow=`Pakt-Platz ${pk.lv}. Grad`;}
+  else if(k==='arc'){setAbUses(o.id,getAbUses(o.id)+1);logHow='Mystic Arcanum';}
+  else if(k==='free'){sp.freeUsed=(sp.freeUsed||0)+1;logHow='Free Cast';}
+  else if(k==='ritual'){logHow='Ritual';}
+  else logHow='Cantrip';
+  if(spellIsConc(sp)){st.concActive=i;st.concActiveFeature=null;}
+  closeRest();buildAbilities();buildMySpells();autoSave();
+  restLog(`Zauber gewirkt: ${sp.name} (${logHow})`);showToast(`✧ ${sp.name} · ${how}`);
+}
 
 function restoreAllUses(){
   st.abUses={};buildAbilities();autoSave();showToast('↺ All uses reset');
@@ -5854,7 +6127,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:""
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -5958,7 +6231,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -5987,7 +6260,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:""
   });
   document.getElementById('charName').textContent=_name;
   TEXT_IDS.forEach(id=>{
@@ -6094,6 +6367,7 @@ function _diffSnaps(a,b){
   if(a.attrs&&b.attrs) for(const k in b.attrs){ if(a.attrs[k]!==b.attrs[k]) out.push(`${k}: ${a.attrs[k]??'?'} → ${b.attrs[k]}`); }
   const smA=a.slotMax||[], smB=b.slotMax||[];
   for(let i=0;i<9;i++){ if((smA[i]??0)!==(smB[i]??0)) out.push(`Zauberplätze Grad ${i+1} (max): ${smA[i]??0} → ${smB[i]??0}`); }
+  if((a.hdUsed||0)!==(b.hdUsed||0)) out.push(`Hit Dice verbraucht: ${a.hdUsed||0} → ${b.hdUsed||0}`);
   const suA=a.slotUsed||[], suB=b.slotUsed||[];
   for(let i=0;i<9;i++){ if((suA[i]??0)!==(suB[i]??0)) out.push(`Zauberplätze Grad ${i+1} verbraucht: ${suA[i]??0} → ${suB[i]??0}`); }
   const kmA=a.skillMisc||{}, kmB=b.skillMisc||{};
@@ -6311,7 +6585,7 @@ function setTextSize(v){
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();
 }
-const APP_VERSION = 'willow-app-2026-09-29c';
+const APP_VERSION = 'willow-app-2026-09-29d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -6583,6 +6857,8 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
     </div>
   </div>
 </div>
+<!-- RAST / ZAUBERN (Paket D, 29.09.2026): Dialog für Short Rest, Long Rest und „Cast“ -->
+<div id="restModal" class="ws-overlay" onclick="if(event.target===this)closeRest()"><div class="ws-box rest-box" id="restBox"></div></div>
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:8px">Delete Character?</div>

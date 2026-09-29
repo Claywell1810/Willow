@@ -586,7 +586,7 @@ const REGRESSION = [
       if (!rage().querySelectorAll('.ab-pip')[2].classList.contains('used') || !rage().querySelectorAll('.ab-pip')[0].classList.contains('avail')) return 'Verfügbare Kreise nicht links';
       rage().querySelectorAll('.ab-pip')[2].click();
       if (av() !== 3 || w.eval('st.abUses.bb_rage') !== 0) return 'Tipp auf leeren Kreis gibt nicht zurück';
-      w.eval('st.slotMax[0]=4;st.slotUsed[0]=0'); w.buildSlots();
+      w.eval('st.slotAdj=[4,0,0,0,0,0,0,0,0];st.slotUsed[0]=0'); w.buildSlots(); // seit Paket D: Barbarian ohne Plätze + Korrektur 4
       const sl = () => d.querySelectorAll('#spSlots .slvl')[0];
       if (sl().querySelectorAll('.slpip.av').length !== 4) return 'Zauberplätze Grad 1 nicht alle gefüllt';
       sl().querySelectorAll('.slpip')[1].click();
@@ -627,7 +627,7 @@ const REGRESSION = [
       w.closeSettings && w.closeSettings();
       if (!/data-ts="sehrgross"\]\{zoom:1\.3/.test(html) || !html.includes("localStorage.getItem('willow_textsize')")) return 'Zoom-CSS oder Frühstart-Skript fehlt';
       if (/id="hp[MT]"[^>]*width:44px/.test(html)) return 'HP-Eingabe mit fester Breite (Temp ragt über den Rand)';
-      w.buildSlots(); if (d.querySelectorAll('#spSlots .slbtn').length !== 18) return 'Zauberplatz-Knöpfe ohne .slbtn';
+      w.eval('slotEdit=true'); w.buildSlots(); if (d.querySelectorAll('#spSlots .slbtn').length !== 18) return 'Zauberplatz-Knöpfe ohne .slbtn (Modus ✎ Adjust, Paket D)'; w.eval('slotEdit=false'); w.buildSlots();
       return true;
     } },
   { name: 'Farben: Beschreibungen hell (--desc), Labels/Highlight hellgold, --muted für Leiste/Platzhalter, eigene Farben gehen vor, Farbauswahl gruppiert', datum: '27.09.2026',
@@ -1091,6 +1091,115 @@ const REGRESSION = [
       w.resetUI();
       return true;
     } },
+  { name: 'Paket D: Zauberplätze aus der Class Table (Stufe, Subklasse EK/AT), −/+ als Korrektur, Grade mit 0 fehlen, Warlock Pakt-Kachel, alte Saves', datum: '29.09.2026',
+    run: ({ w, d, set, sel }) => {
+      w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest D'");
+      w.applyState({ slotMax: [4, 3, 3, 3, 2, 1, 1, 1, 1], slotUsed: [0, 0, 3, 0, 0, 0, 0, 0, 0], _f_lvl: '5' }); // alter Save: slotMax von Hand, kein slotAdj
+      sel('Wizard', '', 5);
+      const tiles = () => [...d.querySelectorAll('#spSlots .slvl')].map(t => t.querySelector('.slvl-lbl').textContent + ':' + t.querySelectorAll('.slpip').length + '/' + t.querySelectorAll('.slpip.av').length).join('|');
+      if (tiles() !== '1st Level:4/4|2nd Level:3/3|3rd Level:2/0') return 'Wizard L5: ' + tiles();
+      if (w.eval('st.slotUsed[2]') !== 3 || w.eval('st.slotMax.join()') !== '4,3,2,0,0,0,0,0,0') return 'Verbrauch gekürzt statt nur begrenzt angezeigt';
+      d.querySelectorAll('#spSlots .slvl')[2].querySelectorAll('.slpip')[1].click();
+      if (w.eval('st.slotUsed[2]') !== 1) return 'Tipp auf leeren Kreis (Verbrauch über Maximum): ' + w.eval('st.slotUsed[2]');
+      if (d.querySelectorAll('#spSlots .slbtn').length) return '−/+ sichtbar ohne ✎ Adjust';
+      w.togSlotEdit(); d.querySelectorAll('#spSlots .slvl')[0].querySelectorAll('.slbtn')[1].click(); w.togSlotEdit();
+      if (w.eval('st.slotAdj[0]') !== 1 || tiles().split('|')[0] !== '1st Level:5/5' || !d.querySelector('#spSlots .sl-adj .sl-hint').textContent.includes('Table 4 · +1')) return 'Korrektur +1: ' + tiles();
+      set('lvl', '9'); w.buildAbilities();
+      if (w.eval('st.slotMax.join()') !== '5,3,3,3,1,0,0,0,0') return 'Stufe 9 mit Korrektur: ' + w.eval('st.slotMax.join()');
+      w.eval('st.slotAdj=[0,0,0,0,0,0,0,0,0]'); sel('Barbarian', '', 5);
+      if (d.querySelectorAll('#spSlots .slvl').length || !d.querySelector('#spSlots .sl-none')) return 'Barbarian: Plätze statt Hinweis';
+      sel('Warlock', '', 5);
+      const pk = d.querySelector('#spSlots .sl-pact');
+      if (!pk || pk.querySelector('.slvl-lbl').textContent !== 'Pact · 3rd' || pk.querySelectorAll('.slpip').length !== 2 || d.querySelectorAll('#spSlots .slvl').length !== 1) return 'Warlock-Pakt-Kachel';
+      pk.querySelector('.slpip').click();
+      if (w.eval('st.abUses.wl_pactslots') !== 1) return 'Pakt-Kreis verbraucht nicht wl_pactslots';
+      // Eldritch Knight / Arcane Trickster: Plätze aus SUBCLASS_TABLES (5e.tools XPHB), auch Class Table und Combat Stats
+      sel('Fighter', 'Eldritch Knight (PHB)', 7);
+      if (w.eval('st.slotMax.join()') !== '4,2,0,0,0,0,0,0,0') return 'Eldritch Knight L7: ' + w.eval('st.slotMax.join()');
+      if (!/Spell Slots/.test(d.getElementById('combatStats').textContent)) return 'Combat Stats ohne EK-Plätze';
+      w.buildClassTable();
+      if (d.getElementById('clsTableTitle').textContent !== 'Fighter Table · Eldritch Knight' || !d.getElementById('clsTableBody').textContent.includes('SpellsPrepared') || d.querySelectorAll('#clsTableBody tr:nth-child(2) th').length !== 3 + 3 + 4 || !d.getElementById('clsTableBody').textContent.includes('Spell Slots per Spell Level')) return 'Class Table ohne EK-Spalten';
+      sel('Rogue', 'Arcane Trickster (PHB)', 13);
+      if (w.eval('st.slotMax.join()') !== '4,3,2,0,0,0,0,0,0') return 'Arcane Trickster L13: ' + w.eval('st.slotMax.join()');
+      sel('Rogue', 'Thief (PHB)', 13);
+      if (w.eval('st.slotMax.join()') !== '0,0,0,0,0,0,0,0,0') return 'Thief mit Plätzen';
+      const snap = w.eval('collectState()'); if (!Array.isArray(snap.slotAdj) || snap.hdUsed !== 0) return 'slotAdj/hdUsed nicht im Save';
+      w.resetUI(); return true;
+    } },
+  { name: 'Paket D: Short Rest (restore short voll, „regain one“ +1, Font of Inspiration erst L5), Long Rest (HP, Temp, Hit Dice, Plätze, Tracker, Free Casts, Death Saves), Hit Dice würfeln/eintippen, Log', datum: '29.09.2026',
+    run: ({ w, d, set, sel }) => {
+      w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest D'");
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 16, CHA: 16 }, _f_lvl: '6', _f_hpM: '40', hpC: 12 });
+      sel('Cleric', '', 6); w.autoSave();
+      if (d.getElementById('hdBox').style.display === 'none' || d.getElementById('hdLbl').textContent !== 'Hit Dice · d8' || d.querySelectorAll('#hdPips .hdpip.av').length !== 6) return 'Hit-Dice-Anzeige';
+      const cdMax = w.eval("abMaxUses(CLASS_DATA.Cleric.abilities.base.find(a=>a.id==='channeldivinity').uses,6)");
+      w.eval(`st.abUses={channeldivinity:${cdMax}};st.slotUsed=[2,1,0,0,0,0,0,0,0]`);
+      w.openRest('short');
+      const box = d.getElementById('restBox');
+      if (!d.getElementById('restModal').classList.contains('on') || !box.textContent.includes('Channel Divinity+1')) return 'Short-Rest-Dialog: ' + box.textContent.slice(0, 200);
+      w.hdSpend('9'); if (w.eval('st.hdUsed') !== 0) return 'Wurf über Würfelgröße angenommen';
+      w.hdSpend('5'); if (w.eval('st.hpC') !== 19 || w.eval('st.hdUsed') !== 1) return 'Eigener Wurf 5 + CON 2: HP ' + w.eval('st.hpC');
+      w.eval('st.attrs.CON=4'); w.hdSpend('1'); if (w.eval('st.hpC') !== 20) return 'Mindestens 1 HP je Würfel'; w.eval('st.attrs.CON=14');
+      const hp0 = w.eval('st.hpC'); w.hdSpend(null); const g = w.eval('st.hpC') - hp0;
+      if (g < 3 || g > 10 || w.eval('st.hdUsed') !== 3) return 'App-Wurf: +' + g;
+      w.doShortRest();
+      if (w.eval('st.abUses.channeldivinity') !== cdMax - 1) return 'Channel Divinity nicht +1';
+      if (w.eval('st.slotUsed.join()') !== '2,1,0,0,0,0,0,0,0') return 'Short Rest füllt Zauberplätze';
+      if (w.eval('st.hdUsed') !== 3 || d.getElementById('restModal').classList.contains('on')) return 'Hit Dice nach Short Rest / Dialog offen';
+      const log = w.eval('st.log').map(e => e.m);
+      if (!log.some(m => /^Short Rest: Channel Divinity \+1/.test(m)) || !log.some(m => /^Hit Die ausgegeben: d8 5 \+ 2 CON → \+7 HP/.test(m))) return 'Log: ' + log.slice(-4).join(' / ');
+      // Bard: Font of Inspiration erst ab L5
+      sel('Bard', '', 4); w.eval('st.abUses={bardicinspiration:2}'); w.doShortRest();
+      if (w.eval('st.abUses.bardicinspiration') !== 2) return 'Bard L4: Short Rest füllt Bardic Inspiration';
+      set('lvl', '5'); w.buildAbilities(); w.doShortRest();
+      if (w.eval('st.abUses.bardicinspiration')) return 'Bard L5: Font of Inspiration greift nicht';
+      if (!d.querySelector('#abList').textContent.includes('Short/Long Rest')) return 'Label Bardic Inspiration';
+      // Warlock: Pakt-Plätze voll beim Short Rest
+      sel('Warlock', '', 5); w.eval("st.abUses={wl_pactslots:2,wl_magicalcunning:0}"); w.openRest('short');
+      if (!box.textContent.includes('Pact Magic Slotsfull') || !box.textContent.includes('Magical Cunning')) return 'Warlock Short-Rest-Dialog: ' + box.textContent;
+      w.doShortRest(); if (w.eval('st.abUses.wl_pactslots')) return 'Pakt-Plätze nicht zurück';
+      // Long Rest
+      sel('Wizard', '', 5);
+      w.eval("st.hpC=3;st.hdUsed=4;st.slotUsed=[3,1,2,0,0,0,0,0,0];st.abUses={wz_arcanerecovery:1};st.dsS=[1,0,0];st.dsF=[1,1,0];st.mySpells=[{name:'Shield',grad:1,school:'Abjuration',prep:true,freeMax:1,freeUsed:1}];document.getElementById('hpT').value=5");
+      w.openRest('long'); if (!box.textContent.includes('Hit Points3 → 40') || !box.textContent.includes('Hit Dice1 → 5')) return 'Long-Rest-Dialog: ' + box.textContent;
+      w.doLongRest();
+      if (w.eval('st.hpC') !== 40 || d.getElementById('hpT').value !== '0' || w.eval('st.hdUsed') !== 0 || w.eval('st.slotUsed.join()') !== '0,0,0,0,0,0,0,0,0' || Object.keys(w.eval('st.abUses')).length || w.eval('st.mySpells[0].freeUsed') || w.eval('st.dsS.join()+st.dsF.join()') !== '0,0,00,0,0') return 'Long Rest unvollständig';
+      if (d.querySelector('#dsF .dspip.f')) return 'Death-Save-Kreise nicht geleert';
+      if (d.body.innerHTML.includes('onclick="restoreAllUses()"')) return 'alter Reset-Knopf noch da';
+      w.resetUI(); return true;
+    } },
+  { name: 'Paket D: „Cast“ in My Spells – Grad ab Zaubergrad, Platz/Pakt-Platz/Mystic Arcanum/Free Cast/Ritual, Konzentration, Log', datum: '29.09.2026',
+    run: ({ w, d, set, sel }) => {
+      w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest D'");
+      w.applyState({ _f_lvl: '5' }); sel('Wizard', '', 5); w.autoSave();
+      const add = n => w.eval(`(()=>{const s=ZB_SPELLS.find(x=>x.name===${JSON.stringify(n)});st.mySpells.push({name:s.name,grad:s.grad,school:s.school,prep:true});return st.mySpells.length-1})()`);
+      const fb = add('Fireball'), dm = add('Detect Magic'), fh = add('Fly'), bl = add('Fire Bolt');
+      w.buildMySpells();
+      if (d.querySelectorAll('#mySpells .sp-cast').length !== 4) return 'Cast-Knöpfe fehlen';
+      const keys = i => w.castOptions(i).map(o => o.k + (o.dis ? '-' : '')).join(',');
+      if (keys(fb) !== 's2') return 'Fireball Optionen: ' + keys(fb);
+      if (keys(dm) !== 's0,s1,s2,ritual') return 'Detect Magic Optionen: ' + keys(dm);
+      if (keys(bl) !== 'cantrip') return 'Cantrip: ' + keys(bl);
+      w.openCast(fb); d.querySelector('#restBox .cast-opt').click();
+      if (w.eval('st.slotUsed[2]') !== 1 || d.getElementById('restModal').classList.contains('on')) return 'Fireball verbraucht keinen Platz 3. Grad';
+      w.openCast(fh); w.doCast('s2');
+      if (w.eval('st.slotUsed[2]') !== 2 || w.eval('st.concActive') !== fh) return 'Fly: Platz/Konzentration';
+      if (keys(fb) !== 's2-') return 'leerer Grad nicht ausgegraut: ' + keys(fb);
+      w.openCast(fb); if (!d.getElementById('restBox').textContent.includes('No slot of level 3 or higher left')) return 'Hinweis ohne Platz'; w.closeRest();
+      w.doCast && (w.eval(`_castIdx=${dm}`), w.doCast('ritual'));
+      if (w.eval('st.slotUsed.join()') !== '0,0,2,0,0,0,0,0,0') return 'Ritual verbraucht Platz';
+      const log = w.eval('st.log').map(e => e.m);
+      if (!log.includes('Zauber gewirkt: Fireball (Platz 3. Grad)') || !log.includes('Zauber gewirkt: Detect Magic (Ritual)')) return 'Log: ' + log.slice(-3).join(' / ');
+      // Warlock L13: Pakt-Platz 5. Grad, Mystic Arcanum 6/7
+      w.eval('st.mySpells=[]'); sel('Warlock', '', 13);
+      const hp = add('Hold Monster'), ch = add('Circle of Death');
+      if (keys(hp) !== 'pact' || keys(ch) !== 'arc') return 'Warlock: ' + keys(hp) + ' / ' + keys(ch);
+      w.eval(`_castIdx=${ch}`); w.doCast('arc');
+      if (w.eval("st.abUses['wl_mysticarcanum.6']") !== 1 || keys(ch) !== 'arc-') return 'Mystic Arcanum nicht verbraucht';
+      w.eval(`_castIdx=${hp}`); w.doCast('pact');
+      if (w.eval('st.abUses.wl_pactslots') !== 1) return 'Pakt-Platz nicht verbraucht';
+      w.resetUI(); return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
@@ -1150,7 +1259,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;

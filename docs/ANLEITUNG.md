@@ -8,7 +8,7 @@ Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuers
 |---|---|---|
 | `index.html` | die App – **einzige maßgebliche Version** (B1a) | nie mit Read, nur Ausschnitte per grep/sed |
 | `docs/ANLEITUNG.md` | diese Datei: A1, A4, A6 (Kurzform), A7–A11, B1a | jede Sitzung ganz |
-| `docs/REFERENZ.md` | Technik: A2, A3, A5, B1–B9, B11–B13 | gezielt, z. B. `grep -n "^## B9" -A60 willow/docs/REFERENZ.md` |
+| `docs/REFERENZ.md` | Technik: A2, A3, A5, B1–B9, B11–B14 | gezielt, z. B. `grep -n "^## B9" -A60 willow/docs/REFERENZ.md` |
 | `docs/ARCHIV.md` | Verlauf: A6 (Reihenfolge), Liste der Regressionstests, B10 (Änderungsprotokoll) | nur beim Nachforschen; B10 wird dort ergänzt |
 | `docs/FIXLISTE.md` | offene Arbeitspakete und Punkte | bei Paket-Arbeit ganz |
 | `docs/FIXLISTE_INFO.md` | Punkte „nur zur Info“/„nur auf Wunsch“, Verlauf, Erledigtes | nur bei Bedarf |
@@ -73,7 +73,7 @@ Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 - **Sammel-Fixes (Opus Hoch, A6 7b):** ~~„Arbeite die Fixliste ab, nur Opus-Teil: Neubau Bard, Druid, Wizard."~~ · ~~„… nur Opus-Teil: Pool-Zähler und Einzel-Tracker."~~ · ~~„… nur Opus-Teil: Zauber-Auswahl."~~ (alle erledigt 27.09.2026; für neue [Sonnet]-Punkte: „Arbeite die Fixliste ab, nur Sonnet-Teil.")
 - ~~**Combat-Tab (Opus Hoch, nach 7b):** „Baue den Combat-Tab nach A6 Punkt 8 um."~~ (erledigt 27.09.2026) · ~~„Arbeite die Fixliste ab: Actions."~~ (erledigt 27.09.2026)
 - ~~**UI / Lesbarkeit (Opus Hoch, A6 Punkt 9):** „Arbeite die Fixliste ab: UI / Lesbarkeit."~~ (erledigt 27.09.2026, alle vier Teilschritte inkl. Sonnet-Kleinkram)
-- **Arbeitspakete (A6 Punkt 10, Modell laut Fixliste):** ~~„Arbeite die Fixliste ab: Paket B.“~~ (erledigt 28.09.2026) · ~~„… Paket C1.“~~ (erledigt 28.09.2026) · ~~„… Paket C2.“~~ (erledigt 29.09.2026) · ~~„… Paket C3.“~~ (erledigt 29.09.2026) · ~~„… Paket C4.“~~ (erledigt 29.09.2026) · „… Paket D.“ · „… Paket E.“ · „… Paket A2.“ (~~„… Paket A.“~~ erledigt 28.09.2026). Die früheren Einzel-Prompts „Zauber mit Stat-Block“ (erledigt in Paket A) und „Feature-Auswahl“ (jetzt Teil von Paket C) entfallen.
+- **Arbeitspakete (A6 Punkt 10, Modell laut Fixliste):** ~~„Arbeite die Fixliste ab: Paket B.“~~ (erledigt 28.09.2026) · ~~„… Paket C1.“~~ (erledigt 28.09.2026) · ~~„… Paket C2.“~~ (erledigt 29.09.2026) · ~~„… Paket C3.“~~ (erledigt 29.09.2026) · ~~„… Paket C4.“~~ (erledigt 29.09.2026) · ~~„… Paket D.“~~ (erledigt 29.09.2026) · „… Paket E.“ · „… Paket A2.“ (~~„… Paket A.“~~ erledigt 28.09.2026). Die früheren Einzel-Prompts „Zauber mit Stat-Block“ (erledigt in Paket A) und „Feature-Auswahl“ (jetzt Teil von Paket C) entfallen.
 - **Ausschlussliste (Gruppe „Weitere“):** „Verschiebe im Actions-Tab das Feature **X** nach ‚Weitere‘.“ (Opus Mittel, B1c)
 - **Rückfall ohne GitHub:** zusätzlich „Anbei `class-warlock.json`."
 
