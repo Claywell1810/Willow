@@ -1200,6 +1200,24 @@ const REGRESSION = [
       if (w.eval('st.abUses.wl_pactslots') !== 1) return 'Pakt-Platz nicht verbraucht';
       w.resetUI(); return true;
     } },
+  { name: 'Paket I: Free-Cast-Punkte gefüllt = verfügbar und vor „Cast“, Hit-Points-Raster, Details mit Abstand, Freifläche unten, Skill-Namensblock', datum: '30.09.2026',
+    run: ({ w, d, sel }) => {
+      sel('Druid', 'Circle of the Stars (XPHB)', 7);
+      w.eval("st.mySpells=[{name:'Shield',grad:1,school:'Abjuration',prep:'free',notes:'',freeMax:2,freeUsed:1},{name:'Healing Word',grad:1,school:'Abjuration',prep:true,notes:''}]"); w.buildMySpells();
+      const row = d.getElementById('fcu_0'); if (!row) return 'Free-Cast-Punkte fehlen';
+      if (row.querySelectorAll('.fc-pip.avail').length !== 1 || row.querySelectorAll('.fc-pip').length !== 2) return 'gefüllt ≠ verfügbar (' + row.querySelectorAll('.fc-pip.avail').length + ')';
+      const nx = row.nextElementSibling; if (!nx || !nx.classList.contains('sp-cast')) return 'Free-Cast-Punkte stehen nicht vor „Cast“';
+      row.querySelector('.fc-pip').click(); if (w.eval('st.mySpells[0].freeUsed') !== 2) return 'gefüllten Punkt antippen verbraucht nicht';
+      d.getElementById('fcu_0').querySelector('.fc-pip').click(); if (w.eval('st.mySpells[0].freeUsed') !== 1) return 'leeren Punkt antippen gibt nicht zurück';
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      if (!/\.spell-notes\{display:none;padding:10px 11px/.test(css)) return '.spell-notes ohne Abstand oben';
+      const g = d.querySelector('.hp-grid .hp-inner'); if (!g || !g.querySelector('.hp-row') || !g.querySelector('.ds-row') || !g.querySelector('.rest-row')) return 'Hit Points nicht in gemeinsamem Raster';
+      if (!/\.ds-death,\.hd-box\{grid-column:span 2/.test(css)) return 'Death Saves/Hit Dice nicht über 2 Spalten';
+      if (d.getElementById('logList').getAttribute('style')) return 'Log hat noch Sonderabstand';
+      if (typeof w.measureNav !== 'function' || !/\.body::after\{[^}]*var\(--nav-h/.test(css)) return 'Freifläche unten nicht an Leistenhöhe gekoppelt';
+      if (!/\.sk-name\{[^}]*flex-wrap:wrap/.test(css) || !/\.sk-attr,\.sk-bon\{flex-shrink:0\}/.test(css)) return 'Skill-Zeile: Abzeichen brechen nicht im Namensblock um';
+      w.eval('st.mySpells=[]'); w.resetUI(); return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────

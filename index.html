@@ -43,7 +43,8 @@ input[type=number]{-moz-appearance:textfield}
 .tabs .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* BODY */
-.body{padding:14px;padding-bottom:calc(64px + env(safe-area-inset-bottom));overflow-x:hidden}
+.body{padding:14px;overflow-x:hidden}
+.body::after{content:"";display:block;height:calc(var(--nav-h, 90px) + 42px)}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border2);display:flex;z-index:200;padding-bottom:max(env(safe-area-inset-bottom), 8px)}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;-webkit-tap-highlight-color:transparent;outline:none}
 .bnav-btn:focus{outline:none}
@@ -109,7 +110,9 @@ input[type=number]{-moz-appearance:textfield}
 .sk-pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--muted);flex-shrink:0}
 .sk-pip.p{background:var(--gold);border-color:var(--gold)}
 .sk-pip.e{background:var(--green);border-color:var(--green)}
-.sk-name{font-size:var(--fs-txt);color:var(--text);flex:1}
+.sk-name{font-size:var(--fs-txt);color:var(--text);flex:1 1 0;min-width:0;display:flex;flex-wrap:wrap;align-items:center;column-gap:5px;row-gap:3px}
+.sk-name .sk-bdg{margin-left:0}
+.sk-attr,.sk-bon{flex-shrink:0}
 .sk-attr{font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif;min-width:28px}
 /* Paket C1: Auswahl-Chips (pickUI) und Herkunfts-Abzeichen */
 .pk{margin:4px 0 2px}
@@ -206,14 +209,15 @@ input[type=number]{-moz-appearance:textfield}
 .spell-prep{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:var(--fs-xs);color:transparent;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .spell-prep.on{background:var(--gold);border-color:var(--gold);color:var(--bg0)}
 .spell-prep.free{background:var(--green);border-color:var(--green);color:var(--bg0)}
-.fc-uses{display:flex;gap:3px;align-items:center;flex-shrink:0;margin-left:4px}
+.fc-uses{display:flex;gap:3px;align-items:center;flex-shrink:0}
+.fc-uses:empty{display:none}
 .fc-pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--green);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
-.fc-pip.used{background:var(--green)}
+.fc-pip.avail{background:var(--green)}
 .sp-conc{background:color-mix(in srgb,var(--purple) 18%,transparent);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 35%,transparent);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .sp-conc.active{background:var(--purple);color:var(--bg0);border-color:var(--purple);box-shadow:0 0 8px color-mix(in srgb,var(--purple) 60%,transparent)}
 .spell-card.conc-active-card{border-left:3px solid var(--purple);background:color-mix(in srgb,var(--purple) 8%,var(--bg2));box-shadow:inset 2px 0 12px color-mix(in srgb,var(--purple) 12%,transparent)}
 .expbtn{background:none;border:none;color:var(--text2);font-size:var(--fs-txt);cursor:pointer;flex-shrink:0;padding:4px 8px;line-height:1;-webkit-tap-highlight-color:transparent;margin-left:auto}
-.spell-notes{display:none;padding:0 11px 10px;border-top:1px solid var(--border2)}
+.spell-notes{display:none;padding:10px 11px;border-top:1px solid var(--border2)}
 .spell-notes.on{display:block}
 .spell-notes textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:16px;padding:7px;resize:vertical;outline:none;min-height:65px}
 
@@ -478,8 +482,24 @@ input[type=number]{-moz-appearance:textfield}
 .bnav-btn{padding:8px 4px 6px}
 button[onclick="toggleTabs()"]{padding:7px!important}
 /* HP-Karten: nie breiter als der Bildschirm (Temp ragte über den Rand); bei großer Schrift bricht Temp um */
-.hp-row{flex-wrap:wrap}
-.hpbox{flex:1 1 104px;min-width:0;padding:10px 4px}
+/* Hit Points (Paket I, 30.09.2026): HP, Death Saves/Inspiration, Hit Dice/Rast in einem gemeinsamen 3-Spalten-Raster,
+   damit die Lücken bei jeder Textgröße untereinander fluchten; zu schmal (große Schrift) → 2 Spalten, alle Zeilen gleich */
+.hp-grid{container-type:inline-size}
+.hp-row,.ds-row,.rest-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex-wrap:nowrap}
+.ds-death,.hd-box{grid-column:span 2;min-width:0}
+.ds-insp{grid-column:span 1;min-width:0}
+.rest-btns{grid-column:-2/-1;min-width:0}
+.ds-groups{flex-wrap:wrap}
+@container (max-width:340px){
+  /* schmal: ein 2-Spalten-Raster über alle drei Zeilen – Current|Maximum, Temp|Inspiration, Death Saves, Hit Dice, Rast */
+  .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  .hp-row,.ds-row,.rest-row{display:contents}
+  .hpbox,.ds-insp{grid-column:auto}
+  .ds-insp{order:1}.ds-death{order:2;grid-column:1/-1}.hd-box{order:3;grid-column:1/-1}
+  .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
+  .rest-btns .rest-btn{flex:1}
+}
+.hpbox{min-width:0;padding:10px 4px}
 .hp-ctrl{gap:3px}
 .hpbox .hpin{width:40px;min-width:0}
 /* Attribute, AC/Initiative/Speed: bei sehr großer Schrift 2 statt 3 Spalten; Knöpfe nie gestaucht */
@@ -792,6 +812,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 
       <!-- HIT POINTS -->
       <div class="sec">Hit Points</div>
+      <div class="hp-grid"><div class="hp-inner">
       <div class="hp-row">
         <div class="hpbox" style="border-color:color-mix(in srgb, var(--green) 40%, transparent)">
           <div class="hp-lbl">Current</div>
@@ -852,6 +873,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <button class="rest-btn" onclick="openRest('short')">☾ Short Rest</button>
           <button class="rest-btn long" onclick="openRest('long')">☀ Long Rest</button>
         </div>
+      </div></div>
       </div>
 
       <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026; unter Hit Points, zuklappbar) -->
@@ -1056,7 +1078,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <button class="char-btn" style="font-size:var(--fs-xs);padding:3px 8px" onclick="clearLog()">Leeren</button>
       </div>
       <div style="color:var(--text3);font-size:var(--fs-xs);margin:0 2px 8px">Automatisch protokollierte Änderungen an diesem Charakter.</div>
-      <div id="logList" style="padding-bottom:120px"></div>
+      <div id="logList"></div>
     </div>
 
   </div>
@@ -2231,9 +2253,9 @@ function buildMySpells(){
       ${isConc?`<span class="sp-badge sp-conc${concIsActive?' active':''}" onclick="event.stopPropagation();togConc(${i})" title="Concentration">C</span>`:''}
       <span class="sp-badge sp-info">${ctShort(dbSpell?dbSpell.zeit:'')}</span>
       ${/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<span class="sp-badge sp-warn">Ritual</span>`:''}
+      <div class="fc-uses" id="fcu_${i}">${freePipsHtml(i)}</div>
       <button class="sp-cast" onclick="event.stopPropagation();openCast(${i})" title="Cast: use a spell slot">Cast</button>
       <div class="spell-prep${sp.prep==='free'?' free':sp.prep?' on':''}" onclick="event.stopPropagation();togPrep(${i})" title="${sp.prep==='free'?'Always prepared':sp.prep?'Prepared':'Not prepared'}">✦</div>
-      <div class="fc-uses" id="fcu_${i}">${(sp.freeMax||0)>0?Array.from({length:sp.freeMax},(_,k)=>`<div class="fc-pip${k<(sp.freeUsed||0)?' used':''}" onclick="event.stopPropagation();togFreeUse(${i},${k})" title="Free cast (no slot)"></div>`).join(''):''}</div>
       <span class="expbtn" id="msbtn_${i}">▾</span>
     </div>
     <div class="spell-notes" id="msn_${i}" style="display:none">
@@ -2268,13 +2290,19 @@ function renderFreePips(i){
   if(!el)return;
   const sp=st.mySpells[i];
   const max=sp.freeMax||0;
-  el.innerHTML = max>0 ? Array.from({length:max},(_,k)=>`<div class="fc-pip${k<(sp.freeUsed||0)?' used':''}" onclick="event.stopPropagation();togFreeUse(${i},${k})" title="Free cast (no slot)"></div>`).join('') : '';
+  el.innerHTML = freePipsHtml(i);
+}
+// Free-Cast-Punkte (Paket I, 30.09.2026): gefüllt = verfügbar wie überall; gespeichert bleibt freeUsed
+function freePipsHtml(i){
+  const sp=st.mySpells[i];const max=sp.freeMax||0;const left=Math.max(0,max-Math.min(sp.freeUsed||0,max));
+  return max>0 ? Array.from({length:max},(_,k)=>`<div class="fc-pip${k<left?' avail':''}" onclick="event.stopPropagation();togFreeUse(${i},${k})" title="Free cast (no slot) · ${left} left"></div>`).join('') : '';
 }
 function togFreeUse(i,k){
   const sp=st.mySpells[i];
-  const used=sp.freeUsed||0;
   const max=sp.freeMax||0;
-  sp.freeUsed = Math.min(k<used ? k : k+1, max);
+  const used=Math.min(sp.freeUsed||0,max);
+  // gefüllter Punkt (k < Rest) = verfügbar → antippen verbraucht einen; leerer Punkt → einer zurück
+  sp.freeUsed = k<max-used ? used+1 : Math.max(0,used-1);
   autoSave();renderFreePips(i);
 }
 function setFreeMax(i,v){
@@ -6583,9 +6611,20 @@ function setTextSize(v){
   if(!TEXT_SIZES.includes(v))v='normal';
   try{localStorage.setItem('willow_textsize',v);}catch(e){}
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
-  markTextSize();
+  markTextSize();measureNav();
 }
-const APP_VERSION = 'willow-app-2026-09-29d';
+// Freifläche unten (Paket I, 30.09.2026): tatsächliche Höhe der unteren Leiste inkl. hochstehendem Würfel-Knopf → --nav-h
+function measureNav(){
+  const nav=document.getElementById('bottomNav');if(!nav||!nav.offsetHeight)return;
+  const r=nav.getBoundingClientRect();const k=r.height/nav.offsetHeight||1;
+  let top=r.top;nav.querySelectorAll('.bnav-icon').forEach(i=>{top=Math.min(top,i.getBoundingClientRect().top);});
+  document.documentElement.style.setProperty('--nav-h',Math.ceil(nav.offsetHeight+(r.top-top)/k)+'px');
+}
+function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav)return;measureNav();
+  try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
+window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
+const APP_VERSION = 'willow-app-2026-09-30a';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
