@@ -1030,6 +1030,67 @@ const REGRESSION = [
       w.resetUI();
       return true;
     } },
+  { name: 'Paket C4: Rassen im Actions-Tab – Tracker (rc_-ids, PB/1×, ab Stufe, Aktionsart je Giant-Ancestry-Boon), Lineage-Zauber 1×/Long Rest ab L3/L5, Passiv/Weitere-Karten, Werte aus dem Text (DC, Schaden), Spell-List ★ mit Rassen-Zaubern, Verbrauch gespeichert; Aasimar-Optionsnamen (Heavenly Wings …)', datum: '29.09.2026',
+    run: ({ w, d, set, sel }) => {
+      if (typeof w.rcTrackers !== 'function' || !w.eval('RACE_PICKS.Orc.tr&&RACE_PICKS.Elf.ch[0].o[0].inn')) return 'Rassen-Tracker fehlen (rcTrackers/RACE_PICKS.tr)';
+      const race = r => { set('race', r); w.onRaceChange(); };
+      const card = n => [...d.querySelectorAll('#abList .ab-card')].find(c => c.querySelector('.ab-name').firstChild.textContent === n);
+      const grp = c => c && c.closest('.ab-grp-box').dataset.grp;
+      const pips = c => c ? c.querySelectorAll('.ab-top .ab-pip').length : -1;
+      const chip = (root, o) => root && [...root.querySelectorAll('.pk-chip')].find(c => c.dataset.o === o);
+      w.resetUI();
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 10, CHA: 10 }, _f_prof: '3', _f_lvl: '5' });
+      sel('Barbarian', '', 5);
+      if (d.querySelector('#abList [id^="ab_rc_"],#abList [id^="ab_f_r_"]')) return 'Rassen-Karten ohne Rasse';
+      // Orc L5: Adrenaline Rush PB=3 (Bonusaktion, Short Rest), Relentless Endurance 1× (Passiv), Darkvision unter Passiv
+      race('Orc');
+      const ar = card('Adrenaline Rush');
+      if (!ar || grp(ar) !== 'bonus' || pips(ar) !== 3 || !ar.textContent.includes('Short/Long Rest') || !ar.querySelector('.ab-tag').textContent.includes('Orc')) return 'Adrenaline Rush: ' + (ar ? grp(ar) + ' ' + pips(ar) : 'fehlt');
+      if (!ar.querySelector('.rc-dc') || ar.querySelector('.rc-dc').textContent !== 'Temp HP 3') return 'Adrenaline Rush Temp HP';
+      if (pips(card('Relentless Endurance')) !== 1 || grp(card('Relentless Endurance')) !== 'passiv' || grp(card('Darkvision')) !== 'passiv') return 'Orc Relentless/Darkvision';
+      // Pip-Klick speichert Verbrauch unter der rc_-id, Reset setzt zurück
+      ar.querySelector('.ab-pip.avail').click();
+      if (w.eval('st.abUses.rc_adrenalinerush') !== 1 || card('Adrenaline Rush').querySelectorAll('.ab-pip.avail').length !== 2) return 'Pip-Klick nicht gespeichert';
+      // Dragonborn: Breath Weapon Aktion mit DC (8+CON+PB; PB = Feld „Prof.“ wie C3, Pips nach Stufe) und Schaden L5 = 2d10, Schadensart nach Wahl; Draconic Flight ab L5; Wahl-Trait unter Weitere
+      race('Dragonborn'); chip(d.getElementById('raceLoreBody'), 'Red') ? chip(d.getElementById('raceLoreBody'), 'Red').click() : null;
+      const bw = card('Breath Weapon');
+      if (!bw || grp(bw) !== 'aktion' || pips(bw) !== 3 || bw.querySelector('.fp-suf').textContent !== ' · Fire') return 'Breath Weapon: ' + (bw ? grp(bw) + ' ' + pips(bw) + bw.querySelector('.fp-suf').textContent : 'fehlt');
+      if (bw.querySelector('.rc-dc').textContent !== 'Save DC 13 (CON) · Damage 2d10') return 'Breath Weapon Werte: ' + bw.querySelector('.rc-dc').textContent;
+      if (!card('Draconic Flight') || grp(card('Draconic Flight')) !== 'bonus' || grp(card('Draconic Ancestry')) !== 'weitere') return 'Draconic Flight / Ancestry';
+      set('lvl', '4'); w.buildAbilities();
+      if (card('Draconic Flight') || card('Breath Weapon').querySelector('.rc-dc').textContent !== 'Save DC 13 (CON) · Damage 1d10' || pips(card('Breath Weapon')) !== 2) return 'Stufe 4: Draconic Flight/Schaden';
+      // Goliath: Aktionsart je Boon
+      set('lvl', '5'); race('Goliath');
+      const ga = () => card('Giant Ancestry');
+      if (!ga() || grp(ga()) !== 'passiv' || pips(ga()) !== 3 || !card('Large Form')) return 'Giant Ancestry/Large Form';
+      chip(ga(), "Stone's Endurance").click();
+      if (grp(ga()) !== 'reaktion' || ga().querySelector('.fp-suf').textContent !== " · Stone's Endurance") return 'Stone\'s Endurance nicht als Reaktion';
+      // Elf: Lineage-Zauber erst ab L3/L5, je 1×/Long Rest; Keen Senses unter Weitere
+      race('Elf');
+      const ln = () => card('Elven Lineage');
+      if (!ln() || ln().querySelectorAll('.ab-sub').length || grp(card('Keen Senses')) !== 'weitere' || grp(card('Trance')) !== 'passiv') return 'Elf vor der Wahl';
+      chip(ln(), 'Drow').click();
+      const subs = () => [...ln().querySelectorAll('.ab-sub')].map(x => x.querySelector('.ab-sublbl').textContent + ':' + x.querySelectorAll('.ab-pip').length);
+      if (subs().join('|') !== 'Faerie Fire:1|Darkness:1' || ln().querySelector('.fp-suf').textContent !== ' · Drow') return 'Drow L5: ' + subs().join('|');
+      set('lvl', '3'); w.buildAbilities(); if (subs().join('|') !== 'Faerie Fire:1') return 'Drow L3: ' + subs().join('|');
+      set('lvl', '2'); w.buildAbilities(); if (subs().length) return 'Drow L2: ' + subs().join('|');
+      // Spell List ★: Barbarian-Elf (keine Klassenzauber) sieht Drow-Zauber bis zur Stufe mit Herkunft
+      set('lvl', '3'); w.slRender && w.slRender();
+      const ctx = w.slMySpellCtx();
+      if (!ctx.avail || w.slMyVia(ctx, { name: 'Faerie Fire', classes: [] }) !== 'Elf: Drow' || w.slMyVia(ctx, { name: 'Darkness', classes: [] }) !== null) return 'Spell-List ★ Rassen-Zauber';
+      // Gnome Forest: Speak with Animals PB/Long Rest; Tiefling/Aasimar: feste Cantrips im ★-Filter
+      race('Gnome'); chip(card('Gnomish Lineage'), 'Forest Gnome').click();
+      if ([...card('Gnomish Lineage').querySelectorAll('.ab-sub .ab-pip')].length !== 2) return 'Forest Gnome Speak with Animals (PB 2 bei L3)';
+      race('Aasimar'); if (w.slMyVia(w.slMySpellCtx(), { name: 'Light', classes: [] }) !== 'Aasimar: Light Bearer') return 'Light Bearer im ★-Filter';
+      if (card('Healing Hands').querySelector('.rc-dc').textContent !== 'Roll 3d4' || !card('Celestial Revelation')) return 'Aasimar-Tracker';
+      // Nebenfund C4: Optionsnamen der Verwandlungen (fehlten im RACE_DATA-Text), bleiben in derselben Karte
+      const crn = [...card('Celestial Revelation').querySelectorAll('.fd-n')].map(x => x.textContent).join('|');
+      if (crn !== 'Heavenly Wings.|Inner Radiance.|Necrotic Shroud.') return 'Celestial Revelation Optionsnamen: ' + crn;
+      // Speichern/Laden
+      const snap = w.eval('collectState()'); if (snap.abUses.rc_adrenalinerush !== 1) return 'rc-Verbrauch nicht im Save';
+      w.resetUI();
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
@@ -1089,7 +1150,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;
@@ -1124,6 +1185,11 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
           if (lostIds.length) bad(`CLASS_DATA.${c}: Tracker-ids gelöscht: ${lostIds.join(', ')}`);
           const lostSp = (a[c].special || []).filter(x => !(n[c].special || []).includes(x));
           if (lostSp.length) bad(`CLASS_DATA.${c}.special: entfernt: ${lostSp.join(', ')}`);
+        }
+        // Rassen-Tracker-ids (rc_…, Paket C4) dürfen ebenso nie verschwinden
+        if (b === 'RACE_PICKS') for (const c of chg) {
+          const lostIds = (a[c].tr || []).map(t => t.id).filter(i => !(n[c].tr || []).some(t => t.id === i));
+          if (lostIds.length) bad(`RACE_PICKS.${c}: Tracker-ids gelöscht: ${lostIds.join(', ')}`);
         }
       }
     }

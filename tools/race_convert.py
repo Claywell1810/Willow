@@ -13,6 +13,9 @@ Quelle je Rasse wie in RACE_DATA (10× XPHB, Half-Elf/Half-Orc PHB). Alles struk
 - Skills (sk): skillProficiencies (fest / choose / any) mit dem Trait-Namen, der sie gibt (SKILL_TRAIT)
 - Attributsboni (asi, nur PHB-2014-Rassen): ability
 - Kuratiert und gegen den 5e.tools-Text geprüft: Vorteile auf Saves (ADV), Dwarven Toughness (HP)
+- Paket C4 (Actions-Tab): tr = Tracker (TRACK: id rc_…, tag, uses, restore, minLvl, Icon; check_track prüft Aktionsart,
+  PB/1×, Rast und Stufe am Text), Option-Feld inn = [{s, l, u}] (Zauber ohne Platz: u 1 = 1×/Long Rest, 'pb'),
+  Option-Feld tag (Goliath-Boon: GIANT_TAG), spk = feste Zauber aus Traits ohne Wahl (Light Bearer, Otherworldly Presence)
 Das Skript prüft, dass jeder Trait-Name auch im App-Text (RACE_DATA.traits) als Karte „• Name: …“ steht.
 """
 import json, os, re, subprocess, sys
@@ -29,6 +32,33 @@ ADV = {'Dwarf': [{'t': 'Dwarven Resilience', 'c': 'Poisoned'}],
        'Gnome': [{'t': 'Gnomish Cunning', 's': ['INT', 'WIS', 'CHA']}],
        'Halfling': [{'t': 'Brave', 'c': 'Frightened'}]}
 HP = {'Dwarf': {'t': 'Dwarven Toughness', 'per': 1}}
+# Tracker im Actions-Tab (Paket C4, 29.09.2026): (id, Trait, tag, uses, restore, minLvl, Icon) – Schema wie CLASS_DATA-Tracker (B2).
+# ids mit Präfix rc_ sind heilig (Verbrauch in st.abUses). Jede Angabe wird gegen den 5e.tools-Text geprüft (check_track).
+TRACK = {'Aasimar': [('rc_healinghands', 'Healing Hands', 'aktion', 1, 'long', None, '✋'),
+                     ('rc_celestialrevelation', 'Celestial Revelation', 'bonus', 1, 'long', 3, '🌟')],
+         'Dragonborn': [('rc_breathweapon', 'Breath Weapon', 'aktion', 'pb', 'long', None, '🐉'),
+                        ('rc_draconicflight', 'Draconic Flight', 'bonus', 1, 'long', 5, '🕊️')],
+         'Dwarf': [('rc_stonecunning', 'Stonecunning', 'bonus', 'pb', 'long', None, '⛰️')],
+         'Goliath': [('rc_giantancestry', 'Giant Ancestry', 'passiv', 'pb', 'long', None, '🗿'),
+                     ('rc_largeform', 'Large Form', 'bonus', 1, 'long', 5, '🏔️')],
+         'Half-Orc': [('rc_relentlessendurance', 'Relentless Endurance', 'passiv', 1, 'long', None, '🩸')],
+         'Orc': [('rc_adrenalinerush', 'Adrenaline Rush', 'bonus', 'pb', 'short', None, '💨'),
+                 ('rc_relentlessendurance', 'Relentless Endurance', 'passiv', 1, 'long', None, '🩸')]}
+# Giant Ancestry: Aktionsart je Boon (Option-Feld tag); übrige Boons wirken beim Treffer ohne eigene Aktion → Tracker-tag passiv
+GIANT_TAG = {"Cloud's Jaunt": 'bonus', "Stone's Endurance": 'reaktion', "Storm's Thunder": 'reaktion'}
+TAG_TXT = {'bonus': 'bonus action', 'reaktion': 'reaction', 'aktion': ('magic action', 'attack action')}
+
+
+def check_track(race, t, tag, uses, restore, minlvl, tx):
+    """tx = 5e.tools-Text des Traits (klein). Meldet Abweichungen als Fehler."""
+    need = TAG_TXT.get(tag)
+    if need and not any(x in tx for x in (need if isinstance(need, tuple) else (need,))): err(f'{race}: {t} – tag {tag} nicht im Text')
+    if tag == 'passiv' and ('bonus action' in tx.split('•')[0] or 'as a reaction' in tx): err(f'{race}: {t} – passiv, Text nennt Aktion')
+    if uses == 'pb' and 'number of times equal to your proficiency' not in tx: err(f'{race}: {t} – uses pb nicht im Text')
+    if uses == 1 and not re.search(r"can't (?:use it|do so|use this feature) again until you finish a long rest", tx): err(f'{race}: {t} – 1×/Long Rest nicht im Text')
+    if restore == 'short' and not re.search(r'finish a short (?:rest )?or long rest', tx): err(f'{race}: {t} – Short Rest nicht im Text')
+    if restore == 'long' and uses == 'pb' and 'regain all expended uses when you finish a long rest' not in tx: err(f'{race}: {t} – Long Rest nicht im Text')
+    if minlvl and not re.search(r'character level %d\b' % minlvl, tx): err(f'{race}: {t} – Stufe {minlvl} nicht im Text')
 ABBR = {'str': 'STR', 'dex': 'DEX', 'con': 'CON', 'int': 'INT', 'wis': 'WIS', 'cha': 'CHA'}
 SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation',
           'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand',
@@ -162,7 +192,20 @@ def main():
                                 L = lv if re.search(r'character level %s\b' % lv, full) else '1'
                                 if L != lv: print(f'  ⚠ {race}/{n}: {nm} in 5e.tools ab Stufe {lv}, Text nennt keine Stufe → ab 1')
                                 if nm not in sp.get(L, []): sp.setdefault(L, []).append(nm)
+                                # Paket C4: Tracker je Zauber (1×/Long Rest laut Grund-Trait bzw. PB laut Versionstext)
+                                if per == '1':
+                                    bt = ' '.join(lines(find_trait(r, t)['entries'])).lower()
+                                    if 'cast it once without a spell slot' not in bt or 'finish a long rest' not in bt: err(f'{race}/{n}: {nm} 1×/Long Rest nicht im Text')
+                                    u = 1
+                                elif per == 'pb':
+                                    if 'number of times equal to your proficiency' not in full.lower(): err(f'{race}/{n}: {nm} PB-Nutzungen nicht im Text')
+                                    u = 'pb'
+                                else: err(f'{race}/{n}: daily {per} nicht unterstützt'); continue
+                                o.setdefault('inn', []).append({'s': nm, 'l': int(L), 'u': u})
                 if sp: o['sp'] = sp
+                if race == 'Goliath':
+                    tg = GIANT_TAG.get(o['n'], 'passiv'); o['tag'] = tg
+                    check_track(race, o['n'], tg, None, None, None, o['txt'].lower())
                 g = groups.setdefault(t, {'t': t, 'o': []})
                 if ab: g['ab'] = ab
                 g['o'].append(o)
@@ -187,10 +230,30 @@ def main():
             h = HP[race]; need(h['t']); tr = find_trait(r, h['t'])
             if 'increases by 1' not in ' '.join(lines(tr['entries'])): err(f'{race}: {h["t"]} – Text geändert')
             e['hp'] = h
+        # Paket C4: Tracker (Actions-Tab) und feste Zauber außerhalb der Wahl-Traits (Light Bearer, Otherworldly Presence)
+        tr = []
+        for (i, t, tag, uses, restore, ml, ic) in TRACK.get(race, []):
+            need(t); ft = find_trait(r, t)
+            if not ft: err(f'{race}: Trait {t} fehlt in races.json'); continue
+            check_track(race, t, tag, uses, restore, ml, ' '.join(lines(ft['entries'])).lower())
+            x = {'id': i, 't': t, 'tag': tag, 'uses': uses, 'restore': restore, 'ic': ic}
+            if ml: x['minLvl'] = ml
+            tr.append(x)
+        if tr: e['tr'] = tr
+        chn = {c['t'] for c in ch} | {x for c in ch for x in c.get('lk', [])}
+        spk = []
+        for tr_ in r['entries']:
+            if not isinstance(tr_, dict) or not tr_.get('name') or tr_['name'] in chn: continue
+            s_ = [names.get(x.lower(), x) for x in spell_tags(json.dumps(tr_['entries']))]
+            if s_: need(tr_['name']); spk.append({'t': tr_['name'], 's': s_})
+        if spk: e['spk'] = spk
         out[race] = e
         print(f'  {race:<11} size {"/".join(e["size"])}, speed {e["speed"]}, dv {e.get("dv", "–")}, res {e.get("res", "–")}'
               f'{", sk " + e["sk"]["t"] if "sk" in e else ""}{", asi" if "asi" in e else ""}'
-              + ''.join(f', {c["t"]}: {"/".join(o["n"] for o in c["o"])}{" ab " + "/".join(c["ab"]) if c.get("ab") else ""}' for c in ch))
+              + ''.join(f', {c["t"]}: {"/".join(o["n"] for o in c["o"])}{" ab " + "/".join(c["ab"]) if c.get("ab") else ""}' for c in ch)
+              + (', tr ' + '/'.join(x['id'] for x in e.get('tr', [])) if e.get('tr') else '')
+              + ''.join(f', {x["t"]}: {"/".join(x["s"])}' for x in e.get('spk', []))
+              + ''.join(f', inn {o["n"]}: ' + '/'.join(f'{z["s"]}@{z["l"]}×{z["u"]}' for z in o['inn']) for c in ch for o in c['o'] if o.get('inn')))
     print(f'Fehler: {len(ERR)}')
     if ERR or not write: sys.exit(1 if ERR else 0)
     s = open(html, encoding='utf-8').read()
