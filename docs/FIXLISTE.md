@@ -9,7 +9,7 @@ Erledigtes nach unten unter „Erledigt“ verschieben (mit Datum und Commit).
 
 Format: `- [ ] [Sonnet|Opus] Bereich – Problem → Soll (gefunden am, Quelle)`
 
-## Übersicht offene Pakete (neu sortiert 29.09.2026, Wunsch Simon „Überblick“)
+## Übersicht offene Pakete (neu sortiert 29.09.2026, Wunsch Simon „Überblick“; F ans Ende 01.10.2026)
 Reihenfolge = Empfehlung. Je Paket ein eigener Chat, Prompt „Arbeite die Fixliste ab: Paket X.“ Details in den Paket-Abschnitten darunter.
 
 | # | Paket | Inhalt | Modell |
@@ -18,11 +18,11 @@ Reihenfolge = Empfehlung. Je Paket ein eigener Chat, Prompt „Arbeite die Fixli
 | 2 | **G – Log + Rückgängig** | Log erfasst alles, dann Undo-Knopf | Opus Hoch |
 | 3 | **H – Always Prepared automatisch** | Klassen-/Subklassen-Zauber nach Stufe, mit Herkunfts-Abzeichen | Opus Hoch |
 | 4 | **E – Effekte und Würfeln** | Attribute mit Grundwert + Boni (BG/Race eingerechnet, Herkunft aufklappbar), Zustände, Erschöpfung, Buffs/Debuffs, mehr Würfe (Attribute, Initiative, Waffen, Zauberangriff) | Opus Hoch |
-| 5 | **F – Multiclass** | erst Planungs-Chat, dann Bau in Teilen | Opus Hoch |
-| 6 | **J – Character Info neu gestalten** | Charakterkarte statt Formular; nach F, weil Multiclass den Kopf verändert; erst Entwurf mit Fotos | Opus Hoch |
-| 7 | **A2 – Begleiter und Stat-Blöcke** | Beast Master/Drakewarden, Wildfire Spirit, Dancing Item … (später) | Opus Hoch |
+| 5 | **J – Character Info neu gestalten** | Charakterkarte statt Formular; Kopf so entwerfen, dass später mehrere Klassen Platz haben (F kommt danach); erst Entwurf mit Fotos | Opus Hoch |
+| 6 | **A2 – Begleiter und Stat-Blöcke** | Beast Master/Drakewarden, Wildfire Spirit, Dancing Item … (später) | Opus Hoch |
+| 7 | **F – Multiclass** | nach hinten verschoben (01.10.2026, Simon: wichtig, aber aktuell nicht gebraucht); erst Planungs-Chat, dann Bau in Teilen | Opus Hoch |
 
-Gründe der Reihenfolge: I schnell und sichtbar; G früh, damit alle späteren Felder automatisch ins Log und ins Undo kommen; H vor F (F erweitert H dann je Klasse); E unabhängig; J erst, wenn klar ist, wie mehrere Klassen im Kopf stehen. Außerhalb der Pakete: „Lesbarkeit allgemein“ (Sammelpunkt) und „Nur auf Simons Wunsch“.
+Gründe der Reihenfolge: I schnell und sichtbar; G früh, damit alle späteren Felder automatisch ins Log und ins Undo kommen; H vor F (F erweitert H dann je Klasse); E unabhängig; **F ans Ende (Simon 01.10.2026: wichtig, aber aktuell nicht gebraucht)** → J kommt vorher und plant im Kopf Platz für mehrere Klassen ein, F passt den Kopf später an. Außerhalb der Pakete: „Lesbarkeit allgemein“ (Sammelpunkt) und „Nur auf Simons Wunsch“.
 
 ## Arbeitspakete (Reihenfolge, Stand 28.09.2026)
 Die offenen Punkte sind zu Paketen gebündelt; **je Paket ein eigener Chat** (Modell in Klammern). Details stehen bei den einzelnen Punkten weiter unten (Titel in „…“). Erledigte Pakete hier durchstreichen.
@@ -80,7 +80,7 @@ Die offenen Punkte sind zu Paketen gebündelt; **je Paket ein eigener Chat** (Mo
 - „Freifläche am Ende jedes Tabs“
 - „Skills/Saves – Wert und Würfel rutschen bei Zoom in die zweite Zeile“
 
-**J – Character Info neu gestalten (Opus Hoch, nach F).** Prompt: „Arbeite die Fixliste ab: Paket J.“ Punkt „Character Info aufwerten“ (UI / Lesbarkeit); erst Entwurf/Fotos mit Simon abstimmen, dann bauen; Multiclass-Kopf aus Paket F berücksichtigen.
+**J – Character Info neu gestalten (Opus Hoch, vor F seit 01.10.2026).** Prompt: „Arbeite die Fixliste ab: Paket J.“ Punkt „Character Info aufwerten“ (UI / Lesbarkeit); erst Entwurf/Fotos mit Simon abstimmen, dann bauen; Kopf so entwerfen, dass später mehrere Klassen (Paket F) Platz haben.
 
 **H – Always Prepared automatisch (Opus Hoch).** Prompt: „Arbeite die Fixliste ab: Paket H.“ Punkt „Always Prepared automatisch eintragen“ (Code / UI); Anzeige vorher mit Simon klären.
 
