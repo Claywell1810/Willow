@@ -2,7 +2,7 @@
 
 Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuerst diese Datei** und arbeitet danach.
 
-**Seit 28.09.2026 liegt alles im Repo** `claywell1810/willow` (GitHub leitet auf `Claywell1810/Willow` um, beides funktioniert), live unter `https://claywell1810.github.io/Willow`:
+**Seit 28.09.2026 liegt alles im Repo** `Claywell1810/Willow` (offizielle Schreibweise; `claywell1810/willow` wird umgeleitet – `add_repo` mit Kleinschreibung aufrufen, damit der Klon `willow/` heißt), live unter `https://claywell1810.github.io/Willow`:
 
 | Pfad | Inhalt | Lesen |
 |---|---|---|
@@ -13,7 +13,7 @@ Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuers
 | `docs/FIXLISTE.md` | offene Arbeitspakete und Punkte | bei Paket-Arbeit ganz |
 | `docs/FIXLISTE_INFO.md` | Punkte „nur zur Info“/„nur auf Wunsch“, Verlauf, Erledigtes | nur bei Bedarf |
 | `docs/ZAUBER_KATEGORIEN.md` | Zauber-Kategorien/Bilder (seit 01.10.2026): Kategorien, Regeln, Ablauf für neue Zauber (`tools/spell_cats.py`) | bei neuen Zaubern oder Änderungen an Kategorien |
-| `tools/` | alle Skripte: `setup.sh`, `app_check.js`, `dump.js`, Konverter, `feature_picks.py` (B12), `race_convert.py` (B13), 12 Configs, Foto-Skripte | nie ganz lesen, nur ausführen oder gezielt greppen |
+| `tools/` | alle Skripte: `setup.sh`, `publish.sh`, `rep.py`, `app_check.js`, `dump.js`, Konverter, `feature_picks.py` (B12), `race_convert.py` (B13), 12 Configs, Foto-Skripte | nie ganz lesen, nur ausführen oder gezielt greppen |
 
 Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Nummer in diese Datei, die Referenz oder das Archiv (Tabelle oben). Im Projekt (claude.ai) liegt nur noch der Wegweiser `claude/Workflow_Anleitung.md` (verweist hierher); Skripte und Doku werden **nicht** mehr per `project_read`/`project_write` übertragen.
 
@@ -51,7 +51,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A6. Reihenfolge (Kurzform)
 
-Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und Pakete A und B sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitt A6). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md`, Reihenfolge laut Übersicht oben dort (seit 01.10.2026: ~~I~~ ✔ 30.09.2026 → ~~G~~ ✔ 01.10.2026 → ~~H~~ ✔ 01.10.2026 → K → E → A2 → F → J (J auch zusammen mit F möglich); alle Opus Hoch)** (früher: B → Opus Mittel, C/D/E/A2 → Opus Hoch; Prompt „Arbeite die Fixliste ab: Paket X.“). Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
+Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: K → E → A2 → F → J (J auch zusammen mit F möglich); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
 
 ## A7. Arbeitsregeln
 
@@ -71,12 +71,12 @@ Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 - **Nur Zauber:** „Ergänze die Zauber des **Warlock** in `ZB_SPELLS` nach B5."
 - **Fehler:** „Im Tab **Actions** passiert: … Erwartet: …"
 - **Lücke schließen:** „Ergänze die Class Table für den **Wizard**."
-- **Sammel-Fixes (Opus Hoch, A6 7b):** ~~„Arbeite die Fixliste ab, nur Opus-Teil: Neubau Bard, Druid, Wizard."~~ · ~~„… nur Opus-Teil: Pool-Zähler und Einzel-Tracker."~~ · ~~„… nur Opus-Teil: Zauber-Auswahl."~~ (alle erledigt 27.09.2026; für neue [Sonnet]-Punkte: „Arbeite die Fixliste ab, nur Sonnet-Teil.")
-- ~~**Combat-Tab (Opus Hoch, nach 7b):** „Baue den Combat-Tab nach A6 Punkt 8 um."~~ (erledigt 27.09.2026) · ~~„Arbeite die Fixliste ab: Actions."~~ (erledigt 27.09.2026)
-- ~~**UI / Lesbarkeit (Opus Hoch, A6 Punkt 9):** „Arbeite die Fixliste ab: UI / Lesbarkeit."~~ (erledigt 27.09.2026, alle vier Teilschritte inkl. Sonnet-Kleinkram)
-- **Arbeitspakete (A6 Punkt 10, Modell laut Fixliste):** ~~„Arbeite die Fixliste ab: Paket B.“~~ (erledigt 28.09.2026) · ~~„… Paket C1.“~~ (erledigt 28.09.2026) · ~~„… Paket C2.“~~ (erledigt 29.09.2026) · ~~„… Paket C3.“~~ (erledigt 29.09.2026) · ~~„… Paket C4.“~~ (erledigt 29.09.2026) · ~~„… Paket D.“~~ (erledigt 29.09.2026) · **neue Reihenfolge seit 29.09.2026 (Übersicht oben in `docs/FIXLISTE.md`):** ~~„… Paket I.“~~ (erledigt 30.09.2026) · ~~„… Paket G.“~~ (erledigt 01.10.2026) · ~~„… Paket H.“~~ (erledigt 01.10.2026) · „… Paket K.“ (Custom-Rasse) · „… Paket E.“ · „… Paket A2.“ · „Plane Paket F (Multiclass).“ (danach Bau in Teilen) · „… Paket J.“ (Character Info, nach oder mit F) (~~„… Paket A.“~~ erledigt 28.09.2026). Die früheren Einzel-Prompts „Zauber mit Stat-Block“ (erledigt in Paket A) und „Feature-Auswahl“ (jetzt Teil von Paket C) entfallen.
+- **Arbeitspakete (Reihenfolge A6):** „Arbeite die Fixliste ab: Paket K.“ (Custom-Rasse) · „… Paket E.“ · „… Paket A2.“ · „Plane Paket F (Multiclass).“ (danach Bau in Teilen) · „… Paket J.“ (Character Info, nach oder mit F)
+- **Neue [Sonnet]-Punkte der Fixliste:** „Arbeite die Fixliste ab, nur Sonnet-Teil."
 - **Ausschlussliste (Gruppe „Weitere“):** „Verschiebe im Actions-Tab das Feature **X** nach ‚Weitere‘.“ (Opus Mittel, B1c)
 - **Rückfall ohne GitHub:** zusätzlich „Anbei `class-warlock.json`."
+
+Erledigte Prompt-Vorlagen (Sammel-Fixes, Combat, UI, Pakete A–D, G, H, I): `docs/ARCHIV.md`, Abschnitt „Ausgelagert“.
 
 ## A9. Projekt-Anweisungen (Text für die Projekteinstellungen)
 
@@ -87,11 +87,11 @@ Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 
 ## A10. Welches Modell für welche Aufgabe
 
-**Seit 28.09.2026 (Entscheidung Simon): Opus 5.5 für alle Arbeit an der HTML, Sonnet nicht mehr.** Grund: Sonnet war in diesem Projekt klar schlechter; Nacharbeit (falsche Anker, zusätzliche Runden, fehlerhafte Commits) kostet mehr Nutzungslimit, als der niedrigere Preis spart. Opus 5.5 braucht auf Mittel deutlich weniger Tokens pro Aufgabe als frühere Opus-Modelle. Modell und Denkstufe beim Chat-Start wählen (oder mittendrin wechseln).
+**Seit 28.09.2026 (Entscheidung Simon): Opus 5.5 für alle Arbeit an der HTML, Sonnet nicht mehr.** Grund: Sonnet war in diesem Projekt klar schlechter; Nacharbeit kostet mehr Nutzungslimit, als der niedrigere Preis spart. Modell und Denkstufe beim Chat-Start wählen (oder mittendrin wechseln).
 
 **Faustregel:** Etwas wird nach Vorlage wiederholt oder ist klar umrissen → **Opus 5.5 · Mittel**. Etwas wird zum ersten Mal gebaut (Umbau, Sonder-UI, Konverter) → **Opus 5.5 · Hoch**. Nur eine Frage → **Haiku** (oder Opus · Niedrig).
 
-**Denkstufe:** Opus 5.5 startet standardmäßig auf **Mittel** – **Hoch muss beim Chat-Start selbst eingestellt werden.** **Xhigh und Max nicht nutzen:** Auf Coding-Benchmarks kosten sie gegenüber Hoch 76–106 % mehr bei höchstens +2 Punkten, teils sogar schlechter. Hoch lohnt sich vor allem bei langen Terminal-Sitzungen mit vielen Schritten (Terminal-Bench: Hoch +6,6 Punkte gegenüber Mittel); bei klar umrissenen Änderungen ist Mittel gleich gut und günstiger (FrontierCode: Mittel 54,6 %, Hoch 54,0 %). Stand der Zahlen: 28.09.2026.
+**Denkstufe:** Opus 5.5 startet auf **Mittel** – **Hoch muss beim Chat-Start selbst eingestellt werden.** **Xhigh und Max nicht nutzen** (deutlich teurer, kaum besser). Hoch lohnt sich vor allem bei langen Sitzungen mit vielen Schritten; bei klar umrissenen Änderungen ist Mittel gleich gut und günstiger. (Benchmark-Zahlen: `docs/ARCHIV.md`, „Ausgelagert“.)
 
 **Marker in der Fixliste** (bleiben wegen der Historie so stehen): **[Sonnet] = Opus 5.5 · Mittel**, **[Opus] = Opus 5.5 · Hoch**. „Sonnet“ in A6, A8 und B10 beschreibt, womit damals gearbeitet wurde.
 
@@ -115,11 +115,9 @@ Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 
 Für Arbeit an der HTML **kein Haiku** (Datei zu groß, zu viele Abhängigkeiten). **Kein Sonnet** mehr (s. o.). Fable/Mythos ist für dieses Projekt nicht nötig.
 
-**Nach Reihenfolge A6:** Fixliste: Sonnet-Teil → Sonnet (erledigt), Opus-Teil → Opus Hoch (erledigt) · Combat-Tab-Umbau und Actions → Opus Hoch (erledigt) · UI / Lesbarkeit → Opus Hoch, Kleinkram → Sonnet (erledigt) · Paket A → Opus Hoch (erledigt 28.09.2026); Pakete B, C1–C4, D, I, G, H erledigt; **als Nächstes: Reihenfolge laut A6** (K → E → A2 → F → J, alle Opus Hoch). (Warlock erledigt: lief ohne Konverter- oder Code-Änderung durch.)
+Das Prüfskript (B8) fängt Fehler unabhängig vom Modell ab. Meldet es Probleme, die auf Mittel nicht sauber gelöst werden: Denkstufe auf Hoch stellen und weitermachen. Wirft `class_extract.py` „Unbekannter entry-Typ" oder „TODO _mod", braucht der Konverter eine Erweiterung → Opus · Hoch (kleine, klar umrissene Erweiterungen wie `refFeat` beim Paladin, die Nachdruck-Regeln beim Sorcerer, der Item-`statblock` beim Rogue, die Speed-Zelle beim Monk oder die Bonus-Zelle beim Barbarian reichen auf Mittel). Dasselbe gilt für `bst_convert.py` („Unbekannter Tag“, „Speed: …“, „Spellcasting-Feld nicht unterstützt“, B11).
 
-Das Prüfskript (B8) fängt Fehler unabhängig vom Modell ab. Meldet es Probleme, die auf Mittel nicht sauber gelöst werden: Denkstufe auf Hoch stellen und weitermachen. Wirft `class_extract.py` „Unbekannter entry-Typ" oder „TODO _mod", braucht der Konverter eine Erweiterung → Opus · Hoch (kleine, klar umrissene Erweiterungen wie `refFeat` beim Paladin, die Nachdruck-Regeln beim Sorcerer, der Item-`statblock` beim Rogue, die Speed-Zelle beim Monk oder die Bonus-Zelle beim Barbarian reichen auf Mittel; damals schaffte sie Sonnet). Dasselbe gilt für `bst_convert.py` („Unbekannter Tag“, „Speed: …“, „Spellcasting-Feld nicht unterstützt“, B11).
-
-**Subagenten/Skills:** Lohnen sich hier nicht. Jeder Agent müsste die 1,9-MB-Datei neu einlesen. Den Ablauf ggf. als Skill bündeln, wenn er sich 2–3-mal auf Mittel bewährt hat (Ranger, Sorcerer, Rogue, Monk, Barbarian und Warlock liefen fast ohne Konverter-Änderung durch → Kandidat).
+**Subagenten:** Lohnen sich hier nicht – jeder Agent müsste die ~2,4-MB-Datei neu einlesen. Wiederkehrende Abläufe stecken stattdessen in Skripten (`setup.sh`, `publish.sh`, `rep.py`, `build_class.py` …).
 
 ## A11. Fertig-Checkliste (Ende jeder Sitzung)
 
@@ -134,7 +132,7 @@ Claude arbeitet sie ab und meldet sie in der Schlussnachricht als Kurzliste (✔
    - neues/geändertes Skript (→ B8 bzw. neuer Abschnitt)
    - neue Stolperfalle beim Debuggen (→ B9)
    Immer: eine Zeile in B10 (`docs/ARCHIV.md`). Kleine UI-Anpassungen ohne diese Anlässe → **kein** Md-Update.
-5. **Veröffentlichen (B1a):** `CACHE_NAME` im Service Worker **und** `APP_VERSION` in der HTML auf denselben neuen Wert, ein Commit mit Beschreibung, Push nach `main`, Größe auf GitHub gegenprüfen. Nur Doku/Skripte geändert (`index.html` unverändert) → Commit ohne neue App-Version.
+5. **Veröffentlichen (B1a Schritt 5):** `bash willow/tools/publish.sh "Nachricht"` – prüft, setzt `APP_VERSION` und `CACHE_NAME` auf denselben neuen Wert, committet, pusht und prüft die Größe. Nur Doku/Skripte geändert (Arbeitskopie = `ALT.html`) → Commit ohne neue App-Version, macht das Skript selbst.
 6. **Fixliste:** neue Funde eingetragen, erledigte Punkte nach „Erledigt" verschoben.
 7. **Skripte und Doku** (seit 28.09.2026 im Repo): geänderte Dateien in `willow/tools/` und `willow/docs/` gehen mit dem Commit aus Punkt 5 mit (`git add -A`). **Nichts ins Projekt schreiben** – dort liegt nur noch der Wegweiser `claude/Workflow_Anleitung.md` (nur ändern, wenn sich Sitzungsstart, Dateiliste oder `setup.sh`-Optionen ändern; dann per `project_write`). Doku wie die HTML nur per Python-`rep()` ändern (B1a Schritt 3), nie neu schreiben oder „zusammenfassen“.
 8. **Schlussnachricht an Simon:** Commit-Kürzel + neue App-Version nennen. HTML-Download nur, wenn Simon ihn wünscht.
@@ -143,44 +141,39 @@ Claude arbeitet sie ab und meldet sie in der Schlussnachricht als Kurzliste (✔
 
 ## B1a. HTML laden, bearbeiten, veröffentlichen (Pflicht-Methode)
 
-**Quelle:** GitHub-Repo `claywell1810/willow`, Branch `main`. Dateien: `index.html` (die App; heißt wegen GitHub Pages zwingend so), `service-worker.js`, `manifest.json`, Icons. Claude hat Schreibzugriff (GitHub App, seit 26.09.2026).
+**Quelle:** GitHub-Repo `Claywell1810/Willow`, Branch `main`. Dateien: `index.html` (die App; heißt wegen GitHub Pages zwingend so), `service-worker.js`, `manifest.json`, Icons. Claude hat Schreibzugriff (GitHub App, seit 26.09.2026).
 
 **Warum nicht aus dem Projekt:** Die HTML ist ~2,4 MB, `ZB_SPELLS` allein eine ~500-KB-Zeile. Projekt-Abrufe und das Read-Werkzeug zeigen nur bis 256 KB, das Edit-Werkzeug setzt ein vollständiges Read voraus → beide für die HTML unbrauchbar.
 
 **1. Laden** (seit 28.09.2026 mit `setup.sh`)
 - Repo in die Sitzung holen: Werkzeug `add_repo` (owner `claywell1810`, repo `willow`, access `push`), danach dessen Klon-Anweisung befolgen (einmal klonen, langes Timeout), danach `register_repo_root` (falls vorhanden; fehlt das Werkzeug, einfach weiter).
-- `bash willow/tools/setup.sh [klassen] [zauber] [bestien] [fotos] [alle]` (aus dem Ordner über dem Klon): zeigt den Willow-Commit, legt `DnD_Character_App.html` und `ALT.html` an (Größe, Ende `</html>`), installiert jsdom, lädt die gewählten 5e.tools-Quellen nach `src/` (A3) und nennt den 5e.tools-Commit; `fotos` prüft Playwright/Chromium. Ohne Angabe nur Arbeitskopie + jsdom (reine UI-/Code-Arbeit).
+- `bash willow/tools/setup.sh [klassen] [zauber] [bestien] [rassen] [fotos] [alle]` (aus dem Ordner über dem Klon): zeigt den Willow-Commit, legt `DnD_Character_App.html` und `ALT.html` an (Größe, Ende `</html>`), installiert jsdom, lädt die gewählten 5e.tools-Quellen nach `src/` (A3) und nennt den 5e.tools-Commit; `fotos` prüft Playwright/Chromium. Ohne Angabe nur Arbeitskopie + jsdom (reine UI-/Code-Arbeit).
 - Rückfall ohne GitHub: Simon hängt die Datei im Chat an.
 
 **2. Ansehen:** nur Ausschnitte per `grep -n … | cut -c1-200` oder `sed -n 'a,bp' … | cut -c1-200`.
 
-**3. Ändern:** per Python, jede Ersetzung mit Eindeutigkeitsprüfung:
-```python
-p='DnD_Character_App.html'; s=open(p,encoding='utf-8').read()
-def rep(alt,neu):
-    global s
-    n=s.count(alt); assert n==1, f'Anker {n}x gefunden: {alt[:60]!r}'
-    s=s.replace(alt,neu)
-rep('ALTER TEXT', 'NEUER TEXT')
-open(p,'w',encoding='utf-8').write(s)
+**3. Ändern:** mit `willow/tools/rep.py` (seit 01.10.2026) – jede Ersetzung mit Eindeutigkeitsprüfung, alles oder nichts, `--dry` für den Trockenlauf:
+```bash
+python3 willow/tools/rep.py DnD_Character_App.html patch.py [--dry]   # patch.py: ERSETZ = [('ALT', 'NEU'), ('ALT2', 'NEU2', 2), …]
 ```
-Große Datenmengen (Features, Zauber) im Skript erzeugen und einfügen, nie als Text in den Chat kopieren (dafür gibt es `build_class.py`, `spell_merge.py`, `subclass_spells.py` und `bst_convert.py` in `willow/tools/`). **Aktuelle Daten der App** (Features, Tracker, Tabellen) für Analysen: `dump.js`-Muster – App in jsdom laden und `JSON.stringify({CD:CLASS_DATA,CT:CLASS_TABLES})` nach `cd.json` schreiben (B9). HTML-Blöcke verschieben: Start-/End-Anker per `s.index()` suchen (Eindeutigkeit prüfen), Block ausschneiden und vor dem Ziel-Anker einfügen (Actions 27.09.2026). **`def rep(...): global s`** nicht vergessen (ein Default-Argument `s=s` bindet sonst nur die erste Fassung und spätere Ersetzungen in derselben Sitzung gehen verloren, ohne Fehler zu melden, B9).
+In eigenen Skripten (berechnete Ersetzungen, Blöcke verschieben):
+```python
+import sys; sys.path.insert(0, 'willow/tools'); from rep import Datei
+d = Datei('DnD_Character_App.html'); d.rep('ALT', 'NEU'); d.save()   # d.s = aktueller Text
+```
+Gilt genauso für Doku-Dateien. Die alte Inline-Funktion `rep()` steht in `docs/ARCHIV.md` („Ausgelagert“); wer sie doch inline schreibt: `global s` nicht vergessen (B9).
+Große Datenmengen (Features, Zauber) im Skript erzeugen und einfügen, nie als Text in den Chat kopieren (dafür gibt es `build_class.py`, `spell_merge.py`, `subclass_spells.py` und `bst_convert.py` in `willow/tools/`). **Aktuelle Daten der App** (Features, Tracker, Tabellen) für Analysen: `dump.js`-Muster – App in jsdom laden und `JSON.stringify({CD:CLASS_DATA,CT:CLASS_TABLES})` nach `cd.json` schreiben (B9). HTML-Blöcke verschieben: Start-/End-Anker per `s.index()` suchen (Eindeutigkeit prüfen), Block ausschneiden und vor dem Ziel-Anker einfügen (Actions 27.09.2026).
 
 **4. Prüfen:** `node willow/tools/app_check.js DnD_Character_App.html ALT.html` → „alles OK".
 
-**5. Veröffentlichen**
-```bash
-V=willow-app-JJJJ-MM-TTx     # gleicher Wert für Cache und App-Version
-sed -i "s/const APP_VERSION = '[^']*';/const APP_VERSION = '$V';/" DnD_Character_App.html
-cp DnD_Character_App.html willow/index.html
-# Cache-Version hochzählen – SONST KOMMT DAS UPDATE AUF DEM HANDY NIE AN:
-sed -i "s/const CACHE_NAME = \"[^\"]*\";/const CACHE_NAME = \"$V\";/" willow/service-worker.js
-cd willow && git fetch -q origin main && git status -sb    # muss aktuell sein
-git add -A && git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit -qm "Kurzbeschreibung der Sitzung"
-git push origin HEAD:main
-curl -sS https://raw.githubusercontent.com/claywell1810/willow/main/index.html | wc -c   # Größe gegenprüfen
-```
-- Name: `willow-app-<Datum>` + Buchstabe, pro Veröffentlichung am selben Tag a, b, c …; Datum = Tag der Veröffentlichung (nach Mitternacht neuer Tag, wieder mit a beginnen).
+**5. Veröffentlichen:** `bash willow/tools/publish.sh "Nachricht"` (aus dem Ordner über dem Klon, seit 01.10.2026). Das Skript
+- bricht ab, wenn `origin/main` neuere Commits hat, und stellt den Remote auf `Claywell1810/Willow` um;
+- bei geänderter Arbeitskopie (≠ `ALT.html`): `app_check.js` muss „alles OK“ melden, dann neue Version in `APP_VERSION` **und** `CACHE_NAME` (sonst kommt das Update auf dem Handy nie an), Kopie nach `willow/index.html`;
+- sonst: Commit nur mit Doku/Skripten, ohne neue App-Version;
+- `git add -A`, ein Commit, Push nach `main`, Größe von `index.html` auf GitHub (über den Commit-Hash) gegenprüfen.
+Mehrzeilige Nachricht (mit Co-Authored-By-Zeilen) als ein Argument übergeben. Der frühere Handablauf steht in `docs/ARCHIV.md` („Ausgelagert“).
+
+- Name (setzt `publish.sh`): `willow-app-<Datum>` + Buchstabe, pro Veröffentlichung am selben Tag a, b, c …; Datum = Tag der Veröffentlichung (nach Mitternacht neuer Tag, wieder mit a beginnen).
 - **Ein Commit pro Veröffentlichung**, Nachricht auf Deutsch: was sich für Simon ändert. Bei UI-Arbeit in Teilschritten (A6 Punkt 9) darf eine Sitzung mehrere Veröffentlichungen haben, jede erst nach Simons OK zu den Fotos.
 - **App-Version** steht in den Einstellungen (⚙) neben „Settings" (`const APP_VERSION`, seit `willow-app-2026-09-26b`).
 
