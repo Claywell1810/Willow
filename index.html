@@ -216,6 +216,9 @@ input[type=number]{-moz-appearance:textfield}
 .spell-tags{gap:0 6px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2);line-height:1.35}
 .spell-tags .sp-badge,.spell-tags .ap-bdg,.spell-tags .sp-via{background:none;border:none;padding:0;border-radius:0;color:inherit;font-size:inherit}
 .spell-tags .sp-dot{opacity:.6}
+/* 01.10.2026: Schrift wie Feature-Karten (Actions): Name wie .ab-name (Accent/Gold), Meta-Zeile wie .ab-tag (Small Labels) */
+.spell-l .spell-name{color:var(--gold)}
+.spell-tags{color:var(--text3);letter-spacing:.5px}
 .sp-conc-txt{color:var(--purple)}
 .sp-conc-txt.active{color:var(--bg0);background:var(--purple);border-radius:8px;padding:0 6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sp-cast.sp-prepbtn{color:var(--text2);border-color:var(--border)}
@@ -7050,7 +7053,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01j';
+const APP_VERSION = 'willow-app-2026-10-01k';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
