@@ -1218,6 +1218,52 @@ const REGRESSION = [
       if (!/\.sk-name\{[^}]*flex-wrap:wrap/.test(css) || !/\.sk-attr,\.sk-bon\{flex-shrink:0\}/.test(css)) return 'Skill-Zeile: Abzeichen brechen nicht im Namensblock um';
       w.eval('st.mySpells=[]'); w.resetUI(); return true;
     } },
+  { name: 'Paket G: Log erfasst alles (Notizen zusammengefasst, Always Prepared, Waffenfelder, Tracker-Namen, Bestien, unbekannte Felder) + Undo/Redo', datum: '01.10.2026',
+    run: ({ w, d, sel }) => {
+      w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest G'");
+      sel('Cleric', '', 6); w.autoSave(); w.eval('st.log=[]');
+      const L = () => w.eval('st.log').map(e => e.m);
+      const typ = (id, v) => { const el = d.getElementById(id); el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); };
+      // Notizen: Tippen = ein Eintrag mit Details
+      typ('n_notes', 'D'); typ('n_notes', 'Dra'); typ('n_notes', 'Drache im Norden');
+      let log = w.eval('st.log');
+      const nt = log.filter(e => /^Notizen/.test(e.m));
+      if (nt.length !== 1 || nt[0].m !== 'Notizen: + „Drache im Norden"' || !nt[0].d || nt[0].d.b !== 'Drache im Norden') return 'Notizen: ' + JSON.stringify(nt);
+      // Always Prepared (prep:'free')
+      w.eval("st.mySpells=[{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''}]"); w.autoSave();
+      w.togPrep(0);
+      if (!L().includes('Zauber „Bless": Prepared → Always Prepared')) return 'Always Prepared fehlt: ' + L().slice(-2).join(' / ');
+      // Waffenfelder, Tracker-Namen, Bestie, unbekanntes Feld, Auswahl-Name
+      w.eval("st.weapons=[{name:'Mace',atk:'+5',dmg:'1d6+3',type:'Bludgeoning'}]"); w.autoSave();
+      w.eval("st.weapons[0].atk='+6'"); w.autoSave();
+      if (!L().includes('Waffe „Mace" Angriff: „+5" → „+6"')) return 'Waffenfeld: ' + L().slice(-2).join(' / ');
+      w.eval("st.abUses={channeldivinity:1}"); w.autoSave();
+      if (!L().includes('Channel Divinity verbraucht: 0 → 1')) return 'Tracker-Name: ' + L().slice(-1);
+      w.eval("st.savedBeasts=[BST_DATA.find(b=>b.n==='Wolf')]"); w.autoSave();
+      if (!L().includes('+ Beast: Wolf')) return 'Bestie: ' + L().slice(-1);
+      w.eval("st.zzNeuesFeld=3"); w.autoSave();
+      if (!L().includes('zzNeuesFeld: — → 3')) return 'unbekanntes Feld: ' + L().slice(-1);
+      w.eval("delete st.zzNeuesFeld"); w.autoSave();
+      w.eval("st.picks['feat:Cleric|base|Divine Order']=['Protector']"); w.autoSave();
+      if (!L().includes('Auswahl Divine Order (Cleric): „—" → „Protector"')) return 'Auswahl-Name: ' + L().slice(-1);
+      // Undo/Redo
+      const ub = d.getElementById('undoBtn'), rb = d.getElementById('redoBtn');
+      if (!ub || !rb || ub.disabled || !rb.disabled) return 'Undo-Knöpfe Zustand';
+      w.eval('st.hpC=7'); w.autoSave(); w.eval('st.hpC=3'); w.autoSave();
+      w.doUndo(); if (w.eval('st.hpC') !== 7 || d.getElementById('hpC').textContent !== '7') return 'Undo HP: ' + w.eval('st.hpC');
+      if (rb.disabled) return 'Redo nicht aktiv';
+      if (!L().some(m => m.startsWith('↶ Rückgängig: HP: 3 → 7'))) return 'Undo-Log: ' + L().slice(-1);
+      w.doRedo(); if (w.eval('st.hpC') !== 3) return 'Redo HP: ' + w.eval('st.hpC');
+      w.doUndo(); w.doUndo(); if (w.eval('st.hpC') !== 10) return 'zweites Undo: ' + w.eval('st.hpC');
+      // Tippen = ein Schritt
+      typ('n_notes', 'A'); typ('n_notes', 'AB'); typ('n_notes', 'ABC');
+      w.doUndo(); if (d.getElementById('n_notes').value !== 'Drache im Norden') return 'Tipp-Folge nicht ein Schritt: ' + d.getElementById('n_notes').value;
+      if (rb.disabled) return 'Redo nach Undo leer';
+      w.eval('st.hpC=12'); w.autoSave(); if (!rb.disabled) return 'neue Änderung leert Redo nicht';
+      // Charakterwechsel leert
+      w.resetUI(); if (!ub.disabled || !rb.disabled) return 'Verlauf nach resetUI nicht leer';
+      w.eval('st.mySpells=[];st.weapons=[];st.savedBeasts=[];st.picks={}'); w.resetUI(); return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────

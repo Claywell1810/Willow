@@ -443,6 +443,18 @@ input[type=number]{-moz-appearance:textfield}
 .char-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-sm);padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .char-btn:active{background:var(--bg2)}
 .char-btn.danger{color:var(--red);border-color:rgba(224,85,85,0.3)}
+/* Paket G: Log-Zeilen mit aufklappbaren Details, Undo/Redo in der Kopfzeile */
+.log-row{display:flex;gap:8px;padding:4px 6px;border-bottom:1px solid var(--border2);font-size:var(--fs-sm);line-height:1.4}
+.log-row.has-det{cursor:pointer}
+.log-tm{color:var(--text3);flex:0 0 auto;font-variant-numeric:tabular-nums}
+.log-msg{color:var(--text2);min-width:0;overflow-wrap:anywhere}
+.log-more{color:var(--text3);font-size:var(--fs-xs)}
+.log-det{display:none;margin-top:3px;padding:4px 6px;background:var(--bg3);border-radius:5px;font-size:var(--fs-xs);color:var(--text2);white-space:pre-wrap}
+.log-det b{color:var(--text3);font-weight:600}
+.log-row.open .log-det{display:block}
+.hdr-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.undo-btn{background:none;border:none;font-size:22px;cursor:pointer;padding:4px 2px;line-height:1;color:var(--text2);-webkit-tap-highlight-color:transparent}
+.undo-btn:disabled{opacity:.3;cursor:default}
 
 /* TOAST */
 .ws-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:flex-start;justify-content:center;padding:70px 16px 16px}
@@ -580,6 +592,8 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div class="hdr-title">D&D 5e · Character Sheet</div>
       <div class="name-in" id="charName" style="cursor:default;border-bottom:1px solid var(--border);padding:2px 0;min-height:26px"></div>
     </div>
+    <button class="undo-btn" id="undoBtn" onclick="doUndo()" title="Undo" aria-label="Undo" disabled>↶</button>
+    <button class="undo-btn" id="redoBtn" onclick="doRedo()" title="Redo" aria-label="Redo" disabled>↷</button>
     <button onclick="openWebSearch()" id="webSearchBtn" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px 2px;line-height:1;color:var(--text2);-webkit-tap-highlight-color:transparent" title="Web search" aria-label="Web search">🔍</button>
     <button onclick="openSettings()" style="background:none;border:none;font-size:22px;cursor:pointer;padding:4px 2px;line-height:1;color:var(--text2);-webkit-tap-highlight-color:transparent" title="Settings">⚙️</button>
   </div>
@@ -6224,6 +6238,7 @@ function loadChar(name){
   _saving = false;
   _lastSnap = JSON.parse(JSON.stringify(collectState()));
   _lastSnapName = name;
+  _undoClear();
   if(typeof buildLog==='function') buildLog();
 }
 
@@ -6275,6 +6290,7 @@ function resetUI(){
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();
   const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
+  _undoClear();
 }
 
 function _doNewChar(name){
@@ -6313,6 +6329,7 @@ function _doNewChar(name){
   _saving = false;
   _lastSnap = JSON.parse(JSON.stringify(snap));
   _lastSnapName = _name;
+  _undoClear();
   if(typeof buildLog==='function') buildLog();
   showToast('✨ New Character: '+_name);
   }
@@ -6371,67 +6388,209 @@ let _lastSnapName = null;
 
 function _skillLabel(k){ return (typeof SKILLS!=='undefined' && (SKILLS.find?.(s=>s.n===k||s.k===k)||{}).n) || k; }
 
+// Paket G (01.10.2026): Log bildet alles ab. Bekannte Felder mit lesbaren Namen, alles Übrige generisch
+// (jeder Schlüssel aus collectState, Pfad als Name), damit neue Felder automatisch mitkommen.
+// Einträge: String oder {m, k, prev, next} für Texte (Notizen) – _pushLog fasst Tipp-Folgen zusammen.
+const LOG_SKIP=['log','abGrpClosed','charInfoClosed','zbAdded']; // reine Anzeige-Zustände; zbAdded spiegelt nur mySpells
+const LOG_FIELDS={cls:'Klasse',subcls:'Subklasse',race:'Rasse',raceCustom:'Eigene Rasse',lvl:'Level',bg:'Hintergrund',align:'Gesinnung',prof:'Übungsbonus',hpM:'Max-HP',ac:'RK',ini:'Initiative',spd:'Bewegung',spAttr:'Zauber-Attribut',cur_pp:'Platin',cur_gp:'Gold',cur_ep:'Elektrum',cur_sp:'Silber',cur_cp:'Kupfer'};
+const LOG_TEXTS={n_bg_notes:'Background-Notizen',n_bst_notes:'Bestien-Notizen',n_ft_notes:'Feat-Notizen',n_class_traits:'Klassen-Notizen',n_bg_feature:'Background-Feature',n_bg_extra:'Background-Extra',n_pers:'Persönlichkeit',n_ideal:'Ideale',n_bond:'Bindungen',n_flaw:'Makel',n_equip:'Ausrüstung',n_notes:'Notizen',n_equip_notes:'Ausrüstungs-Notizen',skillNotes:'Skill-Notizen',raceNotes:'Rassen-Notizen'};
+let _abNames=null;
+function _abLabel(id){
+  if(!_abNames){
+    _abNames={};
+    const add=a=>{if(!a||!a.id)return;_abNames[a.id]=a.name||a.id;(a.sub||[]).forEach(x=>{_abNames[a.id+'.'+x.k]=(a.name||a.id)+' · '+(x.l||x.k);});};
+    try{Object.values(CLASS_DATA).forEach(c=>Object.values(c.abilities||{}).forEach(l=>(l||[]).forEach(add)));}catch(e){}
+    try{if(typeof RACE_PICKS!=='undefined')Object.keys(RACE_PICKS).forEach(r=>(rcTrackers(r,20)||[]).forEach(add));}catch(e){}
+  }
+  return _abNames[id]||id;
+}
+function _pickLabel(k){
+  let m;
+  if((m=/^cls:(.+):skills$/.exec(k)))return 'Skill-Wahl '+m[1];
+  if((m=/^bg:(.+):skills(?::\d+)?$/.exec(k)))return 'Skill-Wahl Background '+m[1];
+  if((m=/^bg:(.+):ability$/.exec(k)))return 'Attributs-Bonus Background '+m[1];
+  if(k==='race:size')return 'Größe (Rasse)';
+  if((m=/^race:(.+)$/.exec(k)))return m[1]+' (Rasse)';
+  if((m=/^feat:(.+)$/.exec(k))){const p=m[1].split('|');return (p[2]||m[1]).replace(/@\d+$/,'')+(p[0]&&p[2]?' ('+p[0]+')':'');}
+  return k;
+}
+function _logV(v){
+  if(v===null||v===undefined||v==='')return '—';
+  if(typeof v==='boolean')return v?'✓':'✗';
+  if(typeof v==='number')return String(v);
+  if(typeof v==='string')return '„'+(v.length>40?v.slice(0,40)+'…':v)+'"';
+  const j=JSON.stringify(v);return j.length>40?j.slice(0,40)+'…':j;
+}
+function _logTxtOut(out,k,label,va,vb){
+  va=va==null?'':String(va);vb=vb==null?'':String(vb);
+  if(va===vb)return;
+  out.push({m:_logTxtMsg(label,va,vb),k:'txt:'+k,prev:va,next:vb,lbl:label});
+}
+// geänderten Bereich zweier Texte bestimmen (gemeinsamer Anfang/Ende weg), gekürzt
+function _logTxtRegion(a,b){
+  let i=0;const n=Math.min(a.length,b.length);
+  while(i<n&&a[i]===b[i])i++;
+  let j=0;while(j<n-i&&a[a.length-1-j]===b[b.length-1-j])j++;
+  return {a:a.slice(i,a.length-j),b:b.slice(i,b.length-j)};
+}
+function _logCut(x,n){x=x.replace(/\s+/g,' ').trim();return x.length>n?x.slice(0,n)+'…':x;}
+function _logTxtMsg(label,a,b){
+  const r=_logTxtRegion(a,b);
+  if(!r.a)return `${label}: + „${_logCut(r.b,40)}"`;
+  if(!r.b)return `${label}: − „${_logCut(r.a,40)}"`;
+  return `${label} geändert: „${_logCut(r.a,25)}" → „${_logCut(r.b,25)}"`;
+}
+// generischer Vergleich beliebiger Werte (Objekte rekursiv, Listen je Eintrag)
+function _logGen(out,label,va,vb,path){
+  if(JSON.stringify(va)===JSON.stringify(vb))return;
+  const isO=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  if(isO(va)||isO(vb)){
+    va=isO(va)?va:{};vb=isO(vb)?vb:{};
+    new Set([...Object.keys(va),...Object.keys(vb)]).forEach(k=>_logGen(out,label+' › '+k,va[k],vb[k],path+'.'+k));
+    return;
+  }
+  if(Array.isArray(va)||Array.isArray(vb)){
+    va=va||[];vb=vb||[];
+    if(va.every(x=>typeof x!=='object')&&vb.every(x=>typeof x!=='object')&&va.length<=12&&vb.length<=12){
+      out.push(`${label}: „${va.join(', ')||'—'}" → „${vb.join(', ')||'—'}"`);return;
+    }
+    _logList(out,va,vb,label,null,null);
+    return;
+  }
+  if((typeof va==='string'&&(va.length>40||va.includes('\n')))||(typeof vb==='string'&&(vb.length>40||vb.includes('\n')))){_logTxtOut(out,path,label,va,vb);return;}
+  out.push(`${label}: ${_logV(va)} → ${_logV(vb)}`);
+}
+// Listen von Objekten: über Schlüssel (keyFn) zuordnen, sonst über die Position (Einfügen/Entfernen einzelner Einträge erkannt)
+function _logList(out,la,lb,label,keyFn,cfg){
+  la=la||[];lb=lb||[];cfg=cfg||{};
+  const nm=(x,i)=>(cfg.name?cfg.name(x,i):(x&&(x.name||x.n)))||('#'+(i+1));
+  const fields=(y,x,i)=>{
+    const lbl=`${label} „${nm(x,i)}"`;
+    if(cfg.extra)cfg.extra(y,x,lbl,i);
+    if(!y||!x||typeof y!=='object'||typeof x!=='object'){_logGen(out,lbl,y,x,label+'.'+i);return;}
+    new Set([...Object.keys(y),...Object.keys(x)]).forEach(f=>{
+      if(cfg.skip&&cfg.skip.includes(f))return;
+      const fl=(cfg.fl&&cfg.fl[f])||f;
+      if(cfg.txt&&cfg.txt.includes(f)){_logTxtOut(out,label+'.'+(keyFn?keyFn(x):i)+'.'+f,`${lbl} ${fl}`,y[f],x[f]);return;}
+      _logGen(out,(cfg.lblF?cfg.lblF(f,x,i,lbl):lbl)+' '+fl,y[f],x[f],label+'.'+i+'.'+f);
+    });
+  };
+  if(keyFn){
+    const ka=la.map(keyFn),kb=lb.map(keyFn);
+    if(new Set(ka).size===ka.length&&new Set(kb).size===kb.length){
+      const ma=new Map(la.map((x,i)=>[ka[i],[x,i]])),mb=new Map(lb.map((x,i)=>[kb[i],[x,i]]));
+      for(const[k,[x,i]]of mb) if(!ma.has(k)) out.push(`+ ${label}: ${nm(x,i)}`);
+      for(const[k,[x,i]]of ma) if(!mb.has(k)) out.push(`− ${label} entfernt: ${nm(x,i)}`);
+      for(const[k,[x,i]]of mb){const y=ma.get(k);if(y)fields(y[0],x,i);}
+      return;
+    }
+  }
+  const J=x=>JSON.stringify(x);
+  if(lb.length===la.length){la.forEach((y,i)=>fields(y,lb[i],i));return;}
+  if(Math.abs(lb.length-la.length)===1){
+    const big=lb.length>la.length?lb:la,small=lb.length>la.length?la:lb;
+    let i=0;while(i<small.length&&J(small[i])===J(big[i]))i++;
+    if(small.slice(i).every((x,j)=>J(x)===J(big[i+1+j]))){
+      if(big===lb)out.push(`+ ${label}: ${nm(lb[i],i)}`);else out.push(`− ${label} entfernt: ${nm(la[i],i)}`);
+      return;
+    }
+  }
+  const cnt=new Map();la.forEach(x=>cnt.set(J(x),(cnt.get(J(x))||0)+1));
+  const add=[];lb.forEach((x,i)=>{const c=cnt.get(J(x))||0;if(c)cnt.set(J(x),c-1);else add.push([x,i]);});
+  const rem=[];const cb=new Map();lb.forEach(x=>cb.set(J(x),(cb.get(J(x))||0)+1));
+  la.forEach((x,i)=>{const c=cb.get(J(x))||0;if(c)cb.set(J(x),c-1);else rem.push([x,i]);});
+  add.forEach(([x,i])=>out.push(`+ ${label}: ${nm(x,i)}`));
+  rem.forEach(([x,i])=>out.push(`− ${label} entfernt: ${nm(x,i)}`));
+}
+
 function _diffSnaps(a,b){
-  const out=[];
-  const fL={cls:'Klasse',subcls:'Subklasse',race:'Rasse',raceCustom:'Rasse',lvl:'Level',bg:'Hintergrund',align:'Gesinnung',prof:'Übungsbonus',hpM:'Max-HP',ac:'RK',ini:'Initiative',spd:'Bewegung',spAttr:'Zauber-Attribut',cur_pp:'Platin',cur_gp:'Gold',cur_ep:'Elektrum',cur_sp:'Silber',cur_cp:'Kupfer'};
-  Object.keys(fL).forEach(id=>{
+  const out=[];a=a||{};b=b||{};
+  const done=new Set(LOG_SKIP);
+  // Formularfelder (TEXT_IDS)
+  Object.keys(a).concat(Object.keys(b)).filter(k=>k.startsWith('_f_')).forEach(k=>done.add(k));
+  new Set(TEXT_IDS.concat(Object.keys(a).concat(Object.keys(b)).filter(k=>k.startsWith('_f_')).map(k=>k.slice(3)))).forEach(id=>{
     const va=a['_f_'+id], vb=b['_f_'+id];
+    if(LOG_TEXTS[id]||/^n_/.test(id)){_logTxtOut(out,id,LOG_TEXTS[id]||id,va,vb);return;}
     if(va!==vb && !(va==null&&vb==='') && !(vb==null&&va==='')){
-      if(vb) out.push(`${fL[id]}: „${va||'—'}" → „${vb}"`);
-      else out.push(`${fL[id]} geleert (war „${va}")`);
+      const lbl=LOG_FIELDS[id]||id;
+      if(vb) out.push(`${lbl}: „${va||'—'}" → „${vb}"`);
+      else out.push(`${lbl} geleert (war „${va}")`);
     }
   });
-  if(a.hpC!==b.hpC && (a.hpC!=null||b.hpC!=null)) out.push(`HP: ${a.hpC??'?'} → ${b.hpC}`);
-  const iA=(a.ins||[]).filter(Boolean).length, iB=(b.ins||[]).filter(Boolean).length;
+  done.add('hpC');if(a.hpC!==b.hpC && (a.hpC!=null||b.hpC!=null)) out.push(`HP: ${a.hpC??'?'} → ${b.hpC}`);
+  done.add('ins');const iA=(a.ins||[]).filter(Boolean).length, iB=(b.ins||[]).filter(Boolean).length;
   if(iA!==iB) out.push(`Inspiration: ${iA} → ${iB}`);
-  const dsA=(a.dsS||[]).filter(Boolean).length, dsB=(b.dsS||[]).filter(Boolean).length;
+  done.add('dsS');const dsA=(a.dsS||[]).filter(Boolean).length, dsB=(b.dsS||[]).filter(Boolean).length;
   if(dsA!==dsB) out.push(`Todesrettung Erfolge: ${dsA} → ${dsB}`);
-  const dfA=(a.dsF||[]).filter(Boolean).length, dfB=(b.dsF||[]).filter(Boolean).length;
+  done.add('dsF');const dfA=(a.dsF||[]).filter(Boolean).length, dfB=(b.dsF||[]).filter(Boolean).length;
   if(dfA!==dfB) out.push(`Todesrettung Fehlschläge: ${dfA} → ${dfB}`);
-  if((a.concActive||null)!==(b.concActive||null)){
-    if(b.concActive) out.push(`Konzentration: ${b.concActive}`);
-    else out.push(`Konzentration beendet${a.concActive?` (war ${a.concActive})`:''}`);
+  done.add('concActive');
+  if((a.concActive??null)!==(b.concActive??null)){
+    const spN=(s,i)=>(i!=null&&s.mySpells&&s.mySpells[i]&&s.mySpells[i].name)||i;
+    if(b.concActive!=null) out.push(`Konzentration: ${spN(b,b.concActive)}`);
+    else out.push(`Konzentration beendet${a.concActive!=null?` (war ${spN(a,a.concActive)})`:''}`);
   }
-  if(a.attrs&&b.attrs) for(const k in b.attrs){ if(a.attrs[k]!==b.attrs[k]) out.push(`${k}: ${a.attrs[k]??'?'} → ${b.attrs[k]}`); }
-  const smA=a.slotMax||[], smB=b.slotMax||[];
+  done.add('concActiveFeature');
+  if((a.concActiveFeature??null)!==(b.concActiveFeature??null)){
+    if(b.concActiveFeature!=null) out.push(`Konzentration: ${_abLabel(b.concActiveFeature)}`);
+    else out.push(`Konzentration beendet (war ${_abLabel(a.concActiveFeature)})`);
+  }
+  done.add('attrs');{const xa=a.attrs||{},xb=b.attrs||{};new Set([...Object.keys(xa),...Object.keys(xb)]).forEach(k=>{ if(xa[k]!==xb[k]) out.push(`${k}: ${xa[k]??'?'} → ${xb[k]??'?'}`); });}
+  done.add('slotMax');const smA=a.slotMax||[], smB=b.slotMax||[];
   for(let i=0;i<9;i++){ if((smA[i]??0)!==(smB[i]??0)) out.push(`Zauberplätze Grad ${i+1} (max): ${smA[i]??0} → ${smB[i]??0}`); }
-  if((a.hdUsed||0)!==(b.hdUsed||0)) out.push(`Hit Dice verbraucht: ${a.hdUsed||0} → ${b.hdUsed||0}`);
-  const suA=a.slotUsed||[], suB=b.slotUsed||[];
+  done.add('slotAdj');const saA=a.slotAdj||[], saB=b.slotAdj||[];
+  for(let i=0;i<9;i++){ if((saA[i]??0)!==(saB[i]??0)) out.push(`Zauberplätze Grad ${i+1} Korrektur: ${fmt(saA[i]??0)} → ${fmt(saB[i]??0)}`); }
+  done.add('hdUsed');if((a.hdUsed||0)!==(b.hdUsed||0)) out.push(`Hit Dice verbraucht: ${a.hdUsed||0} → ${b.hdUsed||0}`);
+  done.add('slotUsed');const suA=a.slotUsed||[], suB=b.slotUsed||[];
   for(let i=0;i<9;i++){ if((suA[i]??0)!==(suB[i]??0)) out.push(`Zauberplätze Grad ${i+1} verbraucht: ${suA[i]??0} → ${suB[i]??0}`); }
-  const kmA=a.skillMisc||{}, kmB=b.skillMisc||{};
+  done.add('skillMisc');const kmA=a.skillMisc||{}, kmB=b.skillMisc||{};
   new Set([...Object.keys(kmA),...Object.keys(kmB)]).forEach(k=>{ if((kmA[k]??0)!==(kmB[k]??0)) out.push(`Skill ${_skillLabel(k)} Bonus: ${kmA[k]??0} → ${kmB[k]??0}`); });
-  const auA=a.abUses||{}, auB=b.abUses||{};
-  new Set([...Object.keys(auA),...Object.keys(auB)]).forEach(k=>{ if((auA[k]??0)!==(auB[k]??0)) out.push(`${k} Nutzungen: ${auA[k]??0} → ${auB[k]??0}`); });
-  const key=s=>(s&&(s.name||s.id))??JSON.stringify(s);
-  function listDiff(la,lb,label,extra){
-    la=la||[]; lb=lb||[];
-    const ma=new Map(la.map(x=>[key(x),x])), mb=new Map(lb.map(x=>[key(x),x]));
-    for(const[k,x]of mb) if(!ma.has(k)) out.push(`+ ${label}: ${x.name||k}`);
-    for(const[k,x]of ma) if(!mb.has(k)) out.push(`− ${label} entfernt: ${x.name||k}`);
-    if(extra) for(const[k,x]of mb){ const y=ma.get(k); if(y) extra(y,x); }
-  }
-  listDiff(a.mySpells,b.mySpells,'Zauber',(y,x)=>{
-    const st_=v=>v.prep2?'Always Prepared':(v.prep?'Prepared':'nicht vorbereitet');
-    if(st_(y)!==st_(x)) out.push(`Zauber „${x.name}": ${st_(y)} → ${st_(x)}`);
-    if((y.freeMax??0)!==(x.freeMax??0)) out.push(`Zauber „${x.name}" Free Casts max: ${y.freeMax??0} → ${x.freeMax??0}`);
-    if((y.freeUsed??0)!==(x.freeUsed??0)) out.push(`Zauber „${x.name}" Free Casts genutzt: ${y.freeUsed??0} → ${x.freeUsed??0}`);
-    if((y.notes||'')!==(x.notes||'')) out.push(`Zauber „${x.name}" Notiz geändert`);
+  done.add('abUses');const auA=a.abUses||{}, auB=b.abUses||{};
+  new Set([...Object.keys(auA),...Object.keys(auB)]).forEach(k=>{ if((auA[k]??0)!==(auB[k]??0)) out.push(`${_abLabel(k)} verbraucht: ${auA[k]??0} → ${auB[k]??0}`); });
+  done.add('abPick');const apA=a.abPick||{}, apB=b.abPick||{};
+  new Set([...Object.keys(apA),...Object.keys(apB)]).forEach(k=>{
+    const lb=x=>(x||[]).map(s=>_abLabel(k+'.'+s).split(' · ').pop()).join(', ');
+    const x=lb(apA[k]),y=lb(apB[k]); if(x!==y) out.push(`Auswahl ${_abLabel(k)}: „${x||'—'}" → „${y||'—'}"`);
   });
-  listDiff(a.feats,b.feats,'Feat');
-  listDiff(a.items,b.items,'Item',(y,x)=>{ if((y.qty??1)!==(x.qty??1)) out.push(`Item „${x.name}" Menge: ${y.qty??1} → ${x.qty??1}`); });
-  listDiff(a.weapons,b.weapons,'Waffe');
-  listDiff(a.savedBeasts,b.savedBeasts,'Beast');
+  done.add('skillNotes');_logTxtOut(out,'skillNotes',LOG_TEXTS.skillNotes,a.skillNotes,b.skillNotes);
+  done.add('raceNotes');_logTxtOut(out,'raceNotes',LOG_TEXTS.raceNotes,a.raceNotes,b.raceNotes);
+  done.add('mySpells');
+  const prepS=v=>(v.prep==='free'||v.prep2)?'Always Prepared':(v.prep?'Prepared':'nicht vorbereitet');
+  _logList(out,a.mySpells,b.mySpells,'Zauber',x=>x&&x.name,{skip:['prep','prep2','freeMax','freeUsed'],txt:['notes'],fl:{notes:'Notiz',grad:'Grad',school:'Schule'},
+    extra:(y,x)=>{
+      if(prepS(y)!==prepS(x)) out.push(`Zauber „${x.name}": ${prepS(y)} → ${prepS(x)}`);
+      if((y.freeMax??0)!==(x.freeMax??0)) out.push(`Zauber „${x.name}" Free Casts max: ${y.freeMax??0} → ${x.freeMax??0}`);
+      if((y.freeUsed??0)!==(x.freeUsed??0)) out.push(`Zauber „${x.name}" Free Casts genutzt: ${y.freeUsed??0} → ${x.freeUsed??0}`);
+    }});
+  done.add('feats');_logList(out,a.feats,b.feats,'Feat',x=>x&&x.name,{txt:['desc','notes','note']});
+  done.add('items');_logList(out,a.items,b.items,'Item',x=>x&&x.id!=null?x.id:x&&x.name,{txt:['note'],fl:{qty:'Menge',wt:'Gewicht',cat:'Kategorie',note:'Notiz',name:'Name'},skip:['id'],
+    lblF:(f,x,i,lbl)=>f==='name'?`Item ${i+1}`:lbl});
+  done.add('weapons');_logList(out,a.weapons,b.weapons,'Waffe',null,{fl:{name:'Name',atk:'Angriff',dmg:'Schaden',type:'Schadensart'},
+    name:(x,i)=>(x&&x.name)||('#'+(i+1)),lblF:(f,x,i,lbl)=>f==='name'?`Waffe ${i+1}`:lbl});
+  done.add('savedBeasts');_logList(out,a.savedBeasts,b.savedBeasts,'Beast',x=>x&&(x.n||x.name),{name:x=>x&&(x.n||x.name)});
   function profDiff(oa,ob,tag,lblFn){
     oa=oa||{}; ob=ob||{};
-    new Set([...Object.keys(oa),...Object.keys(ob)]).forEach(k=>{ if(!!oa[k]!==!!ob[k]) out.push(`${tag} ${lblFn(k)}: ${ob[k]?'✓':'✗'}`); });
+    new Set([...Object.keys(oa),...Object.keys(ob)]).forEach(k=>{
+      if((oa[k]||'')===(ob[k]||''))return;
+      const v=x=>x==='e'?'Expertise':x==='half'?'½':x?'✓':'✗';
+      if(!!oa[k]!==!!ob[k]) out.push(`${tag} ${lblFn(k)}: ${ob[k]?v(ob[k]):'✗'}`);
+      else out.push(`${tag} ${lblFn(k)}: ${v(oa[k])} → ${v(ob[k])}`);
+    });
   }
-  profDiff(a.saveP,b.saveP,'Save',k=>k);
-  profDiff(a.skillP,b.skillP,'Skill',_skillLabel);
-  const pA=a.picks||{}, pB=b.picks||{};
-  new Set([...Object.keys(pA),...Object.keys(pB)]).forEach(k=>{ const x=(pA[k]||[]).join(', '), y=(pB[k]||[]).join(', '); if(x!==y) out.push(`Auswahl ${k}: „${x||'—'}" → „${y||'—'}"`); });
+  done.add('saveP');profDiff(a.saveP,b.saveP,'Save',k=>k);
+  done.add('skillP');profDiff(a.skillP,b.skillP,'Skill',_skillLabel);
+  done.add('picks');const pA=a.picks||{}, pB=b.picks||{};
+  new Set([...Object.keys(pA),...Object.keys(pB)]).forEach(k=>{ const x=(pA[k]||[]).join(', '), y=(pB[k]||[]).join(', '); if(x!==y) out.push(`Auswahl ${_pickLabel(k)}: „${x||'—'}" → „${y||'—'}"`); });
+  // alles Übrige (auch künftige Felder aus Paket E/F) generisch
+  new Set([...Object.keys(a),...Object.keys(b)]).forEach(k=>{ if(!done.has(k)) _logGen(out,k,a[k],b[k],k); });
   return out;
 }
 
+const _logTxtBase={}; // Textstand vor dem ersten Tastendruck je Feld (nur laufende Sitzung)
+function _logTxtDetail(a,b){
+  const r=_logTxtRegion(a||'',b||''),c=x=>x.length>300?x.slice(0,300)+'…':x;
+  return {a:c(r.a),b:c(r.b)};
+}
 function _pushLog(name,entries){
   if(!entries.length) return;
   const chars=getAllChars();
@@ -6440,10 +6599,23 @@ function _pushLog(name,entries){
   const ts=Date.now();
   const COALESCE_MS=90000;
   const parse=m=>{ const x=/^(.*): (.+?) → (.+)$/.exec(m||''); return x?{pre:x[1],from:x[2],to:x[3]}:null; };
-  entries.forEach(m=>{
-    const cur=parse(m);
+  entries.forEach(e=>{
     const last=log[log.length-1];
-    if(cur && last && (ts-last.t)<COALESCE_MS){
+    if(e&&typeof e==='object'){
+      if(e.k){ // Text (Notizen): Tipp-Folge innerhalb 90 s = ein Eintrag, Vergleich gegen den Text vor dem ersten Tastendruck
+        if(last && last.k===e.k && (ts-last.t)<COALESCE_MS && _logTxtBase[e.k]!=null){
+          const base=_logTxtBase[e.k];
+          if(base===e.next){ log.pop(); delete _logTxtBase[e.k]; return; }
+          last.m=_logTxtMsg(e.lbl,base,e.next); last.d=_logTxtDetail(base,e.next); last.t=ts; return;
+        }
+        _logTxtBase[e.k]=e.prev;
+        log.push({t:ts,m:e.m,k:e.k,d:_logTxtDetail(e.prev,e.next)}); return;
+      }
+      const x={t:ts,m:e.m}; if(e.d)x.d=e.d; if(e.u)x.u=1; log.push(x); return;
+    }
+    const m=e;
+    const cur=parse(m);
+    if(cur && last && !last.k && !last.u && (ts-last.t)<COALESCE_MS){
       const lp=parse(last.m);
       if(lp && lp.pre===cur.pre){
         last.m=`${cur.pre}: ${lp.from} → ${cur.to}`;
@@ -6472,10 +6644,14 @@ function buildLog(){
     const day=d.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit'});
     const tm=d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
     if(day!==lastDay){ html+=`<div style="color:var(--gold);font-size:var(--fs-xs);font-weight:600;margin:8px 0 3px;font-family:'Cinzel',serif">${day}</div>`; lastDay=day; }
-    const esc=(e.m||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    html+=`<div style="display:flex;gap:8px;padding:4px 6px;border-bottom:1px solid var(--border2);font-size:var(--fs-sm);line-height:1.4">
-      <span style="color:var(--text3);flex:0 0 auto;font-variant-numeric:tabular-nums">${tm}</span>
-      <span style="color:var(--text2)">${esc}</span></div>`;
+    const E=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const esc=E(e.m);
+    let det='';
+    if(e.d&&Array.isArray(e.d.list)) det=`<div class="log-det">${e.d.list.map(x=>`<div>${E(x)}</div>`).join('')}</div>`;
+    else if(e.d) det=`<div class="log-det">${e.d.a?`<div><b>Vorher:</b> ${E(e.d.a)}</div>`:''}${e.d.b?`<div><b>Nachher:</b> ${E(e.d.b)}</div>`:''}</div>`;
+    html+=`<div class="log-row${det?' has-det':''}"${det?' onclick="this.classList.toggle(\'open\')"':''}>
+      <span class="log-tm">${tm}</span>
+      <span class="log-msg">${esc}${det?' <span class="log-more">▾</span>':''}${det}</span></div>`;
   });
   box.innerHTML=html;
 }
@@ -6490,18 +6666,72 @@ function clearLog(){
   if(typeof showToast==='function') showToast('📓 Log geleert');
 }
 
+// ===== UNDO / REDO (Paket G, 01.10.2026) =====
+// Verlauf nur für die laufende Sitzung, je Charakter, max. 30 Schritte (Entscheidung Simon).
+// Ein Schritt = ein autoSave mit echter Änderung; Tippen im selben Feld ohne 4 s Pause = ein Schritt.
+// Charakterwechsel, neuer Charakter, Import und Löschen leeren den Verlauf.
+const UNDO_MAX=30, UNDO_GROUP_MS=4000, UNDO_SKIP=['log','abGrpClosed','charInfoClosed'];
+let _undo=[], _redo=[], _undoGrp=null;
+function _undoStrip(s){const o={};for(const k in s) if(k!=='log') o[k]=s[k];return JSON.parse(JSON.stringify(o));}
+function _undoSig(s){const o={};for(const k in s) if(!UNDO_SKIP.includes(k)) o[k]=s[k];return JSON.stringify(o);}
+function updUndoBtns(){
+  const u=document.getElementById('undoBtn'),r=document.getElementById('redoBtn');
+  if(u)u.disabled=!_undo.length; if(r)r.disabled=!_redo.length;
+}
+function _undoClear(){_undo=[];_redo=[];_undoGrp=null;updUndoBtns();}
+function _undoRecord(prev,ev){
+  const el=ev&&ev.target, now=Date.now();
+  const typing=!!el&&(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&/^(text|number|search|)$/i.test(el.type||''))||el.isContentEditable===true);
+  if(typing&&_undoGrp&&_undoGrp.el===el&&now-_undoGrp.t<UNDO_GROUP_MS){_undoGrp.t=now;}
+  else{_undo.push(_undoStrip(prev));if(_undo.length>UNDO_MAX)_undo.shift();_undoGrp=typing?{el,t:now}:null;}
+  _redo=[];updUndoBtns();
+}
+function _undoStep(from,to,lbl){
+  const name=document.getElementById('charName')?.textContent.trim();
+  if(!name||!from.length) return;
+  const cur=collectState();
+  const target=from.pop();
+  to.push(_undoStrip(cur));
+  UNDO_SKIP.forEach(k=>{if(k!=='log'&&k in cur)target[k]=cur[k];}); // Anzeige-Zustände (zugeklappt …) bleiben
+  const y=window.scrollY||0;
+  _saving=true;
+  Object.keys(st).forEach(k=>{if(k!=='log'&&!(k in target))delete st[k];});
+  applyState(target);
+  const chars=getAllChars();
+  st.log=(chars[name]&&chars[name].log)||st.log||[];
+  _saving=false;
+  const snap=collectState();
+  const msgs=_diffSnaps(cur,snap).map(x=>typeof x==='string'?x:x.m);
+  snap.log=st.log; chars[name]=snap; localStorage.setItem(LS_KEY,JSON.stringify(chars));
+  _lastSnap=JSON.parse(JSON.stringify(snap)); _lastSnapName=name; _undoGrp=null;
+  if(msgs.length){
+    const e={m:lbl+': '+msgs.slice(0,2).join(' · ')+(msgs.length>2?` (+${msgs.length-2})`:''),u:1};
+    if(msgs.length>2)e.d={list:msgs};
+    _pushLog(name,[e]);
+  }
+  if(document.getElementById('tab-spelllist')?.classList.contains('on')&&typeof slRender==='function') slRender();
+  if(document.getElementById('tab-log')?.classList.contains('on')) buildLog();
+  if(Math.abs((window.scrollY||0)-y)>1){try{window.scrollTo(0,y);}catch(e){}}
+  updUndoBtns();
+  showToast(lbl+(msgs[0]?': '+(msgs[0].length>50?msgs[0].slice(0,50)+'…':msgs[0]):''));
+}
+function doUndo(){_undoStep(_undo,_redo,'↶ Rückgängig');}
+function doRedo(){_undoStep(_redo,_undo,'↷ Wiederhergestellt');}
+
 // Auto-save on input changes
 let _saving = false;
 document.addEventListener('input', autoSave);
-function autoSave(){
+function autoSave(e){
   if(_saving) return;
+  const ev=(e&&e.target)?e:(typeof window!=='undefined'?window.event:null); // auch oninput="…;autoSave()" kennt so das Feld
   const name = document.getElementById('charName')?.textContent.trim();
   if(name){
     const snap = collectState();
     if(_lastSnapName===name && _lastSnap){
       const entries=_diffSnaps(_lastSnap,snap);
       if(entries.length) _pushLog(name,entries);
-    }
+      if(_undoSig(_lastSnap)!==_undoSig(snap)) _undoRecord(_lastSnap,ev);
+    } else _undoClear();
     const chars = getAllChars();
     snap.log = (getAllChars()[name]?.log)||snap.log||[];
     chars[name] = snap;
@@ -6624,7 +6854,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-09-30a';
+const APP_VERSION = 'willow-app-2026-10-01a';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
