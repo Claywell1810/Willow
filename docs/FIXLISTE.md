@@ -17,6 +17,7 @@ Reihenfolge = Empfehlung. Je Paket ein eigener Chat, Prompt „Arbeite die Fixli
 | 1 | ~~**I – UI-Feinschliff**~~ ✔ 30.09.2026 (`willow-app-2026-09-30a`) | 6 kleine Anzeige-Fehler (Spell-Zeilen, Free-Cast-Punkte, Hit-Points-Raster, Spell-Details-Abstand, Freifläche unten, Skill-Zeilen) | Opus Mittel |
 | 2 | ~~**G – Log + Rückgängig**~~ ✔ 01.10.2026 (`willow-app-2026-10-01a`) | Log erfasst alles, dann Undo-Knopf | Opus Hoch |
 | 3 | **H – Always Prepared automatisch** | Klassen-/Subklassen-Zauber nach Stufe, mit Herkunfts-Abzeichen | Opus Hoch |
+| 3b | **K – Custom-Rasse mit Werten** (neu 01.10.2026) | „Custom“ bekommt feste Felder (Größe, Speed, Darkvision, Resistenzen, Skills, Sprachen, Attributsboni, Traits mit Zählern, natürliche Waffen), mit denen die App rechnet wie bei 5e.tools-Rassen; Anlass: Willow = eigene Bearfolk-Fassung | Opus Hoch |
 | 4 | **E – Effekte und Würfeln** | Attribute mit Grundwert + Boni (BG/Race eingerechnet, Herkunft aufklappbar), Zustände, Erschöpfung, Buffs/Debuffs, mehr Würfe (Attribute, Initiative, Waffen, Zauberangriff) | Opus Hoch |
 | 5 | **A2 – Begleiter und Stat-Blöcke** | Beast Master/Drakewarden, Wildfire Spirit, Dancing Item … (später) | Opus Hoch |
 | 6 | **F – Multiclass** | nach hinten verschoben (01.10.2026, Simon: wichtig, aber aktuell nicht gebraucht); erst Planungs-Chat, dann Bau in Teilen | Opus Hoch |
@@ -81,6 +82,8 @@ Die offenen Punkte sind zu Paketen gebündelt; **je Paket ein eigener Chat** (Mo
 - „Skills/Saves – Wert und Würfel rutschen bei Zoom in die zweite Zeile“
 
 **J – Character Info neu gestalten (Opus Hoch, nach oder mit F; rein optisch, nicht eilig – Simon 01.10.2026).** Prompt: „Arbeite die Fixliste ab: Paket J.“ Punkt „Character Info aufwerten“ (UI / Lesbarkeit); erst Entwurf/Fotos mit Simon abstimmen, dann bauen; Multiclass-Kopf aus Paket F berücksichtigen (oder J gleich im F-Bau mit erledigen).
+
+**K – Custom-Rasse mit Werten (Opus Hoch, neu 01.10.2026, Wunsch Simon).** Prompt: „Arbeite die Fixliste ab: Paket K.“ Heute ist `race='custom'` nur Name (`raceCustom`) + Freitext (`n_race_custom`), nichts wird verrechnet. Simon: „Custom müsste so offen sein, dass man in feste Felder selbst Werte einträgt, mit denen gerechnet wird“ (Willow = eigene Bearfolk-Fassung, keine aus dem Netz). Soll: Eingabemaske im Race-Bereich, Werte pro Charakter gespeichert, im selben Schema wie `RACE_PICKS` (B13), damit `rcVals`/`rcGrants`/`rcCard` und der Actions-Tab sie ohne Sonderweg nutzen: Größe, Speed (walk/fly/swim/climb), Darkvision, Resistenzen, Skill-Profs, Sprachen, Attributsboni (Abzeichen „Race“), Traits (Name + Text, optional Zähler: Nutzungen fix/PB, Short/Long Rest), natürliche Waffen (Name, Würfel, Schadensart, Attribut → Angriff im Actions-Tab). Freitext und Name bleiben (Savegames, B7). Ins Log/Undo (B15). Keine Daten erfinden: Werte kommen nur von Simon. Vor dem Bau Maske mit Simon klären (Fotos). Passt vor E, damit E die Attributsboni gleich mitnimmt.
 
 **H – Always Prepared automatisch (Opus Hoch).** Prompt: „Arbeite die Fixliste ab: Paket H.“ Punkt „Always Prepared automatisch eintragen“ (Code / UI); Anzeige vorher mit Simon klären.
 
