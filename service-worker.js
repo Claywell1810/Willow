@@ -1,4 +1,4 @@
-const CACHE_NAME = "willow-app-2026-10-01g";
+const CACHE_NAME = "willow-app-2026-10-01h";
 
 const FILES_TO_CACHE = [
   "./",

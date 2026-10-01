@@ -1285,7 +1285,7 @@ const REGRESSION = [
       w.buildMySpells();
       const card = n => [...d.querySelectorAll('#mySpells .spell-card')].find(c => c.querySelector('.spell-name')?.textContent === n);
       if (card('Aid')?.querySelector('.ap-bdg')?.textContent !== 'Life Domain') return 'Abzeichen Aid';
-      if (card('Shield of Faith')?.querySelector('.ap-bdg.ap-man')?.textContent !== 'manual') return 'Abzeichen manual';
+      if (card('Shield of Faith')?.querySelector('.ap-bdg.ap-man')?.textContent !== 'Always prepared') return 'Abzeichen manual';   // seit 01.10.2026 „✦ Always prepared“ statt „manual“
       if (card('Aid').querySelector('button[onclick^="delMySpell"]')?.style.display !== 'none') return 'Remove bei Automatik sichtbar';
       const ia = M().findIndex(x => x.name === 'Aid'); w.togPrep(ia); w.delMySpell(ia);
       if (F('Aid')?.prep !== 'free') return 'Automatik nicht gesperrt';
@@ -1373,6 +1373,24 @@ const REGRESSION = [
       if (!tb('Mythal Touched', 'FRHoF').textContent.includes('18-19')) return 'Mythal-Touched-Tabelle fehlt';
       if (!tb('Mark of Healing', 'EFA').textContent.includes('Prayer of Healing')) return 'Dragonmark-Zauber fehlen';
       return true;
+    } },
+  { name: 'My Spells ruhiger: graue Meta-Zeile, kein ✦/▾ in der Zeile, „Prepare“ bei Unprepared, Auswahl in den Details, Konzentration als Text (aktiv = antippen beendet)', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      w.eval("st.mySpells=[{name:'Moonbeam',grad:2,school:'Evocation',prep:true,notes:''},{name:'Comprehend Languages',grad:1,school:'Divination',prep:false,notes:''}];st.concActive=null");
+      w.eval('window._apS=apSync;apSync=()=>false'); w.buildMySpells();
+      const row = n => [...d.querySelectorAll('#mySpells .spell-card')].find(c => c.querySelector('.spell-name').textContent === n);
+      const mb = row('Moonbeam'), cl = row('Comprehend Languages');
+      if (d.querySelector('#mySpells .spell-main .spell-prep, #mySpells .spell-main .expbtn')) return '✦ oder ▾ noch in der Zeile';
+      if (!mb.querySelector('.sp-conc-txt') || mb.querySelector('.sp-conc')) return 'Konzentration nicht als Text';
+      if (mb.querySelector('.sp-prepbtn') || !cl.querySelector('.sp-prepbtn')) return 'Prepare-Knopf falsch';
+      w.eval("st.concActive=0"); w.buildMySpells(); row('Moonbeam').querySelector('.sp-conc-txt.active').click();
+      if (w.eval('st.concActive') !== null) return 'Concentrating ✕ beendet nicht';
+      row('Comprehend Languages').querySelector('.sp-prepbtn').click();
+      if (w.eval("st.mySpells[1].prep") !== true) return 'Prepare setzt nicht';
+      [...row('Comprehend Languages').querySelectorAll('.ms-prep button')].find(b => b.textContent === 'Not prepared').click();
+      if (w.eval("st.mySpells[1].prep") !== false) return 'Not prepared in den Details setzt nicht';
+      if (!row('Comprehend Languages').querySelector('.ms-prep .ms-rit')) return 'Cast as Ritual fehlt bei unvorbereitetem Ritual';
+      w.eval('apSync=window._apS;st.mySpells=[];st.concActive=null'); w.buildMySpells(); return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
