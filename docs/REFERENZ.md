@@ -25,7 +25,7 @@ Der Tab **„Actions“** (bis 27.09.2026 „Combat“; intern weiter `data-tab=
 | Spell List: Klassen-Filter | `SL_CLASSES` (Knöpfe), `CLASS_SPELL_MAP` (Standard „★ Meine Klasse“) | – | **Seit 27.09.2026 (B5a):** Standard-Filter = Klasse des Charakters über `CLASS_SPELL_MAP` (Druid, Wizard, Cleric, Bard, Warlock, Paladin, Ranger, Sorcerer; Fighter/Rogue → Wizard), Knopf „★ <Klasse>“ vor „All“; ein Klick auf „All“ zeigt alle Zauber. Zauber kommen weiter über „+ Add to Sheet“ oder manuell (`addSpellManual`) aufs Blatt. Der frühere tote Code (`zbRender` u. a.) ist entfernt. |
 | Spell List: Subklassen-/Zusatzzauber | `SUBCLASS_SPELLS`, `CLASS_SPELL_EXTRA` | `additionalSpells` in `class-<k>.json` bzw. `feats.json` (`subclass_spells.py`, B5a) | 81 Subklassen (602 feste Zauber + Auswahl-Filter), Klassen-Zusätze: Paladin Blessed Warrior, Ranger Druidic Warrior (je ab L2), Bard Magical Secrets (ab L10), Druid Wild Companion (ab L2); im Filter „★“ mit Abzeichen „✦ Herkunft“ |
 | Beasts | `BST_DATA` + `special:["beasts"]` | Bestiarium XMM (`bestiary-xmm.json`, `fluff-bestiary-xmm.json`; `bst_convert.py bst`, B11) | 133 Bestien, nur Druid; seit 28.09.2026 vollständig aus 5e.tools neu erzeugt, Anzeige als Stat-Block (`sbHtml`) |
-| Background | `BG_DATA`, `BG_EXTRA` | `backgrounds.json` | 120 |
+| Background | `BG_DATA`, `BG_EXTRA`, `BG_SPELLS` | `backgrounds.json` (`bg_convert.py`) | 120; seit 01.10.2026 `BG_EXTRA[].f` = voller 5e.tools-Text (aus der Kopfliste nur Languages/Equipment u. Ä., dann alle Abschnitte als „**Name**“ inkl. verschachtelter, Tabellen „Caption:“ + Kopfzeile „A | B“ + „• a | b“); `BG_SPELLS` = Zauber aus `additionalSpells.expanded` (15 Backgrounds SCC/GGR) → Spell List „★ My Class“ über `slMySpellCtx().late` (nach der eigenen Klassenliste geprüft, nur mit Zauberliste). Aufruf: `python3 willow/tools/bg_convert.py DnD_Character_App.html src [--write]` (braucht `src/backgrounds.json`). `_copy`-Einträge in `BG_EXTRA` (Baldur's Gate …, Variant …) bleiben unverändert |
 | Feats | `FT_FEATS` | `feats.json` | 218 (Tabellen seit 01.10.2026 im Text `d`, Format wie `class_extract.render`: „Caption:“, Kopfzeile „A | B“, Zeilen „• …“) |
 | Items | nur Kategorien `ITEM_CATS` | manuell | – |
 | Theme / Rune | `CLASS_THEMES`, `CLASS_RUNES` | selbst definiert | alle 12 (Grundwerte seit 27.09.2026 über `themeBase`, B1d) |
@@ -455,6 +455,8 @@ python3 rebuild_diff.py   # braucht src/class-<k>.json aller 12 Klassen + option
 Pflicht **nach jeder Konverter-Änderung**: Ergebnis muss „SUMME 0" sein, sonst betrifft die Änderung schon eingepflegte Klassen (dann bewusst neu bauen oder Änderung eingrenzen). Neue Klassen in die Liste im Skript aufnehmen; neue Tabellen-Zelltypen dort ebenfalls ergänzen. Braucht `build_class.py` (Import) und liest `<k>_config.py`, falls vorhanden: dann werden `feature_tags` angewandt und die **Tracker** (alle Felder, auch `pool`, `sub`, `pick`) verglichen. Pflicht-Configs: `barbarian_config.py`, `rogue_config.py`, `warlock_config.py`, `bard_config.py`, `wizard_config.py` (sonst Tag-Abweichungen); für den Tracker-Vergleich einer Klasse deren Config dazulegen. Stand 27.09.2026: SUMME 0 (alle 12, mit 10 Configs).
 
 ## B9. Bekannte Stolperfallen
+
+- **`setup.sh` überschreibt die Arbeitskopie** (`DnD_Character_App.html` und `ALT.html` neu aus dem Repo): Ein zweiter Aufruf mitten in der Sitzung (z. B. später `setup.sh fotos`) löscht alle bisherigen Änderungen ohne Warnung. Alle Quellen gleich beim ersten Aufruf angeben oder vorher sichern (01.10.2026).
 
 Wächst mit jedem Debugging. Vor Code-Arbeit kurz lesen.
 

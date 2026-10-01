@@ -907,6 +907,35 @@ const REGRESSION = [
       w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
+  { name: 'Background-Text vollständig aus 5e.tools (Languages, Equipment, Abschnitte, Tabellen) in Info- und Background-Tab; Strixhaven-/Ravnica-Zauber auf „★ My Class“ nur mit Zauberliste', datum: '01.10.2026',
+    run: ({ w, d, sel }) => {
+      const body = d.getElementById('bgLoreBody');
+      w.eval("st.bg='Quandrix Student'"); w.buildBgLore();
+      const t = body.textContent, caps = [...body.querySelectorAll('.bg-cap')].map(x => x.textContent);
+      for (const x of ['Languages:', 'Equipment:', 'Vortex Warp', 'Personality Trait', 'Quandrix Trinkets']) if (!t.includes(x)) return 'Info-Tab ohne ' + x;
+      if (!caps.includes('Building a Quandrix Character')) return 'Abschnitt „Building a Quandrix Character“ fehlt';
+      const tb = [...body.querySelectorAll('table.fd-tbl')].find(x => x.textContent.includes('Entangle'));
+      if (!tb || !tb.querySelector('th') || tb.querySelector('th').textContent !== 'Spell Level' || tb.querySelectorAll('tr').length !== 6) return 'Tabelle Quandrix Spells falsch';
+      w.eval("st.bg='Sage'"); w.buildBgLore();
+      if (!body.textContent.includes('Equipment: Choose A or B') || body.textContent.includes('Researcher')) return 'XPHB-Sage: Equipment fehlt oder 2014-Feature';
+      w.eval("st.bg='Folk Hero'"); w.buildBgLore();
+      if (!body.textContent.includes('Defining Event') || !body.textContent.includes('Rustic Hospitality')) return 'Folk Hero: Specialty-Tabelle oder Feature fehlt';
+      // Background-Tab: Karte zeigt den Text
+      w.eval("st.bg='Quandrix Student'"); w.bgRenderMy();
+      const my = d.querySelector('#bgMyCard .bg-full');
+      if (!my || !my.textContent.includes('Vortex Warp')) return 'Background-Tab: Text fehlt in „My Background“';
+      // Zauber: Druid mit Quandrix Student → Vortex Warp über „Quandrix Student“, Barbarian ohne Liste → nicht
+      sel('Druid', '', 3);
+      const zb = n => w.eval(`ZB_SPELLS.find(s=>s.name===${JSON.stringify(n)})`);
+      if (w.slMyVia(w.slMySpellCtx(), zb('Vortex Warp')) !== 'Quandrix Student') return 'Vortex Warp nicht auf der Druid-Liste';
+      if (w.slMyVia(w.slMySpellCtx(), zb('Entangle')) !== '') return 'Entangle (Druid-Liste) falsch markiert';
+      w.eval("st.bg=''");
+      if (w.slMyVia(w.slMySpellCtx(), zb('Vortex Warp')) !== null) return 'ohne Background trotzdem auf der Liste';
+      w.eval("st.bg='Quandrix Student'"); sel('Barbarian', '', 3);
+      if (w.slMyVia(w.slMySpellCtx(), zb('Vortex Warp')) !== null) return 'Barbarian (ohne Zauberliste) bekommt Background-Zauber';
+      w.eval("st.bg=''"); w.buildBgLore(); w.resetUI();
+      return true;
+    } },
   { name: 'Paket C2: Feature-Auswahl (Primal Order · Magician mit +WIS auf Arcana/Nature, Storm Aura → Storm Soul, wechselbar mit ↻), Expertise nur auf geübte Skills (Rogue L1/L6), Jack of All Trades (½), Bonus-Skills und Saves aus Features, nur ab Feature-Stufe und bei passender Subklasse', datum: '29.09.2026',
     run: ({ w, d, sel, set }) => {
       if (typeof w.fpHtml !== 'function' || !w.eval('typeof FEATURE_PICKS==="object"&&Object.keys(FEATURE_PICKS).length>40')) return 'FEATURE_PICKS/fpHtml fehlen';
@@ -1433,7 +1462,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;
