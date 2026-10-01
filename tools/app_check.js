@@ -1505,7 +1505,7 @@ const REGRESSION = [
       if (panels.some(p => !p || !p.classList.contains('act-panel'))) return 'Abschnitt ohne Rahmen';
       const wp = d.getElementById('sb-weapons').parentElement;
       if (!wp.classList.contains('act-panel') || !wp.querySelector('.sec.sec-top')) return 'Weapons ohne Rahmen/Überschrift';
-      if (d.querySelectorAll('.act-div').length !== 4) return 'Trenner: ' + d.querySelectorAll('.act-div').length;
+      if (d.querySelectorAll('#tab-zauber .act-div').length !== 4) return 'Trenner: ' + d.querySelectorAll('#tab-zauber .act-div').length;
       const sub = [...d.querySelectorAll('#subpanel-meinezauber .sec.sec-sub')].map(e => e.firstElementChild.textContent).join('|');
       if (sub !== 'Spell Slots|My Spells') return 'Unterüberschriften: ' + sub;
       return true;
@@ -1525,6 +1525,27 @@ const REGRESSION = [
       w.toggleInfoSection('sb-hitpoints', 'sb-hitpoints-btn');
       if (d.getElementById('sb-hitpoints').style.display !== 'none') return 'Hit Points klappt nicht ein';
       w.toggleInfoSection('sb-hitpoints', 'sb-hitpoints-btn');
+      return true;
+    } },
+  { name: 'Info-Tab im Actions-Design: alle Abschnitte als Rahmen mit Haupt-Überschrift, Trenner ◆ direkt vor jedem Rahmen, Attribute klappbar', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      const ids = ['attrPanel', 'charInfoPanel', 'coreTraitsSection', 'clsTableSection', 'clsLoreSection', 'subclsLoreSection', 'raceLoreSection', 'bgLoreSection', 'featsInfoSection'];
+      for (const id of ids) {
+        const p = d.getElementById(id);
+        if (!p || !p.classList.contains('act-panel') || p.parentElement.id !== 'tab-info') return 'kein Rahmen: ' + id;
+        if (!p.firstElementChild || !p.firstElementChild.matches('.sec.sec-top')) return 'keine Haupt-Überschrift: ' + id;
+        if (p.firstElementChild.style.marginTop) return 'Inline-margin-top überschreibt Abstand: ' + id;
+      }
+      const divs = [...d.querySelectorAll('#tab-info .act-div')];
+      if (divs.length !== ids.length - 1) return 'Trenner: ' + divs.length;
+      if (divs.some(x => !x.nextElementSibling || !x.nextElementSibling.classList.contains('act-panel'))) return 'Trenner nicht direkt vor einem Rahmen';
+      const a = d.getElementById('sb-attr');
+      if (!a || !a.contains(d.getElementById('attrGrid')) || !a.contains(d.getElementById('ac')) || !a.contains(d.getElementById('raceStats'))) return 'Attribute-Klappbereich unvollständig';
+      w.toggleInfoSection('sb-attr', 'sb-attr-btn');
+      if (a.style.display !== 'none' || d.getElementById('sb-attr-btn').textContent !== '▾ Expand') return 'Attribute klappt nicht ein';
+      w.toggleInfoSection('sb-attr', 'sb-attr-btn');
+      if (!d.getElementById('charInfoPanel').contains(d.getElementById('charInfoBody'))) return 'Character Info nicht im Rahmen';
+      if (w.getComputedStyle(d.getElementById('subclsLoreTitle')).whiteSpace !== 'normal') return 'lange Titel brechen nicht um (laufen bei Textgröße Large aus dem Rahmen)';
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },

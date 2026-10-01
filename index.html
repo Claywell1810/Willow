@@ -227,6 +227,7 @@ input[type=number]{-moz-appearance:textfield}
 .sec.sec-top{flex-wrap:wrap;row-gap:6px}
 .sec.sec-top > span:first-child{white-space:nowrap}
 .sec.sec-top > span:last-child,.sec.sec-top > button:last-child{margin-left:auto}
+#tab-info .sec.sec-top > span:first-child{white-space:normal;flex:1 1 0;min-width:0}   /* 01.10.2026: lange Info-Titel (Subclass …) umbrechen statt über den Rahmen hinaus */
 #hpPanel{padding-left:8px;padding-right:8px}
 #hpPanel > .sec:first-child{margin-left:4px;margin-right:4px}
 .sec.sec-sub{font-size:var(--fs-2xs);color:var(--text3);letter-spacing:1.5px;border-bottom:none;margin-top:16px}
@@ -681,8 +682,13 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 
     <!-- INFO TAB -->
     <div class="panel on" id="tab-info">
-      <!-- ATTRIBUTE (seit Paket B 28.09.2026 oben) -->
-      <div class="sec" style="margin-top:0">Attribute</div>
+      <!-- ATTRIBUTE (seit Paket B 28.09.2026 oben; 01.10.2026: Rahmen + Klappknopf wie im Actions-Tab) -->
+      <div class="act-panel" id="attrPanel">
+      <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Attribute</span>
+        <button onclick="toggleInfoSection('sb-attr','sb-attr-btn')" id="sb-attr-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+      </div>
+      <div id="sb-attr">
       <div class="attr-grid" id="attrGrid"></div>
       <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
       <div class="stat3">
@@ -691,9 +697,12 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
       </div>
       <div id="raceStats"></div>
+      </div></div>
 
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <!-- CHARACTER INFO -->
+      <div class="act-div"></div>
+      <div class="act-panel" id="charInfoPanel">
+      <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
         <span>Character Info</span>
         <button onclick="togCharInfo()" id="charInfoBtn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
       </div>
@@ -726,11 +735,12 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
       </div>
       </div>
+      </div>
 
-      <!-- EXPAND SECTIONS -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div id="coreTraitsSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <!-- EXPAND SECTIONS (01.10.2026: je Abschnitt ein Rahmen, davor Trenner ◆ – nur sichtbar, wenn der Abschnitt sichtbar ist) -->
+      <div class="act-div"></div>
+      <div id="coreTraitsSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span>Class Traits<span class="pk-pend" id="coreTraitsPend"></span></span>
           <button onclick="toggleInfoSection('coreTraitsBody','coreTraitsBtn')" id="coreTraitsBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
@@ -739,43 +749,49 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <div class="nta-wrap" style="margin-top:6px"><textarea class="nta" id="n_class_traits" placeholder="Homebrew notes, custom traits..." style="min-height:60px"></textarea><button class="nta-expand" onclick="openNoteModal('n_class_traits','Class Traits Notes')">⛶</button></div>
         </div>
       </div>
-      <div id="clsTableSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="clsTableSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span id="clsTableTitle">Class Table</span>
           <button onclick="toggleInfoSection('clsTableBody','clsTableBtn')" id="clsTableBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="clsTableBody" style="display:none"></div>
       </div>
-      <div id="clsLoreSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="clsLoreSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span id="clsLoreTitle">Class: —</span>
           <button onclick="toggleClsLore()" id="clsLoreToggleBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="clsLoreBody" style="display:none"></div>
       </div>
-      <div id="subclsLoreSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="subclsLoreSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span id="subclsLoreTitle">Subclass: —</span>
           <button onclick="toggleInfoSection('subclsLoreBody','subclsLoreBtn')" id="subclsLoreBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="subclsLoreBody" style="display:none"></div>
       </div>
-      <div id="raceLoreSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="raceLoreSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span><span id="raceLoreTitle">Race: —</span><span class="pk-pend" id="raceLorePend"></span></span>
           <button onclick="toggleInfoSection('raceLoreBody','raceLoreBtn')" id="raceLoreBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="raceLoreBody" style="display:none"></div>
       </div>
-      <div id="bgLoreSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="bgLoreSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span><span id="bgLoreTitle">Background: —</span><span class="pk-pend" id="bgLorePend"></span></span>
           <button onclick="toggleInfoSection('bgLoreBody','bgLoreBtn')" id="bgLoreBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
         <div id="bgLoreBody" style="display:none"></div>
       </div>
-      <div id="featsInfoSection" style="display:none;margin-top:10px">
-        <div class="sec" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="featsInfoSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span>My Feats</span>
           <button onclick="toggleInfoSection('featsInfoBody','featsInfoBtn')" id="featsInfoBtn" class="filter-toggle" style="padding:3px 10px">▾ Expand</button>
         </div>
@@ -7105,7 +7121,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01o';
+const APP_VERSION = 'willow-app-2026-10-01p';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
