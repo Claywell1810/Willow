@@ -1421,7 +1421,7 @@ const REGRESSION = [
     run: ({ w, d }) => {
       w.eval("st.mySpells=[{name:'Thunderwave',grad:1,school:'Evocation',prep:true,notes:''},{name:'Shield',grad:1,school:'Abjuration',prep:'free',notes:''},{name:'Guidance',grad:0,school:'Divination',prep:true,notes:''},{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''},{name:'Entangle',grad:1,school:'Conjuration',prep:false,notes:''}]");
       w.eval('window._apS=apSync;apSync=()=>false'); w.buildMySpells();
-      const hd = [...d.querySelectorAll('#mySpells .zb-divider')].map(e => e.textContent);
+      const hd = [...d.querySelectorAll('#mySpells .zb-divider')].map(e => e.firstChild.textContent);   // Titel ohne Anzahl/Pfeil (Unprepared einklappbar seit 01.10.2026)
       if (hd.join('|') !== '✦ Prepared|◦ Unprepared') return 'Abschnitte: ' + hd.join('|');
       const nm = [...d.querySelectorAll('#mySpells .spell-name')].map(e => e.textContent).join(',');
       if (nm !== 'Guidance,Shield,Bless,Thunderwave,Entangle') return 'Reihenfolge: ' + nm;
@@ -1484,6 +1484,20 @@ const REGRESSION = [
       w.eval(`saveThemeOverrides({[${JSON.stringify(cls)}]:{red:'#112233',icoAct:'#445566'}})`); w.applyTheme(cls);
       if (V('--ico-act') !== '#445566' || V('--red') !== '#112233') return 'eigener Icon-Wert geht nicht vor';
       w.eval(`saveThemeOverrides({})`); w.applyTheme(cls); return true;
+    } },
+  { name: 'My Spells: Unprepared einklappbar (Anzahl, Zustand pro Charakter in abGrpClosed, Prepared bleibt sichtbar)', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      w.eval("st.mySpells=[{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''},{name:'Bane',grad:1,school:'Enchantment',prep:false,notes:''},{name:'Entangle',grad:1,school:'Conjuration',prep:false,notes:''}];st.abGrpClosed={}");
+      w.eval('window._apS=apSync;apSync=()=>false'); w.buildMySpells();
+      const names = () => [...d.querySelectorAll('#mySpells .spell-name')].map(e => e.textContent).join(',');
+      const h = () => d.querySelector('#mySpells .ms-unp-h');
+      if (!h() || h().querySelector('.ab-grp-n').textContent !== '2') return 'Kopf/Anzahl fehlt';
+      if (names() !== 'Bless,Bane,Entangle') return 'offen: ' + names();
+      h().click();
+      if (names() !== 'Bless' || !w.eval('st.abGrpClosed.ms_unprep') || !h()) return 'zu: ' + names();
+      h().click();
+      if (names() !== 'Bless,Bane,Entangle') return 'wieder auf: ' + names();
+      w.eval('apSync=window._apS;st.mySpells=[];st.abGrpClosed={}'); w.buildMySpells(); return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];

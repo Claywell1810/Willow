@@ -216,6 +216,8 @@ input[type=number]{-moz-appearance:textfield}
 .spell-tags{gap:0 6px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2);line-height:1.35}
 .spell-tags .sp-badge,.spell-tags .ap-bdg,.spell-tags .sp-via{background:none;border:none;padding:0;border-radius:0;color:inherit;font-size:inherit}
 .spell-tags .sp-dot{opacity:.6}
+.ms-unp-h{display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ms-unp-h .ab-grp-chev{font-size:var(--fs-sm);letter-spacing:0}
 /* 01.10.2026: Schrift wie Feature-Karten (Actions): Name wie .ab-name (Accent/Gold), Meta-Zeile wie .ab-tag (Small Labels) */
 .spell-l .spell-name{color:var(--gold)}
 .spell-tags{color:var(--text3);letter-spacing:.5px}
@@ -2399,9 +2401,15 @@ function buildMySpells(){
     if(lastPrep!==prepRank(sp.prep)){
       lastPrep=prepRank(sp.prep);lastGrad=null;
       const hdr=document.createElement('div');hdr.className='zb-divider';
-      hdr.textContent=sp.prep?'✦ Prepared':'◦ Unprepared';
+      if(sp.prep) hdr.textContent='✦ Prepared';
+      else{ // 01.10.2026 (Wunsch Simon): Unprepared einklappbar, Zustand pro Charakter in st.abGrpClosed.ms_unprep
+        const n=visible.filter(x=>!x.prep).length, cl=msUnprepClosed();
+        hdr.className='zb-divider ms-unp-h';hdr.onclick=togMsUnprep;
+        hdr.innerHTML=`<span>◦ Unprepared</span><span class="ab-grp-n">${n}</span><span class="ab-grp-chev">${cl?'▸':'▾'}</span>`;
+      }
       list.appendChild(hdr);
     }
+    if(!sp.prep&&msUnprepClosed()) return;
     // Level divider
     if(lastGrad!==sp.grad){
       lastGrad=sp.grad;
@@ -2457,6 +2465,8 @@ function buildMySpells(){
     list.appendChild(div);
   });
 }
+function msUnprepClosed(){return !!(st.abGrpClosed||{}).ms_unprep;}
+function togMsUnprep(){st.abGrpClosed=st.abGrpClosed||{};st.abGrpClosed.ms_unprep=!msUnprepClosed();buildMySpells();autoSave();}
 function togMySpellDetail(i,el){
   const n=document.getElementById('msn_'+i);
   const open=n.style.display==='none';
@@ -7073,7 +7083,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01l';
+const APP_VERSION = 'willow-app-2026-10-01m';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
