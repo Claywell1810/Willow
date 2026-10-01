@@ -1351,6 +1351,29 @@ const REGRESSION = [
       if (F('Shield')?.auto !== 'Magic Initiate') return 'falscher Feat entfernt';
       w.eval('st.mySpells=[];st.feats=[];st.picks={}'); w.resetUI(); return true;
     } },
+  { name: 'My Spells: Always Prepared mit Prepared nach Grad (zuerst, dann alphabetisch), Zeile zweizeilig (Name + Abzeichen darunter)', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      w.eval("st.mySpells=[{name:'Thunderwave',grad:1,school:'Evocation',prep:true,notes:''},{name:'Shield',grad:1,school:'Abjuration',prep:'free',notes:''},{name:'Guidance',grad:0,school:'Divination',prep:true,notes:''},{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''},{name:'Entangle',grad:1,school:'Conjuration',prep:false,notes:''}]");
+      w.eval('window._apS=apSync;apSync=()=>false'); w.buildMySpells();
+      const hd = [...d.querySelectorAll('#mySpells .zb-divider')].map(e => e.textContent);
+      if (hd.join('|') !== '✦ Prepared|◦ Unprepared') return 'Abschnitte: ' + hd.join('|');
+      const nm = [...d.querySelectorAll('#mySpells .spell-name')].map(e => e.textContent).join(',');
+      if (nm !== 'Guidance,Shield,Bless,Thunderwave,Entangle') return 'Reihenfolge: ' + nm;
+      const c = d.querySelectorAll('#mySpells .spell-card')[1];
+      if (!c.querySelector('.spell-l > .spell-name') || !c.querySelector('.spell-l > .spell-tags .ap-bdg') || !c.querySelector('.spell-tags .sp-info')) return 'Zeile nicht zweizeilig (Name/Abzeichen)';
+      if (c.querySelector('.spell-tags .sp-cast, .spell-tags .spell-prep')) return 'Cast/✦ in der Abzeichen-Zeile';
+      w.eval('apSync=window._apS;st.mySpells=[]'); w.buildMySpells(); return true;
+    } },
+  { name: 'Feats: Tabellen aus 5e.tools im Text (Strixhaven Spells, Fast Crafting, Mythal-Touched Magic, Dragonmark-Zauber …)', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      const tb = (n, src) => { const x = d.createElement('div'); x.innerHTML = w.eval(`fmtDesc(FT_FEATS.find(f=>f.n===${JSON.stringify(n)}&&f.src===${JSON.stringify(src)}).d)`); return x; };
+      const sx = tb('Strixhaven Initiate', 'SCC'), t = sx.querySelector('table.fd-tbl');
+      if (!t || t.querySelectorAll('th').length !== 3 || t.querySelectorAll('tr').length !== 6 || !t.textContent.includes('Witherbloom')) return 'Strixhaven-Tabelle fehlt/falsch';
+      if (!tb('Crafter', 'XPHB').textContent.includes("Woodcarver's Tools")) return 'Fast-Crafting-Tabelle fehlt';
+      if (!tb('Mythal Touched', 'FRHoF').textContent.includes('18-19')) return 'Mythal-Touched-Tabelle fehlt';
+      if (!tb('Mark of Healing', 'EFA').textContent.includes('Prayer of Healing')) return 'Dragonmark-Zauber fehlen';
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
