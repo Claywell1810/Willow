@@ -1458,6 +1458,21 @@ const REGRESSION = [
       if (!row('Comprehend Languages').querySelector('.ms-prep .ms-rit')) return 'Cast as Ritual fehlt bei unvorbereitetem Ritual';
       w.eval('apSync=window._apS;st.mySpells=[];st.concActive=null'); w.buildMySpells(); return true;
     } },
+  { name: 'Zauber-Kategorien: jeder Zauber hat eine gültige Kategorie (SPELL_CATS), Bild in My Spells (Schadenstyp, Schutz/Heilung, Rahmen nach Zeit)', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      const bad = w.eval("ZB_SPELLS.filter(s=>{const c=SPELL_CATS[s.name]||'';const [k,t]=c.split(':');return !(k==='dmg'?(SPELL_CAT_ICONS.dmg[t]):SPELL_CAT_ICONS[k]&&k!=='dmg')}).map(s=>s.name)");
+      if (bad.length) return 'ohne/ungültige Kategorie: ' + bad.slice(0, 5).join(', ');
+      const want = { 'Fireball': '🔥', 'Shield': '🛡️', 'Cure Wounds': '💚', 'Bless': '💪', 'Misty Step': '🌀', 'Entangle': '⛓️', 'Chromatic Orb': '🌈', 'Find Familiar': '🐾' };
+      w.eval('st.mySpells=' + JSON.stringify(Object.keys(want).map(n => ({ name: n, grad: 1, school: '', prep: true, notes: '' }))));
+      w.eval('window._apS=apSync;apSync=()=>false'); w.buildMySpells();
+      for (const c of d.querySelectorAll('#mySpells .spell-card')) {
+        const n = c.querySelector('.spell-name').textContent, ic = c.querySelector('.spell-main > .sp-ico');
+        if (!ic || ic.textContent !== want[n]) return 'Bild ' + n + ': ' + (ic ? ic.textContent : 'fehlt');
+      }
+      const cls = n => [...d.querySelectorAll('#mySpells .spell-card')].find(c => c.querySelector('.spell-name').textContent === n).querySelector('.sp-ico').classList;
+      if (!cls('Shield').contains('reaktion') || !cls('Misty Step').contains('bonus') || !cls('Fireball').contains('aktion')) return 'Rahmenfarbe nach Zeit falsch';
+      w.eval('apSync=window._apS;st.mySpells=[]'); w.buildMySpells(); return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
