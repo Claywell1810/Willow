@@ -212,6 +212,18 @@ input[type=number]{-moz-appearance:textfield}
 .spell-l .spell-name{flex:none;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.25}
 .spell-tags{display:flex;flex-wrap:wrap;align-items:center;gap:5px;max-width:100%}
 .spell-tags .ap-bdg{max-width:100%}
+/* 01.10.2026: ruhigere Zeile – Meta-Zeile als grauer Text (--text2, ≥5,4:1 in allen Themes), keine Pillen */
+.spell-tags{gap:0 6px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2);line-height:1.35}
+.spell-tags .sp-badge,.spell-tags .ap-bdg,.spell-tags .sp-via{background:none;border:none;padding:0;border-radius:0;color:inherit;font-size:inherit}
+.spell-tags .sp-dot{opacity:.6}
+.sp-conc-txt{color:var(--purple)}
+.sp-conc-txt.active{color:var(--bg0);background:var(--purple);border-radius:8px;padding:0 6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sp-cast.sp-prepbtn{color:var(--text2);border-color:var(--border)}
+.ms-prep{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px}
+.ms-prep-l{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-right:2px}
+.ms-prep button{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;cursor:pointer}
+.ms-prep button.on{border-color:var(--gold);color:var(--gold)}
+.ms-prep .ms-rit{margin-left:auto;border-color:var(--gold2);color:var(--gold)}
 .ap-bdg.ap-man{color:var(--text3);border-color:var(--border)}
 .fs-box{margin:4px 0 10px;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3)}
 .spell-prep.auto{box-shadow:0 0 0 2px color-mix(in srgb, var(--green) 35%, transparent)}
@@ -2414,20 +2426,19 @@ function buildMySpells(){
     const higherHtml=dbSpell&&dbSpell.higher?`<div class="higher-box"><label>At Higher Levels</label>${fmtDesc(dbSpell.higher)}</div>`:'';
     inner.innerHTML=`
     <div class="spell-main" onclick="togMySpellDetail(${i},this)" style="cursor:pointer">
-      <div class="spell-l"><span class="spell-name">${sp.name}</span><div class="spell-tags">
-      ${sp.auto?`<span class="sk-bdg ap-bdg" title="${pkEsc(sp.autoInfo||sp.auto)}">${pkEsc(sp.auto)}</span>`:sp.prep==='free'?`<span class="sk-bdg ap-bdg ap-man" title="Set by hand">manual</span>`:''}
-      ${(()=>{if(sp.auto||!dbSpell||!vctx.avail)return'';const v=slMyVia(vctx,dbSpell);return v?`<span class="sk-bdg sp-via" title="On your spell list from ${pkEsc(v)}">✦ ${pkEsc(v)}</span>`:'';})()}
-      ${isConc?`<span class="sp-badge sp-conc${concIsActive?' active':''}" onclick="event.stopPropagation();togConc(${i})" title="Concentration">C</span>`:''}
-      <span class="sp-badge sp-info">${ctShort(dbSpell?dbSpell.zeit:'')}</span>
-      ${/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<span class="sp-badge sp-warn">Ritual</span>`:''}
-      </div></div>
+      <div class="spell-l"><span class="spell-name">${sp.name}</span><div class="spell-tags">${[
+        sp.auto?`<span>✦ <span class="ap-bdg" title="${pkEsc(sp.autoInfo||sp.auto)}">${pkEsc(sp.auto)}</span></span>`:sp.prep==='free'?`<span>✦ <span class="ap-bdg ap-man" title="Set by hand">Always prepared</span></span>`:'',
+        (()=>{if(sp.auto||!dbSpell||!vctx.avail)return'';const v=slMyVia(vctx,dbSpell);return v?`<span class="sp-via" title="On your spell list from ${pkEsc(v)}">✦ ${pkEsc(v)}</span>`:'';})(),
+        `<span class="sp-badge sp-info">${ctShort(dbSpell?dbSpell.zeit:'')}</span>`,
+        /ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<span class="sp-badge sp-warn">Ritual</span>`:'',
+        isConc?(concIsActive?`<span class="sp-conc-txt active" onclick="event.stopPropagation();togConc(${i})" title="End concentration">Concentrating ✕</span>`:`<span class="sp-conc-txt" title="Concentration">Concentration</span>`):''
+      ].filter(Boolean).join('<span class="sp-dot">·</span>')}</div></div>
       <div class="fc-uses" id="fcu_${i}">${freePipsHtml(i)}</div>
-      <button class="sp-cast" onclick="event.stopPropagation();openCast(${i})" title="Cast: use a spell slot">Cast</button>
-      <div class="spell-prep${sp.prep==='free'?' free':sp.prep?' on':''}${sp.auto?' auto':''}" onclick="event.stopPropagation();togPrep(${i})" title="${sp.auto?'Always prepared · '+pkEsc(sp.autoInfo||sp.auto):sp.prep==='free'?'Always prepared':sp.prep?'Prepared':'Not prepared'}">✦</div>
-      <span class="expbtn" id="msbtn_${i}">▾</span>
+      ${sp.prep?`<button class="sp-cast" onclick="event.stopPropagation();openCast(${i})" title="Cast: use a spell slot">Cast</button>`:`<button class="sp-cast sp-prepbtn" onclick="event.stopPropagation();setPrep(${i},true)" title="Prepare this spell">Prepare</button>`}
     </div>
     <div class="spell-notes" id="msn_${i}" style="display:none">
       ${metaHtml}${descHtml}${higherHtml}${dbSpell?spellStatBlocks(dbSpell.name):''}
+      ${sp.auto?'':`<div class="ms-prep"><span class="ms-prep-l">Prepared</span>${[[true,'Prepared'],['free','Always'],[false,'Not prepared']].map(([v,l])=>`<button class="${(sp.prep||false)===v?'on':''}" onclick="event.stopPropagation();setPrep(${i},${JSON.stringify(v)})">${l}</button>`).join('')}${!sp.prep&&/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<button class="ms-rit" onclick="event.stopPropagation();openCast(${i})">Cast as Ritual</button>`:''}</div>`}
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px">
         <span style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--green);text-transform:uppercase">Free casts</span>
         <input type="number" min="0" max="10" value="${sp.freeMax||0}" oninput="setFreeMax(${i},this.value)" onclick="event.stopPropagation()" style="width:46px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:var(--fs-txt);padding:3px 6px;outline:none;font-family:'Cinzel',serif;text-align:center">
@@ -2448,6 +2459,12 @@ function togMySpellDetail(i,el){
   n.style.display=open?'block':'none';
   const arrow=document.getElementById('msbtn_'+i);
   if(arrow) arrow.textContent=open?'▴':'▾';
+}
+// 01.10.2026: Vorbereitung direkt setzen (Knopf „Prepare“ in der Zeile, Auswahl in den Details)
+function setPrep(i,v){
+  if(!st.mySpells[i])return;
+  if(st.mySpells[i].auto){showToast('✦ Always prepared · '+(st.mySpells[i].autoInfo||st.mySpells[i].auto));return;}
+  st.mySpells[i].prep=v;autoSave();buildMySpells();
 }
 function togPrep(i){
   if(st.mySpells[i]&&st.mySpells[i].auto){showToast('✦ Always prepared · '+(st.mySpells[i].autoInfo||st.mySpells[i].auto));return;}
@@ -7033,7 +7050,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01i';
+const APP_VERSION = 'willow-app-2026-10-01j';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
