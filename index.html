@@ -224,6 +224,11 @@ input[type=number]{-moz-appearance:textfield}
 .act-panel > .sec:first-child{margin-top:10px}
 .sec.sec-top{font-size:var(--fs-sm);color:var(--gold);letter-spacing:2px;gap:8px;border-bottom-color:color-mix(in srgb,var(--gold) 40%,transparent);padding-bottom:6px}
 .sec.sec-top button{white-space:nowrap;flex-shrink:0}
+.sec.sec-top{flex-wrap:wrap;row-gap:6px}
+.sec.sec-top > span:first-child{white-space:nowrap}
+.sec.sec-top > span:last-child,.sec.sec-top > button:last-child{margin-left:auto}
+#hpPanel{padding-left:8px;padding-right:8px}
+#hpPanel > .sec:first-child{margin-left:4px;margin-right:4px}
 .sec.sec-sub{font-size:var(--fs-2xs);color:var(--text3);letter-spacing:1.5px;border-bottom:none;margin-top:16px}
 .ms-unp-h{display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ms-unp-h .ab-grp-chev{font-size:var(--fs-sm);letter-spacing:0}
@@ -540,7 +545,7 @@ button[onclick="toggleTabs()"]{padding:7px!important}
 .ds-insp{grid-column:span 1;min-width:0}
 .rest-btns{grid-column:-2/-1;min-width:0}
 .ds-groups{flex-wrap:wrap}
-@container (max-width:340px){
+@container (max-width:320px){   /* 01.10.2026: 340 → 320 (gemessen: 3 Spalten passen bei allen Textgrößen bis 321px; nötig, weil Hit Points jetzt im Rahmen steht) */
   /* schmal: ein 2-Spalten-Raster über alle drei Zeilen – Current|Maximum, Temp|Inspiration, Death Saves, Hit Dice, Rast */
   .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
   .hp-row,.ds-row,.rest-row{display:contents}
@@ -863,8 +868,13 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
     <!-- COMBAT -->
     <div class="panel" id="tab-zauber">
 
-      <!-- HIT POINTS -->
-      <div class="sec">Hit Points</div>
+      <!-- HIT POINTS (01.10.2026: Rahmen + Klappknopf, Combat Stats im selben Rahmen) -->
+      <div class="act-panel" id="hpPanel">
+      <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Hit Points</span>
+        <button onclick="toggleInfoSection('sb-hitpoints','sb-hitpoints-btn')" id="sb-hitpoints-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+      </div>
+      <div id="sb-hitpoints">
       <div class="hp-grid"><div class="hp-inner">
       <div class="hp-row">
         <div class="hpbox" style="border-color:color-mix(in srgb, var(--green) 40%, transparent)">
@@ -931,6 +941,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 
       <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026; unter Hit Points, zuklappbar) -->
       <div id="combatStats" class="cst-card" style="display:none;margin-top:12px"></div>
+      </div></div>
 
       <!-- WEAPONS -->
       <div class="act-div"></div>
@@ -975,7 +986,6 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
             <div class="ifield"><label>Save DC</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
             <div class="ifield"><label>Attack</label><input id="spAtk" value="+0" readonly style="color:var(--gold)"></div>
           </div>
-        </div>
 
         <div class="sec sec-sub" style="display:flex;justify-content:space-between;align-items:center">
           <span>Spell Slots</span>
@@ -1001,6 +1011,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           </div>
           <div id="mySpells"></div>
         </div>
+        </div><!-- /sb-spellcasting (ganzer Block, 01.10.2026) -->
       </div>
 
       <!-- BEASTS -->
@@ -7094,7 +7105,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01n';
+const APP_VERSION = 'willow-app-2026-10-01o';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

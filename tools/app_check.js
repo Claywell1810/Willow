@@ -600,7 +600,7 @@ const REGRESSION = [
       w.eval("st.abGrpClosed={};document.getElementById('charName').textContent='Regressionstest'");
       if (d.querySelector("#tab-zauber button[onclick*=\"switchTab('spelllist')\"]")) return 'Spell-List-Link noch im Actions-Tab';
       if (!d.querySelector('.tab[data-tab="spelllist"]')) return 'Spell List nicht mehr über die Tab-Leiste erreichbar';
-      const cs = d.getElementById('combatStats'), hp = [...d.querySelectorAll('#tab-zauber .sec')].find(x => x.textContent.trim() === 'Hit Points');
+      const cs = d.getElementById('combatStats'), hp = [...d.querySelectorAll('#tab-zauber .sec')].find(x => (x.firstElementChild || x).textContent.trim() === 'Hit Points');   // Titel ohne Klappknopf (seit 01.10.2026)
       if (!hp || !(hp.compareDocumentPosition(cs) & 4)) return 'Combat Stats steht nicht unter Hit Points';
       if (!(cs.compareDocumentPosition(d.getElementById('weaponList')) & 4)) return 'Combat Stats steht nicht vor Weapons';
       sel('Monk', 'Warrior of the Open Hand (XPHB)', 7);
@@ -1508,6 +1508,23 @@ const REGRESSION = [
       if (d.querySelectorAll('.act-div').length !== 4) return 'Trenner: ' + d.querySelectorAll('.act-div').length;
       const sub = [...d.querySelectorAll('#subpanel-meinezauber .sec.sec-sub')].map(e => e.firstElementChild.textContent).join('|');
       if (sub !== 'Spell Slots|My Spells') return 'Unterüberschriften: ' + sub;
+      return true;
+    } },
+  { name: 'Actions-Tab: Hit Points als Rahmen mit Klappknopf; Spellcasting klappt den ganzen Block, Spell Slots/My Spells weiter einzeln', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      const hp = d.getElementById('hpPanel');
+      if (!hp || !hp.classList.contains('act-panel') || !d.getElementById('sb-hitpoints').contains(d.getElementById('hpC'))) return 'Hit Points ohne Rahmen/Klappbereich';
+      const sc = d.getElementById('sb-spellcasting');
+      if (!sc.contains(d.getElementById('spSlots')) || !sc.contains(d.getElementById('mySpells')) || !sc.contains(d.getElementById('spDC'))) return 'Spellcasting klappt nicht den ganzen Block';
+      w.toggleInfoSection('sb-spellcasting', 'sb-spellcasting-btn');
+      if (d.getElementById('sb-spellcasting').style.display !== 'none') return 'Spellcasting klappt nicht ein';
+      w.toggleInfoSection('sb-spellcasting', 'sb-spellcasting-btn');
+      w.toggleInfoSection('sb-spellslots', 'sb-spellslots-btn');
+      if (d.getElementById('sb-spellslots').style.display !== 'none' || d.getElementById('sb-myspells').style.display === 'none') return 'Spell Slots nicht einzeln klappbar';
+      w.toggleInfoSection('sb-spellslots', 'sb-spellslots-btn');
+      w.toggleInfoSection('sb-hitpoints', 'sb-hitpoints-btn');
+      if (d.getElementById('sb-hitpoints').style.display !== 'none') return 'Hit Points klappt nicht ein';
+      w.toggleInfoSection('sb-hitpoints', 'sb-hitpoints-btn');
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
