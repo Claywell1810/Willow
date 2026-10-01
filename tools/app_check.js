@@ -1553,6 +1553,11 @@ const REGRESSION = [
       const css = [...d.querySelectorAll('style')].map(s => s.textContent).join('\n');
       const m = css.match(/@container \(max-width:(\d+)px\)/);
       if (!m || +m[1] < 360) return 'Hit-Points-Schwelle zu klein: ' + (m ? m[1] : 'fehlt') + ' (mit Cinzel passen 3 Spalten erst ab ~360px)';
+      // 02.10.2026: Safari wertet die Container-Abfrage mit zoom anders aus → zusätzlich Media Queries je Textgröße (Breite ≤ 408 × zoom)
+      for (const [px, pre] of [[408, ''], [469, 'html[data-ts="gross"] '], [530, 'html[data-ts="sehrgross"] ']]) {
+        const i = css.indexOf('@media (max-width:' + px + 'px){');
+        if (i < 0 || !css.slice(i, i + 600).includes(pre + '.hp-row,')) return 'Media-Query-Ersatz für Hit Points fehlt: ' + px + 'px ' + pre;
+      }
       const inp = d.querySelector('.sbox .hpin');
       if (!inp || w.getComputedStyle(inp).flexGrow !== '1') return 'AC/Initiative/Speed: Zahlenfeld fest breit (+/− ragen über die Karte)';
       const top = d.createElement('div'); top.className = 'ab-top'; const t = d.createElement('div'); t.className = 'ab-title'; top.appendChild(t); d.body.appendChild(top);

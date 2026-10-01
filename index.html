@@ -555,6 +555,39 @@ button[onclick="toggleTabs()"]{padding:7px!important}
   .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
   .rest-btns .rest-btn{flex:1}
 }
+/* 02.10.2026: dieselbe Umstellung zusätzlich über die Bildschirmbreite (Media Query). Grund: Safari (iPhone) wertet die
+   Container-Abfrage zusammen mit der Textgröße (zoom) offenbar anders aus als Chrome – auf Simons iPhone blieben bei Large 3 Spalten.
+   Bildschirmbreiten hängen nicht vom zoom ab. Rechnung: Container = Breite/zoom − 46 ≤ 362 → Breite ≤ 408 × zoom (1 / 1,15 / 1,3). */
+@media (max-width:408px){
+  .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  .hp-row,.ds-row,.rest-row{display:contents}
+  .hpbox,.ds-insp{grid-column:auto}
+  .ds-insp{order:1}
+  .ds-death{order:2;grid-column:1/-1}
+  .hd-box{order:3;grid-column:1/-1}
+  .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
+  .rest-btns .rest-btn{flex:1}
+}
+@media (max-width:469px){
+  html[data-ts="gross"] .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  html[data-ts="gross"] .hp-row,html[data-ts="gross"] .ds-row,html[data-ts="gross"] .rest-row{display:contents}
+  html[data-ts="gross"] .hpbox,html[data-ts="gross"] .ds-insp{grid-column:auto}
+  html[data-ts="gross"] .ds-insp{order:1}
+  html[data-ts="gross"] .ds-death{order:2;grid-column:1/-1}
+  html[data-ts="gross"] .hd-box{order:3;grid-column:1/-1}
+  html[data-ts="gross"] .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
+  html[data-ts="gross"] .rest-btns .rest-btn{flex:1}
+}
+@media (max-width:530px){
+  html[data-ts="sehrgross"] .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  html[data-ts="sehrgross"] .hp-row,html[data-ts="sehrgross"] .ds-row,html[data-ts="sehrgross"] .rest-row{display:contents}
+  html[data-ts="sehrgross"] .hpbox,html[data-ts="sehrgross"] .ds-insp{grid-column:auto}
+  html[data-ts="sehrgross"] .ds-insp{order:1}
+  html[data-ts="sehrgross"] .ds-death{order:2;grid-column:1/-1}
+  html[data-ts="sehrgross"] .hd-box{order:3;grid-column:1/-1}
+  html[data-ts="sehrgross"] .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
+  html[data-ts="sehrgross"] .rest-btns .rest-btn{flex:1}
+}
 .hpbox{min-width:0;padding:10px 4px}
 .hp-ctrl{gap:3px}
 .hpbox .hpin{width:40px;min-width:0}
@@ -7130,7 +7163,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02a';
+const APP_VERSION = 'willow-app-2026-10-02b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
