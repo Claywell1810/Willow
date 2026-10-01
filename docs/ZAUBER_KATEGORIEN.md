@@ -18,7 +18,7 @@ Seit 01.10.2026 (Wunsch Simon). Jeder Zauber in My Spells zeigt links ein Bild i
 | `move` | Bewegung & Positionierung | 🌀 | Teleportieren, fliegen, Kreaturen versetzen | Misty Step, Fly, Vortex Warp |
 | `info` | Information & Kommunikation | 🔮 | Magie erkennen, Wissen gewinnen, Nachrichten | Detect Magic, Sending, Speak with Animals |
 | `social` | Täuschung & soziale Einflussnahme | 🎭 | Wahrnehmung verändern, täuschen, Personen beeinflussen | Disguise Self, Suggestion, Charm Person |
-| `util` | Alltag & Erkundung / Utility | 🧰 | Praktische Probleme lösen, Umgebung verändern | Druidcraft, Mending, Light |
+| `util` | Hilfsmagie | 🪄 | Praktische Magie für Probleme außerhalb des Kampfes: Zaubertricks, Erschaffen und Formen, Öffnen, Unterschlupf, Sonderfälle (Wish, Time Stop) | Druidcraft, Mending, Light, Knock, Rope Trick |
 
 „Schutz & Heilung“ ist eine Kategorie mit zwei Bildern, weil Shield und Healing Word sich im Spiel sehr unterscheiden.
 
@@ -55,7 +55,7 @@ Grundlage: 5e.tools `spells-*.json` (XPHB-Fassung, sonst erste Fassung). Markier
 13. ADV, „bonus to“, „advantage on“ → Buff
 14. Erkenntnismagie (Divination), „telepathic“, „message“, „language“ → Information
 15. Illusion/Verzauberung → Täuschung & sozial
-16. sonst → Utility
+16. sonst → Hilfsmagie
 
 Die Regeln treffen etwa drei Viertel; die Durchsicht vom 01.10.2026 hat 156 Zauber korrigiert (`KORREKTUREN`).
 

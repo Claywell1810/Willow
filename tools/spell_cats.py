@@ -21,7 +21,7 @@ CATS = {
   'move':   'Bewegung & Positionierung',
   'info':   'Information & Kommunikation',
   'social': 'Täuschung & soziale Einflussnahme',
-  'util':   'Alltag & Erkundung / Utility',
+  'util':   'Hilfsmagie',                # bis 01.10.2026 „Alltag & Erkundung / Utility“ (🧰)
 }
 DMG_TYPES = ['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder']
 

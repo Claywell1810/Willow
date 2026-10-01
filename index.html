@@ -2467,8 +2467,8 @@ function togMySpellDetail(i,el){
 // 01.10.2026: Vorbereitung direkt setzen (Knopf „Prepare“ in der Zeile, Auswahl in den Details)
 // Zauber-Bilder (01.10.2026): Kategorie aus SPELL_CATS (tools/spell_cats.py, docs/ZAUBER_KATEGORIEN.md), Rahmenfarbe wie Feature-Karten nach Zeit
 const SPELL_CAT_ICONS={dmg:{acid:'🧪',bludgeoning:'🔨',cold:'❄️',fire:'🔥',force:'✴️',lightning:'⚡',necrotic:'💀',piercing:'🏹',poison:'☠️',psychic:'🧠',radiant:'☀️',slashing:'🗡️',thunder:'💥',multi:'🌈'},
-  ctrl:'⛓️',buff:'💪',debuff:'🥀',prot:'🛡️',heal:'💚',summon:'🐾',move:'🌀',info:'🔮',social:'🎭',util:'🧰'};
-const SPELL_CAT_NAMES={dmg:'Damage',ctrl:'Control',buff:'Buff',debuff:'Debuff',prot:'Protection',heal:'Healing',summon:'Summoning',move:'Movement',info:'Information',social:'Deception & Social',util:'Utility'};
+  ctrl:'⛓️',buff:'💪',debuff:'🥀',prot:'🛡️',heal:'💚',summon:'🐾',move:'🌀',info:'🔮',social:'🎭',util:'🪄'};
+const SPELL_CAT_NAMES={dmg:'Damage',ctrl:'Control',buff:'Buff',debuff:'Debuff',prot:'Protection',heal:'Healing',summon:'Summoning',move:'Movement',info:'Information',social:'Deception & Social',util:'Utility magic'};
 function spellIconHtml(name,zeit){
   const c=(typeof SPELL_CATS!=='undefined'&&SPELL_CATS[name])||'';
   const [k,t]=c.split(':');
