@@ -1,6 +1,8 @@
 # Theme-Galerie: je Klasse Ausschnitt Actions-Tab (Class Features, eine Karte offen)
 # Aufruf: python3 theme_shots.py HTML OUTDIR
 import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import shot_fonts   # echte Schriften (02.10.2026)
 from playwright.sync_api import sync_playwright
 html, out = sys.argv[1], sys.argv[2]; os.makedirs(out, exist_ok=True)
 CL = [('', ''), ('Barbarian', 'Path of the Berserker (PHB)'), ('Bard', 'College of Lore (PHB)'), ('Cleric', 'Life Domain (PHB)'),
@@ -11,6 +13,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 390, 'height': 844}, device_scale_factor=2)
     pg.goto('file://' + os.path.abspath(html)); pg.wait_for_timeout(700)
+    shot_fonts.apply(pg)
     for c, sub in CL:
         pg.evaluate("""([c,sub])=>{const set=(i,v)=>{document.getElementById(i).value=v};set('lvl','6');set('cls',c);onClsChange();
           set('subcls',sub);onSubclsChange();if(typeof applyTheme==='function')applyTheme(c);switchTabAll('zauber');

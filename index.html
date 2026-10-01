@@ -546,7 +546,7 @@ button[onclick="toggleTabs()"]{padding:7px!important}
 .ds-insp{grid-column:span 1;min-width:0}
 .rest-btns{grid-column:-2/-1;min-width:0}
 .ds-groups{flex-wrap:wrap}
-@container (max-width:320px){   /* 01.10.2026: 340 → 320 (gemessen: 3 Spalten passen bei allen Textgrößen bis 321px; nötig, weil Hit Points jetzt im Rahmen steht) */
+@container (max-width:362px){   /* 01.10.2026: 340 → 320 → 362 – mit echter Schrift (Cinzel) gemessen: 3 Spalten passen erst ab ~360px Container (darunter ragen +/− und „Inspiration“ über die Karte, z. B. 430er-Handy auf Large); die 320 waren mit Ersatzschrift gemessen */
   /* schmal: ein 2-Spalten-Raster über alle drei Zeilen – Current|Maximum, Temp|Inspiration, Death Saves, Hit Dice, Rast */
   .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
   .hp-row,.ds-row,.rest-row{display:contents}
@@ -562,6 +562,15 @@ button[onclick="toggleTabs()"]{padding:7px!important}
 .attr-grid,.stat3{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
 .acard{min-width:0}
 .hbtn{flex-shrink:0}
+/* 01.10.2026 (mit echter Schrift gemessen, 430er-Handy auf Large): AC/Initiative/Speed – Zahlenfeld nimmt nur den Rest, +/− bleiben in der Karte;
+   Attribut-Namen (CONSTITUTION, INTELLIGENCE) etwas enger gesperrt, damit sie in die Karte passen */
+.sbox .hp-ctrl{gap:2px}
+.sbox .hpin{width:auto;flex:1 1 0;min-width:24px}
+.aname{letter-spacing:.4px}
+/* Feature-Karten (Actions): Titel behält mindestens 36 % der Zeile (gemessen: so wenig wie möglich, kein Überstand bei allen Textgrößen 375–430 px); passt der Verbrauchs-Block (Kreise + „Short Rest +1 · Long Rest“) nicht daneben, rutscht er rechtsbündig in eine eigene Zeile, statt den Titel zu quetschen */
+.ab-top{flex-wrap:wrap;row-gap:4px}
+.ab-top > .ab-title{min-width:36%}
+.ab-top > .ab-title + div{margin-left:auto;max-width:100%}
 /* Zauberplätze: bei großer Schrift 2 statt 3 Spalten */
 .slot-g{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
 /* Spell List: Abzeichen in eigener Zeile unter dem Namen (überlappten den Namen) */
@@ -7121,7 +7130,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01p';
+const APP_VERSION = 'willow-app-2026-10-02a';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

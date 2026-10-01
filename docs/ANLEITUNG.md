@@ -124,7 +124,7 @@ Das Prüfskript (B8) fängt Fehler unabhängig vom Modell ab. Meldet es Probleme
 Claude arbeitet sie ab und meldet sie in der Schlussnachricht als Kurzliste (✔ / –).
 
 1. **Prüfskript:** `node app_check.js NEU.html ALT.html` → „ERGEBNIS: alles OK".
-2. **Gezielter Test:** Die geänderte Funktion selbst im simulierten Browser geprüft (nicht nur „lädt ohne Fehler"). Bei sichtbaren UI-Änderungen zusätzlich Bildschirmfotos in Handybreite (`ui_shots.py`, bei Farben `theme_shots.py`, B8) – **Simon sieht sie vor dem Veröffentlichen**.
+2. **Gezielter Test:** Die geänderte Funktion selbst im simulierten Browser geprüft (nicht nur „lädt ohne Fehler"). Bei sichtbaren UI-Änderungen zusätzlich Bildschirmfotos in Handybreite (`ui_shots.py` mit echter Schrift, mindestens Normal 390 px und Large 430 px = Simons Handy, auf „Karten-Überstand“ achten; bei Farben `theme_shots.py`, B8) – **Simon sieht sie vor dem Veröffentlichen**.
 3. **Fehler behoben?** → Regressionstest in `REGRESSION` ergänzt (B8), vorher mit fehlerhafter Version gegengeprüft (Test muss dort ✘ melden).
 4. **Md-Update nötig?** Ja, wenn mindestens eins zutrifft:
    - Stand in A2 hat sich geändert (Klasse/Lücke gefüllt)

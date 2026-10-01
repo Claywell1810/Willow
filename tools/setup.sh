@@ -6,7 +6,7 @@
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium für BST_DATA und SPELL_STATBLOCKS (+ spells)
 #   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
-#   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen (ui_shots.py, theme_shots.py)
+#   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen, echte Schriften (ui_shots.py, theme_shots.py)
 #   bash willow/tools/setup.sh alle         # alles
 # Mehrere Angaben gehen zusammen: bash willow/tools/setup.sh klassen zauber
 set -e
@@ -55,6 +55,8 @@ fi
 if has fotos; then
   python3 -c "import playwright" 2>/dev/null || pip install --break-system-packages -q playwright
   ls /opt/pw-browsers >/dev/null 2>&1 || python3 -m playwright install chromium >/dev/null
-  echo "   Playwright bereit"
+  # echte App-Schriften für die Fotos (Google Fonts ist hier nicht erreichbar; Ersatzschrift ist schmaler → Überstände unsichtbar, 02.10.2026)
+  [ -d node_modules/@fontsource/cinzel ] && [ -d node_modules/@fontsource/crimson-pro ] || npm i @fontsource/cinzel @fontsource/crimson-pro --silent >/dev/null 2>&1
+  echo "   Playwright bereit, Schriften: $([ -d node_modules/@fontsource/cinzel ] && echo 'Cinzel + Crimson Pro' || echo 'FEHLEN')"
 fi
 echo "== Prüfskript: node $W/tools/app_check.js DnD_Character_App.html ALT.html"

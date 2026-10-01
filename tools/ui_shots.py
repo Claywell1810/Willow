@@ -1,9 +1,13 @@
 # Bildschirmfotos aller Tabs in Handybreite + Überlauf-Prüfung
-# Aufruf: python3 shots.py HTML OUTDIR [zoom-stufe]   (zoom-stufe: normal|gross|sehrgross, nur neue Version)
+# Aufruf: python3 ui_shots.py HTML OUTDIR [zoom-stufe] [breite]   (zoom-stufe: normal|gross|sehrgross oder -, breite: 390 Standard, 430 = Simons Handy)
+# Seit 02.10.2026 mit echten Schriften (shot_fonts.py, setup.sh fotos) und Prüfung „Karten-Überstand“ je Tab (Kind ragt über eine gerahmte Karte).
 import sys, json, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import shot_fonts   # echte Schriften + Karten-Überstand (02.10.2026)
 from playwright.sync_api import sync_playwright
 html, out = sys.argv[1], sys.argv[2]
-zoom = sys.argv[3] if len(sys.argv) > 3 else None
+zoom = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != '-' else None
+W = int(sys.argv[4]) if len(sys.argv) > 4 else 390   # Breite in px: 390 (iPhone 12–15), 430 (Pro Max/Plus = Simons Handy), 375 (SE/mini)
 os.makedirs(out, exist_ok=True)
 TABS = ['info', 'skills', 'zauber', 'spelllist', 'ausruestung', 'feats', 'hintergrund', 'bestien', 'notizen', 'log']
 SETUP = """
@@ -39,13 +43,14 @@ OVER = """
 res = {}
 with sync_playwright() as p:
     b = p.chromium.launch()
-    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+    ctx = b.new_context(viewport={'width': W, 'height': 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
     if zoom:
         ctx.add_init_script(f"try{{localStorage.setItem('willow_textsize','{zoom}')}}catch(e){{}}")
     pg = ctx.new_page()
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.goto('file://' + os.path.abspath(html)); pg.wait_for_timeout(700)
+    shot_fonts.apply(pg)
     pg.evaluate(SETUP)
     for t in TABS:
         pg.evaluate(f"switchTabAll('{t}')"); pg.wait_for_timeout(250)
@@ -54,21 +59,22 @@ with sync_playwright() as p:
         if t == 'spelllist':
             pg.evaluate("const c=document.querySelector('#slList .zb-card .zb-top'); if(c) c.click();")
         pg.evaluate('window.scrollTo(0,0)'); pg.wait_for_timeout(150)
-        res[t] = pg.evaluate(OVER, 390)
+        res[t] = pg.evaluate(OVER, W)
+        res[t]['karten'] = pg.evaluate(shot_fonts.CARD_CHECK, 'tab-' + t)
         if t == 'zauber': pg.screenshot(path=f'{out}/nav.png')
         pg.add_style_tag(content='.bottom-nav,.dice-fab,.toast{visibility:hidden!important}')
         h = pg.evaluate('document.documentElement.scrollHeight')
-        pg.screenshot(path=f'{out}/{t}.png', full_page=True, clip={'x': 0, 'y': 0, 'width': 390, 'height': min(h, 1700)})
+        pg.screenshot(path=f'{out}/{t}.png', full_page=True, clip={'x': 0, 'y': 0, 'width': W, 'height': min(h, 1700)})
         if t == 'zauber':  # Class Features und Zauberplätze extra
             y = pg.evaluate("document.getElementById('abilitiesSection').getBoundingClientRect().top+scrollY")
-            pg.screenshot(path=f'{out}/zauber2.png', full_page=True, clip={'x': 0, 'y': y, 'width': 390, 'height': min(h - y, 1500)})
+            pg.screenshot(path=f'{out}/zauber2.png', full_page=True, clip={'x': 0, 'y': y, 'width': W, 'height': min(h - y, 1500)})
     pg.add_style_tag(content='.bottom-nav,.dice-fab{visibility:visible!important}')
     pg.evaluate('openSettings()'); pg.wait_for_timeout(250)
-    res['settings'] = pg.evaluate(OVER, 390)
+    res['settings'] = pg.evaluate(OVER, W)
     pg.screenshot(path=f'{out}/settings.png')
     res['errs'] = errs
     b.close()
 json.dump(res, open(f'{out}/check.json', 'w'), indent=1)
 for k, v in res.items():
     if k == 'errs': print('JS-Fehler:', v); continue
-    print(k.ljust(12), 'scrollW', v['sw'], v['bw'], 'überlauf', v['nbad'], v['bad'][:4], 'bnav', [round(x) for x in v['bnav']], round(v['bnavH'] or 0))
+    print(k.ljust(12), 'scrollW', v['sw'], v['bw'], 'überlauf', v['nbad'], v['bad'][:4], 'bnav', [round(x) for x in v['bnav']], round(v['bnavH'] or 0), ('Karten-Überstand ' + str(v['karten'])) if v.get('karten') else '')

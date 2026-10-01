@@ -1548,6 +1548,18 @@ const REGRESSION = [
       if (w.getComputedStyle(d.getElementById('subclsLoreTitle')).whiteSpace !== 'normal') return 'lange Titel brechen nicht um (laufen bei Textgröße Large aus dem Rahmen)';
       return true;
     } },
+  { name: 'Überstände mit echter Schrift (430er-Handy, Large): Hit Points erst ab ~360px Container 3-spaltig, AC/Initiative/Speed-Feld flexibel, Feature-Titel behält 36 %', datum: '02.10.2026',
+    run: ({ w, d }) => {
+      const css = [...d.querySelectorAll('style')].map(s => s.textContent).join('\n');
+      const m = css.match(/@container \(max-width:(\d+)px\)/);
+      if (!m || +m[1] < 360) return 'Hit-Points-Schwelle zu klein: ' + (m ? m[1] : 'fehlt') + ' (mit Cinzel passen 3 Spalten erst ab ~360px)';
+      const inp = d.querySelector('.sbox .hpin');
+      if (!inp || w.getComputedStyle(inp).flexGrow !== '1') return 'AC/Initiative/Speed: Zahlenfeld fest breit (+/− ragen über die Karte)';
+      const top = d.createElement('div'); top.className = 'ab-top'; const t = d.createElement('div'); t.className = 'ab-title'; top.appendChild(t); d.body.appendChild(top);
+      const mw = w.getComputedStyle(t).minWidth; top.remove();
+      if (mw !== '36%') return 'Feature-Titel ohne Mindestbreite: ' + mw;
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
