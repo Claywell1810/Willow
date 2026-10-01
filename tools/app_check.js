@@ -944,6 +944,17 @@ const REGRESSION = [
       w.eval("st.mySpells=[]"); w.buildBgLore(); w.resetUI();
       return true;
     } },
+  { name: 'Feats-Filter: jede Kategorie der Daten hat einen Knopf und findet ihre Feats (Fighting Style inkl. FS:P/FS:R, Epic Boon, Dragonmark, Dark Gift)', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      w.switchTabAll && w.switchTabAll('feats'); w.ftBuildFilters();
+      const btns = [...d.querySelectorAll('#ftCatFilters .fbtn')];
+      const cnt = v => { const b = btns.find(x => x.dataset.val === v); if (!b) return -1; b.click(); return d.querySelectorAll('#ftList .zb-card').length; };
+      for (const c of w.eval('[...new Set(FT_FEATS.map(f=>f.cat))]')) if (!w.eval(`FT_CATS[${JSON.stringify(c)}]!==undefined`)) return 'Kategorie ohne Namen: ' + c;
+      const exp = { FS: w.eval("FT_FEATS.filter(f=>f.cat.startsWith('FS')).length"), EB: w.eval("FT_FEATS.filter(f=>f.cat==='EB').length"), D: 12, DG: 9 };
+      for (const [k, n] of Object.entries(exp)) { const c = cnt(k); if (c !== n) return `Filter ${k}: ${c} statt ${n}`; }
+      cnt('all');
+      return true;
+    } },
   { name: 'Backgrounds und Feats aus AU/RHW/EFA ergänzt: 12 neue Backgrounds, 4 durch Nachdruck ersetzt (Name gleich), 40 Feats inkl. Dark Gift, Origin Feat findbar', datum: '01.10.2026',
     run: ({ w, d }) => {
       const bg = n => w.eval(`BG_DATA.find(b=>b.n===${JSON.stringify(n)})`), ft = n => w.eval(`FT_FEATS.find(f=>f.n===${JSON.stringify(n)})`);
