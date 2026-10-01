@@ -259,7 +259,75 @@ print(f'\nALWAYS_PREP: {sum(len(d) for d in ap.values())} Gruppen, {n_ap} Eintr�
 if ap_skip: print('   übersprungen:', '; '.join(ap_skip))
 if ap_choose: print('   Auswahl (nicht automatisch):', ', '.join(sorted(set(ap_choose))))
 
+# ── FEAT_SPELLS (Paket H2, 01.10.2026): Zauber aus Feats (alle FT_FEATS-Feats mit additionalSpells, Name+Quelle) ──
+# Feats geben ihre Zauber dauerhaft (XPHB: „You always have … prepared“), daher prepared/known/innate gleich behandelt.
+# Format: {Feat:[{o:Variante|null, s:[[Stufe,Zauber],…], c:[{k,l,n,f:{grad,cls,school,ritual,from}},…]},…]}
+# Stufe = Charakterstufe ('_' = 1); c = Wahl-Plätze (n Zauber aus Filter f, zur Laufzeit gegen ZB_SPELLS).
+ft_pairs = re.findall(r'\{"n": "((?:[^"\\]|\\.)*)", "src": "([^"]*)"', html[html.index('const FT_FEATS='):html.index('\n', html.index('const FT_FEATS='))])
+feats_all = json.load(open(os.path.join(SRC, 'feats.json')))['feat']
+fs, fs_miss = {}, {}
+# Rune Shaper (BGG): 5e.tools führt alle 14 Runen-Zauber als fest; laut Text fest nur Comprehend Languages,
+# die übrigen nur für die gewählten Runen → nur Comprehend Languages automatisch.
+FS_ONLY = {'Rune Shaper': ['Comprehend Languages']}
+
+def fs_filter(x):
+    if isinstance(x, dict):   # {"from":[…],"count":n}
+        fr = []
+        for r in x.get('from', []):
+            n, raw = canon(r)
+            if n: fr.append(n)
+            else: fs_miss.setdefault('from', set()).add(raw)
+        return {'from': fr}, x.get('count', 1)
+    out, rit = {}, False
+    parts = []
+    for part in x.split('|'):
+        if part.strip().lower().startswith('components & miscellaneous='):
+            rit = 'ritual' in part.lower()
+        else: parts.append(part)
+    out = parse_filter('|'.join(parts))
+    if rit: out['ritual'] = True
+    return out, None
+
+def fs_walk(node, lvl, fixed, slots, feat):
+    if isinstance(node, str):
+        n, raw = canon(node)
+        if n: fixed.append([lvl, n])
+        else: fs_miss.setdefault(feat, set()).add(raw)
+    elif isinstance(node, list):
+        for x in node: fs_walk(x, lvl, fixed, slots, feat)
+    elif isinstance(node, dict):
+        if 'choose' in node:
+            f, cnt = fs_filter(node['choose'])
+            slots.append({'k': 'c%d' % len(slots), 'l': lvl, 'n': node.get('count', cnt or 1), 'f': f})
+            return
+        for k, v in node.items():
+            if k in ('count', 'name', 'ability', 'resourceName'): continue
+            fs_walk(v, lvl, fixed, slots, feat)
+
+for name, src in ft_pairs:
+    f = next((x for x in feats_all if x['name'] == name and x['source'] == src), None)
+    if not f or not f.get('additionalSpells'): continue
+    var = []
+    for a in f['additionalSpells']:
+        fixed, slots = [], []
+        for cat in ('prepared', 'known', 'innate'):
+            for k, v in (a.get(cat) or {}).items():
+                fs_walk(v, int(k) if k.isdigit() else 1, fixed, slots, name)
+        if fixed or slots:
+            e = {'o': a.get('name') if len(f['additionalSpells']) > 1 else None, 's': sorted({(l, n) for l, n in fixed})}
+            e['s'] = [list(x) for x in e['s']]
+            if slots: e['c'] = slots
+            var.append(e)
+    if len(var) > 1 and not all(v['o'] for v in var):
+        for i, v in enumerate(var): v['o'] = v['o'] or f'Option {i + 1}'
+    if name in FS_ONLY:   # 5e.tools-Daten weiter als der Text (s. FS_ONLY)
+        for v in var: v['s'] = [x for x in v['s'] if x[1] in FS_ONLY[name]]
+    if var: fs[name] = var
+print(f'\nFEAT_SPELLS: {len(fs)} Feats ({", ".join(fs)})')
+if fs_miss: print('   nicht in ZB_SPELLS:', {k: sorted(v) for k, v in fs_miss.items()})
+
 if '--show' in sys.argv:
+    for k, v in fs.items(): print('   FS', k, json.dumps(v)[:300])
     for cls, d in ap.items():
         for k, g in d.items(): print('   AP', cls, k, g)
     for cls, d in result.items():
@@ -271,6 +339,7 @@ if WRITE:
           'const SUBCLASS_SPELLS=' + json.dumps(result, ensure_ascii=False, separators=(',', ':')) + ';\n'
           'const CLASS_SPELL_EXTRA=' + json.dumps(extra, ensure_ascii=False, separators=(',', ':')) + ';\n'
           'const ALWAYS_PREP=' + json.dumps(ap, ensure_ascii=False, separators=(',', ':')) + ';\n'
+          'const FEAT_SPELLS=' + json.dumps(fs, ensure_ascii=False, separators=(',', ':')) + ';\n'
           '// SUBCLASS_SPELLS-END')
     a, b = html.find('// SUBCLASS_SPELLS-START'), html.find('// SUBCLASS_SPELLS-END')
     assert a > 0 and b > a and html.count('// SUBCLASS_SPELLS-START') == 1, 'Anker fehlt'

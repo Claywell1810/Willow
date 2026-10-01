@@ -1316,6 +1316,41 @@ const REGRESSION = [
       if (M().filter(x => x.name === "Hunter's Mark").length !== 1 || F("Hunter's Mark").auto !== 'Ranger') return 'Alter Spielstand: ' + JSON.stringify(M());
       w.eval('st.mySpells=[];st.picks={}'); w.resetUI(); return true;
     } },
+  { name: 'Paket H2: Feat-Zauber (feste automatisch, Wahl im Feats-Tab, Variante, Stufe, Entfernen, Log)', datum: '01.10.2026',
+    run: ({ w, d, sel }) => {
+      w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest H2'");
+      const M = () => w.eval('st.mySpells'), F = n => M().find(x => x.name === n), L = () => w.eval('st.log').map(e => e.m);
+      sel('Fighter', '', 4); w.autoSave(); w.eval('st.log=[]');
+      const ft = n => w.eval(`FT_FEATS.find(f=>f.n===${JSON.stringify(n)})`);
+      w.ftToggle('Fey-Touched', ft('Fey-Touched').d);
+      if (F('Misty Step')?.auto !== 'Fey-Touched' || F('Misty Step').prep !== 'free') return 'Misty Step: ' + JSON.stringify(F('Misty Step'));
+      if (!L().includes('+ Spell: Misty Step (✦ Fey-Touched)')) return 'Log Feat+Zauber: ' + L().slice(-3).join(' / ');
+      const card = () => [...d.querySelectorAll('#ftMyList .zb-card')].find(c => c.querySelector('.zb-name')?.textContent === 'Fey-Touched');
+      if (!card()?.querySelector('.pk-pend') || !card().querySelector('.zb-detail.on .fs-box')) return 'Wahl-Hinweis/Box fehlt';
+      const chip = (c, o) => [...c.querySelectorAll('.fs-box .pk-chip')].find(b => b.dataset.o === o);
+      if (!chip(card(), 'Charm Person') || chip(card(), 'Magic Missile')) return 'Optionen Enchantment/Divination falsch';
+      chip(card(), 'Charm Person').click();
+      if (F('Charm Person')?.auto !== 'Fey-Touched') return 'Gewählter Zauber fehlt';
+      if (card().querySelector('.pk-pend')) return 'Hinweis bleibt nach Wahl';
+      if (!L().some(m => m.startsWith('Choice Fey-Touched spells'))) return 'Log Wahl: ' + L().slice(-2).join(' / ');
+      // Variante: Magic Initiate (Wizard) – 2 Cantrips + 1 Zauber
+      w.ftToggle('Magic Initiate', ft('Magic Initiate').d);
+      const mi = () => [...d.querySelectorAll('#ftMyList .zb-card')].find(c => c.querySelector('.zb-name')?.textContent === 'Magic Initiate');
+      chip(mi(), 'Wizard Spells').click();
+      chip(mi(), 'Fire Bolt').click(); chip(mi(), 'Mage Hand').click(); chip(mi(), 'Shield').click();
+      for (const n of ['Fire Bolt', 'Mage Hand', 'Shield']) if (F(n)?.auto !== 'Magic Initiate') return 'Magic Initiate: ' + n;
+      if (mi().querySelector('.pk-pend')) return 'Magic Initiate noch offen';
+      // Ritual Caster: Stufe zählt (2 ab L1, +1 ab L5)
+      w.ftToggle('Ritual Caster', ft('Ritual Caster').d);
+      const rc = () => [...d.querySelectorAll('#ftMyList .zb-card')].find(c => c.querySelector('.zb-name')?.textContent === 'Ritual Caster');
+      if (rc().querySelectorAll('.fs-box .pk').length !== 1 || !/From level 5/.test(rc().textContent)) return 'Ritual Caster Stufen';
+      if ([...rc().querySelectorAll('.fs-box .pk-chip')].some(b => b.dataset.o === 'Shield')) return 'Ritual-Filter';
+      // Entfernen: Zauber weg
+      w.ftToggle('Fey-Touched', '');
+      if (F('Misty Step') || F('Charm Person')) return 'Zauber nach Entfernen des Feats noch da';
+      if (F('Shield')?.auto !== 'Magic Initiate') return 'falscher Feat entfernt';
+      w.eval('st.mySpells=[];st.feats=[];st.picks={}'); w.resetUI(); return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
@@ -1375,7 +1410,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;
