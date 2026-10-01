@@ -1147,7 +1147,7 @@ const REGRESSION = [
       if (w.eval('st.slotUsed.join()') !== '2,1,0,0,0,0,0,0,0') return 'Short Rest füllt Zauberplätze';
       if (w.eval('st.hdUsed') !== 3 || d.getElementById('restModal').classList.contains('on')) return 'Hit Dice nach Short Rest / Dialog offen';
       const log = w.eval('st.log').map(e => e.m);
-      if (!log.some(m => /^Short Rest: Channel Divinity \+1/.test(m)) || !log.some(m => /^Hit Die ausgegeben: d8 5 \+ 2 CON → \+7 HP/.test(m))) return 'Log: ' + log.slice(-4).join(' / ');
+      if (!log.some(m => /^Short Rest: Channel Divinity \+1/.test(m)) || !log.some(m => /^Hit Die spent: d8 5 \+ 2 CON → \+7 HP/.test(m))) return 'Log: ' + log.slice(-4).join(' / ');
       // Bard: Font of Inspiration erst ab L5
       sel('Bard', '', 4); w.eval('st.abUses={bardicinspiration:2}'); w.doShortRest();
       if (w.eval('st.abUses.bardicinspiration') !== 2) return 'Bard L4: Short Rest füllt Bardic Inspiration';
@@ -1189,7 +1189,7 @@ const REGRESSION = [
       w.doCast && (w.eval(`_castIdx=${dm}`), w.doCast('ritual'));
       if (w.eval('st.slotUsed.join()') !== '0,0,2,0,0,0,0,0,0') return 'Ritual verbraucht Platz';
       const log = w.eval('st.log').map(e => e.m);
-      if (!log.includes('Zauber gewirkt: Fireball (Platz 3. Grad)') || !log.includes('Zauber gewirkt: Detect Magic (Ritual)')) return 'Log: ' + log.slice(-3).join(' / ');
+      if (!log.includes('Spell cast: Fireball (level 3 slot)') || !log.includes('Spell cast: Detect Magic (Ritual)')) return 'Log: ' + log.slice(-3).join(' / ');
       // Warlock L13: Pakt-Platz 5. Grad, Mystic Arcanum 6/7
       w.eval('st.mySpells=[]'); sel('Warlock', '', 13);
       const hp = add('Hold Monster'), ch = add('Circle of Death');
@@ -1227,32 +1227,32 @@ const REGRESSION = [
       // Notizen: Tippen = ein Eintrag mit Details
       typ('n_notes', 'D'); typ('n_notes', 'Dra'); typ('n_notes', 'Drache im Norden');
       let log = w.eval('st.log');
-      const nt = log.filter(e => /^Notizen/.test(e.m));
-      if (nt.length !== 1 || nt[0].m !== 'Notizen: + „Drache im Norden"' || !nt[0].d || nt[0].d.b !== 'Drache im Norden') return 'Notizen: ' + JSON.stringify(nt);
+      const nt = log.filter(e => /^Notes/.test(e.m));
+      if (nt.length !== 1 || nt[0].m !== 'Notes: + "Drache im Norden"' || !nt[0].d || nt[0].d.b !== 'Drache im Norden') return 'Notizen: ' + JSON.stringify(nt);
       // Always Prepared (prep:'free')
       w.eval("st.mySpells=[{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''}]"); w.autoSave();
       w.togPrep(0);
-      if (!L().includes('Zauber „Bless": Prepared → Always Prepared')) return 'Always Prepared fehlt: ' + L().slice(-2).join(' / ');
+      if (!L().includes('Spell "Bless": Prepared → Always Prepared')) return 'Always Prepared fehlt: ' + L().slice(-2).join(' / ');
       // Waffenfelder, Tracker-Namen, Bestie, unbekanntes Feld, Auswahl-Name
       w.eval("st.weapons=[{name:'Mace',atk:'+5',dmg:'1d6+3',type:'Bludgeoning'}]"); w.autoSave();
       w.eval("st.weapons[0].atk='+6'"); w.autoSave();
-      if (!L().includes('Waffe „Mace" Angriff: „+5" → „+6"')) return 'Waffenfeld: ' + L().slice(-2).join(' / ');
+      if (!L().includes('Weapon "Mace" Attack: "+5" → "+6"')) return 'Waffenfeld: ' + L().slice(-2).join(' / ');
       w.eval("st.abUses={channeldivinity:1}"); w.autoSave();
-      if (!L().includes('Channel Divinity verbraucht: 0 → 1')) return 'Tracker-Name: ' + L().slice(-1);
+      if (!L().includes('Channel Divinity used: 0 → 1')) return 'Tracker-Name: ' + L().slice(-1);
       w.eval("st.savedBeasts=[BST_DATA.find(b=>b.n==='Wolf')]"); w.autoSave();
       if (!L().includes('+ Beast: Wolf')) return 'Bestie: ' + L().slice(-1);
       w.eval("st.zzNeuesFeld=3"); w.autoSave();
       if (!L().includes('zzNeuesFeld: — → 3')) return 'unbekanntes Feld: ' + L().slice(-1);
       w.eval("delete st.zzNeuesFeld"); w.autoSave();
       w.eval("st.picks['feat:Cleric|base|Divine Order']=['Protector']"); w.autoSave();
-      if (!L().includes('Auswahl Divine Order (Cleric): „—" → „Protector"')) return 'Auswahl-Name: ' + L().slice(-1);
+      if (!L().includes('Choice Divine Order (Cleric): "—" → "Protector"')) return 'Auswahl-Name: ' + L().slice(-1);
       // Undo/Redo
       const ub = d.getElementById('undoBtn'), rb = d.getElementById('redoBtn');
       if (!ub || !rb || ub.disabled || !rb.disabled) return 'Undo-Knöpfe Zustand';
       w.eval('st.hpC=7'); w.autoSave(); w.eval('st.hpC=3'); w.autoSave();
       w.doUndo(); if (w.eval('st.hpC') !== 7 || d.getElementById('hpC').textContent !== '7') return 'Undo HP: ' + w.eval('st.hpC');
       if (rb.disabled) return 'Redo nicht aktiv';
-      if (!L().some(m => m.startsWith('↶ Rückgängig: HP: 3 → 7'))) return 'Undo-Log: ' + L().slice(-1);
+      if (!L().some(m => m.startsWith('↶ Undone: HP: 3 → 7'))) return 'Undo-Log: ' + L().slice(-1);
       w.doRedo(); if (w.eval('st.hpC') !== 3) return 'Redo HP: ' + w.eval('st.hpC');
       w.doUndo(); w.doUndo(); if (w.eval('st.hpC') !== 10) return 'zweites Undo: ' + w.eval('st.hpC');
       // Tippen = ein Schritt
@@ -1262,7 +1262,15 @@ const REGRESSION = [
       w.eval('st.hpC=12'); w.autoSave(); if (!rb.disabled) return 'neue Änderung leert Redo nicht';
       // Charakterwechsel leert
       w.resetUI(); if (!ub.disabled || !rb.disabled) return 'Verlauf nach resetUI nicht leer';
+      const de = L().filter(m => /[„äöüß]|Rückgängig|verbraucht|Zauber|Waffe|Auswahl/.test(m)); if (de.length) return 'Log nicht englisch: ' + de.slice(0, 3).join(' / ');
       w.eval('st.mySpells=[];st.weapons=[];st.savedBeasts=[];st.picks={}'); w.resetUI(); return true;
+    } },
+  { name: 'Toast bricht um statt über den Rand zu laufen (Undo-Meldung, Foto Simon)', datum: '01.10.2026',
+    run: ({ d }) => {
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      const m = /\.toast\{[^}]*\}/.exec(css); if (!m) return '.toast fehlt';
+      if (/white-space:nowrap/.test(m[0]) || !/max-width:calc\(100vw \/ var\(--zf,1\) - 32px\)/.test(m[0])) return 'Toast: ' + m[0].slice(0, 120);
+      return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
