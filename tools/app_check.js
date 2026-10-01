@@ -778,7 +778,7 @@ const REGRESSION = [
       const j = w.eval("ZB_SPELLS.findIndex(s=>s.name==='Fireball')");
       if (d.getElementById('sld_' + j)?.querySelector('.sb-det')) return 'Fireball mit Stat-Block';
       w.eval("st.mySpells.push({name:'Summon Fey',grad:3,school:'Conjuration',prep:false,notes:''})"); w.buildMySpells();
-      const ms = d.getElementById('msn_' + (w.eval('st.mySpells.length') - 1));
+      const ms = d.getElementById('msn_' + w.eval("st.mySpells.findIndex(s=>s.name==='Summon Fey')"));   // Index per Name (Paket H: Always Prepared kann Einträge anhängen)
       if (!ms || !ms.querySelector('.sb-det')) return 'My Spells: Stat-Block fehlt';
       w.eval('st.mySpells.pop()'); w.buildMySpells();
       return true;
@@ -1272,6 +1272,50 @@ const REGRESSION = [
       if (/white-space:nowrap/.test(m[0]) || !/max-width:calc\(100vw \/ var\(--zf,1\) - 32px\)/.test(m[0])) return 'Toast: ' + m[0].slice(0, 120);
       return true;
     } },
+  { name: 'Paket H: Always Prepared automatisch (Klasse/Subklasse nach Stufe, Abzeichen, gesperrt, Wegfall mit Notiz, manuell, Landtyp-Wahl, ein Log-/Undo-Schritt)', datum: '01.10.2026',
+    run: ({ w, d, sel }) => {
+      w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest H'");
+      const M = () => w.eval('st.mySpells'), F = n => M().find(x => x.name === n), L = () => w.eval('st.log').map(e => e.m);
+      const typ = (id, v) => { const el = d.getElementById(id); el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); };
+      sel('Cleric', '', 3); w.eval("st.mySpells=[{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''},{name:'Shield of Faith',grad:1,school:'Abjuration',prep:'free',notes:''}]"); w.autoSave(); w.eval('st.log=[]');
+      sel('Cleric', 'Life Domain (PHB)', 3); w.autoSave();
+      for (const n of ['Aid', 'Bless', 'Cure Wounds', 'Lesser Restoration']) { const x = F(n); if (!x || x.prep !== 'free' || x.auto !== 'Life Domain') return 'L3 fehlt/falsch: ' + n + ' ' + JSON.stringify(x); }
+      if (F('Revivify')) return 'Revivify schon auf Stufe 3';
+      if (M().filter(x => x.name === 'Bless').length !== 1 || F('Bless').autoPrev !== true) return 'Bless doppelt oder autoPrev fehlt';
+      w.buildMySpells();
+      const card = n => [...d.querySelectorAll('#mySpells .spell-card')].find(c => c.querySelector('.spell-name')?.textContent === n);
+      if (card('Aid')?.querySelector('.ap-bdg')?.textContent !== 'Life Domain') return 'Abzeichen Aid';
+      if (card('Shield of Faith')?.querySelector('.ap-bdg.ap-man')?.textContent !== 'manual') return 'Abzeichen manual';
+      if (card('Aid').querySelector('button[onclick^="delMySpell"]')?.style.display !== 'none') return 'Remove bei Automatik sichtbar';
+      const ia = M().findIndex(x => x.name === 'Aid'); w.togPrep(ia); w.delMySpell(ia);
+      if (F('Aid')?.prep !== 'free') return 'Automatik nicht gesperrt';
+      // Stufe 5 per Eingabe: neue Zauber im selben Log-/Undo-Schritt wie die Stufe
+      typ('lvl', '5');
+      if (!F('Revivify') || !F('Mass Healing Word')) return 'Stufe 5: Revivify/Mass Healing Word fehlen';
+      if (!L().includes('+ Spell: Revivify (✦ Life Domain)')) return 'Log: ' + L().slice(-3).join(' / ');
+      w.doUndo(); if (d.getElementById('lvl').value !== '3' || F('Revivify')) return 'Undo Stufe+Zauber nicht ein Schritt';
+      w.doRedo(); if (!F('Revivify')) return 'Redo';
+      // Wegfall: Notiz bleibt (als normaler Zauber), ohne Notiz weg, vorher manuell → alter Zustand
+      w.eval("st.mySpells.find(x=>x.name==='Aid').notes='Gruppe'");
+      sel('Cleric', 'Light Domain (PHB)', 5); w.autoSave();
+      const aid = F('Aid'); if (!aid || aid.prep !== false || aid.auto || aid.autoNew) return 'Aid mit Notiz: ' + JSON.stringify(aid);
+      if (F('Cure Wounds') || F('Revivify')) return 'Life-Zauber ohne Notiz nicht entfernt';
+      const bl = F('Bless'); if (!bl || bl.prep !== true || bl.auto || 'autoPrev' in bl) return 'Bless nicht zurück: ' + JSON.stringify(bl);
+      if (F('Burning Hands')?.auto !== 'Light Domain' || F('Fireball')?.prep !== 'free') return 'Light Domain fehlt';
+      // Druid: Basis ab Stufe, Circle of the Land über die Landtyp-Wahl
+      w.eval('st.mySpells=[];st.picks={}'); sel('Druid', 'Circle of the Land (PHB)', 3); w.autoSave();
+      if (F('Speak with Animals')?.auto !== 'Druid' || F('Find Familiar')?.prep !== 'free') return 'Druid-Basis fehlt';
+      if (F('Blur') || F('Fog Cloud')) return 'Land-Zauber ohne Wahl';
+      w.eval("st.picks['feat:Druid|Circle of the Land|Circle of the Land Spells']=['Arid Land']"); w.pkRefresh();
+      if (F('Blur')?.auto !== 'Circle of the Land' || !/Arid Land/.test(F('Blur').autoInfo)) return 'Arid Land: ' + JSON.stringify(F('Blur'));
+      w.eval("st.picks['feat:Druid|Circle of the Land|Circle of the Land Spells']=['Polar Land']"); w.pkRefresh();
+      if (F('Blur') || F('Fog Cloud')?.prep !== 'free') return 'Landwechsel';
+      // Alter Spielstand: vorhandener Eintrag wird erkannt, nicht doppelt
+      const snap = w.eval("(()=>{const s=collectState();s.mySpells=[{name:\"Hunter's Mark\",grad:1,school:'Divination',prep:false,notes:''}];s._f_cls='Ranger';s._f_subcls='';s._f_lvl='2';return s})()");
+      w.applyState(snap);
+      if (M().filter(x => x.name === "Hunter's Mark").length !== 1 || F("Hunter's Mark").auto !== 'Ranger') return 'Alter Spielstand: ' + JSON.stringify(M());
+      w.eval('st.mySpells=[];st.picks={}'); w.resetUI(); return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
@@ -1331,7 +1375,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;

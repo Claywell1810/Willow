@@ -197,7 +197,71 @@ print(f'\nSubklassen mit Zusatzzaubern: {sum(len(v) for v in result.values())}, 
 print('Nicht in ZB_SPELLS (Quellenregel B5, nicht eingefügt):')
 for k, v in report_missing.items(): print('  ', k, ':', ', '.join(v))
 
+# ── ALWAYS_PREP (Paket H, 01.10.2026): automatisch eingetragene Always-Prepared-Zauber nach Stufe ──
+# Regel: alle festen Zauber aus `prepared`; aus `known` feste Cantrips immer, feste Zauber ab Grad 1 außer beim Wizard
+# (dort heißt „known“ = im Zauberbuch, z. B. Necromancy AU Find Familiar). Nicht: `expanded`, `innate`, choose/all-Filter.
+# Mehrere additionalSpells-Einträge = Alternativen: mit Namen und passender FEATURE_PICKS-Wahl gekoppelt (Landtyp,
+# Divine-Soul-Affinität), sonst übersprungen und gemeldet. Format: {Klasse:{Gruppe:{v:Abzeichen,pick?:FEATURE_PICKS-Key,
+# s:[[Stufe,Zauber,Option?],…]}}}, Gruppe = 'base' oder CLASS_DATA-Subklassen-Key.
+fp_m = re.search(r'const FEATURE_PICKS=(\{.*?\});\n', html)
+FPICKS = json.loads(fp_m.group(1)) if fp_m else {}
+grad = {s['name']: s['grad'] for s in cd['ZB']}
+ap, ap_skip, ap_choose = {}, [], []
+
+def ap_levels(cls, cat, blk, lst, opt):
+    for k, v in (blk or {}).items():
+        lvl = int(k) if k.isdigit() else 1
+        names, filters, missing = set(), [], set()
+        collect(v, names, filters, missing)
+        if filters: ap_choose.append(f'{cls} {cat} L{lvl}')
+        for n in sorted(names):
+            if cat == 'known' and grad.get(n, 0) > 0 and cls == 'Wizard': continue
+            lst.append([lvl, n] + ([opt] if opt else []))
+
+def ap_group(cls, a_list, lst, label, pick_prefix):
+    a_list = a_list or []
+    named = [x.get('name') for x in a_list]
+    if len(a_list) > 1:
+        pk = next((k for k, v in FPICKS.items() if k.startswith(pick_prefix) and all(n in v.get('o', []) for n in named)), None) if all(named) else None
+        if not pk:
+            if any('prepared' in x or 'known' in x for x in a_list): ap_skip.append(f'{label} ({len(a_list)} Alternativen ohne Wahl)')
+            return None
+    else: pk = None
+    for x in a_list:
+        for cat in ('prepared', 'known'):
+            if cat in x: ap_levels(cls, cat, x[cat], lst, x.get('name') if pk else None)
+    return pk
+
+for cls in CLASSES:
+    data = json.load(open(os.path.join(SRC, f'class-{cls.lower()}.json')))
+    c = [x for x in data['class'] if x['source'] == 'XPHB'][0]
+    lst = []
+    ap_group(cls, c.get('additionalSpells'), lst, cls, None)
+    if lst: ap.setdefault(cls, {})['base'] = {'v': cls, 's': lst}
+    m = re.search(r'// Quelle: 5e\.tools class-' + cls.lower() + r'\.json[^\n]*?neueste Fassung: ([^\n]*)', html)
+    for key, src in [p.rsplit('=', 1) for p in m.group(1).split(', ')]:
+        key = key.strip(); src = src.strip()
+        sc = find_sub(data['subclass'], key, src) if key in cd['SUBS'][cls]['keys'] else None
+        if not sc: continue
+        lst = []
+        pk = ap_group(cls, resolve_additional(sc, data['subclass']), lst, f'{cls}/{key}', f'{cls}|{key}|')
+        if not lst: continue
+        best = {}
+        for e in lst:   # gleicher Zauber (und Option) mehrfach → niedrigste Stufe
+            k = (e[1], e[2] if len(e) > 2 else None)
+            if k not in best or e[0] < best[k][0]: best[k] = e
+        g = {'v': re.sub(r'\s*\([A-Za-z]+\)\s*$', '', key), 's': sorted(best.values(), key=lambda e: (e[0], e[1]))}
+        if pk: g['pick'] = pk
+        ap.setdefault(cls, {})[key] = g
+n_ap = sum(len(g['s']) for d in ap.values() for g in d.values())
+print(f'\nALWAYS_PREP: {sum(len(d) for d in ap.values())} Gruppen, {n_ap} Einträge;'
+      f' gekoppelt an Wahl: {[f"{c}/{k}" for c, d in ap.items() for k, g in d.items() if "pick" in g]}')
+if ap_skip: print('   übersprungen:', '; '.join(ap_skip))
+if ap_choose: print('   Auswahl (nicht automatisch):', ', '.join(sorted(set(ap_choose))))
+
 if '--show' in sys.argv:
+    for cls, d in ap.items():
+        for k, g in d.items(): print('   AP', cls, k, g)
     for cls, d in result.items():
         for k, e in d.items():
             if 'filters' in e: print('   Filter', cls, k, e['filters'])
@@ -206,6 +270,7 @@ if WRITE:
     js = ('// SUBCLASS_SPELLS-START (erzeugt von subclass_spells.py aus 5e.tools additionalSpells; nicht von Hand ändern)\n'
           'const SUBCLASS_SPELLS=' + json.dumps(result, ensure_ascii=False, separators=(',', ':')) + ';\n'
           'const CLASS_SPELL_EXTRA=' + json.dumps(extra, ensure_ascii=False, separators=(',', ':')) + ';\n'
+          'const ALWAYS_PREP=' + json.dumps(ap, ensure_ascii=False, separators=(',', ':')) + ';\n'
           '// SUBCLASS_SPELLS-END')
     a, b = html.find('// SUBCLASS_SPELLS-START'), html.find('// SUBCLASS_SPELLS-END')
     assert a > 0 and b > a and html.count('// SUBCLASS_SPELLS-START') == 1, 'Anker fehlt'
