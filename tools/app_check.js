@@ -1558,6 +1558,10 @@ const REGRESSION = [
         const i = css.indexOf('@media (max-width:' + px + 'px){');
         if (i < 0 || !css.slice(i, i + 600).includes(pre + '.hp-row,')) return 'Media-Query-Ersatz für Hit Points fehlt: ' + px + 'px ' + pre;
       }
+      // 02.10.2026: Hit Points einheitlich zentriert, Inspiration im 2-Spalten-Raster ohne Platzhalter, Sonne als Schriftzeichen
+      if (w.getComputedStyle(d.querySelector('.ds-death')).alignItems !== 'center') return 'Death Saves nicht zentriert';
+      if ((css.match(/\.ds-insp \.ds-sub\{display:none\}/g) || []).length !== 4) return 'Inspiration-Platzhalter nicht in allen 2-Spalten-Regeln ausgeblendet';
+      if (!/\u2600\uFE0E Long Rest/.test(d.querySelector('.rest-btn.long').textContent)) return 'Long-Rest-Sonne als Emoji';
       const inp = d.querySelector('.sbox .hpin');
       if (!inp || w.getComputedStyle(inp).flexGrow !== '1') return 'AC/Initiative/Speed: Zahlenfeld fest breit (+/− ragen über die Karte)';
       const top = d.createElement('div'); top.className = 'ab-top'; const t = d.createElement('div'); t.className = 'ab-title'; top.appendChild(t); d.body.appendChild(top);

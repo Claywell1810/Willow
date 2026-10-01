@@ -284,6 +284,10 @@ input[type=number]{-moz-appearance:textfield}
 .hd-pips{display:flex;flex-wrap:wrap;align-items:center}
 .slpip.hdpip{border-color:var(--green)}
 .slpip.hdpip.av{background:var(--green)}
+/* 02.10.2026 (Wunsch Simon „optisch unrund“): Death Saves, Inspiration und Hit Dice zentriert wie Current/Maximum/Temp */
+.ds-box{align-items:center;text-align:center}
+.ds-groups{justify-content:center;column-gap:28px}
+.hd-pips{justify-content:center}
 .hd-n{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text3);margin-left:6px}
 .rest-btns{display:flex;flex-direction:column;gap:6px;flex:1 0 auto;justify-content:center}
 .rest-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;padding:8px 12px;cursor:pointer;white-space:nowrap;min-height:38px}
@@ -554,6 +558,7 @@ button[onclick="toggleTabs()"]{padding:7px!important}
   .ds-insp{order:1}.ds-death{order:2;grid-column:1/-1}.hd-box{order:3;grid-column:1/-1}
   .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
   .rest-btns .rest-btn{flex:1}
+  .ds-insp .ds-sub{display:none}   /* 02.10.2026: Platzhalter nur für 3 Spalten (Kreise auf Höhe der Death-Save-Kreise) */
 }
 /* 02.10.2026: dieselbe Umstellung zusätzlich über die Bildschirmbreite (Media Query). Grund: Safari (iPhone) wertet die
    Container-Abfrage zusammen mit der Textgröße (zoom) offenbar anders aus als Chrome – auf Simons iPhone blieben bei Large 3 Spalten.
@@ -567,6 +572,7 @@ button[onclick="toggleTabs()"]{padding:7px!important}
   .hd-box{order:3;grid-column:1/-1}
   .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
   .rest-btns .rest-btn{flex:1}
+  .ds-insp .ds-sub{display:none}   /* 02.10.2026: Platzhalter nur für 3 Spalten (Kreise auf Höhe der Death-Save-Kreise) */
 }
 @media (max-width:469px){
   html[data-ts="gross"] .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
@@ -577,6 +583,7 @@ button[onclick="toggleTabs()"]{padding:7px!important}
   html[data-ts="gross"] .hd-box{order:3;grid-column:1/-1}
   html[data-ts="gross"] .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
   html[data-ts="gross"] .rest-btns .rest-btn{flex:1}
+  html[data-ts="gross"] .ds-insp .ds-sub{display:none}
 }
 @media (max-width:530px){
   html[data-ts="sehrgross"] .hp-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
@@ -587,6 +594,7 @@ button[onclick="toggleTabs()"]{padding:7px!important}
   html[data-ts="sehrgross"] .hd-box{order:3;grid-column:1/-1}
   html[data-ts="sehrgross"] .rest-btns{order:4;grid-column:1/-1;flex-direction:row}
   html[data-ts="sehrgross"] .rest-btns .rest-btn{flex:1}
+  html[data-ts="sehrgross"] .ds-insp .ds-sub{display:none}
 }
 .hpbox{min-width:0;padding:10px 4px}
 .hp-ctrl{gap:3px}
@@ -992,7 +1000,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="ds-box hd-box" id="hdBox" style="display:none"><div class="ds-lbl" id="hdLbl">Hit Dice</div><div class="hd-pips" id="hdPips"></div></div>
         <div class="rest-btns">
           <button class="rest-btn" onclick="openRest('short')">☾ Short Rest</button>
-          <button class="rest-btn long" onclick="openRest('long')">☀ Long Rest</button>
+          <button class="rest-btn long" onclick="openRest('long')">☀︎ Long Rest</button>
         </div>
       </div></div>
       </div>
@@ -7163,7 +7171,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02b';
+const APP_VERSION = 'willow-app-2026-10-02c';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
