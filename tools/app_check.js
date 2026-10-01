@@ -933,7 +933,33 @@ const REGRESSION = [
       if (w.slMyVia(w.slMySpellCtx(), zb('Vortex Warp')) !== null) return 'ohne Background trotzdem auf der Liste';
       w.eval("st.bg='Quandrix Student'"); sel('Barbarian', '', 3);
       if (w.slMyVia(w.slMySpellCtx(), zb('Vortex Warp')) !== null) return 'Barbarian (ohne Zauberliste) bekommt Background-Zauber';
-      w.eval("st.bg=''"); w.buildBgLore(); w.resetUI();
+      // My Spells: Herkunfts-Abzeichen nur für Zauber über Zusatzquelle
+      sel('Druid', '', 3);
+      w.eval("st.mySpells=[{name:'Vortex Warp',grad:2,school:'Conjuration',prep:true},{name:'Entangle',grad:1,school:'Conjuration',prep:true}]"); w.buildMySpells();
+      const via = n => { const c = [...d.querySelectorAll('#mySpells .spell-card')].find(x => x.querySelector('.spell-name').textContent === n); return c ? (c.querySelector('.sp-via') || {}).textContent || '' : 'fehlt'; };
+      if (via('Vortex Warp') !== '✦ Quandrix Student') return 'My Spells: Vortex Warp ohne Abzeichen „Quandrix Student“ (' + via('Vortex Warp') + ')';
+      if (via('Entangle') !== '') return 'My Spells: Entangle (Druid-Liste) mit Abzeichen';
+      w.eval("st.bg=''"); w.buildMySpells();
+      if (via('Vortex Warp') !== '') return 'My Spells: Abzeichen bleibt ohne Background';
+      w.eval("st.mySpells=[]"); w.buildBgLore(); w.resetUI();
+      return true;
+    } },
+  { name: 'Backgrounds und Feats aus AU/RHW/EFA ergänzt: 12 neue Backgrounds, 4 durch Nachdruck ersetzt (Name gleich), 40 Feats inkl. Dark Gift, Origin Feat findbar', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      const bg = n => w.eval(`BG_DATA.find(b=>b.n===${JSON.stringify(n)})`), ft = n => w.eval(`FT_FEATS.find(f=>f.n===${JSON.stringify(n)})`);
+      if (w.eval('BG_DATA.length') !== 132 || w.eval('new Set(BG_DATA.map(b=>b.n)).size') !== 132) return 'BG_DATA nicht 132 eindeutige Namen';
+      const ft1 = bg('Familiar Trainer'); if (!ft1 || ft1.f !== 'Familiar Friend' || ft1.a !== 'CON, INT, WIS' || ft1.src !== 'AU') return 'Familiar Trainer falsch';
+      for (const [n, q] of [['Haunted One', 'RHW'], ['Investigator', 'RHW'], ['Archaeologist', 'EFA'], ['House Agent', 'EFA']]) if (!bg(n) || bg(n).src !== q) return n + ' nicht ' + q;
+      for (const b of w.eval('BG_DATA')) { if (b.f && !w.eval(`FT_FEATS.some(f=>f.n.toLowerCase()===${JSON.stringify(b.f.toLowerCase())})`)) return 'Origin Feat fehlt in FT_FEATS: ' + b.n + ' → ' + b.f; if (!w.eval(`!!BG_EXTRA_MAP[${JSON.stringify(b.n + '|' + b.src)}]`)) return 'BG_EXTRA fehlt: ' + b.n; }
+      if (!ft('Survivor') || ft('Survivor').cat !== 'O' || !ft('Mist Walker') || ft('Mist Walker').cat !== 'DG') return 'RHW-Feats fehlen';
+      if (ft('Abjuration Adept').pre !== 'Level 4, Spellcasting or Pact Magic Feature' || !ft('Abjuration Adept').d.includes('Spell Slot Level | Spell')) return 'Abjuration Adept: Voraussetzung/Tabelle';
+      if (w.eval("FT_CATS.DG") !== 'Dark Gift' || !w.eval("typeof FEAT_SPELLS!=='undefined'&&!!FEAT_SPELLS['Abjuration Adept']")) return 'Dark Gift-Kategorie oder FEAT_SPELLS fehlt';
+      const body = d.getElementById('bgLoreBody');
+      w.eval("st.bg='Mist Wanderer'"); w.buildBgLore();
+      if (!body.textContent.includes('Dark Gift feat of your choice')) return 'Mist Wanderer: Feat-Zeile (Dark Gift) fehlt';
+      w.eval("st.bg='Familiar Trainer'"); w.buildBgLore();
+      if (!body.textContent.includes('Equipment:')) return 'Familiar Trainer ohne Text';
+      w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
   { name: 'Paket C2: Feature-Auswahl (Primal Order · Magician mit +WIS auf Arcana/Nature, Storm Aura → Storm Soul, wechselbar mit ↻), Expertise nur auf geübte Skills (Rogue L1/L6), Jack of All Trades (½), Bonus-Skills und Saves aus Features, nur ab Feature-Stufe und bei passender Subklasse', datum: '29.09.2026',
@@ -1477,7 +1503,11 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
         const chg = [...ma.keys()].filter(k => mb.has(k) && JSON.stringify(ma.get(k)) !== JSON.stringify(mb.get(k)));
         console.log(`   ${b}: +${add.length} neu, ~${chg.length} geändert, -${del.length} gelöscht`);
         if (chg.length) console.log('      geändert (max 5): ' + chg.slice(0, 5).join(', '));
-        if (del.length) bad(`${b}: gelöscht: ${del.slice(0, 10).join(', ')}${del.length > 10 ? ' …' : ''}`);
+        // Name bleibt, nur die Quelle wechselt (Nachdruck, z. B. Haunted One VRGR → RHW): kein Verlust für Savegames, nur melden (01.10.2026)
+        const nm = k => k.split('|')[0], namesB = new Set([...mb.keys()].map(nm));
+        const moved = del.filter(k => namesB.has(nm(k))), lost = del.filter(k => !namesB.has(nm(k)));
+        if (moved.length) console.log(`      Quelle gewechselt (Name bleibt): ${moved.join(', ')}`);
+        if (lost.length) bad(`${b}: gelöscht: ${lost.slice(0, 10).join(', ')}${lost.length > 10 ? ' …' : ''}`);
       } else {
         const del = Object.keys(a).filter(k => !(k in n)), add = Object.keys(n).filter(k => !(k in a));
         const chg = Object.keys(a).filter(k => k in n && JSON.stringify(a[k]) !== JSON.stringify(n[k]));

@@ -18,9 +18,14 @@ has() { for x in "$@"; do for a in $ARGS; do [ "$a" = "$x" ] || [ "$a" = alle ] 
 ARGS="$*"
 
 echo "== Willow: $(git -C "$W" log -1 --format='%h %ci %s')"
-cp "$W/index.html" DnD_Character_App.html
-cp "$W/index.html" ALT.html
-echo "   Arbeitskopie DnD_Character_App.html + ALT.html ($(wc -c < DnD_Character_App.html) Bytes, Ende: $(tail -c 7 DnD_Character_App.html))"
+# Arbeitskopie nicht überschreiben, wenn sie schon Änderungen enthält (zweiter Aufruf in derselben Sitzung, z. B. später „fotos“; B9)
+if [ -f DnD_Character_App.html ] && [ -f ALT.html ] && ! cmp -s DnD_Character_App.html ALT.html; then
+  echo "   Arbeitskopie hat Änderungen → bleibt erhalten (neu laden: DnD_Character_App.html löschen und setup.sh erneut aufrufen)"
+else
+  cp "$W/index.html" DnD_Character_App.html
+  cp "$W/index.html" ALT.html
+  echo "   Arbeitskopie DnD_Character_App.html + ALT.html ($(wc -c < DnD_Character_App.html) Bytes, Ende: $(tail -c 7 DnD_Character_App.html))"
+fi
 
 if [ ! -d node_modules/jsdom ]; then npm i jsdom@24 --silent >/dev/null 2>&1 && echo "   jsdom installiert"; else echo "   jsdom vorhanden"; fi
 
