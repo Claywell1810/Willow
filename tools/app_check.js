@@ -811,9 +811,7 @@ const REGRESSION = [
       w.localStorage.removeItem('willow_websearch');
       if (!d.getElementById('webSearchBtn')) return 'Lupe fehlt';
       w.openWebSearch(); d.getElementById('webSearchIn').value = 'Fireball'; w.runWebSearch();
-      if (opened !== 'https://www.google.com/search?q=D%26D%205e%20Fireball') return 'Such-URL: ' + opened;
-      const iu = w.wsIntent('https://www.google.com/search?q=D%26D%205e%20Fireball');
-      if (iu !== 'intent://www.google.com/search?q=D%26D%205e%20Fireball#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3DD%2526D%25205e%2520Fireball;end') return 'Android-Intent (Chrome statt Google-App): ' + iu;
+      if (opened !== 'https://www.startpage.com/do/search?q=D%26D%205e%20Fireball') return 'Such-URL (Startpage statt google.com, sonst öffnet iOS die Google-App): ' + opened;
       if (JSON.parse(w.localStorage.getItem('willow_websearch'))[0] !== 'Fireball') return 'letzte Suche nicht gemerkt';
       w.openWebSearch(); if (d.querySelectorAll('#webSearchRecent .ws-chip').length !== 1) return 'letzte Suchen nicht angezeigt';
       w.closeWebSearch();

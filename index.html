@@ -1139,9 +1139,8 @@ const prof=()=>parseInt(document.getElementById('prof')?.value||2);
 // Websuche per Lupe (Paket B, 28.09.2026): nur Link zu Google öffnen, keine Daten übernehmen; letzte Suchen pro Gerät
 const WS_KEY='willow_websearch';
 function wsRecent(){try{const a=JSON.parse(localStorage.getItem(WS_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
-function wsUrl(q){return 'https://www.google.com/search?q='+encodeURIComponent('D&D 5e '+q);}
-// Android (01.10.2026): google.com-Links öffnet sonst die Google-App → per Intent fest an Chrome (Browser) geben; fehlt Chrome, normaler Link
-function wsIntent(u){return 'intent://'+u.replace(/^https:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(u)+';end';}
+// Startpage statt google.com (01.10.2026): iOS öffnet google.com-Links in der Google-App; Startpage liefert Google-Ergebnisse und öffnet wie der 5e.tools-Link im Browser-Fenster der App
+function wsUrl(q){return 'https://www.startpage.com/do/search?q='+encodeURIComponent('D&D 5e '+q);}
 function openWebSearch(){
   const m=document.getElementById('webSearchModal'),inp=document.getElementById('webSearchIn');
   const r=wsRecent(),box=document.getElementById('webSearchRecent');
@@ -1154,9 +1153,7 @@ function runWebSearch(q){
   if(!q) return;
   if(navigator.onLine===false){showToast('Keine Internetverbindung');return;}
   try{const r=wsRecent().filter(x=>x.toLowerCase()!==q.toLowerCase());r.unshift(q);localStorage.setItem(WS_KEY,JSON.stringify(r.slice(0,8)));}catch(e){}
-  const u=wsUrl(q);
-  if(/Android/i.test(navigator.userAgent||'')) location.href=wsIntent(u);
-  else window.open(u,'_blank','noopener');
+  window.open(wsUrl(q),'_blank','noopener');
   closeWebSearch();
 }
 
@@ -6858,7 +6855,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01c';
+const APP_VERSION = 'willow-app-2026-10-01d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -7115,10 +7112,10 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').catch(()=>{});});
 }
 </script>
-<!-- WEBSUCHE (Lupe in der Kopfzeile, Google mit Präfix „D&D 5e“, Paket B 28.09.2026) -->
+<!-- WEBSUCHE (Lupe in der Kopfzeile, Startpage/Google-Ergebnisse mit Präfix „D&D 5e“, Paket B 28.09.2026) -->
 <div id="webSearchModal" class="ws-overlay" onclick="if(event.target===this)closeWebSearch()">
   <div class="ws-box">
-    <div class="ws-head">Web search · Google</div>
+    <div class="ws-head">Web search · Startpage</div>
     <form onsubmit="runWebSearch();return false" style="display:flex;gap:6px">
       <div class="ws-pre">D&amp;D 5e</div>
       <input id="webSearchIn" type="search" enterkeyhint="search" autocomplete="off" placeholder="z. B. Fireball">
