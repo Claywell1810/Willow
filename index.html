@@ -216,6 +216,15 @@ input[type=number]{-moz-appearance:textfield}
 .spell-tags{gap:0 6px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2);line-height:1.35}
 .spell-tags .sp-badge,.spell-tags .ap-bdg,.spell-tags .sp-via{background:none;border:none;padding:0;border-radius:0;color:inherit;font-size:inherit}
 .spell-tags .sp-dot{opacity:.6}
+/* 01.10.2026 (Wunsch Simon, Variante B): Actions-Tab – Abschnitte als Rahmen, Trenner mit ◆, Haupt-/Unterüberschriften */
+.act-div{height:1px;margin:18px 0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--gold) 45%,transparent),transparent);position:relative}
+.act-div::after{content:'◆';position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);color:var(--gold);font-size:var(--fs-2xs);line-height:1;background:var(--bg0);padding:0 8px}
+.act-div:has(+ .act-panel[style*="none"]){display:none}   /* Trenner nur vor sichtbarem Abschnitt */
+.act-panel{background:color-mix(in srgb,var(--bg1) 70%,var(--bg0));border:1px solid color-mix(in srgb,var(--gold) 22%,transparent);border-radius:12px;padding:4px 12px 12px}
+.act-panel > .sec:first-child{margin-top:10px}
+.sec.sec-top{font-size:var(--fs-sm);color:var(--gold);letter-spacing:2px;gap:8px;border-bottom-color:color-mix(in srgb,var(--gold) 40%,transparent);padding-bottom:6px}
+.sec.sec-top button{white-space:nowrap;flex-shrink:0}
+.sec.sec-sub{font-size:var(--fs-2xs);color:var(--text3);letter-spacing:1.5px;border-bottom:none;margin-top:16px}
 .ms-unp-h{display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ms-unp-h .ab-grp-chev{font-size:var(--fs-sm);letter-spacing:0}
 /* 01.10.2026: Schrift wie Feature-Karten (Actions): Name wie .ab-name (Accent/Gold), Meta-Zeile wie .ab-tag (Small Labels) */
@@ -924,8 +933,9 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div id="combatStats" class="cst-card" style="display:none;margin-top:12px"></div>
 
       <!-- WEAPONS -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div class="act-panel">
+      <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
         <span>Weapons & Attacks</span>
         <span style="display:flex;gap:6px;align-items:center">
           <button onclick="addWeapon()" style="font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--gold);padding:3px 10px;cursor:pointer">+ Add</button>
@@ -935,11 +945,12 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div id="sb-weapons">
         <div id="weaponList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
       </div>
+      </div>
 
       <!-- CLASS FEATURES -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div id="abilitiesSection" style="display:none">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="abilitiesSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span>Class Features</span>
           <span style="display:flex;gap:6px;align-items:center">
             <button onclick="toggleInfoSection('sb-classfeatures','sb-classfeatures-btn')" id="sb-classfeatures-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
@@ -951,9 +962,9 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       </div>
 
       <!-- Spellcasting -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div id="subpanel-meinezauber">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="subpanel-meinezauber" class="act-panel">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span>Spellcasting</span>
           <button onclick="toggleInfoSection('sb-spellcasting','sb-spellcasting-btn')" id="sb-spellcasting-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
         </div>
@@ -966,7 +977,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           </div>
         </div>
 
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+        <div class="sec sec-sub" style="display:flex;justify-content:space-between;align-items:center">
           <span>Spell Slots</span>
           <span style="display:flex;gap:6px;align-items:center">
             <button onclick="togSlotEdit()" id="slotEditBtn" class="filter-toggle" style="padding:3px 10px" title="−/+ as correction to the class table">✎ Adjust</button>
@@ -977,7 +988,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <div class="slot-g" id="spSlots"></div>
         </div>
 
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+        <div class="sec sec-sub" style="display:flex;justify-content:space-between;align-items:center">
           <span>My Spells</span>
           <button onclick="toggleInfoSection('sb-myspells','sb-myspells-btn')" id="sb-myspells-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
         </div>
@@ -993,9 +1004,9 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       </div>
 
       <!-- BEASTS -->
-      <div style="border-top:1px solid var(--border2);margin:12px 0 10px"></div>
-      <div id="savedBeastsSection" style="display:none">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="act-div"></div>
+      <div id="savedBeastsSection" class="act-panel" style="display:none">
+        <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
           <span>Beasts & Companions</span>
           <span style="display:flex;gap:6px;align-items:center">
             <button style="background:transparent;border:none;color:var(--text3);font-size:var(--fs-2xs);font-family:'Cinzel',serif;cursor:pointer" onclick="switchTab('bestien')">+ Browser →</button>
@@ -7083,7 +7094,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-01m';
+const APP_VERSION = 'willow-app-2026-10-01n';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

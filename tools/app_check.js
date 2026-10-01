@@ -1499,6 +1499,17 @@ const REGRESSION = [
       if (names() !== 'Bless,Bane,Entangle') return 'wieder auf: ' + names();
       w.eval('apSync=window._apS;st.mySpells=[];st.abGrpClosed={}'); w.buildMySpells(); return true;
     } },
+  { name: 'Actions-Tab gegliedert: Abschnitte als Rahmen (act-panel), Trenner (act-div), Haupt-/Unterüberschriften, Spell Slots/My Spells im Spellcasting-Block', datum: '01.10.2026',
+    run: ({ d }) => {
+      const panels = ['abilitiesSection', 'subpanel-meinezauber', 'savedBeastsSection'].map(id => d.getElementById(id));
+      if (panels.some(p => !p || !p.classList.contains('act-panel'))) return 'Abschnitt ohne Rahmen';
+      const wp = d.getElementById('sb-weapons').parentElement;
+      if (!wp.classList.contains('act-panel') || !wp.querySelector('.sec.sec-top')) return 'Weapons ohne Rahmen/Überschrift';
+      if (d.querySelectorAll('.act-div').length !== 4) return 'Trenner: ' + d.querySelectorAll('.act-div').length;
+      const sub = [...d.querySelectorAll('#subpanel-meinezauber .sec.sec-sub')].map(e => e.firstElementChild.textContent).join('|');
+      if (sub !== 'Spell Slots|My Spells') return 'Unterüberschriften: ' + sub;
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
