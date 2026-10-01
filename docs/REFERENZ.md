@@ -133,6 +133,8 @@ Reihenfolge im Tab (seit 27.09.2026, `willow-app-2026-09-27j`): Hit Points/Death
 
 ## B1d. Anzeige: Schriftskala, Tipp-Flächen, Textgröße, Farben (seit 27.09.2026)
 
+**Icon-Farben (seit 01.10.2026, Wunsch Simon):** neue Farb-Keys `icoAct`, `icoBonus`, `icoReact`, `icoPass`, `icoOther` (Gruppe „Icons (Features & Spells)“ in ⚙, `COLOR_LABELS`/`COLOR_GROUPS`) → CSS `--ico-act` … `--ico-other` für `.ab-icon.<aktion|bonus|reaktion|passiv|weitere>` (Feature- und Zauber-Icons) und `.ab-grp-dot`. Nicht in `CLASS_THEMES`: ohne eigenen Wert liefert `themeIco(t)` Red/Gold/Blue/Green/Small Labels (folgt also deren Änderungen), eigener Wert geht vor. Keys sind wie alle Farb-Keys heilig (A7.4).
+
 Nur Anzeige, keine Daten. Entstanden in A6 Punkt 9 (`17eaa3a`/`…27k`, `3f17987`/`…27l`).
 
 **Typo-Skala** (`:root`): `--fs-2xs:11px` · `--fs-xs:12px` · `--fs-sm:13px` · `--fs-md:14px` · `--fs-txt:15px` (Fließtext/Beschreibungen). Alle früheren festen Größen 8–15 px (CSS, HTML-Inline, JS-Vorlagen) sind darauf umgestellt (8/9/10 → 2xs, 11 → xs, 12 → sm, 13 → md, 14/15 → txt). **Neue Schriftgrößen unter 16 px immer als Variable schreiben** (`font-size:var(--fs-sm)`), nie `px` unter 11 (Regressionstest). 16 px und größer bleiben `px` (Eingabefelder brauchen 16 px, sonst zoomt iOS beim Tippen).

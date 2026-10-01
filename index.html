@@ -338,11 +338,11 @@ input[type=number]{-moz-appearance:textfield}
 .ab-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;overflow:hidden}
 .ab-top{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ab-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);flex-shrink:0}
-.ab-icon.aktion{background:color-mix(in srgb, var(--red) 20%, transparent);border:1px solid color-mix(in srgb, var(--red) 40%, transparent)}
-.ab-icon.bonus{background:color-mix(in srgb, var(--gold) 20%, transparent);border:1px solid color-mix(in srgb, var(--gold) 40%, transparent)}
-.ab-icon.reaktion{background:color-mix(in srgb, var(--blue) 20%, transparent);border:1px solid color-mix(in srgb, var(--blue) 40%, transparent)}
-.ab-icon.passiv{background:color-mix(in srgb, var(--green) 15%, transparent);border:1px solid color-mix(in srgb, var(--green) 30%, transparent)}
-.ab-icon.weitere{background:color-mix(in srgb, var(--text3) 12%, transparent);border:1px solid color-mix(in srgb, var(--text3) 30%, transparent)}
+.ab-icon.aktion{background:color-mix(in srgb, var(--ico-act) 20%, transparent);border:1px solid color-mix(in srgb, var(--ico-act) 40%, transparent)}
+.ab-icon.bonus{background:color-mix(in srgb, var(--ico-bonus) 20%, transparent);border:1px solid color-mix(in srgb, var(--ico-bonus) 40%, transparent)}
+.ab-icon.reaktion{background:color-mix(in srgb, var(--ico-react) 20%, transparent);border:1px solid color-mix(in srgb, var(--ico-react) 40%, transparent)}
+.ab-icon.passiv{background:color-mix(in srgb, var(--ico-pass) 15%, transparent);border:1px solid color-mix(in srgb, var(--ico-pass) 30%, transparent)}
+.ab-icon.weitere{background:color-mix(in srgb, var(--ico-other) 12%, transparent);border:1px solid color-mix(in srgb, var(--ico-other) 30%, transparent)}
 .ab-title{flex:1;min-width:0}
 .ab-name{font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)}
 .ab-tag{font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif;letter-spacing:.5px}
@@ -372,11 +372,11 @@ input[type=number]{-moz-appearance:textfield}
 .ab-grp{display:flex;align-items:center;gap:8px;margin:12px 2px 6px;font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:1px;text-transform:uppercase;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
 .ab-grp:first-child{margin-top:2px}
 .ab-grp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.ab-grp-dot.aktion{background:color-mix(in srgb, var(--red) 60%, transparent)}
-.ab-grp-dot.bonus{background:color-mix(in srgb, var(--gold) 60%, transparent)}
-.ab-grp-dot.reaktion{background:color-mix(in srgb, var(--blue) 60%, transparent)}
-.ab-grp-dot.passiv{background:color-mix(in srgb, var(--green) 50%, transparent)}
-.ab-grp-dot.weitere{background:color-mix(in srgb, var(--text3) 60%, transparent)}
+.ab-grp-dot.aktion{background:color-mix(in srgb, var(--ico-act) 60%, transparent)}
+.ab-grp-dot.bonus{background:color-mix(in srgb, var(--ico-bonus) 60%, transparent)}
+.ab-grp-dot.reaktion{background:color-mix(in srgb, var(--ico-react) 60%, transparent)}
+.ab-grp-dot.passiv{background:color-mix(in srgb, var(--ico-pass) 50%, transparent)}
+.ab-grp-dot.weitere{background:color-mix(in srgb, var(--ico-other) 60%, transparent)}
 .ab-grp-n{font-size:var(--fs-xs);color:var(--text3);letter-spacing:0}
 .ab-grp-chev{margin-left:auto;color:var(--text3);font-size:var(--fs-sm)}
 .ab-card.ab-feat .ab-name{color:var(--text)}
@@ -6973,6 +6973,8 @@ function themeBase(cls){
   return {...t, purple:THEME_GOLD_HI, text3:THEME_GOLD_LBL, muted:t.text3, desc:hexMix(t.text,t.text2,.2),
     red:t.red||'#e05555', green:t.green||'#4caf7d', blue:t.blue||'#5b9bd5'};
 }
+// Icon-Farben (01.10.2026, Wunsch Simon): eigene Regler für Feature-/Zauber-Icons und Gruppenpunkte; ohne eigenen Wert folgen sie Red/Gold/Blue/Green/Small Labels
+function themeIco(t){return {icoAct:t.icoAct||t.red||'#e05555',icoBonus:t.icoBonus||t.gold,icoReact:t.icoReact||t.blue||'#5b9bd5',icoPass:t.icoPass||t.green||'#4caf7d',icoOther:t.icoOther||t.text3};}
 function applyTheme(cls){
   const base=themeBase(cls);
   const ov=loadThemeOverrides();
@@ -6997,6 +6999,8 @@ function applyTheme(cls){
   r.setProperty('--red',t.red||'#e05555');
   r.setProperty('--green',t.green||'#4caf7d');
   r.setProperty('--blue',t.blue||'#5b9bd5');
+  const ic=themeIco(t);
+  r.setProperty('--ico-act',ic.icoAct);r.setProperty('--ico-bonus',ic.icoBonus);r.setProperty('--ico-react',ic.icoReact);r.setProperty('--ico-pass',ic.icoPass);r.setProperty('--ico-other',ic.icoOther);
   const rune=document.querySelector('.rune');
   if(rune) rune.textContent=CLASS_RUNES[cls]||'⚔';
 }
@@ -7071,10 +7075,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
 const APP_VERSION = 'willow-app-2026-10-01l';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
-const COLOR_LABELS = {gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
+const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
 const COLOR_GROUPS = [['Backgrounds',['bg0','bg1','bg2','bg3']],['Text',['text','desc','text2','text3','muted']],
-  ['Accents',['gold','gold2','purple','purple2']],['Status',['green','red','blue']]];
+  ['Accents',['gold','gold2','purple','purple2']],['Status',['green','red','blue']],
+  ['Icons (Features & Spells)',['icoAct','icoBonus','icoReact','icoPass','icoOther']]];
 const colorGrpOpen = new Set(['Text']);
 
 function loadThemeOverrides(){
@@ -7121,6 +7126,7 @@ function buildColorPanel(){
   const ov = loadThemeOverrides();
   const base = themeBase(settingsActiveClass);
   const current = {...base, ...(ov[settingsActiveClass]||{})};
+  Object.assign(current, themeIco(current));
   const clsLabel = settingsActiveClass || 'Default';
   panel.innerHTML = `
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text3);margin-bottom:10px;letter-spacing:1px">${clsLabel.toUpperCase()}</div>

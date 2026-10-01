@@ -647,7 +647,7 @@ const REGRESSION = [
       w.localStorage.removeItem('dnd5e_theme_overrides'); w.applyTheme('Barbarian');
       w.openSettings();
       const g = [...d.querySelectorAll('#settingsColorPanels .clr-grp summary')].map(x => x.textContent.trim());
-      if (JSON.stringify(g) !== '["Backgrounds","Text","Accents","Status"]') return 'Farbgruppen: ' + JSON.stringify(g);
+      if (JSON.stringify(g) !== '["Backgrounds","Text","Accents","Status","Icons (Features & Spells)"]')   // Icons seit 01.10.2026 return 'Farbgruppen: ' + JSON.stringify(g);
       if ((d.getElementById('settingsColorPanels').textContent.match(/#[0-9a-f]{6}/gi) || []).length !== 16) return 'nicht 16 Farbfelder';
       w.closeSettings();
       return true;
@@ -1472,6 +1472,18 @@ const REGRESSION = [
       const cls = n => [...d.querySelectorAll('#mySpells .spell-card')].find(c => c.querySelector('.spell-name').textContent === n).querySelector('.sp-ico').classList;
       if (!cls('Shield').contains('reaktion') || !cls('Misty Step').contains('bonus') || !cls('Fireball').contains('aktion')) return 'Rahmenfarbe nach Zeit falsch';
       w.eval('apSync=window._apS;st.mySpells=[]'); w.buildMySpells(); return true;
+    } },
+  { name: 'Icon-Farben einstellbar (Gruppe „Icons“): ohne eigenen Wert folgen sie Red/Gold/Blue/Green/Small Labels, eigener Wert geht vor', datum: '01.10.2026',
+    run: ({ w, d }) => {
+      const cls = w.eval("document.getElementById('cls').value||''");
+      const V = k => w.eval(`document.documentElement.style.getPropertyValue('${k}').trim()`);
+      w.eval(`saveThemeOverrides({})`); w.applyTheme(cls);
+      if (V('--ico-act') !== V('--red') || V('--ico-bonus') !== V('--gold') || V('--ico-other') !== V('--text3')) return 'Standard folgt nicht den Theme-Farben';
+      w.eval(`saveThemeOverrides({[${JSON.stringify(cls)}]:{red:'#112233'}})`); w.applyTheme(cls);
+      if (V('--ico-act') !== '#112233') return 'folgt geändertem Red nicht';
+      w.eval(`saveThemeOverrides({[${JSON.stringify(cls)}]:{red:'#112233',icoAct:'#445566'}})`); w.applyTheme(cls);
+      if (V('--ico-act') !== '#445566' || V('--red') !== '#112233') return 'eigener Icon-Wert geht nicht vor';
+      w.eval(`saveThemeOverrides({})`); w.applyTheme(cls); return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];

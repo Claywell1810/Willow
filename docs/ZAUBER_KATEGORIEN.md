@@ -25,7 +25,7 @@ Seit 01.10.2026 (Wunsch Simon). Jeder Zauber in My Spells zeigt links ein Bild i
 **Schadenstypen** (alle 13 aus D&D 5e):
 🔥 fire · ❄️ cold · ⚡ lightning · 💥 thunder · 🧪 acid · ☠️ poison · 💀 necrotic · ☀️ radiant · ✴️ force · 🧠 psychic · 🗡️ slashing · 🏹 piercing · 🔨 bludgeoning · 🌈 `multi` = drei oder mehr Typen bzw. frei wählbar (Chromatic Orb, Chaos Bolt …). Bei zwei Typen wird der thematisch passende gewählt (Ice Storm ❄️, Flame Strike 🔥), ggf. per Korrektur.
 
-**Rahmenfarbe** = Zeit wie bei den Features: rot Action, gold Bonus Action, blau Reaction, neutral alles andere (1 Minute, 1 Stunde …).
+**Rahmenfarbe** = Zeit wie bei den Features: rot Action, gold Bonus Action, blau Reaction, neutral alles andere (1 Minute, 1 Stunde …). Einstellbar in ⚙ unter „Icons (Features & Spells)“ (gilt auch für die Feature-Icons und die Gruppenpunkte im Actions-Tab).
 
 ## Wo steht was?
 
