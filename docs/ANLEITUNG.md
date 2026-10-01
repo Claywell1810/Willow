@@ -15,7 +15,7 @@ Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuers
 | `docs/ZAUBER_KATEGORIEN.md` | Zauber-Kategorien/Bilder (seit 01.10.2026): Kategorien, Regeln, Ablauf für neue Zauber (`tools/spell_cats.py`) | bei neuen Zaubern oder Änderungen an Kategorien |
 | `tools/` | alle Skripte: `setup.sh`, `app_check.js`, `dump.js`, Konverter, `feature_picks.py` (B12), `race_convert.py` (B13), 12 Configs, Foto-Skripte | nie ganz lesen, nur ausführen oder gezielt greppen |
 
-Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Nummer in diese Datei, die Referenz oder das Archiv (Tabelle oben). Im Projekt (claude.ai) liegt nur noch der Wegweiser `docs/ANLEITUNG.md`; Skripte und Doku werden **nicht** mehr per `project_read`/`project_write` übertragen.
+Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Nummer in diese Datei, die Referenz oder das Archiv (Tabelle oben). Im Projekt (claude.ai) liegt nur noch der Wegweiser `claude/Workflow_Anleitung.md` (verweist hierher); Skripte und Doku werden **nicht** mehr per `project_read`/`project_write` übertragen.
 
 **Sitzungsstart (immer, in dieser Reihenfolge):**
 1. Repo holen: Werkzeug `add_repo` (owner `claywell1810`, repo `willow`, access `push`), dann dessen Klon-Anweisung (einmal klonen, langes Timeout).
@@ -26,7 +26,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A1. Grundprinzip
 
-- **Eine Datei:** `DnD_Character_App.html` (~1,9 MB). Code und alle Referenzdaten stecken darin.
+- **Eine Datei:** `index.html` im Repo, Arbeitskopie `DnD_Character_App.html` (~2,4 MB, Stand 01.10.2026). Code und alle Referenzdaten stecken darin.
 - **Referenzdaten** (Zauber, Klassen, Rassen …) sind JS-Konstanten in der HTML. **Charakterdaten** liegen im Browser (localStorage). Beide Welten sind getrennt, verbunden nur über **Namen** (Klasse, Subklasse, Zauber, Feat).
 - **Claude** holt Rohdaten selbst aus dem 5e.tools-GitHub (A3). **Simon** entscheidet und lädt nur im Rückfall Dateien hoch. **Claude** konvertiert, fügt ein, prüft und liefert die HTML.
 - **Keine erfundenen Daten.** Fehlt die Quelle, wird nichts eingebaut.
@@ -81,7 +81,7 @@ Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 ## A9. Projekt-Anweisungen (Text für die Projekteinstellungen)
 
 > D&D 5e Charakterbogen-App: eine HTML-Datei, Vanilla JS, offline, localStorage, Dark-Theme, mobil.
-> Vor jeder Arbeit `docs/ANLEITUNG.md` lesen und danach arbeiten.
+> Vor jeder Arbeit claude/Workflow_Anleitung.md lesen und danach arbeiten.
 > Die App liegt im GitHub-Repo claywell1810/willow (index.html) und wird nur dort gelesen und veröffentlicht.
 > Keine Daten erfinden, nur 5e.tools-Daten. Änderungen per Python mit eindeutigen Ankern, nie neu schreiben. Klassen-/Subklassen-Namen nie ändern. Nach Änderungen testen. Antworten kurz.
 
@@ -115,7 +115,7 @@ Alle 12 Klassen sind eingepflegt, Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 
 Für Arbeit an der HTML **kein Haiku** (Datei zu groß, zu viele Abhängigkeiten). **Kein Sonnet** mehr (s. o.). Fable/Mythos ist für dieses Projekt nicht nötig.
 
-**Nach Reihenfolge A6:** Fixliste: Sonnet-Teil → Sonnet (erledigt), Opus-Teil → Opus Hoch (erledigt) · Combat-Tab-Umbau und Actions → Opus Hoch (erledigt) · UI / Lesbarkeit → Opus Hoch, Kleinkram → Sonnet (erledigt) · Paket A → Opus Hoch (erledigt 28.09.2026); **als Nächstes: die Arbeitspakete B–E laut Fixliste** (Modell je Paket dort angegeben: B → Opus Mittel, C/D/E/A2 → Opus Hoch). (Warlock erledigt: lief ohne Konverter- oder Code-Änderung durch.)
+**Nach Reihenfolge A6:** Fixliste: Sonnet-Teil → Sonnet (erledigt), Opus-Teil → Opus Hoch (erledigt) · Combat-Tab-Umbau und Actions → Opus Hoch (erledigt) · UI / Lesbarkeit → Opus Hoch, Kleinkram → Sonnet (erledigt) · Paket A → Opus Hoch (erledigt 28.09.2026); Pakete B, C1–C4, D, I, G, H erledigt; **als Nächstes: Reihenfolge laut A6** (K → E → A2 → F → J, alle Opus Hoch). (Warlock erledigt: lief ohne Konverter- oder Code-Änderung durch.)
 
 Das Prüfskript (B8) fängt Fehler unabhängig vom Modell ab. Meldet es Probleme, die auf Mittel nicht sauber gelöst werden: Denkstufe auf Hoch stellen und weitermachen. Wirft `class_extract.py` „Unbekannter entry-Typ" oder „TODO _mod", braucht der Konverter eine Erweiterung → Opus · Hoch (kleine, klar umrissene Erweiterungen wie `refFeat` beim Paladin, die Nachdruck-Regeln beim Sorcerer, der Item-`statblock` beim Rogue, die Speed-Zelle beim Monk oder die Bonus-Zelle beim Barbarian reichen auf Mittel; damals schaffte sie Sonnet). Dasselbe gilt für `bst_convert.py` („Unbekannter Tag“, „Speed: …“, „Spellcasting-Feld nicht unterstützt“, B11).
 
@@ -136,7 +136,7 @@ Claude arbeitet sie ab und meldet sie in der Schlussnachricht als Kurzliste (✔
    Immer: eine Zeile in B10 (`docs/ARCHIV.md`). Kleine UI-Anpassungen ohne diese Anlässe → **kein** Md-Update.
 5. **Veröffentlichen (B1a):** `CACHE_NAME` im Service Worker **und** `APP_VERSION` in der HTML auf denselben neuen Wert, ein Commit mit Beschreibung, Push nach `main`, Größe auf GitHub gegenprüfen. Nur Doku/Skripte geändert (`index.html` unverändert) → Commit ohne neue App-Version.
 6. **Fixliste:** neue Funde eingetragen, erledigte Punkte nach „Erledigt" verschoben.
-7. **Skripte und Doku** (seit 28.09.2026 im Repo): geänderte Dateien in `willow/tools/` und `willow/docs/` gehen mit dem Commit aus Punkt 5 mit (`git add -A`). **Nichts ins Projekt schreiben** – dort liegt nur noch der Wegweiser `docs/ANLEITUNG.md`. Doku wie die HTML nur per Python-`rep()` ändern (B1a Schritt 3), nie neu schreiben oder „zusammenfassen“.
+7. **Skripte und Doku** (seit 28.09.2026 im Repo): geänderte Dateien in `willow/tools/` und `willow/docs/` gehen mit dem Commit aus Punkt 5 mit (`git add -A`). **Nichts ins Projekt schreiben** – dort liegt nur noch der Wegweiser `claude/Workflow_Anleitung.md` (nur ändern, wenn sich Sitzungsstart, Dateiliste oder `setup.sh`-Optionen ändern; dann per `project_write`). Doku wie die HTML nur per Python-`rep()` ändern (B1a Schritt 3), nie neu schreiben oder „zusammenfassen“.
 8. **Schlussnachricht an Simon:** Commit-Kürzel + neue App-Version nennen. HTML-Download nur, wenn Simon ihn wünscht.
 
 ---
@@ -145,7 +145,7 @@ Claude arbeitet sie ab und meldet sie in der Schlussnachricht als Kurzliste (✔
 
 **Quelle:** GitHub-Repo `claywell1810/willow`, Branch `main`. Dateien: `index.html` (die App; heißt wegen GitHub Pages zwingend so), `service-worker.js`, `manifest.json`, Icons. Claude hat Schreibzugriff (GitHub App, seit 26.09.2026).
 
-**Warum nicht aus dem Projekt:** Die HTML ist 1,9 MB, `ZB_SPELLS` allein eine 480-KB-Zeile. Projekt-Abrufe und das Read-Werkzeug zeigen nur bis 256 KB, das Edit-Werkzeug setzt ein vollständiges Read voraus → beide für die HTML unbrauchbar.
+**Warum nicht aus dem Projekt:** Die HTML ist ~2,4 MB, `ZB_SPELLS` allein eine ~500-KB-Zeile. Projekt-Abrufe und das Read-Werkzeug zeigen nur bis 256 KB, das Edit-Werkzeug setzt ein vollständiges Read voraus → beide für die HTML unbrauchbar.
 
 **1. Laden** (seit 28.09.2026 mit `setup.sh`)
 - Repo in die Sitzung holen: Werkzeug `add_repo` (owner `claywell1810`, repo `willow`, access `push`), danach dessen Klon-Anweisung befolgen (einmal klonen, langes Timeout), danach `register_repo_root` (falls vorhanden; fehlt das Werkzeug, einfach weiter).
