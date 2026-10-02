@@ -1665,6 +1665,15 @@ const REGRESSION = [
       if (!d.getElementById('abList').textContent.includes('Testflug')) return 'Trait ab Stufe 5 fehlt bei Stufe 5';
       return true;
     } },
+  { name: 'Platzhalter blass (nicht wie eingetragener Text) + natürliche Waffe ohne Würfel zeigt „set dice“', datum: '02.10.2026',
+    run: ({w, d}) => {
+      const css = [...d.querySelectorAll('style')].map(s => s.textContent).join('');
+      if (!/::placeholder\{[^}]*-webkit-text-fill-color:var\(--muted\)/.test(css)) return 'Globale ::placeholder-Regel mit -webkit-text-fill-color fehlt (Platzhalter sehen aus wie Werte)';
+      d.getElementById('race').value = 'custom'; w.onRaceChange();
+      w.eval("st.customRace={nw:[{n:'Testklaue',dice:'',type:'Slashing',ab:'STR'}]}"); w.crFull(); w.buildWeapons();
+      if (!d.getElementById('weaponList').textContent.includes('set dice')) return 'Leerer Würfel nicht als „set dice“ markiert';
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────

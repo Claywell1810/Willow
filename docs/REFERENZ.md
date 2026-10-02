@@ -473,6 +473,8 @@ Pflicht **nach jeder Konverter-Änderung**: Ergebnis muss „SUMME 0" sein, sons
 
 Wächst mit jedem Debugging. Vor Code-Arbeit kurz lesen.
 
+- **Platzhalter und `-webkit-text-fill-color`** (02.10.2026): Die globale Regel `-webkit-text-fill-color:inherit` (bzw. `var(--text)` an Feldern) gilt auch für `::placeholder` → Platzhalter sehen aus wie eingetragene Werte. Dafür gibt es die globale Regel `::placeholder{…-webkit-text-fill-color:var(--muted)}`; neue Platzhalter trotzdem als Beispiel formulieren („e.g. 1d6“).
+
 - **`setup.sh` legt `DnD_Character_App.html` und `ALT.html` neu an** (auch `setup.sh fotos` mitten in der Sitzung) → vorher Stand sichern oder Patch-Skripte so schreiben, dass sie erneut laufen können (Paket D, 29.09.2026).
 
 - **Riesige Einzeilen** (`ZB_SPELLS`, `BG_EXTRA`, `FT_FEATS`, `BST_DATA`, auch `CLASS_THEMES`, `SUBCLASS_SPELLS`, `SPELL_STATBLOCKS`): Ausgabe von grep/sed immer mit `cut -c1-200` kürzen, sonst ist der Kontext sofort voll.

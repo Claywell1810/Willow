@@ -24,6 +24,8 @@ html{scrollbar-gutter:stable}
 body{background:var(--bg0);color:var(--text);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;padding:0}
 input,select,textarea,button{font-family:inherit;color:inherit;-webkit-text-fill-color:inherit}
 input[type=color]{-webkit-text-fill-color:unset}
+/* Platzhalter blass (02.10.2026): -webkit-text-fill-color:inherit färbte sie wie echten Text → „1d6“ sah eingetragen aus (Foto Simon, Paket K) */
+::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted);opacity:1}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 
@@ -1567,7 +1569,7 @@ function crWeapons(){
 function crWeaponsHtml(){
   const L=crWeapons();if(!L.length)return '';const rn=pkEsc(rcName('custom'));
   return L.map(w=>`<div class="cr-nw"><div class="cr-nw-h">${pkEsc(w.n)}<span class="sk-bdg">${rn}</span></div>`
-    +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${w.atk}</b></span><span><small>DAMAGE</small><b>${pkEsc(w.dmg||'—')}</b></span><span><small>TYPE</small><b>${pkEsc(w.type||'—')}</b></span></div>`
+    +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${w.atk}</b></span><span><small>DAMAGE</small>${w.dmg?`<b>${pkEsc(w.dmg)}</b>`:'<b class="g" title="Enter the damage dice in Race › Natural weapons">set dice</b>'}</span><span><small>TYPE</small><b>${pkEsc(w.type||'—')}</b></span></div>`
     +`<div class="cr-nw-s">Natural weapon · ${w.ab} + Proficiency · set in Race</div></div>`).join('');
 }
 function crUsesTxt(t){return t.uses?(t.uses==='pb'?'PB':t.uses+'×')+' / '+(t.restore==='short'?'Short':'Long')+' Rest':'';}
@@ -1660,7 +1662,7 @@ function crForm(c){
   h+='<div class="cr-lbl">Natural weapons</div>'+(c.nw||[]).map((w,i)=>`<div class="cr-item">
       <div class="cr-row"><input class="cr-in" placeholder="e.g. Claws" value="${e(w.n||'')}" oninput="crNw(${i},'n',this.value)" onchange="crSide()"><button type="button" class="cr-x" onclick="crDel('nw',${i})" aria-label="Remove weapon">&times;</button></div>
       <div class="cr-grid3" style="margin-top:6px">
-        <label class="cr-f"><span>Damage</span><input class="cr-in" placeholder="1d6" value="${e(w.dice||'')}" oninput="crNw(${i},'dice',this.value)" onchange="crSide()"></label>
+        <label class="cr-f"><span>Damage</span><input class="cr-in" placeholder="e.g. 1d6" value="${e(w.dice||'')}" oninput="crNw(${i},'dice',this.value)" onchange="crSide()"></label>
         <label class="cr-f"><span>Type</span><select class="cr-in" onchange="crNw(${i},'type',this.value);crFull()">${opt('','—',w.type)}${CR_DMG.map(x=>opt(x,x,w.type)).join('')}</select></label>
         <label class="cr-f"><span>Ability</span><select class="cr-in" onchange="crNw(${i},'ab',this.value);crFull()">${opt('STR','STR',w.ab||'STR')}${opt('DEX','DEX',w.ab)}</select></label>
       </div></div>`).join('')+`<button type="button" class="cr-add" onclick="crAdd('nw')">+ Add natural weapon</button>`;
@@ -7500,7 +7502,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02f';
+const APP_VERSION = 'willow-app-2026-10-02g';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
