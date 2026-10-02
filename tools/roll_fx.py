@@ -5,10 +5,11 @@ Aufruf (aus dem Ordner über dem Klon; braucht nur die App):
     python3 willow/tools/roll_fx.py DnD_Character_App.html [--write]
 
 Erzeugt den Block zwischen `// ROLL_FX-START` und `// ROLL_FX-END` (erstes Einfügen: direkt nach `// EFFECT_DATA-END`):
-  const ROLL_FX={cond:{Name:[Regel,…]}, fx:{Name:[Regel,…]}}
+  const ROLL_FX={cond:{Name:[Regel,…]}, fx:{Name:[Regel,…]}, feat:{Name:[Regel,…]}}   (feat seit 03.10.2026: gilt, wenn der Feat im Feats-Tab steht)
   Regel = {w, m, ab?, sk?, on?, once?, note?} oder {c}
     w  = Würfe (mit Leerzeichen): d20 (Angriff, Rettungswurf, Attributswurf) | atk | watk (nur Waffen) | save | check
          (auch Initiative, XPHB: Initiative = Dexterity check) | init | dmg | wdmg (nur Waffen) | ac | spd
+         | conc (Rettungswurf, um Konzentration zu halten: an bei rollD20({…conc:1}) aus Paket P, bei anderen CON-Saves nur angeboten)
     m  = '+1d4', '-2' … | 'v' (Zahl/Würfel aus dem Wert des Effekts, Rückfall d) | 'adv' | 'dis' | 'fail' | 'ex' (−2 × Exhaustion)
          | ac: 'min17' (AC mindestens 17), 'base13' (Grund-AC 13 + DEX ohne Rüstung) | spd: 'x2', 'half'
     ab = nur diese Attribute (Liste) oder '*' = vom Wirker gewählt (an, wenn Note/From das Attribut nennt)
@@ -17,7 +18,7 @@ Erzeugt den Block zwischen `// ROLL_FX-START` und `// ROLL_FX-END` (erstes Einf�
     once = 1: Einmal-Effekt (Knopf „used – remove“ im Würfel-Dialog)
     c  = Zustand mit eigenen Regeln (Paralyzed → Incapacitated; Hold Person → Paralyzed)
 Keine Daten erfinden: jede Regel braucht einen Beleg, der wörtlich im Regeltext der App steht (COND_DATA, ZB_SPELLS
-in der Fassung aus EFFECT_DATA, CLASS_DATA); fehlt er, bricht das Skript ab. Neue Einträge: Zeile in COND/FX ergänzen.
+in der Fassung aus EFFECT_DATA, CLASS_DATA, FT_FEATS); fehlt er, bricht das Skript ab. Neue Einträge: Zeile in COND/FX/FEAT ergänzen.
 """
 import json, os, re, subprocess, sys
 
@@ -99,20 +100,27 @@ FX = {
     'Aura of Protection': [R('save', 'v', 'bonus to saving throws equal to your Charisma modifier')],
 }
 
+# Feats (Namen und Text wie FT_FEATS; Regel gilt, wenn der Feat in st.feats steht) – seit 03.10.2026
+FEAT = {
+    'War Caster': [R('conc', 'adv', 'You have Advantage on Constitution saving throws that you make to maintain Concentration',
+                     ab=['CON'], note='to maintain Concentration')],
+}
+
 
 def dump(html):
     out = 'roll_fx_dump.json'
     subprocess.check_call(['node', os.path.join(TOOLS, 'dump.js'), html,
                            "{cond:COND_DATA,ef:EFFECT_DATA,zb:ZB_SPELLS.filter(s=>EFFECT_DATA.some(e=>e.k==='s'&&e.n===s.name&&e.s===s.src)).map(s=>({n:s.name,d:s.desc})),"
                            "cd:Object.fromEntries(EFFECT_DATA.filter(e=>e.k==='f').map(e=>{const c=CLASS_DATA[e.c];let f=(c.base||[]).find(x=>x&&x.name===e.n);"
-                           "if(!f)for(const k in c.subclass||{}){f=(c.subclass[k]||[]).find(x=>x&&x.name===e.n);if(f)break;}return [e.n,f?f.desc:'']}))}",
+                           "if(!f)for(const k in c.subclass||{}){f=(c.subclass[k]||[]).find(x=>x&&x.name===e.n);if(f)break;}return [e.n,f?f.desc:'']})),"
+                           "ft:Object.fromEntries(FT_FEATS.filter(f=>" + json.dumps(list(FEAT)) + ".includes(f.n)).map(f=>[f.n,f.d]))}",
                            out], stdout=subprocess.DEVNULL)
     d = json.load(open(out, encoding='utf-8'))
     os.remove(out)
     return d
 
 
-W_OK = {'d20', 'atk', 'watk', 'save', 'check', 'init', 'dmg', 'wdmg', 'ac', 'spd'}
+W_OK = {'d20', 'atk', 'watk', 'save', 'check', 'init', 'dmg', 'wdmg', 'ac', 'spd', 'conc'}
 M_OK = re.compile(r"^([+-]\d*d?\d+|v|adv|dis|fail|ex|min17|base13|x2|half)$")
 
 
@@ -153,20 +161,26 @@ def build(html):
             fehler.append(f'Kein Regeltext: {n}')
             continue
         fx[n] = pruefe('fx', n, liste, texte_fx[n])
-    return {'cond': cond, 'fx': fx}, fehler
+    feat = {}
+    for n, liste in FEAT.items():
+        if not d['ft'].get(n):
+            fehler.append(f'Feat fehlt in FT_FEATS: {n}')
+            continue
+        feat[n] = pruefe('feat', n, liste, d['ft'][n])
+    return {'cond': cond, 'fx': fx, 'feat': feat}, fehler
 
 
 def main():
     html = sys.argv[1]
     write = '--write' in sys.argv
     daten, fehler = build(html)
-    for g in ('cond', 'fx'):
+    for g in ('cond', 'fx', 'feat'):
         for n, rs in daten[g].items():
             print(f'  {g} {n}: ' + '; '.join(r['c'] if 'c' in r else f"{r['w']} {r['m']}" + (' (aus)' if r.get('on') == 0 else '') for r in rs))
     if fehler:
         print('FEHLER:', *fehler, sep='\n  ')
         sys.exit(1)
-    block = '// ROLL_FX-START (tools/roll_fx.py; Würfel-Regeln für Zustände/Effekte, Belege aus COND_DATA/ZB_SPELLS/CLASS_DATA)\n' + \
+    block = '// ROLL_FX-START (tools/roll_fx.py; Würfel-Regeln für Zustände/Effekte/Feats, Belege aus COND_DATA/ZB_SPELLS/CLASS_DATA/FT_FEATS)\n' + \
         'const ROLL_FX=' + json.dumps(daten, ensure_ascii=False, separators=(',', ':')) + ';\n// ROLL_FX-END\n'
     s = open(html, encoding='utf-8').read()
     m = re.search(r'// ROLL_FX-START.*?// ROLL_FX-END\n', s, re.S)
@@ -178,7 +192,7 @@ def main():
             sys.exit(f'Anker // EFFECT_DATA-END {k}x gefunden')
         i = s.index('// EFFECT_DATA-END\n') + len('// EFFECT_DATA-END\n')
         neu = s[:i] + block + s[i:]
-    print(f"{len(daten['cond'])} Zustände, {len(daten['fx'])} Effekte, Block {len(block)} Bytes", '– unverändert' if neu == s else '')
+    print(f"{len(daten['cond'])} Zustände, {len(daten['fx'])} Effekte, {len(daten['feat'])} Feats, Block {len(block)} Bytes", '– unverändert' if neu == s else '')
     if write and neu != s:
         open(html, 'w', encoding='utf-8').write(neu)
         print('geschrieben')

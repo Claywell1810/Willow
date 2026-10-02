@@ -1901,6 +1901,91 @@ const REGRESSION = [
       w.eval('st.effects=[];st.ins=[0,0,0];st.weapons=[]'); w.buildFx(); w.closeDice();
       return true;
     } },
+  { name: 'Paket P: Schaden/Heilung – Temp HP zuerst, Resistance, Konzentration (DC, Würfel CON-Save), 0 HP (Unconscious, Massive Damage), Schaden bei 0 HP (Death Save), Heilung bis Max. + Death Saves zurück, Temp HP addieren sich nicht, Log, Undo', datum: '03.10.2026',
+    run: ({w, d}) => {
+      if (typeof w.hpApply !== 'function' || !d.getElementById('dmgAmt')) return 'hpApply/Eingabe fehlt';
+      const res = () => d.getElementById('dmgRes').textContent, hp = () => w.eval('st.hpC'), tmp = () => d.getElementById('hpT').value;
+      const go = (k, n) => { d.getElementById('dmgAmt').value = String(n); w.hpApply(k); };
+      w.eval("document.getElementById('charName').textContent='Regressionstest P'");
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 10, CHA: 10 }, _f_cls: 'Fighter', _f_lvl: '5', _f_hpM: '20', hpC: 20, _f_hpT: '5', saveP: {}, dsS: [0,0,0], dsF: [0,0,0], conditions: [], effects: [] });
+      const box = d.getElementById('dmgBox'); if (!box || box.closest('#hpPanel') == null) return 'Eingabe nicht im Hit-Points-Bereich';
+      // Temp HP zuerst (XPHB: 5 Temp, 7 Schaden → 0 Temp, −2 HP)
+      go('dmg', 7); if (tmp() !== '0' || hp() !== 18 || !res().includes('Temp 5 → 0') || !res().includes('HP 20 → 18')) return 'Temp zuerst: Temp ' + tmp() + ' HP ' + hp() + ' / ' + res();
+      if (d.getElementById('dmgAmt').value !== '') return 'Eingabe nicht geleert';
+      // Resistance halbiert (abgerundet)
+      w.dmgTogHalf(); go('dmg', 5); w.dmgTogHalf(); if (hp() !== 16 || !res().includes('5 halved')) return 'Resistance: HP ' + hp();
+      // Konzentration: DC = max(10, halber Schaden), höchstens 30; Würfel = CON-Save (Fighter geübt: +2 Mod +3 PB)
+      w.eval("st.mySpells=[{name:'Bless',grad:1,prep:true}];st.concActive=0"); w.buildFx();
+      go('dmg', 4); if (!res().includes('DC 10') || !res().includes('Bless')) return 'Konzentration DC 10: ' + res();
+      let rolled = null; const orig = w.rollD20; w.rollD20 = o => { rolled = o; };
+      w.hpConcRoll(); w.rollD20 = orig;
+      if (!rolled || rolled.k !== 'save' || rolled.ab !== 'CON' || rolled.l !== 'Concentration (DC 10)' || rolled.mod !== w.eval("md(st.attrs.CON)+(grantLvl(calcGrants(),'save','CON')||st.saveP.CON?prof():0)")) return 'Würfel: ' + JSON.stringify(rolled);
+      if (w.eval('concDC(24)') !== 12 || w.eval('concDC(70)') !== 30 || w.eval('concDC(21)') !== 10) return 'concDC';
+      w.hpEndConc(); if (w.eval('st.concActive') !== null || !res().includes('Concentration has ended')) return 'End Concentration';
+      // Heilung bis Max.
+      go('heal', 50); if (hp() !== 20 || !res().includes('over maximum')) return 'Heilung über Max.: ' + hp();
+      // 0 HP + Massive Damage
+      go('dmg', 25); if (hp() !== 0 || !res().includes('0 HP') || res().includes('Massive')) return '0 HP: ' + res();
+      w.hpUnc(true); if (!w.eval("st.conditions.includes('Unconscious')")) return '+ Unconscious';
+      go('heal', 3); go('dmg', 25); if (!res().includes('Massive Damage')) return 'Massive Damage fehlt: ' + res();
+      // Schaden bei 0 HP → Death-Save-Fehlschlag per Knopf; Heilung setzt Death Saves zurück
+      go('dmg', 3); if (!res().includes('Death Saving Throw failure')) return 'Schaden bei 0 HP: ' + res();
+      w.hpDsFail(2); if (w.eval('st.dsF.join()') !== '1,1,0' || res().includes('+1 Failure')) return 'Death Save Fehlschläge: ' + w.eval('st.dsF.join()');
+      go('heal', 4); if (hp() !== 4 || w.eval('st.dsF.join()') !== '0,0,0' || !res().includes('Death Saves reset') || !res().includes('Remove Unconscious')) return 'Heilung aus 0 HP: ' + res();
+      w.hpUnc(false); if (w.eval("st.conditions.includes('Unconscious')")) return 'Remove Unconscious';
+      // Temp HP addieren sich nicht
+      go('temp', 10); if (tmp() !== '10') return 'Temp 10: ' + tmp();
+      go('temp', 8); if (tmp() !== '10' || !res().includes("don't stack")) return 'Temp nicht stapeln: ' + tmp();
+      w.hpTakeTemp(); if (tmp() !== '8') return 'Take 8: ' + tmp();
+      // gespeichert + Log
+      const sv = JSON.parse(w.localStorage.getItem('dnd5e_chars'))['Regressionstest P'];
+      if (!sv || sv._f_hpT !== '8' || sv.hpC !== 4) return 'nicht gespeichert';
+      const lg = (sv.log || []).map(x => x.m).join('|');
+      for (const x of ['Damage taken 7', 'Damage taken 2 (5 halved, Resistance)', 'CON save DC 10', 'Massive Damage', 'Healing 4', 'Death Saves reset', 'Temp HP gained 8 (replaces 10)']) if (!lg.includes(x)) return 'Log fehlt: ' + x;
+      // Undo stellt HP wieder her und leert den Ergebnis-Kasten
+      go('dmg', 3); if (hp() !== 4 || tmp() !== '5') return 'vor Undo';
+      w.doUndo(); if (tmp() !== '8' || res() !== '') return 'Undo: Temp ' + tmp() + ' / ' + res();
+      w.eval('st.mySpells=[];st.conditions=[]');
+      return true;
+    } },
+  { name: 'War Caster: Vorteil auf Konzentrations-Saves (Knopf aus Paket P an, andere CON-Saves nur angeboten, ohne Feat kein Chip); HP-Felder ohne −/+, Current per Antippen korrigierbar', datum: '03.10.2026',
+    run: ({w, d}) => {
+      if (!w.eval('typeof ROLL_FX==="object"&&ROLL_FX.feat&&ROLL_FX.feat["War Caster"]')) return 'ROLL_FX.feat War Caster fehlt';
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 10, CHA: 10 }, _f_cls: 'Wizard', _f_lvl: '5', _f_hpM: '30', hpC: 30, feats: [], conditions: [], effects: [] });
+      const parts = o => w.eval('rlParts(' + JSON.stringify(o) + ')').filter(p => p.l === 'War Caster');
+      if (parts({ k: 'save', ab: 'CON', conc: 1 }).length) return 'ohne Feat: Chip vorhanden';
+      w.eval("st.feats=[{name:'War Caster',tag:'Feat',desc:''}]");
+      let p = parts({ k: 'save', ab: 'CON', conc: 1 }); if (p.length !== 1 || !p[0].on || p[0].m !== 'adv') return 'Konzentrations-Save: ' + JSON.stringify(p);
+      p = parts({ k: 'save', ab: 'CON' }); if (p.length !== 1 || p[0].on || !/Concentration/.test(p[0].note)) return 'CON-Save ohne Konz.: ' + JSON.stringify(p);
+      if (parts({ k: 'save', ab: 'DEX', conc: 1 }).length || parts({ k: 'check', ab: 'CON' }).length) return 'War Caster bei falschem Wurf';
+      // Knopf aus Paket P übergibt conc:1
+      let rolled = null; const orig = w.rollD20; w.rollD20 = o => { rolled = o; };
+      w.eval("st.mySpells=[{name:'Bless',grad:1,prep:true}];st.concActive=0"); d.getElementById('dmgAmt').value = '6'; w.hpApply('dmg'); w.hpConcRoll(); w.rollD20 = orig;
+      if (!rolled || rolled.conc !== 1) return 'Konzentrations-Knopf ohne conc: ' + JSON.stringify(rolled);
+      w.rollD20({ k: 'save', ab: 'CON', conc: 1, l: 'Concentration (DC 10)', mod: 2 });
+      if (!w.eval('_rl&&_rl.mode') || w.eval('_rl.mode') !== 'adv') return 'Würfel-Dialog ohne Vorteil: ' + w.eval('_rl&&_rl.mode');
+      // HP-Felder ohne −/+; Current per Antippen
+      if (d.querySelectorAll('#hpPanel .hp-row .hbtn').length) return 'HP-Felder haben noch −/+';
+      w.hpCEdit(); const inp = d.querySelector('#hpC input'); if (!inp) return 'Antippen öffnet kein Feld';
+      inp.value = '17'; inp.dispatchEvent(new w.Event('blur')); if (w.eval('st.hpC') !== 17 || d.getElementById('hpC').textContent !== '17') return 'Korrektur: ' + w.eval('st.hpC');
+      w.hpCEdit(); const i2 = d.querySelector('#hpC input'); i2.value = '99'; i2.dispatchEvent(new w.Event('blur')); if (w.eval('st.hpC') !== 30) return 'über Max.: ' + w.eval('st.hpC');
+      w.eval('st.feats=[];st.mySpells=[];st.concActive=null');
+      return true;
+    } },
+  { name: 'Maximum HP ändern: Current folgt nur bei vollen HP, sonst bleibt er (höchstens neues Maximum); erst beim Übernehmen, nicht je Tastendruck; leer → alter Wert', datum: '03.10.2026',
+    run: ({w, d}) => {
+      w.applyState({ attrs: {}, _f_cls: 'Fighter', _f_lvl: '5', _f_hpM: '45', hpC: 45 });
+      const M = d.getElementById('hpM'), hp = () => w.eval('st.hpC');
+      const typ = v => { M.value = v; M.dispatchEvent(new w.Event('input', { bubbles: true })); }, ok = v => { typ(v); M.dispatchEvent(new w.Event('change', { bubbles: true })); };
+      ok('50'); if (hp() !== 50) return 'volle HP folgen nicht: ' + hp();
+      w.eval('st.hpC=26'); w.updBar();
+      typ('5'); if (hp() !== 26) return 'Tastendruck kürzt HP: ' + hp();
+      M.value = '55'; M.dispatchEvent(new w.Event('change', { bubbles: true })); if (hp() !== 26) return 'nicht volle HP springen: ' + hp();
+      ok('20'); if (hp() !== 20) return 'über neuem Maximum: ' + hp();
+      ok(''); if (M.value !== '20' || hp() !== 20) return 'leer: ' + M.value + ' / ' + hp();
+      ok('30'); if (hp() !== 30) return 'volle HP (nach Kappung) folgen nicht: ' + hp();
+      return true;
+    } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
 
