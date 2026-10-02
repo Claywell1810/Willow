@@ -691,7 +691,7 @@ const REGRESSION = [
       const css = [...d.querySelectorAll('style')].map(s => s.textContent).join('');
       if (/\.ab-desc\{[^}]*pre-line/.test(css)) return '.ab-desc noch mit pre-line';
       const js = [...d.querySelectorAll('script')].map(s => s.textContent).join('\n');
-      if (!js.includes('desc.innerHTML=fmtDesc(ft.d)') || !js.includes('<div class="feat-desc">${fmtDesc(f.desc)}</div>')) return 'Feats nicht formatiert';
+      if (!js.includes('desc.innerHTML=fmtDesc(faDesc(ft))') || !js.includes('<div class="feat-desc">${fmtDesc(f.desc)}</div>')) return 'Feats nicht formatiert';
       return true;
     } },
   { name: 'UI-Kleinkram: Würfel-Knopf in der unteren Leiste (kein .dice-fab, kein Tab-Wechsel), Skills-Icon 🎯', datum: '27.09.2026',
@@ -1397,7 +1397,7 @@ const REGRESSION = [
       if (!chip(card(), 'Charm Person') || chip(card(), 'Magic Missile')) return 'Optionen Enchantment/Divination falsch';
       chip(card(), 'Charm Person').click();
       if (F('Charm Person')?.auto !== 'Fey-Touched') return 'Gewählter Zauber fehlt';
-      if (card().querySelector('.pk-pend')) return 'Hinweis bleibt nach Wahl';
+      if ([...card().querySelectorAll('.pk-pend')].some(x => x.textContent === 'choose spells')) return 'Hinweis bleibt nach Wahl';
       if (!L().some(m => m.startsWith('Choice Fey-Touched spells'))) return 'Log Wahl: ' + L().slice(-2).join(' / ');
       // Variante: Magic Initiate (Wizard) – 2 Cantrips + 1 Zauber
       w.ftToggle('Magic Initiate', ft('Magic Initiate').d);
@@ -1409,7 +1409,7 @@ const REGRESSION = [
       // Ritual Caster: Stufe zählt (2 ab L1, +1 ab L5)
       w.ftToggle('Ritual Caster', ft('Ritual Caster').d);
       const rc = () => [...d.querySelectorAll('#ftMyList .zb-card')].find(c => c.querySelector('.zb-name')?.textContent === 'Ritual Caster');
-      if (rc().querySelectorAll('.fs-box .pk').length !== 1 || !/From level 5/.test(rc().textContent)) return 'Ritual Caster Stufen';
+      if ([...rc().querySelectorAll('.fs-box .pk')].filter(p => !/abilit/i.test(p.querySelector('.pk-h').textContent)).length !== 1 || !/From level 5/.test(rc().textContent)) return 'Ritual Caster Stufen';
       if ([...rc().querySelectorAll('.fs-box .pk-chip')].some(b => b.dataset.o === 'Shield')) return 'Ritual-Filter';
       // Entfernen: Zauber weg
       w.ftToggle('Fey-Touched', '');
@@ -1710,7 +1710,7 @@ const REGRESSION = [
       if (w.eval('st.attrs.CON') !== 15 || w.attrAuto('CON').race !== 1) return 'Rasse nicht eingerechnet: CON ' + w.eval('st.attrs.CON');
       // Log lesbar, Speichern/Laden, Charakterwechsel
       const lg = w.eval('_diffSnaps({attrSrc:{INT:{base:15}},attrs:{INT:17}},{attrSrc:{INT:{base:15,asi:2}},attrs:{INT:19}})').join('|');
-      if (!lg.includes('Intelligence Ability Score Improvement / Feats: +0 → +2')) return 'Log: ' + lg;
+      if (!lg.includes('Intelligence Ability Score Improvement (by hand): +0 → +2')) return 'Log: ' + lg;
       const snap = w.eval('collectState()'); if (!snap.attrSrc || snap.attrSrc.INT.asi !== 2 || snap.attrs.CON !== 15) return 'nicht gespeichert';
       w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
       if (w.eval('st.attrSrc') !== null) return 'Charakterwechsel übernimmt Grundwerte';
@@ -1755,6 +1755,49 @@ const REGRESSION = [
       w.applyState(snap); if (val('ini') !== '+4') return 'Laden: ' + val('ini');
       w.eval('st.exhaustion=2'); w.buildAttrs(); if (val('spd') !== '20') return 'Exhaustion 2 → Speed −10: ' + val('spd');
       w.eval('st.exhaustion=0'); w.buildAttrs();
+      return true;
+    } },
+  { name: 'Feat-Attributsbonus: Textzeile aus 5e.tools, Wahl in der Feat-Karte, feste Boni, ASI mehrfach (+2 / +1+1), Entfernen rückt nach, Log', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      if (typeof w.faSpec !== 'function' || !w.eval('FT_FEATS.find(f=>f.n==="Telepathic").ab')) return 'faSpec/FT_FEATS.ab fehlen';
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }, _f_cls: 'Fighter', _f_lvl: '8', _f_race: '', bg: '' });
+      w.eval('st.attrSrc=attrSrcNew();st.feats=[];st.picks={}'); w.buildAttrs();
+      const ft = n => w.eval(`FT_FEATS.find(f=>f.n===${JSON.stringify(n)})`), A = k => w.eval(`st.attrs.${k}`);
+      const cards = n => [...d.querySelectorAll('#ftMyList .zb-card')].filter(c => c.querySelector('.zb-name')?.textContent.startsWith(n));
+      const chip = (c, o) => [...c.querySelectorAll('.fs-box .pk-chip')].find(b => b.dataset.o === o);
+      // Telepathic: Zeile im Text, Wahl offen, INT wählen → +1
+      w.ftToggle('Telepathic', ft('Telepathic').d);
+      const tc = cards('Telepathic')[0];
+      if (!tc.textContent.includes('Ability Score Increase: Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20.')) return 'Textzeile fehlt';
+      if (![...tc.querySelectorAll('.pk-pend')].some(x => x.textContent === 'choose ability')) return 'Hinweis „choose ability“ fehlt';
+      if (A('INT') !== 10) return 'Bonus ohne Wahl';
+      chip(tc, 'INT').click();
+      if (A('INT') !== 11 || w.attrAuto('INT').feat !== 1) return 'INT nach Wahl: ' + A('INT');
+      if ([...cards('Telepathic')[0].querySelectorAll('.pk-pend')].length) return 'Hinweis bleibt nach Wahl';
+      chip(cards('Telepathic')[0], 'WIS').click(); if (A('INT') !== 10 || A('WIS') !== 11) return 'Wechsel INT → WIS';
+      // fester Bonus: Great Weapon Master +1 STR sofort
+      w.ftToggle('Great Weapon Master', ft('Great Weapon Master').d);
+      if (A('STR') !== 11) return 'GWM fest: STR ' + A('STR');
+      // ASI: +2 auf eins (zweimal tippen), zweites Exemplar +1/+1
+      w.ftToggle('Ability Score Improvement', ft('Ability Score Improvement').d);
+      chip(cards('Ability Score Improvement')[0], 'STR').click(); chip(cards('Ability Score Improvement')[0], 'STR').click();
+      if (A('STR') !== 13) return 'ASI +2: STR ' + A('STR');
+      w.ftAddInst('Ability Score Improvement', ft('Ability Score Improvement').d);
+      const a2 = () => cards('Ability Score Improvement').find(c => c.querySelector('.zb-name').textContent.endsWith('(2)'));
+      if (!a2()) return 'zweites Exemplar fehlt';
+      chip(a2(), 'DEX').click(); chip(a2(), 'CON').click(); chip(a2(), 'WIS').click();
+      if (A('DEX') !== 11 || A('CON') !== 11 || A('WIS') !== 11) return 'ASI +1/+1 (höchstens 2 Punkte): ' + [A('DEX'), A('CON'), A('WIS')];
+      d.getElementById('attrBox') && (w.openAttr('STR'), 0);
+      if (!d.getElementById('attrBox').textContent.includes('Great Weapon Master, Ability Score Improvement')) return 'Fenster nennt Feats nicht: ' + d.getElementById('attrBox').textContent.slice(0, 300);
+      w.closeAttr();
+      // erstes ASI entfernen → zweite Wahl rückt nach
+      w.ftDropInst('Ability Score Improvement', 0);
+      if (A('STR') !== 11 || A('DEX') !== 11 || A('CON') !== 11 || cards('Ability Score Improvement').length !== 1) return 'Entfernen/Nachrücken: ' + JSON.stringify(w.eval('st.picks'));
+      // Log, Speichern
+      const lg = w.eval(`_diffSnaps({picks:{}},{picks:{'fa:Telepathic':['WIS'],'fa:Ability Score Improvement#2':['DEX']}})`).join('|');
+      if (!lg.includes('Choice Ability bonus Telepathic: "—" → "WIS"') || !lg.includes('Ability bonus Ability Score Improvement (2)')) return 'Log: ' + lg;
+      if (JSON.stringify(w.eval('collectState()').picks['fa:Telepathic']) !== '["WIS"]') return 'nicht gespeichert';
+      w.eval('st.feats=[];st.picks={};st.attrSrc=null'); w.resetUI();
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
