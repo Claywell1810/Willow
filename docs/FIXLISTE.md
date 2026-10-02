@@ -20,6 +20,7 @@ Reihenfolge = Empfehlung. Je Paket ein eigener Chat, Prompt „Arbeite die Fixli
 | 3a | ~~**L – Einzelnen Charakter teilen**~~ ✔ 02.10.2026 (`willow-app-2026-10-02d`) | Export/Import **eines** Charakters zusätzlich zum Gesamt-Backup, zum Hin- und Herschicken (Teilen-Menü am Handy), Namenskonflikt beim Import abfragen | Opus Mittel |
 | 3b | ~~**K – Custom-Rasse mit Werten**~~ ✔ 02.10.2026 (neu 01.10.2026) | „Custom“ bekommt feste Felder (Größe, Speed, Darkvision, Resistenzen, Skills, Sprachen, Attributsboni, Traits mit Zählern, natürliche Waffen), mit denen die App rechnet wie bei 5e.tools-Rassen; Anlass: Willow = eigene Bearfolk-Fassung | Opus Hoch |
 | 4 | **E – Effekte und Würfeln** (Teil 1 ✔ 02.10.2026: Attribute + AC/Initiative/Speed aus Quellen; Teil 2 ✔ 02.10.2026: Effects & Conditions) | Attribute mit Grundwert + Boni (BG/Race eingerechnet, Herkunft aufklappbar), Zustände, Erschöpfung, Buffs/Debuffs, mehr Würfe (Attribute, Initiative, Waffen, Zauberangriff) | Opus Hoch |
+| 4a | **P – Schaden/Heilung** (neu 02.10.2026, Simon: „zeitnah, nach E“) | Eingabe „Damage / Heal“: Schaden zieht erst Temp HP, dann HP ab (XPHB); bei Konzentration Hinweis Rettungswurf CON mit DC und Würfel-Knopf; Heilung bis Max. Punkt „Schaden/Heilung mit Temp HP und Konzentration“ (Neue Funktionen) | Opus Hoch |
 | 5 | **A2 – Begleiter und Stat-Blöcke** | Beast Master/Drakewarden, Wildfire Spirit, Dancing Item … (später) | Opus Hoch |
 | 6 | **F – Multiclass** | nach hinten verschoben (01.10.2026, Simon: wichtig, aber aktuell nicht gebraucht); erst Planungs-Chat, dann Bau in Teilen | Opus Hoch |
 | 7 | **J – Character Info neu gestalten** | Charakterkarte statt Formular; rein optisch, nicht eilig (Simon 01.10.2026) → nach F oder zusammen mit F; erst Entwurf mit Fotos | Opus Hoch |
@@ -67,6 +68,8 @@ Die offenen Punkte sind zu Paketen gebündelt; **je Paket ein eigener Chat** (Mo
 - ~~„10. Attribute: Grundwert + Boni“~~ ✔ Teil 1 (02.10.2026, REFERENZ B17; dazu AC/Initiative/Speed aus Quellen, Wunsch Simon) – zuerst, weil Effekte auf Attribute denselben Grundwert/Endwert brauchen
 - ~~„3. Zustände und Erschöpfung“ + „7. Aktive Effekte“~~ ✔ Teil 2 (02.10.2026, REFERENZ B18) (Neue Funktionen) – gemeinsamer Bereich „Effects & Conditions“; dabei Inspiration-Kreise umbauen (Heroic Inspiration + erhaltene Bardic Inspiration als Effekt, Entscheidung Simon)
 - „4. Tippen zum Würfeln erweitern“ (Neue Funktionen) – danach Effekte in Würfe einrechnen
+
+**P – Schaden/Heilung (Opus Hoch, direkt nach E, Simon 02.10.2026).** Prompt: „Arbeite die Fixliste ab: Paket P.“ Punkt „Schaden/Heilung mit Temp HP und Konzentration“ (Neue Funktionen); falls E Teil 3 (Würfeln) dann schon fertig ist, den Konzentrations-Wurf über `rollCheck` mit CON-Save-Bonus.
 
 **F – Multiclass (Opus Hoch; erst ein Planungs-Chat, dann Bau in Teilen wie Paket C).** Wunsch Simon 29.09.2026: „muss unbedingt noch rein“. Prompt Planung: „Plane Paket F (Multiclass).“ Heute kennt ein Charakter nur **eine** Klasse (`cls`, `subcls`, `lvl`). Betroffen (im Planungs-Chat gegen 5e.tools/XPHB „Multiclassing“ prüfen):
 - Datenmodell: mehrere Klassen mit je Stufe und Subklasse (z. B. `st.classes=[{cls, subcls, lvl}]`), Gesamtstufe = Summe; alte Saves (ein Klassenfeld) müssen unverändert laden (B7); Namen heilig
