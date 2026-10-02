@@ -1897,7 +1897,7 @@ const REGRESSION = [
       w.eval("st.effects=[{id:'x1',n:'Testsegen',k:'x',t:'b',v:'+2',ap:['save','ac']}]"); w.buildFx(); w.rollD20({ k: 'save', ab: 'WIS', l: 'W', mod: 0 });
       if (!on('Testsegen') || P('Testsegen').P.k !== 2 || w.eval("statCalc('ac').t") !== ac0 + 2) return 'Eigener Effekt +2 Saves/AC';
       // freier Wurf ohne Chips
-      w.closeDice(); w.openDice('', 0); w.rollPreset('2d6'); if (d.getElementById('diceMods').innerHTML || w.eval('_rl') !== null) return 'freier Wurf zeigt Chips';
+      w.closeDice(); w.openDice('', 0); w.rollPreset('2d6'); if (/Testsegen/.test(d.getElementById('diceMods').textContent) || w.eval('_rl.k') !== 'free' || w.eval('_rl.parts.length')) return 'freier Wurf zeigt Chips'; // seit Paket Q: freier Wurf über die Engine (k 'free'), ohne Effekt-Chips
       w.eval('st.effects=[];st.ins=[0,0,0];st.weapons=[]'); w.buildFx(); w.closeDice();
       return true;
     } },
@@ -1984,6 +1984,72 @@ const REGRESSION = [
       ok('20'); if (hp() !== 20) return 'über neuem Maximum: ' + hp();
       ok(''); if (M.value !== '20' || hp() !== 20) return 'leer: ' + M.value + ' / ' + hp();
       ok('30'); if (hp() !== 30) return 'volle HP (nach Kappung) folgen nicht: ' + hp();
+      return true;
+    } },
+  { name: 'Paket Q: Zauber würfeln – SPELL_ROLLS (Angriff/Save/½/Heilung, Hochstufen, Cantrip-Stufen, MOD), nach Cast → Platz direkt in den Würfel-Dialog (Fireball Save-Hinweis + ½, Fire Bolt Angriff → Schaden), Save ohne Würfel/mehrere Optionen als Auswahl, Heilung „Heal me“, 🎲 ohne Platz mit Grad-Wahl; freier Würfel-Dialog mit Adv/Dis und gemischten Würfeln', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      if (typeof w.spDice !== 'function' || !w.eval('typeof SPELL_ROLLS==="object"')) return 'SPELL_ROLLS/spDice fehlen';
+      const SR = n => w.eval(`SPELL_ROLLS[${JSON.stringify(n)}]`);
+      const fb = SR('Fireball'); if (!fb || fb.s[0] !== 'DEX' || !fb.h || fb.o[0].d !== '8d6' || fb.o[0].up.g !== 3 || fb.o[0].up.d !== '1d6') return 'Daten Fireball: ' + JSON.stringify(fb);
+      if (SR('Fire Bolt').a !== 'R' || SR('Fire Bolt').o[0].cs['11'] !== '3d10') return 'Daten Fire Bolt';
+      if (SR('Hold Person').o || SR('Hold Person').s[0] !== 'WIS') return 'Daten Hold Person';
+      if (SR('Detect Magic') || SR('Mage Armor')) return 'Zauber ohne Wurf hat Eintrag';
+      const sd = (n, j, lv, cl, m) => w.eval(`spDice(SPELL_ROLLS[${JSON.stringify(n)}].o[${j}],${lv},${cl},${m})`);
+      const exp = [['Fireball', 0, 5, 5, 3, '10d6'], ['Fire Bolt', 0, 0, 5, 3, '2d10'], ['Fire Bolt', 0, 0, 4, 3, '1d10'], ['Cure Wounds', 0, 2, 3, 3, '4d8+3'], ['Ice Storm', 0, 5, 9, 3, '3d10+4d6'],
+        ['Green-Flame Blade', 0, 0, 5, 3, '1d8+3'], ['Green-Flame Blade', 0, 0, 1, 3, '3'], ['False Life', 0, 3, 5, 3, '2d4+14'], ['Magic Missile', 0, 1, 1, -1, '1d4+1'], ['Spiritual Weapon', 0, 4, 7, 2, '3d8+2']];
+      for (const [n, j, lv, cl, m, e] of exp) { const r = sd(n, j, lv, cl, m); if (r !== e) return `spDice ${n} Grad ${lv}/Stufe ${cl}: ${r} statt ${e}`; }
+      if (sd('Booming Blade', 1, 0, 4, 3) !== null) return 'Booming Blade „on hit“ vor Stufe 5 nicht null';
+      // Charakter: Wizard 5, INT 16 → Angriff +6, DC 14
+      sel('Wizard', '', '5');
+      w.eval("Object.assign(st.attrs,{STR:8,DEX:14,CON:14,INT:16,WIS:12,CHA:10});st.attrSrc=null;buildAttrs();document.getElementById('prof').value='3';document.getElementById('spAttr').value='INT';calcSpell();st.effects=[];st.conditions=[];st.exhaustion=0;buildFx()");
+      w.eval("st.mySpells=[{name:'Fire Bolt',grad:0,prep:true},{name:'Fireball',grad:3,prep:true},{name:'Hold Person',grad:2,prep:true},{name:'Cure Wounds',grad:1,prep:true},{name:'Toll the Dead',grad:0,prep:true},{name:'Moonbeam',grad:2,prep:true}];st.slotUsed=[0,0,0,0,0,0,0,0,0];buildMySpells();buildSlots()");
+      // Fireball mit Platz 3 → Schaden direkt, Save-Hinweis, ½-Chip aus, kein Crit-Chip
+      w.openCast(1); w.doCast('s2');
+      if (w.eval('st.slotUsed[2]') !== 1 || w.eval('st.mySpells[1].castLv') !== 3) return 'Fireball: Platz/castLv';
+      if (w.eval('_rl&&_rl.k') !== 'dmg' || w.eval('_rl.spec') !== '8d6' || !/DEX save · DC 14 · half on success/.test(w.eval('_rl.sub'))) return 'Fireball: Würfel-Dialog ' + w.eval('JSON.stringify(_rl&&{k:_rl.k,spec:_rl.spec,sub:_rl.sub})');
+      if (w.eval("_rl.parts.some(p=>p.m==='crit')")) return 'Fireball: Crit-Chip bei Save-Zauber';
+      if (!d.getElementById('diceStage').textContent.includes('DC 14')) return 'Fireball: Hinweis nicht sichtbar';
+      const full = w.eval('_rl.total'); w.rlTog(w.eval("_rl.parts.findIndex(p=>p.m==='half')"));
+      if (w.eval('_rl.total') !== Math.floor(full / 2)) return `½: ${w.eval('_rl.total')} statt ${Math.floor(full / 2)}`;
+      // Fire Bolt (Cantrip, Stufe 5) → Angriff +6, Schaden 2d10
+      w.closeDice(); w.openCast(0); w.doCast('cantrip');
+      if (w.eval('_rl.k') !== 'atk' || w.eval('_rl.mod') !== 6 || w.eval('_rl.dmg') !== '2d10' || w.eval('_rl.ab') !== 'INT') return 'Fire Bolt: ' + w.eval('JSON.stringify({k:_rl.k,mod:_rl.mod,dmg:_rl.dmg})');
+      w.rlDmgFromAtk(); if (w.eval('_rl.k') !== 'dmg' || w.eval('_rl.spec') !== '2d10') return 'Fire Bolt: Schaden';
+      // Hold Person → Auswahl-Fenster nur mit Hinweis
+      w.closeDice(); w.eval('_rl=null'); w.openCast(2); w.doCast('s1');
+      const box = () => d.getElementById('restBox').textContent;
+      if (w.eval('_restMode') !== 'spr' || !/WIS save · DC 14/.test(box()) || !/No dice to roll/.test(box()) || w.eval('_rl') !== null) return 'Hold Person: ' + box().slice(0, 200);
+      w.closeRest();
+      // Cure Wounds → Heilung 2d8+3, „Heal me“ heilt
+      w.eval("document.getElementById('hpM').value='38';st.hpC=5;updBar()"); w.openCast(3); w.doCast('s0');
+      if (w.eval('_rl.k') !== 'heal' || w.eval('_rl.spec') !== '2d8+3' || w.eval('_rl.parts.length')) return 'Cure Wounds: ' + w.eval('JSON.stringify({k:_rl.k,spec:_rl.spec})');
+      const hv = w.eval('_rl.total'); w.rlHealMe(); if (w.eval('st.hpC') !== Math.min(38, 5 + hv) || !w.eval('_rl.applied')) return `Heal me: HP ${w.eval('st.hpC')} statt ${5 + hv}`;
+      w.rlHealMe(); if (w.eval('st.hpC') !== Math.min(38, 5 + hv)) return 'Heal me doppelt';
+      // Toll the Dead → zwei Optionen, Auswahl; 1d12-Option ohne Crit
+      w.closeDice(); w.openCast(4); w.doCast('cantrip');
+      if (w.eval('_restMode') !== 'spr' || d.querySelectorAll('#restBox .cast-opt').length !== 2) return 'Toll the Dead: Auswahl';
+      w.spGo(1); if (w.eval('_rl.spec') !== '2d12' || w.eval("_rl.parts.some(p=>p.m==='crit')") || w.eval('_restMode') !== null) return 'Toll the Dead: 2d12';
+      // 🎲 in der Zeile: nur Zauber ab Grad 1 mit Würfeln; würfeln ohne Platz mit Grad-Wahl
+      w.closeDice(); w.buildMySpells();
+      const rows = [...d.querySelectorAll('#mySpells .spell-card')], row = n => rows.find(r => r.querySelector('.spell-name').textContent === n);
+      if (!row('Moonbeam').querySelector('.sp-dice') || row('Fireball').querySelector('.sp-dice') || row('Fire Bolt').querySelector('.sp-dice') || row('Hold Person').querySelector('.sp-dice')) return '🎲 in der Zeile falsch (nur Zauber mit Dauer)';
+      row('Moonbeam').querySelector('.sp-dice').click(); if (w.eval('_restMode') !== 'spr' || w.eval('_spr.lv') !== 2) return '🎲: Fenster Moonbeam'; w.closeRest();
+      w.openSpellRoll(1, w.eval('st.mySpells[1].castLv'));
+      if (w.eval('_restMode') !== 'spr' || w.eval('_spr.lv') !== 3 || d.querySelectorAll('#restBox .spr-lv .pk-chip').length !== 7) return '🎲: Fenster/Grad';
+      w.spSetLv(5); w.spGo(0); if (w.eval('_rl.spec') !== '10d6' || w.eval('st.slotUsed.join()') !== '1,1,1,0,0,0,0,0,0') return '🎲 Grad 5: ' + w.eval('_rl.spec') + ' / ' + w.eval('st.slotUsed.join()');
+      if (w.eval('_rl.l') !== 'Fireball (5th)' || w.eval('_rl.dt') !== 'Fire') return 'Titel: ' + w.eval('_rl.l') + ' / ' + w.eval('_rl.dt');
+      // freier Würfel-Dialog: Adv/Dis, gemischte Würfel
+      w.closeDice(); w.openDice('', 0);
+      if (!d.getElementById('diceMods').textContent.includes('Advantage')) return 'frei: Auswahl fehlt vor dem Wurf';
+      w.rlFreeMode('adv'); w.rollPreset('1d20'); const a = w.eval("_rl.cache['f0:0']");
+      if (w.eval('_rl.k') !== 'free' || w.eval('_rl.total') !== Math.max(a[0], a[1]) || w.eval('_rl.mode') !== 'adv') return 'frei: Advantage';
+      w.rlFreeMode('dis'); if (w.eval('_rl.total') !== Math.min(a[0], a[1])) return 'frei: Disadvantage ohne Neuwurf';
+      d.getElementById('diceCustomInput').value = '2d6+1d4+3'; w.rollCustom();
+      const c0 = w.eval("_rl.cache['f0:0']"), c1 = w.eval("_rl.cache['f1:0']");
+      if (w.eval('_rl.total') !== c0[0] + c0[1] + c1[0] + 3 || w.eval('_rl.mode') !== 'n') return 'frei: 2d6+1d4+3 ' + w.eval('_rl.br.join(" ")');
+      d.getElementById('diceCustomInput').value = '2x'; w.rollCustom(); if (!/Invalid/.test(d.getElementById('diceStage').textContent)) return 'frei: ungültige Eingabe';
+      w.openDice('', 0); if (w.eval('_rlFreeMode') !== 'n') return 'frei: Adv bleibt nach erneutem Öffnen';
+      w.closeDice(); w.eval('st.mySpells=[];st.slotUsed=[0,0,0,0,0,0,0,0,0]');
       return true;
     } },
 ];
