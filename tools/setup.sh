@@ -6,7 +6,7 @@
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium für BST_DATA und SPELL_STATBLOCKS (+ spells)
 #   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
-#   bash willow/tools/setup.sh effekte      # + conditionsdiseases/variantrules/items-base.json (cond_convert.py, armor_convert.py, Paket E)
+#   bash willow/tools/setup.sh effekte      # + conditionsdiseases/variantrules/items-base.json (cond_convert.py, armor_convert.py, effect_convert.py, Paket E)
 #   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen, echte Schriften (ui_shots.py, theme_shots.py)
 #   bash willow/tools/setup.sh alle         # alles
 # Mehrere Angaben gehen zusammen: bash willow/tools/setup.sh klassen zauber

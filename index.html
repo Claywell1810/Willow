@@ -363,6 +363,49 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .rest-list{margin:0;padding:0 0 0 18px;font-size:var(--fs-txt);color:var(--text2);line-height:1.6}
 .rest-list span{color:var(--gold);font-size:var(--fs-xs);margin-left:4px}
 .rest-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+/* Effects & Conditions (Paket E Teil 2, 02.10.2026) */
+.fx-ex{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.fx-lbl{background:none;border:0;padding:0;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text2);text-transform:uppercase;cursor:pointer}
+.fx-pips{display:flex;gap:6px}
+.fx-pip{width:20px;height:20px;border-radius:50%;border:1px solid color-mix(in srgb, var(--red) 70%, transparent);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.fx-pip.f{background:var(--red);border-color:var(--red)}
+.fx-extxt{flex:1 1 100%;font-size:var(--fs-sm);color:var(--text3)}
+.fx-extxt.on{color:var(--red)}
+.fx-row{display:flex;flex-wrap:wrap;gap:6px}
+.fx-chip{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px;max-width:100%;min-width:0;min-height:34px;background:var(--bg3);border:1px solid var(--border);border-left-width:3px;border-radius:8px;padding:6px 10px;color:var(--text);font-family:'Crimson Text',serif;font-size:var(--fs-txt);line-height:1.2;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.fx-chip.b{border-left-color:var(--green)}
+.fx-chip.d{border-left-color:var(--red)}
+.fx-chip.x{border-left-color:var(--gold)}
+.fx-chip.conc{border-left-color:var(--purple)}
+.fx-chip.auto{border-style:dashed;border-left-style:solid}
+.fx-n{overflow-wrap:anywhere}
+.fx-v{font-size:var(--fs-sm);color:var(--gold)}
+.fx-chip.fx-add{border-left-width:1px;border-style:dashed;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;align-items:center}
+.fx-c{color:var(--purple);font-size:var(--fs-xs)}
+.fx-from{font-size:var(--fs-sm);color:var(--text3)}
+.fx-empty{font-size:var(--fs-sm);color:var(--text3);line-height:1.45}
+.fx-warn{font-size:var(--fs-sm);color:var(--red);border:1px solid color-mix(in srgb, var(--red) 45%, transparent);border-radius:8px;padding:6px 10px;margin-bottom:8px;line-height:1.45}
+.fx-mini{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-2xs);padding:4px 8px;margin-left:4px;cursor:pointer}
+.fx-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.fx-in{width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:7px 9px;outline:none;min-width:0}
+.fx-items{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.fx-gh{margin-top:10px}
+.fx-item{border:1px solid var(--border2);border-radius:8px;background:var(--bg2);min-width:0}
+.fx-item.on{border-color:var(--gold2)}
+.fx-it{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;width:100%;background:none;border:0;padding:6px 10px;color:var(--text);font-family:'Crimson Text',serif;font-size:var(--fs-txt);text-align:left;cursor:pointer}
+.fx-it small{margin-left:auto;font-size:var(--fs-sm);color:var(--text3);white-space:nowrap}
+.fx-it small .fx-c{margin-left:4px}
+.fx-form{padding:2px 10px 8px;display:flex;flex-direction:column;gap:6px}
+.fx-sub{font-size:var(--fs-sm);color:var(--text3)}
+.fx-f{display:flex;flex-direction:column;gap:3px}
+.fx-f>span{display:block;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--text3);text-transform:uppercase}
+.fx-in{font-family:'Crimson Text',serif;text-transform:none;letter-spacing:0}
+.fx-chk{display:flex;align-items:center;gap:8px;font-size:var(--fs-txt);color:var(--text2);padding:4px 0}
+.fx-chk input{width:18px;height:18px;accent-color:var(--gold)}
+.fx-txt{font-size:var(--fs-txt);color:var(--text2);line-height:1.5}
+.fx-info{margin-top:10px;border-top:1px solid var(--border2);padding-top:8px}
+.fx-del{border-color:color-mix(in srgb, var(--red) 50%, transparent);color:var(--red)}
+.ds-insp .ds-lbl{cursor:pointer}
 .sp-cast{flex-shrink:0;background:transparent;border:1px solid var(--gold2);border-radius:10px;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;padding:3px 9px;cursor:pointer;margin-left:auto}
 .cast-sub{font-size:var(--fs-sm);color:var(--text3);margin:-4px 0 8px}
 .cast-opts{display:flex;flex-direction:column;gap:6px}
@@ -1024,7 +1067,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <div class="hp-lbl">Temp</div>
           <div class="hp-ctrl">
             <button class="hbtn" onclick="chHpT(-1)">−</button>
-            <input class="hpin" type="number" id="hpT" value="0" min="0" style="color:var(--purple)">
+            <input class="hpin" type="number" id="hpT" value="0" min="0" style="color:var(--purple)" oninput="autoSave()">
             <button class="hbtn" onclick="chHpT(1)">+</button>
           </div>
         </div>
@@ -1044,12 +1087,10 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           </div>
         </div>
         <div class="ds-box ds-insp">
-          <div class="ds-lbl">Inspiration</div>
+          <div class="ds-lbl" onclick="openFxView('rule','Heroic Inspiration')">Heroic Inspiration ⓘ</div>
           <div class="ds-groups"><div><div class="ds-sub" aria-hidden="true">&nbsp;</div>
             <div class="ds-pips">
               <div class="inspip" id="ins0" onclick="togIns(0)"></div>
-              <div class="inspip" id="ins1" onclick="togIns(1)"></div>
-              <div class="inspip" id="ins2" onclick="togIns(2)"></div>
             </div></div></div>
         </div>
       </div>
@@ -1067,6 +1108,18 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <!-- COMBAT STATS (Kampfwerte aus CLASS_TABLES, seit 27.09.2026; unter Hit Points, zuklappbar) -->
       <div id="combatStats" class="cst-card" style="display:none;margin-top:12px"></div>
       </div></div>
+
+      <!-- EFFECTS & CONDITIONS (Paket E Teil 2, 02.10.2026): Zustände, Exhaustion, Buffs/Debuffs, Bloodied, Konzentration -->
+      <div class="act-div"></div>
+      <div class="act-panel" id="fxPanel">
+      <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Effects & Conditions</span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <button onclick="toggleInfoSection('sb-effects','sb-effects-btn')" id="sb-effects-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+        </span>
+      </div>
+      <div id="sb-effects"><div id="fxBody"></div></div>
+      </div>
 
       <!-- WEAPONS -->
       <div class="act-div"></div>
@@ -1306,7 +1359,7 @@ let st={
   slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,
   mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set(),
-  concActive:null, concActiveFeature:null, customRace:{}, attrSrc:null, statSrc:null
+  concActive:null, concActiveFeature:null, customRace:{}, attrSrc:null, statSrc:null, conditions:[], exhaustion:0, effects:[]
 };
 
 const md=v=>Math.floor((v-10)/2);
@@ -1457,7 +1510,10 @@ function stSpdCalc(s){
   if(ar&&ar.str&&(st.attrs.STR||10)<ar.str)add(-10,`${ar.n} (Strength ${ar.str})`,1);
   const ex=+st.exhaustion||0;if(ex)add(-5*ex,`Exhaustion ${ex}`,1);
   add(+s.feat||0,'Feat / Feature');add(+s.item||0,'Item');add(+s.dm||0,'Other');
-  r.t=Math.max(0,r.t);return r;
+  r.t=Math.max(0,r.t);
+  const z=(st.conditions||[]).filter(c=>/Speed 0\./.test(COND_DATA[c]||'')); // Paket E2: Grappled, Restrained … „Speed 0 and can't increase“
+  if(z.length&&r.t>0)add(-r.t,`${z.join(', ')} (Speed 0)`,1);
+  return r;
 }
 function statCalc(k,s){s=s||(st.statSrc&&st.statSrc[k])||{};return k==='ac'?stAcCalc(s):k==='ini'?stIniCalc(s):stSpdCalc(s);}
 function statFmt(k,v){return k==='ini'?fmt(v):String(v);}
@@ -3217,13 +3273,13 @@ function togConc(i){
   st.concActive=(st.concActive===i)?null:i;
   if(st.concActive!==null) st.concActiveFeature=null; // only one concentration at a time
   buildMySpells();
-  buildAbilities();
+  buildAbilities();buildFx();
 }
 function togConcFeature(id){
   st.concActiveFeature=(st.concActiveFeature===id)?null:id;
   if(st.concActiveFeature!==null) st.concActive=null; // only one concentration at a time
   buildAbilities();
-  buildMySpells();
+  buildMySpells();buildFx();
 }
 function delMySpell(i){
   const sp=st.mySpells[i];
@@ -3233,7 +3289,7 @@ function delMySpell(i){
   if(idx>=0) st.zbAdded.delete(idx);
   if(st.concActive===i) st.concActive=null;
   st.mySpells.splice(i,1);
-  buildMySpells();
+  buildMySpells();buildFx();
 }
 function addSpellManual(){
   const name=prompt('Spell Name:');if(!name)return;
@@ -3263,7 +3319,7 @@ function delFeat(i){ftDropAt(i);buildFeats();autoSave();buildMySpells();buildFea
 // HP
 function chHP(d){const m=parseInt(document.getElementById('hpM').value)||10;st.hpC=Math.max(0,Math.min(m,st.hpC+d));document.getElementById('hpC').textContent=st.hpC;updBar();autoSave()}
 function chHpM(d){const el=document.getElementById('hpM');el.value=Math.max(1,(parseInt(el.value)||10)+d);onHpMChange();}
-function chHpT(d){const el=document.getElementById('hpT');el.value=Math.max(0,(parseInt(el.value)||0)+d);}
+function chHpT(d){const el=document.getElementById('hpT');el.value=Math.max(0,(parseInt(el.value)||0)+d);autoSave();}
 function onHpMChange(){
   const newMax=parseInt(document.getElementById('hpM').value)||10;
   st.hpC=newMax;
@@ -3277,13 +3333,185 @@ function updBar(){
   const p=Math.round(st.hpC/m*100);
   const b=document.getElementById('hpBar');b.style.width=p+'%';
   b.style.background=p>50?'var(--green)':p>25?'#d4a017':'var(--red)';
+  if(typeof buildFx==='function')buildFx(); // Paket E2: Bloodied
 }
 function togDS(t,i){
   const a=t==='s'?st.dsS:st.dsF;a[i]=a[i]?0:1;
   document.getElementById(t==='s'?'dsS':'dsF').querySelectorAll('.dspip').forEach((p,j)=>p.classList.toggle('f',!!a[j]));
   autoSave();
 }
-function togIns(i){st.ins[i]=st.ins[i]?0:1;document.getElementById('ins'+i).classList.toggle('f',!!st.ins[i]);autoSave()}
+function togIns(i){const on=(st.ins||[]).some(Boolean);st.ins=[on?0:1,0,0];document.getElementById('ins0').classList.toggle('f',!on);autoSave()}
+
+// ── EFFECTS & CONDITIONS (Paket E Teil 2, 02.10.2026; REFERENZ B18) ──
+// st.conditions = ['Poisoned', …] (Namen aus COND_DATA), st.exhaustion = 0–6, st.effects = [{id,n,k,s|c,t,v,from,note,conc,dur}]
+// k: 's' Zauber (Text ZB_SPELLS, Fassung s) | 'f' Feature (CLASS_DATA[c]) | 'x' eigener Eintrag; t: 'b' Buff | 'd' Debuff
+// Nur Anzeige (Entscheidung Simon 27.09.2026): nichts wird in Würfe/AC eingerechnet; Ausnahme Speed (Exhaustion, „Speed 0“-Zustände).
+function fxCondNames(){return Object.keys(COND_DATA).filter(n=>!['Exhaustion','Bloodied','Concentration'].includes(n));} // COND_DATA steht weiter unten im Skript
+let _fxTab='cond',_fxQ='',_fxSel=null,_fxInfo=null,_fxView=null;
+function fxList(){if(!Array.isArray(st.effects))st.effects=[];return st.effects;}
+function fxConds(){if(!Array.isArray(st.conditions))st.conditions=[];return st.conditions;}
+function fxEx(){return Math.max(0,Math.min(6,parseInt(st.exhaustion)||0));}
+function fxSpell(n,s){return ZB_SPELLS.find(x=>x.name===n&&(!s||x.src===s))||ZB_SPELLS.find(x=>x.name===n)||null;}
+function fxFeature(c,n){const cd=CLASS_DATA[c];if(!cd)return null;let f=(cd.base||[]).find(x=>x&&x.name===n);if(f)return f;
+  for(const k in cd.subclass||{}){f=(cd.subclass[k]||[]).find(x=>x&&x.name===n);if(f)return f;}return null;}
+function fxDurMin(t){ // Minuten aus der Zauberdauer; null = unbekannt
+  t=String(t||'');let m;
+  if(/Instantaneous|round/i.test(t))return 1;
+  if((m=/(\d+)\s*minute/i.exec(t)))return +m[1];
+  if((m=/(\d+)\s*hour/i.exec(t)))return 60*m[1];
+  if((m=/(\d+)\s*day/i.exec(t)))return 1440*m[1];
+  if(/dispelled|Permanent|triggered/i.test(t))return Infinity;
+  return null;
+}
+function fxRef(e){ // Regeltext, Dauer, Konzentration, Untertitel
+  if(e.k==='s'){const sp=fxSpell(e.n,e.s);if(!sp)return null;
+    return {txt:sp.desc,dur:sp.dauer,min:fxDurMin(sp.dauer),conc:/^Concentration/i.test(sp.dauer||''),sub:`${sp.grad?ordinal(sp.grad)+'-level':'Cantrip'} · ${sp.dauer} · ${sp.src}`};}
+  if(e.k==='f'){const f=fxFeature(e.c,e.n);if(!f)return null;
+    return {txt:f.desc,dur:e.d?e.d+' minutes':'',min:e.d||null,conc:false,sub:`${e.c} feature${e.d?' · '+(e.d>=60?(e.d/60)+' hour':e.d+' minutes'):''}`};}
+  return null;
+}
+function fxDice(v){const m=/(\d*)d(\d+)/i.exec(v||'');return m?(m[1]||1)+'d'+m[2]:null;}
+function fxBloodied(){return st.hpC<=hpMaxVal()/2;}
+function fxConcName(){
+  if(st.concActive!=null&&st.mySpells&&st.mySpells[st.concActive])return st.mySpells[st.concActive].name;
+  if(st.concActiveFeature)return _abLabel(st.concActiveFeature);
+  return '';
+}
+function fxIncap(){return fxConds().filter(c=>c==='Incapacitated'||/You have the Incapacitated/.test(COND_DATA[c]||''));}
+function fxChip(cls,name,val,extra,click){
+  return `<button class="fx-chip ${cls}" onclick="${click}"><span class="fx-n">${pkEsc(name)}</span>${val?`<span class="fx-v">${pkEsc(val)}</span>`:''}${extra||''}</button>`;
+}
+function buildFx(){
+  const box=document.getElementById('fxBody');if(!box)return;
+  const ex=fxEx(),conds=fxConds(),eff=fxList(),cn=fxConcName(),inc=fxIncap();
+  let h='';
+  const auto=[];
+  if(fxBloodied())auto.push(fxChip('auto d','Bloodied',`${st.hpC} / ${hpMaxVal()} HP`,'',"openFxView('rule','Bloodied')"));
+  if(cn)auto.push(fxChip('auto conc','◎ Concentration',cn,'',"openFxView('conc')"));
+  if(inc.length&&cn)h+=`<div class="fx-warn">${pkEsc(inc.join(', '))}: Concentration ends (Incapacitated). <button class="fx-mini" onclick="fxEndConc()">End Concentration</button></div>`;
+  const exTxt=ex===0?'none':ex>=6?'Level 6 · you die (XPHB)':`Level ${ex} · D20 Tests −${2*ex} · Speed −${5*ex} ft`;
+  h+=`<div class="fx-ex"><button class="fx-lbl" onclick="openFxView('rule','Exhaustion')">Exhaustion ⓘ</button>
+    <div class="fx-pips">${[1,2,3,4,5,6].map(i=>`<div class="fx-pip${i<=ex?' f':''}" onclick="fxSetEx(${i})"></div>`).join('')}</div>
+    <div class="fx-extxt${ex?' on':''}">${exTxt}</div></div>`;
+  const chips=auto.concat(
+    conds.map(c=>fxChip('d',c,'','',`openFxView('cond','${pkEsc(c)}')`)),
+    eff.map(e=>fxChip(e.t==='d'?'d':e.k==='x'?'x':'b',e.n,e.v,(e.conc?'<span class="fx-c" title="Concentration">◎</span>':'')+(e.from?`<span class="fx-from">${pkEsc(e.from)}</span>`:''),`openFxView('fx','${e.id}')`)));
+  const add=`<button class="fx-chip fx-add" onclick="openFx()">+ Add</button>`;
+  h+=`<div class="fx-row">${chips.join('')}${add}</div>`+(chips.length?'':`<div class="fx-empty" style="margin-top:6px">No conditions or effects. Add a condition, a spell or feature (Bless, Bardic Inspiration …) or your own effect.</div>`);
+  box.innerHTML=h;
+}
+function fxSetEx(i){const ex=fxEx();st.exhaustion=i===ex?i-1:i;buildFx();statRender();autoSave();}
+function fxEndConc(){st.concActive=null;st.concActiveFeature=null;buildMySpells();buildAbilities();buildFx();autoSave();if(_fxView)closeFx();}
+function fxTogCond(c){const a=fxConds(),i=a.indexOf(c);if(i>=0)a.splice(i,1);else a.push(c);_fxInfo=c;buildFx();statRender();autoSave();}
+function fxNewId(){return 'fx'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);}
+// Fenster: Hinzufügen (Tabs) und Ansicht eines Eintrags
+function openFx(){_fxView=null;_fxSel=null;_fxInfo=null;_fxQ='';window._fxOwn=null;renderFx();document.getElementById('fxModal').classList.add('on');}
+function openFxView(kind,key){_fxView={kind,key};renderFx();document.getElementById('fxModal').classList.add('on');}
+function closeFx(){document.getElementById('fxModal').classList.remove('on');_fxView=null;_fxSel=null;}
+function fxTab(t){_fxTab=t;_fxSel=null;_fxInfo=null;renderFx();}
+function fxRule(txt,open){return txt?`<details class="fp-more fx-rule"${open?' open':''}><summary>Rules text</summary><div class="fx-txt">${fmtDesc(txt)}</div></details>`:'';}
+function renderFx(){
+  const box=document.getElementById('fxBox');if(!box)return;
+  if(_fxView){renderFxView(box);return;}
+  const tabs=[['cond','Conditions'],['fx','Effects'],['own','Custom']].map(([k,l])=>`<button class="fbtn${_fxTab===k?' on':''}" onclick="fxTab('${k}')">${l}</button>`).join('');
+  let body='';
+  if(_fxTab==='cond'){
+    const on=fxConds();
+    body=`<div class="pk-chips">${fxCondNames().map(c=>`<button class="pk-chip${on.includes(c)?' on':''}" onclick="fxTogCond('${c}');renderFx()">${c}</button>`).join('')}</div>
+      <div class="rest-note">Tap to add or remove. Exhaustion has its own row in the panel.</div>`+
+      (_fxInfo&&COND_DATA[_fxInfo]?`<div class="fx-info"><div class="rest-h">${pkEsc(_fxInfo)}${on.includes(_fxInfo)?' · active':''}</div><div class="fx-txt">${fmtDesc(COND_DATA[_fxInfo])}</div></div>`:'');
+  }else if(_fxTab==='fx'){
+    body=`<input id="fxQ" class="fx-in" type="search" placeholder="Search all spells, e.g. Bless" value="${pkEsc(_fxQ)}" oninput="_fxQ=this.value;_fxSel=null;renderFxList()"><div id="fxList"></div>`;
+  }else{
+    body=fxForm({k:'x',n:'',t:'b',v:'',from:'',note:'',conc:0},true);
+  }
+  box.innerHTML=`<div class="ws-head">Effects & Conditions</div><div class="fx-tabs">${tabs}</div>${body}<div class="rest-foot"><button class="ws-btn" onclick="closeFx()">Close</button></div>`;
+  if(_fxTab==='fx')renderFxList();
+}
+function fxCandidates(){
+  const q=_fxQ.trim().toLowerCase();
+  if(!q)return EFFECT_DATA.map(e=>Object.assign({},e));
+  const out=EFFECT_DATA.filter(e=>e.n.toLowerCase().includes(q)).map(e=>Object.assign({},e)),seen=new Set(out.map(e=>e.n));
+  ZB_SPELLS.forEach(sp=>{if(seen.has(sp.name)||!sp.name.toLowerCase().includes(q))return;seen.add(sp.name);const p=fxSpell(sp.name,"PHB'24");out.push({n:sp.name,k:'s',s:p.src,t:'b'});});
+  return out.slice(0,40);
+}
+function renderFxList(){
+  const el=document.getElementById('fxList');if(!el)return;
+  const c=fxCandidates(),q=_fxQ.trim();
+  const row=(e,i)=>{const r=fxRef(e),sel=_fxSel&&_fxSel.n===e.n&&_fxSel.k===e.k;
+    return `<div class="fx-item${sel?' on':''}"><button class="fx-it" onclick="fxPick(${i})"><span class="fx-n">${pkEsc(e.n)}</span>${e.v?`<span class="fx-v">${pkEsc(e.v)}</span>`:''}<small>${e.k==='f'?pkEsc(e.c):''}${r&&r.conc?'<span class="fx-c" title="Concentration">◎</span>':''}</small></button>${sel?fxForm(_fxSel,false):''}</div>`;};
+  window._fxCand=c;
+  if(!c.length){el.innerHTML='<div class="rest-note">Nothing found. Use the tab Custom for your own effect.</div>';return;}
+  if(q){el.innerHTML=`<div class="fx-items">${c.map(row).join('')}</div>`;return;}
+  const g=t=>c.map((e,i)=>e.t===t?row(e,i):'').join('');
+  el.innerHTML=`<div class="rest-note">Common effects from 5e.tools. Search finds every spell in the app. ◎ = Concentration.</div><div class="rest-h fx-gh">Buffs</div><div class="fx-items">${g('b')}</div><div class="rest-h fx-gh">Debuffs</div><div class="fx-items">${g('d')}</div>`;
+}
+function fxPick(i){const e=(window._fxCand||[])[i];if(!e)return;
+  if(_fxSel&&_fxSel.n===e.n&&_fxSel.k===e.k){_fxSel=null;renderFxList();return;}
+  const r=fxRef(e);_fxSel=Object.assign({},e,{v:e.v||'',from:'',note:'',conc:r&&r.conc?1:0});renderFxList();
+  const it=document.querySelector('#fxList .fx-item.on');if(it&&it.scrollIntoView)it.scrollIntoView({block:'nearest'});}
+function fxForm(e,own){ // Eingabe für neuen Eintrag (Liste oder „Custom“)
+  if(own&&!window._fxOwn)window._fxOwn=Object.assign({},e);
+  const o=own?window._fxOwn:e,ref=own?'_fxOwn':'_fxSel',r=own?null:fxRef(e);
+  const val=o.o?`<select class="fx-in" onchange="${ref}.v=this.value">${o.o.map(x=>`<option${x===o.v?' selected':''}>${pkEsc(x)}</option>`).join('')}</select>`
+    :`<input class="fx-in" type="text" value="${pkEsc(o.v||'')}" placeholder="e.g. +1d4, +2 AC" oninput="${ref}.v=this.value">`;
+  return `<div class="fx-form">${r?`<div class="fx-sub">${pkEsc(r.sub)}</div>`+fxRule(r.txt,false):''}
+    ${own?`<label class="fx-f"><span>Name</span><input class="fx-in" id="fxOwnN" type="text" value="${pkEsc(o.n)}" placeholder="e.g. Blessing of the Forge" oninput="_fxOwn.n=this.value"></label>
+      <div class="fx-f"><span>Type</span><div class="pk-chips"><button class="pk-chip${o.t!=='d'?' on':''}" onclick="_fxOwn.t='b';renderFx()">Buff</button><button class="pk-chip${o.t==='d'?' on':''}" onclick="_fxOwn.t='d';renderFx()">Debuff</button></div></div>`:''}
+    <label class="fx-f"><span>Value</span>${val}</label>
+    <label class="fx-f"><span>From</span><input class="fx-in" type="text" value="${pkEsc(o.from||'')}" placeholder="e.g. Lia (Bard)" oninput="${ref}.from=this.value"></label>
+    <label class="fx-f"><span>Note</span><input class="fx-in" type="text" value="${pkEsc(o.note||'')}" placeholder="optional" oninput="${ref}.note=this.value"></label>
+    <label class="fx-chk"><input type="checkbox"${o.conc?' checked':''} onchange="${ref}.conc=this.checked?1:0"> Concentration (marker only)</label>
+    <div class="rest-foot"><button class="ws-btn ws-go" onclick="fxAdd(${own?1:0})">+ Add effect</button></div></div>`;
+}
+function fxAdd(own){
+  const s=own?window._fxOwn:_fxSel;if(!s)return;
+  const n=String(s.n||'').trim();if(!n){showToast('Enter a name');return;}
+  const r=own?null:fxRef(s);
+  const e={id:fxNewId(),n,k:own?'x':s.k,t:s.t==='d'?'d':'b',v:String(s.v||'').trim(),from:String(s.from||'').trim(),note:String(s.note||'').trim(),conc:s.conc?1:0,dur:r?r.min:null};
+  if(!own){if(s.k==='s')e.s=s.s;if(s.k==='f')e.c=s.c;}
+  if(e.dur===Infinity)e.dur=-1; // JSON: „bis aufgehoben“
+  fxList().push(e);window._fxOwn=null;closeFx();buildFx();autoSave();showToast('✦ '+n+' added');
+}
+function fxGet(id){return fxList().find(e=>e.id===id)||null;}
+function fxSet(id,f,v){const e=fxGet(id);if(!e)return;e[f]=f==='conc'?(v?1:0):String(v).trim();buildFx();autoSave();}
+function fxDel(id){const a=fxList(),i=a.findIndex(e=>e.id===id);if(i<0)return;const n=a[i].n;a.splice(i,1);closeFx();buildFx();autoSave();showToast('✕ '+n+' removed');}
+function fxRoll(id){const e=fxGet(id),d=e&&fxDice(e.v);if(!d)return;closeFx();openDice(e.n,0);const inp=document.getElementById('diceCustomInput');if(inp)inp.value=d;setTimeout(()=>doRoll(d),120);}
+function renderFxView(box){
+  const v=_fxView;let head='',body='',btn='';
+  if(v.kind==='rule'){head=v.key;body=`<div class="fx-txt">${fmtDesc(COND_DATA[v.key]||EFFECT_RULES[v.key]||'')}</div>`;
+    if(v.key==='Bloodied')body=`<div class="rest-hp">HP <b>${st.hpC}</b> / ${hpMaxVal()} – automatic</div>`+body;}
+  else if(v.kind==='conc'){head='Concentration';body=`<div class="rest-hp">Concentrating on <b>${pkEsc(fxConcName())}</b></div>${fxRule(COND_DATA.Concentration,true)}`;btn=`<button class="ws-btn" onclick="fxEndConc()">End Concentration</button>`;}
+  else if(v.kind==='cond'){head=v.key;body=`<div class="fx-txt">${fmtDesc(COND_DATA[v.key]||'')}</div>`;btn=`<button class="ws-btn fx-del" onclick="fxTogCond('${pkEsc(v.key)}');closeFx()">Remove</button>`;}
+  else{const e=fxGet(v.key);if(!e){closeFx();return;}const r=fxRef(e),d=fxDice(e.v);head=e.n;
+    body=`<div class="fx-form" style="padding:0">${r?`<div class="fx-sub">${pkEsc(r.sub)}</div>`:`<div class="fx-sub">${e.t==='d'?'Debuff':'Buff'} · custom</div>`}
+      <label class="fx-f"><span>Value</span><input class="fx-in" type="text" value="${pkEsc(e.v||'')}" placeholder="e.g. +1d4" onchange="fxSet('${e.id}','v',this.value);renderFx()"></label>
+      <label class="fx-f"><span>From</span><input class="fx-in" type="text" value="${pkEsc(e.from||'')}" onchange="fxSet('${e.id}','from',this.value)"></label>
+      <label class="fx-f"><span>Note</span><input class="fx-in" type="text" value="${pkEsc(e.note||'')}" onchange="fxSet('${e.id}','note',this.value)"></label>
+      <label class="fx-chk"><input type="checkbox"${e.conc?' checked':''} onchange="fxSet('${e.id}','conc',this.checked)"> Concentration (marker only)</label>
+      ${r?fxRule(r.txt,true):''}</div>`;
+    btn=(d?`<button class="ws-btn ws-go" onclick="fxRoll('${e.id}')">🎲 Roll ${d}</button>`:'')+`<button class="ws-btn fx-del" onclick="fxDel('${e.id}')">Remove</button>`;}
+  box.innerHTML=`<div class="ws-head">${pkEsc(head)}</div>${body}<div class="rest-foot">${btn}<button class="ws-btn" onclick="closeFx()">Close</button></div>`;
+}
+// Rast (Paket D): Effekte enden nach Dauer (Short Rest 1 h, Long Rest 8 h; Wahl im Fenster), Exhaustion sinkt
+let _restFx={};
+function fxRestDefault(mode,e){const m=e.dur;if(m==null)return mode==='long';if(m<0)return false;return m<=(mode==='short'?60:480);}
+function fxTireless(){return stFeatures().find(f=>/Whenever you finish a Short Rest, your Exhaustion level, if any, decreases by 1/.test(f.desc||''))||null;}
+function fxRestHtml(mode){
+  const eff=fxList(),ex=fxEx(),tl=mode==='short'?fxTireless():null;let h='';
+  eff.forEach(e=>{if(!(e.id in _restFx))_restFx[e.id]=fxRestDefault(mode,e);});
+  if(eff.length)h+=`<div class="rest-sec"><div class="rest-h">Effects end</div>${eff.map(e=>`<label class="fx-chk"><input type="checkbox"${_restFx[e.id]?' checked':''} onchange="_restFx['${e.id}']=this.checked"> ${pkEsc(e.n)}${e.v?` <span class="fx-v">${pkEsc(e.v)}</span>`:''}</label>`).join('')}<div class="rest-note">Pre-selected by duration (${mode==='short'?'1 hour':'8 hours'}); change as needed.</div></div>`;
+  if(ex&&(mode==='long'||tl))h+=`<div class="rest-sec"><div class="rest-h">Exhaustion</div><ul class="rest-list"><li>${mode==='long'?'Long Rest':pkEsc(tl.name)}<span>${ex} → ${ex-1}</span></li></ul></div>`;
+  if(fxConds().length&&mode==='long')h+=`<div class="rest-note">Conditions stay: ${pkEsc(fxConds().join(', '))} – remove them by hand.</div>`;
+  return h;
+}
+function fxRestDo(mode){
+  const gone=fxList().filter(e=>_restFx[e.id]),names=gone.map(e=>e.n),ex=fxEx();
+  if(gone.length)st.effects=fxList().filter(e=>!_restFx[e.id]);
+  if(ex&&(mode==='long'||fxTireless())){st.exhaustion=ex-1;names.push(`Exhaustion ${ex} → ${ex-1}`);}
+  _restFx={};buildFx();statRender();
+  return names;
+}
 
 // ZAUBERBUCH
 const ZB_SCHOOLS=[...new Set(ZB_SPELLS.map(s=>s.school))].sort();
@@ -5025,6 +5253,10 @@ const ARMOR_DATA=[{"n":"Leather Armor","c":"L","ac":11},{"n":"Padded Armor","c":
 // COND_DATA-START (tools/cond_convert.py, 5e.tools conditionsdiseases.json XPHB)
 const COND_DATA={"Blinded":"While you have the Blinded condition, you experience the following effects.\nCan't See. You can't see and automatically fail any ability check that requires sight.\nAttacks Affected. Attack rolls against you have Advantage, and your attack rolls have Disadvantage.","Charmed":"While you have the Charmed condition, you experience the following effects.\nCan't Harm the Charmer. You can't attack the charmer or target the charmer with damaging abilities or magical effects.\nSocial Advantage. The charmer has Advantage on any ability check to interact with you socially.","Deafened":"While you have the Deafened condition, you experience the following effect.\nCan't Hear. You can't hear and automatically fail any ability check that requires hearing.","Exhaustion":"While you have the Exhaustion condition, you experience the following effects.\nExhaustion Levels. This condition is cumulative. Each time you receive it, you gain 1 Exhaustion level. You die if your Exhaustion level is 6.\nD20 Tests Affected. When you make a D20 Test, the roll is reduced by 2 times your Exhaustion level.\nSpeed Reduced. Your Speed is reduced by a number of feet equal to 5 times your Exhaustion level.\nRemoving Exhaustion Levels. Finishing a Long Rest removes 1 of your Exhaustion levels. When your Exhaustion level reaches 0, the condition ends.","Frightened":"While you have the Frightened condition, you experience the following effects.\nAbility Checks and Attacks Affected. You have Disadvantage on ability checks and attack rolls while the source of fear is within line of sight.\nCan't Approach. You can't willingly move closer to the source of fear.","Grappled":"While you have the Grappled condition, you experience the following effects.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. You have Disadvantage on attack rolls against any target other than the grappler.\nMovable. The grappler can drag or carry you when it moves, but every foot of movement costs it 1 extra foot unless you are Tiny or two or more sizes smaller than it.","Incapacitated":"While you have the Incapacitated condition, you experience the following effects.\nInactive. You can't take any action, Bonus Action, or Reaction.\nNo Concentration. Your Concentration is broken.\nSpeechless. You can't speak.\nSurprised. If you're Incapacitated when you roll Initiative, you have Disadvantage on the roll.","Invisible":"While you have the Invisible condition, you experience the following effects.\nSurprise. If you're Invisible when you roll Initiative, you have Advantage on the roll.\nConcealed. You aren't affected by any effect that requires its target to be seen unless the effect's creator can somehow see you. Any equipment you are wearing or carrying is also concealed.\nAttacks Affected. Attack rolls against you have Disadvantage, and your attack rolls have Advantage. If a creature can somehow see you, you don't gain this benefit against that creature.","Paralyzed":"While you have the Paralyzed condition, you experience the following effects.\nIncapacitated. You have the Incapacitated condition.\nSpeed 0. Your Speed is 0 and can't increase.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAttacks Affected. Attack rolls against you have Advantage.\nAutomatic Critical Hits. Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.","Petrified":"While you have the Petrified condition, you experience the following effects.\nTurned to Inanimate Substance. You are transformed, along with any nonmagical objects you are wearing and carrying, into a solid inanimate substance (usually stone). Your weight increases by a factor of ten, and you cease aging.\nIncapacitated. You have the Incapacitated condition.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nResist Damage. You have Resistance to all damage.\nPoison Immunity. You have Immunity to the Poisoned condition.","Poisoned":"While you have the Poisoned condition, you experience the following effect.\nAbility Checks and Attacks Affected. You have Disadvantage on attack rolls and ability checks.","Prone":"While you have the Prone condition, you experience the following effects.\nRestricted Movement. Your only movement options are to crawl or to spend an amount of movement equal to half your Speed (round down) to right yourself and thereby end the condition. If your Speed is 0, you can't right yourself.\nAttacks Affected. You have Disadvantage on attack rolls. An attack roll against you has Advantage if the attacker is within 5 feet of you. Otherwise, that attack roll has Disadvantage.","Restrained":"While you have the Restrained condition, you experience the following effects.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage, and your attack rolls have Disadvantage.\nSaving Throws Affected. You have Disadvantage on Dexterity saving throws.","Stunned":"While you have the Stunned condition, you experience the following effects.\nIncapacitated. You have the Incapacitated condition.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAttacks Affected. Attack rolls against you have Advantage.","Unconscious":"While you have the Unconscious condition, you experience the following effects.\nInert. You have the Incapacitated and Prone conditions, and you drop whatever you're holding. When this condition ends, you remain Prone.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAutomatic Critical Hits. Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.\nUnaware. You're unaware of your surroundings.","Bloodied":"A creature is Bloodied while it has half its Hit Points or fewer remaining.","Concentration":"Some spells and other effects require Concentration to remain active, as specified in their descriptions. If the effect's creator loses Concentration, the effect ends. If the effect has a maximum duration, the effect's description specifies how long the creator can concentrate on it: up to 1 minute, 1 hour, or some other duration. The creator can end Concentration at any time (no action required). The following factors break Concentration.\nAnother Concentration Effect. You lose Concentration on an effect the moment you start casting a spell that requires Concentration or activate another effect that requires Concentration.\nDamage. If you take damage, you must succeed on a Constitution saving throw to maintain Concentration. The DC equals 10 or half the damage taken (round down), whichever number is higher, up to a maximum DC of 30.\nIncapacitated or Dead. Your Concentration ends if you have the Incapacitated condition or you die."};
 // COND_DATA-END
+// EFFECT_DATA-START (tools/effect_convert.py; Texte zur Laufzeit aus ZB_SPELLS/CLASS_DATA, Regeln aus 5e.tools variantrules.json)
+const EFFECT_DATA=[{"n":"Bless","k":"s","t":"b","s":"PHB'24","v":"+1d4 attacks & saves"},{"n":"Guidance","k":"s","t":"b","s":"PHB'24","v":"+1d4 checks (chosen skill)"},{"n":"Resistance","k":"s","t":"b","s":"PHB'24","v":"−1d4 damage (chosen type)"},{"n":"Shield of Faith","k":"s","t":"b","s":"PHB'24","v":"+2 AC"},{"n":"Haste","k":"s","t":"b","s":"PHB'24","v":"+2 AC · Speed ×2"},{"n":"Aid","k":"s","t":"b","s":"PHB'24","v":"+5 HP max"},{"n":"Heroism","k":"s","t":"b","s":"PHB'24","v":"Temp HP each turn"},{"n":"Longstrider","k":"s","t":"b","s":"PHB'24","v":"+10 ft Speed"},{"n":"Barkskin","k":"s","t":"b","s":"PHB'24","v":"AC at least 17"},{"n":"Warding Bond","k":"s","t":"b","s":"PHB'24","v":"+1 AC & saves"},{"n":"Mage Armor","k":"s","t":"b","s":"PHB'24","v":"AC 13 + DEX"},{"n":"Pass without Trace","k":"s","t":"b","s":"PHB'24","v":"+10 Stealth"},{"n":"Enhance Ability","k":"s","t":"b","s":"PHB'24","v":"Advantage (chosen ability)"},{"n":"Beacon of Hope","k":"s","t":"b","s":"PHB'24"},{"n":"Protection from Evil and Good","k":"s","t":"b","s":"PHB'24"},{"n":"Death Ward","k":"s","t":"b","s":"PHB'24"},{"n":"Freedom of Movement","k":"s","t":"b","s":"PHB'24"},{"n":"Fly","k":"s","t":"b","s":"PHB'24","v":"Fly Speed 60 ft"},{"n":"Invisibility","k":"s","t":"b","s":"PHB'24"},{"n":"Greater Invisibility","k":"s","t":"b","s":"PHB'24"},{"n":"Darkvision","k":"s","t":"b","s":"PHB'24","v":"Darkvision 150 ft"},{"n":"Spider Climb","k":"s","t":"b","s":"PHB'24"},{"n":"Water Breathing","k":"s","t":"b","s":"PHB'24"},{"n":"Stoneskin","k":"s","t":"b","s":"PHB'24","v":"Resistance B/P/S"},{"n":"Protection from Energy","k":"s","t":"b","s":"PHB'24","v":"Resistance (chosen type)"},{"n":"Magic Weapon","k":"s","t":"b","s":"PHB'24","v":"+1 attack & damage"},{"n":"Elemental Weapon","k":"s","t":"b","s":"PHB'24","v":"+1 attack · +1d4 damage"},{"n":"Crusader's Mantle","k":"s","t":"b","s":"PHB'24","v":"+1d4 Radiant on hit"},{"n":"Circle of Power","k":"s","t":"b","s":"PHB'24"},{"n":"Aura of Life","k":"s","t":"b","s":"PHB'24"},{"n":"Aura of Purity","k":"s","t":"b","s":"PHB'24"},{"n":"Heroes' Feast","k":"s","t":"b","s":"PHB'24"},{"n":"Sanctuary","k":"s","t":"b","s":"PHB'24"},{"n":"Foresight","k":"s","t":"b","s":"PHB'24"},{"n":"Holy Aura","k":"s","t":"b","s":"PHB'24"},{"n":"Mind Blank","k":"s","t":"b","s":"PHB'24"},{"n":"Shield","k":"s","t":"b","s":"PHB'24","v":"+5 AC"},{"n":"Blur","k":"s","t":"b","s":"PHB'24","v":"Attacks vs you: Disadvantage"},{"n":"Divine Favor","k":"s","t":"b","s":"PHB'24","v":"+1d4 Radiant on hit"},{"n":"Armor of Agathys","k":"s","t":"b","s":"PHB'24","v":"5 Temp HP"},{"n":"Bardic Inspiration","k":"f","t":"b","c":"Bard","d":60,"v":"+1d6","o":["+1d6","+1d8","+1d10","+1d12"]},{"n":"Aura of Protection","k":"f","t":"b","c":"Paladin","v":"+CHA mod to saves"},{"n":"Aura of Courage","k":"f","t":"b","c":"Paladin","v":"Immune to Frightened"},{"n":"Emboldening Bond","k":"f","t":"b","c":"Cleric","d":10,"v":"+1d4 once per turn"},{"n":"Bane","k":"s","t":"d","s":"PHB'24","v":"−1d4 attacks & saves"},{"n":"Slow","k":"s","t":"d","s":"PHB'24","v":"−2 AC & DEX saves · Speed ½"},{"n":"Faerie Fire","k":"s","t":"d","s":"PHB'24","v":"Attacks vs you: Advantage"},{"n":"Hex","k":"s","t":"d","s":"PHB'24","v":"Disadvantage (chosen ability checks)"},{"n":"Bestow Curse","k":"s","t":"d","s":"PHB'24"},{"n":"Ray of Enfeeblement","k":"s","t":"d","s":"PHB'24","v":"−1d8 damage rolls"},{"n":"Mind Sliver","k":"s","t":"d","s":"PHB'24","v":"−1d4 next save"},{"n":"Vicious Mockery","k":"s","t":"d","s":"PHB'24","v":"Disadvantage next attack"},{"n":"Guiding Bolt","k":"s","t":"d","s":"PHB'24","v":"Next attack vs you: Advantage"},{"n":"Shining Smite","k":"s","t":"d","s":"PHB'24","v":"Attacks vs you: Advantage"},{"n":"Starry Wisp","k":"s","t":"d","s":"PHB'24","v":"Can't be Invisible"},{"n":"Chill Touch","k":"s","t":"d","s":"PHB'24","v":"Can't regain HP"},{"n":"Frostbite","k":"s","t":"d","s":"XGE","v":"Disadvantage next weapon attack"},{"n":"Blindness/Deafness","k":"s","t":"d","s":"PHB'24"},{"n":"Hold Person","k":"s","t":"d","s":"PHB'24"},{"n":"Tasha's Hideous Laughter","k":"s","t":"d","s":"PHB'24"},{"n":"Contagion","k":"s","t":"d","s":"PHB'24"},{"n":"Polymorph","k":"s","t":"d","s":"PHB'24"}];
+const EFFECT_RULES={"Heroic Inspiration":"If you (a player character) have Heroic Inspiration, you can expend it to reroll any die immediately after rolling it, and you must use the new roll.\nIf you gain Heroic Inspiration but already have it, it's lost unless you give it to a player character who lacks it."};
+// EFFECT_DATA-END
 // RACE_PICKS-START
 const RACE_PICKS={"Aasimar":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"res":["Necrotic","Radiant"],"tr":[{"id":"rc_healinghands","t":"Healing Hands","tag":"aktion","uses":1,"restore":"long","ic":"✋"},{"id":"rc_celestialrevelation","t":"Celestial Revelation","tag":"bonus","uses":1,"restore":"long","ic":"🌟","minLvl":3}],"spk":[{"t":"Light Bearer","s":["Light"]}]},"Dragonborn":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"ch":[{"t":"Draconic Ancestry","o":[{"n":"Black","dmg":"Acid","res":["Acid"]},{"n":"Blue","dmg":"Lightning","res":["Lightning"]},{"n":"Brass","dmg":"Fire","res":["Fire"]},{"n":"Bronze","dmg":"Lightning","res":["Lightning"]},{"n":"Copper","dmg":"Acid","res":["Acid"]},{"n":"Gold","dmg":"Fire","res":["Fire"]},{"n":"Green","dmg":"Poison","res":["Poison"]},{"n":"Red","dmg":"Fire","res":["Fire"]},{"n":"Silver","dmg":"Cold","res":["Cold"]},{"n":"White","dmg":"Cold","res":["Cold"]}],"lk":["Breath Weapon","Damage Resistance"],"tbl":"Draconic Ancestors:\n• Black: Acid\n• Blue: Lightning\n• Brass: Fire\n• Bronze: Lightning\n• Copper: Acid\n• Gold: Fire\n• Green: Poison\n• Red: Fire\n• Silver: Cold\n• White: Cold"}],"tr":[{"id":"rc_breathweapon","t":"Breath Weapon","tag":"aktion","uses":"pb","restore":"long","ic":"🐉"},{"id":"rc_draconicflight","t":"Draconic Flight","tag":"bonus","uses":1,"restore":"long","ic":"🕊️","minLvl":5}]},"Dwarf":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"res":["Poison"],"adv":[{"t":"Dwarven Resilience","c":"Poisoned"}],"hp":{"t":"Dwarven Toughness","per":1},"tr":[{"id":"rc_stonecunning","t":"Stonecunning","tag":"bonus","uses":"pb","restore":"long","ic":"⛰️"}]},"Elf":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Keen Senses","f":["Insight","Perception","Survival"],"n":1},"ch":[{"t":"Elven Lineage","o":[{"n":"Drow","txt":"You are part of a lineage that grants you supernatural abilities. The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.\nWhen you reach character level 3, you learn the Faerie Fire spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","dv":120,"inn":[{"s":"Faerie Fire","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Dancing Lights"],"3":["Faerie Fire"],"5":["Darkness"]}},{"n":"High Elf","txt":"You are part of a lineage that grants you supernatural abilities. You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list.\nWhen you reach character level 3, you learn the Detect Magic spell. When you reach character level 5, you also learn the Misty Step spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","inn":[{"s":"Detect Magic","l":3,"u":1},{"s":"Misty Step","l":5,"u":1}],"sp":{"1":["Prestidigitation"],"3":["Detect Magic"],"5":["Misty Step"]}},{"n":"Wood Elf","txt":"You are part of a lineage that grants you supernatural abilities. Your Speed increases to 35 feet. You also know the Druidcraft cantrip.\nWhen you reach character level 3, you learn the Longstrider spell. When you reach character level 5, you also learn the Pass without Trace spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","speed":35,"inn":[{"s":"Longstrider","l":3,"u":1},{"s":"Pass without Trace","l":5,"u":1}],"sp":{"1":["Druidcraft"],"3":["Longstrider"],"5":["Pass without Trace"]}}],"ab":["INT","WIS","CHA"],"tbl":"Elven Lineages:\nLineage | Level 1 | Level 3 | Level 5\n• Drow | The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip. | Faerie Fire | Darkness\n• High Elf | You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. | Detect Magic | Misty Step\n• Wood Elf | Your Speed increases to 35 feet. You also know the Druidcraft cantrip. | Longstrider | Pass without Trace"}],"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Gnome":{"src":"XPHB","size":["S"],"speed":30,"dv":60,"ch":[{"t":"Gnomish Lineage","o":[{"n":"Forest Gnome","txt":"You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.","inn":[{"s":"Speak with Animals","l":1,"u":"pb"}],"sp":{"1":["Minor Illusion","Speak with Animals"]}},{"n":"Rock Gnome","txt":"You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.","sp":{"1":["Mending","Prestidigitation"]}}],"ab":["INT","WIS","CHA"]}],"adv":[{"t":"Gnomish Cunning","s":["INT","WIS","CHA"]}]},"Goliath":{"src":"XPHB","size":["M"],"speed":35,"ch":[{"t":"Giant Ancestry","o":[{"n":"Cloud's Jaunt","anc":"Cloud","txt":"As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.","tag":"bonus"},{"n":"Fire's Burn","anc":"Fire","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.","tag":"passiv"},{"n":"Frost's Chill","anc":"Frost","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.","tag":"passiv"},{"n":"Hill's Tumble","anc":"Hill","txt":"When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.","tag":"passiv"},{"n":"Stone's Endurance","anc":"Stone","txt":"When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.","tag":"reaktion"},{"n":"Storm's Thunder","anc":"Storm","txt":"When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.","tag":"reaktion"}]}],"tr":[{"id":"rc_giantancestry","t":"Giant Ancestry","tag":"passiv","uses":"pb","restore":"long","ic":"🗿"},{"id":"rc_largeform","t":"Large Form","tag":"bonus","uses":1,"restore":"long","ic":"🏔️","minLvl":5}]},"Half-Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Skill Versatility","any":2},"asi":{"fix":{"CHA":2},"ch":{"f":["STR","DEX","CON","INT","WIS"],"n":2,"v":1}},"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Half-Orc":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Menacing","fix":["Intimidation"]},"asi":{"fix":{"STR":2,"CON":1}},"tr":[{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Halfling":{"src":"XPHB","size":["S"],"speed":30,"adv":[{"t":"Brave","c":"Frightened"}]},"Human":{"src":"XPHB","size":["S","M"],"speed":30,"sk":{"t":"Skillful","any":1}},"Orc":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"tr":[{"id":"rc_adrenalinerush","t":"Adrenaline Rush","tag":"bonus","uses":"pb","restore":"short","ic":"💨"},{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Tiefling":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"ch":[{"t":"Fiendish Legacy","o":[{"n":"Abyssal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Poison damage. You also know the Poison Spray cantrip.\nWhen you reach character level 3, you learn the Ray of Sickness spell. When you reach character level 5, you also learn the Hold Person spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Poison"],"inn":[{"s":"Ray of Sickness","l":3,"u":1},{"s":"Hold Person","l":5,"u":1}],"sp":{"1":["Poison Spray"],"3":["Ray of Sickness"],"5":["Hold Person"]}},{"n":"Chthonic","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.\nWhen you reach character level 3, you learn the False Life spell. When you reach character level 5, you also learn the Ray of Enfeeblement spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Necrotic"],"inn":[{"s":"False Life","l":3,"u":1},{"s":"Ray of Enfeeblement","l":5,"u":1}],"sp":{"1":["Chill Touch"],"3":["False Life"],"5":["Ray of Enfeeblement"]}},{"n":"Infernal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Fire damage. You also know the Fire Bolt cantrip.\nWhen you reach character level 3, you learn the Hellish Rebuke spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Fire"],"inn":[{"s":"Hellish Rebuke","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Fire Bolt"],"3":["Hellish Rebuke"],"5":["Darkness"]}}],"ab":["INT","WIS","CHA"],"tbl":"Fiendish Legacies:\nLegacy | Level 1 | Level 3 | Level 5\n• Abyssal | You have Resistance to Poison damage. You also know the Poison Spray cantrip. | Ray of Sickness | Hold Person\n• Chthonic | You have Resistance to Necrotic damage. You also know the Chill Touch cantrip. | False Life | Ray of Enfeeblement\n• Infernal | You have Resistance to Fire damage. You also know the Fire Bolt cantrip. | Hellish Rebuke | Darkness"}],"spk":[{"t":"Otherworldly Presence","s":["Thaumaturgy"]}]}};
 // RACE_PICKS-END
@@ -6385,7 +6617,7 @@ function hpMaxVal(){return parseInt(document.getElementById('hpM')?.value)||10;}
 function restLog(m){const n=document.getElementById('charName')?.textContent.trim();if(n)_pushLog(n,[m]);}
 function resetDeathSaves(){st.dsS=[0,0,0];st.dsF=[0,0,0];['dsS','dsF'].forEach(id=>document.getElementById(id)?.querySelectorAll('.dspip').forEach(p=>p.classList.remove('f')));}
 let _restMode=null,_restLast='',_castIdx=null;
-function openRest(mode){_restMode=mode;_restLast='';renderRest();document.getElementById('restModal').classList.add('on');}
+function openRest(mode){_restMode=mode;_restLast='';_restFx={};renderRest();document.getElementById('restModal').classList.add('on');}
 function closeRest(){document.getElementById('restModal').classList.remove('on');_restMode=null;_castIdx=null;}
 function hdSpend(own){
   const h=hdInfo();if(!h||h.left<=0){showToast('No Hit Dice left');return;}
@@ -6418,7 +6650,7 @@ function renderRest(){
     }
     const li=p.full.map(x=>`<li>${x.ab.name}<span>full</span></li>`).concat(p.one.map(x=>`<li>${x.ab.name}<span>+1</span></li>`));
     body+=`<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Nothing to recover.</div>`}`+
-      (p.manual.length?`<div class="rest-note">Use by hand if you want (see feature text): ${p.manual.map(a=>a.name).join(', ')}</div>`:'')+`</div>`;
+      (p.manual.length?`<div class="rest-note">Use by hand if you want (see feature text): ${p.manual.map(a=>a.name).join(', ')}</div>`:'')+`</div>`+fxRestHtml('short');
     box.innerHTML=`<div class="ws-head">☾ Short Rest · 1 hour</div>${warn}${body}<div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doShortRest()">Finish Short Rest</button></div>`;
   }else{
     const li=[];
@@ -6430,14 +6662,14 @@ function renderRest(){
     restTrackers().forEach(ab=>{if(restIds(ab,lvl).some(id=>getAbUses(id)>0))li.push(`<li>${ab.name}<span>full</span></li>`);});
     const fc=(st.mySpells||[]).filter(x=>(x.freeUsed||0)>0);if(fc.length)li.push(`<li>Free casts<span>${fc.map(x=>x.name).join(', ')}</span></li>`);
     if((st.dsS||[]).some(Boolean)||(st.dsF||[]).some(Boolean))li.push(`<li>Death Saves<span>reset</span></li>`);
-    box.innerHTML=`<div class="ws-head">☀ Long Rest · 8 hours</div>${warn}<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Everything is already full.</div>`}</div><div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doLongRest()">Finish Long Rest</button></div>`;
+    box.innerHTML=`<div class="ws-head">☀ Long Rest · 8 hours</div>${warn}<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Everything is already full.</div>`}</div>${fxRestHtml('long')}<div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doLongRest()">Finish Long Rest</button></div>`;
   }
 }
 function doShortRest(){
   const p=shortRestPlan();
   p.full.forEach(x=>x.ids.forEach(id=>{delete st.abUses[id];}));
   p.one.forEach(x=>x.ids.forEach(id=>{const u=getAbUses(id);if(u>0)setAbUses(id,u-1);}));
-  const names=p.full.map(x=>x.ab.name).concat(p.one.map(x=>x.ab.name+' +1'));
+  const names=p.full.map(x=>x.ab.name).concat(p.one.map(x=>x.ab.name+' +1')).concat(fxRestDo('short'));
   closeRest();buildAbilities();autoSave();
   restLog('Short Rest'+(names.length?': '+names.join(', '):''));showToast('☾ Short Rest finished');
 }
@@ -6446,9 +6678,9 @@ function doLongRest(){
   const t=document.getElementById('hpT');if(t)t.value=0;
   st.hdUsed=0;st.slotUsed=[0,0,0,0,0,0,0,0,0];st.abUses={};
   (st.mySpells||[]).forEach(x=>{if(x.freeUsed)x.freeUsed=0;});
-  resetDeathSaves();updBar();
+  resetDeathSaves();const fxn=fxRestDo('long');updBar();
   closeRest();buildAbilities();buildMySpells();autoSave();
-  restLog('Long Rest');showToast('☀ Long Rest finished');
+  restLog('Long Rest'+(fxn.length?': '+fxn.join(', '):''));showToast('☀ Long Rest finished');
 }
 
 // ── ZAUBERN (Paket D, 29.09.2026): „Cast“ in My Spells verbraucht einen Platz ──
@@ -6498,7 +6730,7 @@ function doCast(k){
   else if(k==='ritual'){logHow='Ritual';}
   else logHow='Cantrip';
   if(spellIsConc(sp)){st.concActive=i;st.concActiveFeature=null;}
-  closeRest();buildAbilities();buildMySpells();autoSave();
+  closeRest();buildAbilities();buildMySpells();buildFx();autoSave();
   restLog(`Spell cast: ${sp.name} (${logHow})`);showToast(`✧ ${sp.name} · ${how}`);
 }
 
@@ -7075,7 +7307,7 @@ function switchTab(t){
 
 // LOCALSTORAGE / MEHRCHARAKTERE
 const LS_KEY = 'dnd5e_chars';
-const TEXT_IDS = ['cls','race','raceCustom','lvl','bg','subcls','align','prof','hpM','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','n_equip_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
+const TEXT_IDS = ['cls','race','raceCustom','lvl','bg','subcls','align','prof','hpM','hpT','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','n_equip_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
 
 function getAllChars(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
@@ -7107,7 +7339,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[]
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -7119,6 +7351,7 @@ function applyState(snap){
     const el=document.getElementById(id);
     if(el && fields[id]!==undefined) el.value=fields[id];
   });
+  if(fields.hpT===undefined){const t=document.getElementById('hpT');if(t)t.value='0';} // Paket E2: alte Saves ohne Temp HP
   // Sync custom race input visibility
   const raceVal=document.getElementById('race')?.value;
   const raceCustom=document.getElementById('raceCustom');
@@ -7138,9 +7371,7 @@ function applyState(snap){
     const el=document.getElementById(k==='dsS'?'dsS':'dsF');
     if(el) el.querySelectorAll('.dspip').forEach((p,j)=>p.classList.toggle('f',!!(st[k]||[])[j]));
   });
-  document.getElementById('ins0')?.classList.toggle('f',!!st.ins?.[0]);
-  document.getElementById('ins1')?.classList.toggle('f',!!st.ins?.[1]);
-  document.getElementById('ins2')?.classList.toggle('f',!!st.ins?.[2]);
+  document.getElementById('ins0')?.classList.toggle('f',(st.ins||[]).some(Boolean)); // Heroic Inspiration (Paket E2; alte Saves: einer der drei Kreise)
   document.getElementById('hpC').textContent=st.hpC;
   updBar();
   if(typeof buildLog==='function') buildLog();
@@ -7214,7 +7445,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[]
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -7245,7 +7476,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[]
   });
   st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
   document.getElementById('charName').textContent=_name;
@@ -7334,7 +7565,7 @@ function _skillLabel(k){ return (typeof SKILLS!=='undefined' && (SKILLS.find?.(s
 // (jeder Schlüssel aus collectState, Pfad als Name), damit neue Felder automatisch mitkommen.
 // Einträge: String oder {m, k, prev, next} für Texte (Notizen) – _pushLog fasst Tipp-Folgen zusammen.
 const LOG_SKIP=['log','abGrpClosed','charInfoClosed','zbAdded']; // reine Anzeige-Zustände; zbAdded spiegelt nur mySpells
-const LOG_FIELDS={cls:'Class',subcls:'Subclass',race:'Race',raceCustom:'Custom Race',lvl:'Level',bg:'Background',align:'Alignment',prof:'Proficiency Bonus',hpM:'Max HP',ac:'AC',ini:'Initiative',spd:'Speed',spAttr:'Spellcasting Ability',cur_pp:'Platinum',cur_gp:'Gold',cur_ep:'Electrum',cur_sp:'Silver',cur_cp:'Copper'};
+const LOG_FIELDS={cls:'Class',subcls:'Subclass',race:'Race',raceCustom:'Custom Race',lvl:'Level',bg:'Background',align:'Alignment',prof:'Proficiency Bonus',hpM:'Max HP',hpT:'Temp HP',ac:'AC',ini:'Initiative',spd:'Speed',spAttr:'Spellcasting Ability',cur_pp:'Platinum',cur_gp:'Gold',cur_ep:'Electrum',cur_sp:'Silver',cur_cp:'Copper'};
 const LOG_TEXTS={n_bg_notes:'Background Notes',n_bst_notes:'Beast Notes',n_ft_notes:'Feat Notes',n_class_traits:'Class Traits Notes',n_bg_feature:'Background Feature',n_bg_extra:'Background Extra',n_pers:'Personality Trait',n_ideal:'Ideals',n_bond:'Bonds',n_flaw:'Flaws',n_equip:'Equipment',n_notes:'Notes',n_equip_notes:'Equipment Notes',skillNotes:'Skill Notes',raceNotes:'Race Notes'};
 let _abNames=null;
 function _abLabel(id){
@@ -7495,8 +7726,11 @@ function _diffSnaps(a,b){
     }
   });
   done.add('hpC');if(a.hpC!==b.hpC && (a.hpC!=null||b.hpC!=null)) out.push(`HP: ${a.hpC??'?'} → ${b.hpC}`);
-  done.add('ins');const iA=(a.ins||[]).filter(Boolean).length, iB=(b.ins||[]).filter(Boolean).length;
-  if(iA!==iB) out.push(`Inspiration: ${iA} → ${iB}`);
+  done.add('ins');const iA=(a.ins||[]).some(Boolean), iB=(b.ins||[]).some(Boolean);
+  if(iA!==iB) out.push(`Heroic Inspiration: ${iA?'yes':'no'} → ${iB?'yes':'no'}`);
+  done.add('conditions');{const ca=a.conditions||[],cb=b.conditions||[];cb.filter(x=>!ca.includes(x)).forEach(x=>out.push(`+ Condition: ${x}`));ca.filter(x=>!cb.includes(x)).forEach(x=>out.push(`− Condition removed: ${x}`));}
+  done.add('exhaustion');if((a.exhaustion||0)!==(b.exhaustion||0)) out.push(`Exhaustion: ${a.exhaustion||0} → ${b.exhaustion||0}`);
+  done.add('effects');_logList(out,a.effects,b.effects,'Effect',x=>x&&x.id,{name:x=>x&&(x.n+(x.v?' ('+x.v+')':'')),skip:['id','k','s','c','t','dur'],fl:{v:'Value',from:'From',note:'Note',conc:'Concentration'}});
   done.add('dsS');const dsA=(a.dsS||[]).filter(Boolean).length, dsB=(b.dsS||[]).filter(Boolean).length;
   if(dsA!==dsB) out.push(`Death Save successes: ${dsA} → ${dsB}`);
   done.add('dsF');const dfA=(a.dsF||[]).filter(Boolean).length, dfB=(b.dsF||[]).filter(Boolean).length;
@@ -7917,7 +8151,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02i';
+const APP_VERSION = 'willow-app-2026-10-02j';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -8194,6 +8428,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
 <!-- RAST / ZAUBERN (Paket D, 29.09.2026): Dialog für Short Rest, Long Rest und „Cast“ -->
 <div id="attrModal" class="ws-overlay" onclick="if(event.target===this)closeAttr()"><div class="ws-box rest-box" id="attrBox"></div></div>
 <div id="restModal" class="ws-overlay" onclick="if(event.target===this)closeRest()"><div class="ws-box rest-box" id="restBox"></div></div>
+<div id="fxModal" class="ws-overlay" onclick="if(event.target===this)closeFx()"><div class="ws-box rest-box" id="fxBox"></div></div>
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:8px">Delete Character?</div>

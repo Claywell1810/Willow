@@ -805,8 +805,8 @@ const REGRESSION = [
       sel('Druid', '', 7);
       const cs = d.getElementById('combatStats');
       if (!cs.textContent.includes('Prof. Bonus') || ![...cs.querySelectorAll('.cst-slot b')].map(b => b.textContent).join(',').startsWith('1st,2nd,3rd,4th')) return 'Combat Stats Beschriftung: ' + cs.textContent;
-      if (d.querySelectorAll('.ds-row .ds-box').length !== 2 || d.querySelectorAll('#dsS .dspip').length !== 3 || !d.getElementById('ins2')) return 'Death Saves/Inspiration-Aufbau';
-      w.togIns(1); if (!d.getElementById('ins1').classList.contains('f')) return 'togIns wirkt nicht'; w.togIns(1);
+      if (d.querySelectorAll('.ds-row .ds-box').length !== 2 || d.querySelectorAll('#dsS .dspip').length !== 3 || !d.getElementById('ins0')) return 'Death Saves/Inspiration-Aufbau'; // seit Paket E2 ein Kreis (Heroic Inspiration)
+      w.togIns(0); if (!d.getElementById('ins0').classList.contains('f')) return 'togIns wirkt nicht'; w.togIns(0);
       let opened = null; w.open = u => { opened = u; };
       w.localStorage.removeItem('willow_websearch');
       if (!d.getElementById('webSearchBtn')) return 'Lupe fehlt';
@@ -1505,7 +1505,7 @@ const REGRESSION = [
       if (panels.some(p => !p || !p.classList.contains('act-panel'))) return 'Abschnitt ohne Rahmen';
       const wp = d.getElementById('sb-weapons').parentElement;
       if (!wp.classList.contains('act-panel') || !wp.querySelector('.sec.sec-top')) return 'Weapons ohne Rahmen/Überschrift';
-      if (d.querySelectorAll('#tab-zauber .act-div').length !== 4) return 'Trenner: ' + d.querySelectorAll('#tab-zauber .act-div').length;
+      if (d.querySelectorAll('#tab-zauber .act-div').length !== 5) return 'Trenner: '  /* seit Paket E2 +1 (Effects & Conditions) */ + d.querySelectorAll('#tab-zauber .act-div').length;
       const sub = [...d.querySelectorAll('#subpanel-meinezauber .sec.sec-sub')].map(e => e.firstElementChild.textContent).join('|');
       if (sub !== 'Spell Slots|My Spells') return 'Unterüberschriften: ' + sub;
       return true;
@@ -1801,6 +1801,55 @@ const REGRESSION = [
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
+  { name: 'Paket E2: Effects & Conditions – Zustände (Speed 0), Exhaustion (Long Rest/Tireless), Buffs/Debuffs aus EFFECT_DATA + eigene, Rast räumt nach Dauer auf, Bloodied, Konzentration/Incapacitated, Heroic Inspiration, Temp HP gespeichert, Log, alte Saves', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      if (typeof w.buildFx !== 'function' || !w.eval('typeof EFFECT_DATA==="object"&&EFFECT_DATA.length>40&&EFFECT_RULES["Heroic Inspiration"]')) return 'buildFx/EFFECT_DATA fehlen';
+      const fx = () => d.getElementById('fxBody').textContent;
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }, _f_cls: 'Fighter', _f_lvl: '5', _f_hpM: '20', hpC: 20, _f_spd: '30' });
+      const p = d.getElementById('fxPanel'); if (!p || p.previousElementSibling.className !== 'act-div' || p.previousElementSibling.previousElementSibling.id !== 'hpPanel') return 'Panel nicht unter Hit Points';
+      // Zustand + Speed 0
+      w.eval('st.statSrc=statSrcNew()'); w.statRender(); if (d.getElementById('spdV').textContent !== '30') return 'Speed vorher: ' + d.getElementById('spdV').textContent;
+      w.fxTogCond('Grappled'); if (!fx().includes('Grappled') || d.getElementById('spdV').textContent !== '0') return 'Grappled: Speed ' + d.getElementById('spdV').textContent;
+      w.fxTogCond('Grappled'); if (w.eval('st.conditions.length') !== 0 || d.getElementById('spdV').textContent !== '30') return 'Grappled entfernen';
+      // Exhaustion
+      w.fxSetEx(2); if (w.eval('st.exhaustion') !== 2 || !fx().includes('D20 Tests −4 · Speed −10 ft') || d.getElementById('spdV').textContent !== '20') return 'Exhaustion 2: ' + fx();
+      // Buff aus der Liste (Bless: Konzentration, 1 Minute) und eigener Effekt
+      w.openFx(); w.fxTab('fx'); const bi = w.eval('_fxCand.findIndex(e=>e.n==="Bless")'); w.fxPick(bi); w.fxAdd(0);
+      const b = w.eval('JSON.stringify(st.effects[0])');
+      if (!/"n":"Bless".*"v":"\+1d4 attacks & saves".*"conc":1,"dur":1/.test(b)) return 'Bless: ' + b;
+      w.openFx(); w.fxTab('own'); w.eval("_fxOwn.n='Blessing of the Forge';_fxOwn.v='+1 AC';_fxOwn.from='Smith'"); w.fxAdd(1);
+      if (!fx().includes('Bless') || !fx().includes('Blessing of the Forge') || !fx().includes('Smith')) return 'Chips: ' + fx();
+      w.eval("_fxCand=null;_fxQ='heroes'"); w.openFx(); w.fxTab('fx'); w.eval("_fxQ='mind spi'"); w.renderFxList(); if (!w.eval('_fxCand.some(e=>e.n==="Mind Spike")')) return 'Suche über alle Zauber';
+      w.closeFx();
+      // Short Rest: Bless (1 min) endet, eigener Effekt bleibt, Exhaustion bleibt (kein Tireless)
+      w.openRest('short'); w.doShortRest();
+      if (w.eval('st.effects.map(e=>e.n).join()') !== 'Blessing of the Forge' || w.eval('st.exhaustion') !== 2) return 'Short Rest: ' + w.eval('st.effects.map(e=>e.n).join()') + ' / Ex ' + w.eval('st.exhaustion');
+      // Long Rest: eigener Effekt endet, Exhaustion −1
+      w.openRest('long'); w.doLongRest();
+      if (w.eval('st.effects.length') !== 0 || w.eval('st.exhaustion') !== 1) return 'Long Rest: ' + w.eval('st.effects.length') + ' / Ex ' + w.eval('st.exhaustion');
+      // Ranger L10 Tireless: Short Rest senkt Exhaustion
+      sel('Ranger', '', 10); w.openRest('short'); if (!d.getElementById('restBox').textContent.includes('Tireless')) return 'Tireless nicht im Fenster'; w.doShortRest();
+      if (w.eval('st.exhaustion') !== 0) return 'Tireless: Ex ' + w.eval('st.exhaustion');
+      // Bloodied, Konzentration + Incapacitated
+      d.getElementById('hpM').value = '20'; w.eval('st.hpC=10'); w.updBar(); if (!fx().includes('Bloodied')) return 'Bloodied fehlt';
+      w.eval('st.hpC=11'); w.updBar(); if (fx().includes('Bloodied')) return 'Bloodied über der Hälfte';
+      w.eval("st.mySpells=[{name:'Bless',grad:1,prep:true}];st.concActive=0"); w.buildFx(); if (!fx().includes('Concentration') || !fx().includes('Bless')) return 'Konzentration fehlt';
+      w.fxTogCond('Stunned'); if (!fx().includes('Concentration ends')) return 'Incapacitated-Hinweis fehlt';
+      w.fxEndConc(); if (w.eval('st.concActive') !== null) return 'End Concentration';
+      // Heroic Inspiration, Temp HP, Speichern/Laden, alter Save
+      w.eval('st.ins=[0,0,0]'); w.togIns(0); if (!d.getElementById('ins0').classList.contains('f') || d.getElementById('ins1')) return 'Heroic Inspiration';
+      d.getElementById('hpT').value = '7';
+      const snap = w.eval('collectState()');
+      if (snap._f_hpT !== '7' || snap.conditions.join() !== 'Stunned' || !Array.isArray(snap.effects)) return 'nicht gespeichert';
+      w.applyState({ attrs: {}, ins: [0, 0, 1] });
+      if (w.eval('st.conditions.length+st.effects.length+st.exhaustion') !== 0 || d.getElementById('hpT').value !== '0') return 'alter Save übernimmt fremde Werte';
+      if (!d.getElementById('ins0').classList.contains('f')) return 'alter Save: Inspiration-Kreis 3 → Heroic Inspiration';
+      w.applyState(snap); if (d.getElementById('hpT').value !== '7' || !fx().includes('Stunned')) return 'Laden';
+      const lg = w.eval("_diffSnaps({conditions:[],exhaustion:0,effects:[],ins:[0,0,0],_f_hpT:'0'},{conditions:['Poisoned'],exhaustion:1,effects:[{id:'a',n:'Bless',v:'+1d4'}],ins:[1,0,0],_f_hpT:'5'})").join('|');
+      for (const x of ['+ Condition: Poisoned', 'Exhaustion: 0 → 1', '+ Effect: Bless (+1d4)', 'Heroic Inspiration: no → yes', 'Temp HP']) if (!lg.includes(x)) return 'Log fehlt: ' + x + ' in ' + lg;
+      w.eval('st.conditions=[];st.effects=[];st.exhaustion=0;st.mySpells=[]'); w.buildFx();
+      return true;
+    } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
 
