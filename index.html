@@ -256,6 +256,34 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .dice-history{border-top:1px solid var(--border2);padding-top:10px}
 .dice-history-row{display:flex;justify-content:space-between;font-size:var(--fs-sm);color:var(--text3);padding:4px 2px;border-bottom:1px solid var(--border2)}
 .dice-history-row .dh-result{color:var(--text2);font-weight:600}
+/* Paket E Teil 3 (02.10.2026): Würfe mit Effekten – Chips im Würfel-Dialog, Würfel-Knöpfe (REFERENZ B19) */
+.rl-mods{margin:-4px 0 14px}
+.rl-mods:empty{display:none}
+.rl-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.rl-chip{display:inline-flex;flex-direction:column;align-items:center;padding:4px 11px;border-radius:14px;background:var(--bg2);border:1px dashed var(--border);color:var(--muted);font-family:'Crimson Pro',serif;font-size:var(--fs-md);line-height:1.25;cursor:pointer;-webkit-tap-highlight-color:transparent;max-width:100%;text-align:center}
+.rl-chip b{font-weight:600}
+.rl-chip small{font-size:var(--fs-2xs);color:var(--muted)}
+.rl-chip.on{border-style:solid;border-color:var(--gold);color:var(--text);background:color-mix(in srgb,var(--gold) 12%,var(--bg2))}
+.rl-chip.on.g{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--bg2))}
+.rl-chip.on.r{border-color:var(--red);background:color-mix(in srgb,var(--red) 14%,var(--bg2))}
+.rl-chip.na{opacity:.6}
+.rl-hint{font-size:var(--fs-sm);color:var(--muted);text-align:center;margin-top:6px}
+.rl-acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.rl-act{padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rl-act.go{background:var(--purple3);border-color:var(--purple)}
+.rl-ok{color:var(--green)}
+.rl-bad{color:var(--red)}
+.rl-wbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rl-wbtn{display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.rl-wbtn b{font-family:'Crimson Pro',serif;font-size:var(--fs-txt);color:var(--gold);letter-spacing:0;overflow:hidden;text-overflow:ellipsis}
+.rl-wbtn:disabled{opacity:.45}
+.rl-wbtn:active,.rl-act:active{transform:scale(.96)}
+.rl-amod{cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.rl-dz{font-size:.8em;margin-left:4px}
+.rl-spatk{display:flex;align-items:center;width:100%;padding:0;background:none;border:none;cursor:pointer;position:relative}
+.rl-spatk input{pointer-events:none;flex:1;min-width:0}
+.rl-spatk .rl-dz{position:absolute;right:8px;margin:0}
+.fx-ap{font-size:var(--fs-md);color:var(--text2)}
 
 /* SPELL CARDS (Charakterbogen) */
 .spell-card{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;overflow:hidden}
@@ -845,7 +873,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div class="stat3">
         <!-- Paket E (02.10.2026): wie die Attribute – nur Wert, Tippen öffnet die Quellen (openStat); Felder ac/ini/spd bleiben (TEXT_IDS, versteckt) -->
         <div class="sbox st-card" onclick="openStat('ac')"><div class="aname">Armor (AC)</div><button class="aval-btn" id="acV" aria-label="Armor Class, details">10</button><input type="number" id="ac" value="10" style="display:none"></div>
-        <div class="sbox st-card" onclick="openStat('ini')"><div class="aname">Initiative</div><button class="aval-btn" id="iniV" aria-label="Initiative, details">+0</button><input type="number" id="ini" value="0" style="display:none"></div>
+        <div class="sbox st-card" onclick="openStat('ini')"><div class="aname">Initiative</div><button class="aval-btn" id="iniV" aria-label="Initiative, details">+0</button><div><button class="amod hl rl-amod" onclick="event.stopPropagation();rollInit()" aria-label="Roll Initiative">Roll<span class="rl-dz">🎲</span></button></div><input type="number" id="ini" value="0" style="display:none"></div>
         <div class="sbox st-card" onclick="openStat('spd')"><div class="aname">Speed (ft)</div><button class="aval-btn" id="spdV" aria-label="Speed, details">30</button><input type="number" id="spd" value="30" style="display:none"></div>
       </div>
       <div id="raceStats"></div>
@@ -1162,7 +1190,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
             <div class="ifield"><label>Ability</label>
               <select id="spAttr" onchange="calcSpell()"><option value="">—</option><option value="INT">INT</option><option value="WIS">WIS</option><option value="CHA">CHA</option></select></div>
             <div class="ifield"><label>Save DC</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
-            <div class="ifield"><label>Attack</label><input id="spAtk" value="+0" readonly style="color:var(--gold)"></div>
+            <div class="ifield"><label>Attack</label><button class="rl-spatk" onclick="rollSpellAtk()" aria-label="Roll spell attack"><input id="spAtk" value="+0" readonly tabindex="-1" style="color:var(--gold)"><span class="rl-dz">🎲</span></button></div>
           </div>
 
         <div class="sec sec-sub" style="display:flex;justify-content:space-between;align-items:center">
@@ -1437,7 +1465,7 @@ function buildAttrs(){
     const d=document.createElement('div');d.className='acard';d.onclick=()=>openAttr(a.k);
     d.innerHTML=`<div class="aname">${a.l}</div>
       <button class="aval-btn" id="a_${a.k}" aria-label="${a.l} ${v}, details">${v}</button>
-      <div><span class="amod hl" id="m_${a.k}">${fmt(m)}</span></div>`;
+      <div><button class="amod hl rl-amod" id="m_${a.k}" onclick="event.stopPropagation();rollAttr('${a.k}')" aria-label="Roll ${a.l} check">${fmt(m)}<span class="rl-dz">🎲</span></button></div>`;
     g.appendChild(d);
   });
   statRender(); // Paket E: AC/Initiative/Speed hängen an den Attributen
@@ -1486,6 +1514,10 @@ function stAcCalc(s){
   else{r.t=10;r.base='10 Unarmored';add(dex,'DEX',1);}
   if(s.sh){const sh=ARMOR_DATA.find(x=>x.c==='S');add(sh?sh.ac:2,'Shield');}
   add(+s.item||0,'Item');add(+s.feat||0,'Feat / Feature');add(+s.dm||0,'Other');
+  const F=rlStatFx('ac'),ma=F.find(f=>f.m==='base13'); // Paket E3: Effekte (ROLL_FX) – Mage Armor, Shield of Faith, Barkskin …
+  if(ma){if(!ar&&!a)/* nur „Unarmored (10 + DEX)“ */{r.t+=3;r.base=`13 ${ma.l}`;}else r.warn.push(`${ma.l}: not counted – armor or another base AC is selected (only one base AC applies).`);}
+  F.filter(f=>f.m==='n'&&f.P&&f.P.k).forEach(f=>{r.t+=f.P.k;r.parts.push({v:f.P.k,l:f.l,fx:1});});
+  const bk=F.find(f=>f.m==='min17');if(bk&&r.t<17){r.parts.push({v:17-r.t,l:`${bk.l} (AC 17)`,fx:1});r.t=17;}
   return r;
 }
 function stIniCalc(s){
@@ -1510,6 +1542,9 @@ function stSpdCalc(s){
   if(ar&&ar.str&&(st.attrs.STR||10)<ar.str)add(-10,`${ar.n} (Strength ${ar.str})`,1);
   const ex=+st.exhaustion||0;if(ex)add(-5*ex,`Exhaustion ${ex}`,1);
   add(+s.feat||0,'Feat / Feature');add(+s.item||0,'Item');add(+s.dm||0,'Other');
+  const F=rlStatFx('spd'); // Paket E3: Longstrider +10, Haste verdoppelt, Slow halbiert
+  F.filter(f=>f.m==='n'&&f.P).forEach(f=>add(f.P.k,f.l,1));
+  F.filter(f=>f.m==='x2'||f.m==='half').forEach(f=>{const n=Math.max(0,r.t);add(f.m==='x2'?n:-Math.ceil(n/2),`${f.l} (${f.m==='x2'?'doubled':'halved'})`,1);});
   r.t=Math.max(0,r.t);
   const z=(st.conditions||[]).filter(c=>/Speed 0\./.test(COND_DATA[c]||'')); // Paket E2: Grappled, Restrained … „Speed 0 and can't increase“
   if(z.length&&r.t>0)add(-r.t,`${z.join(', ')} (Speed 0)`,1);
@@ -1548,6 +1583,7 @@ function renderStat(){
     const sh=ARMOR_DATA.find(x=>x.c==='S');
     rows+=`<div class="at-row"><div class="at-l">Armor<small>5e.tools (XPHB)</small></div><select class="at-sel" onchange="statArm(this.value)">${o}</select></div>
       <div class="at-row"><div class="at-l">Shield<small>+${sh?sh.ac:2} AC</small></div><button class="pk-chip${s.sh?' on':''}" onclick="statPut('sh',${s.sh?0:1});renderStat()">${s.sh?'✓ Shield':'No shield'}</button></div>`;
+    rows+=r.parts.filter(x=>x.fx).map(x=>`<div class="at-row auto"><div class="at-l">${pkEsc(x.l)}<small>effect · automatic</small></div><div class="at-v">${fmt(x.v)}</div></div>`).join('');
   }else{
     r.parts.filter(x=>x.auto).forEach(x=>{
       rows+=`<div class="at-row auto"><div class="at-l">${pkEsc(x.l)}<small>automatic</small></div><div class="at-v">${fmt(x.v)}</div></div>`;});
@@ -1689,7 +1725,7 @@ function buildSaves(){
     const auto=grantLvl(G,'save',a.k),p=!!st.saveP[a.k]||!!auto;const b=md(st.attrs[a.k])+(p?prof():0);
     const bd=grantSrc(G,'save',a.k).map(q=>`<span class="sk-bdg">${q}</span>`).join('')+rcAdv().filter(x=>(x.s||[]).includes(a.k)).map(x=>`<span class="sk-bdg" title="${pkEsc(x.t)}">Adv</span>`).join('');
     const r=document.createElement('div');r.className='sk-row';
-    r.innerHTML=`<div class="sk-pip${p?' p':''}"></div><span class="sk-name">${a.l}${bd}</span><span class="sk-attr">${a.k}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${a.l} Save',${b})">🎲</span>`;
+    r.innerHTML=`<div class="sk-pip${p?' p':''}"></div><span class="sk-name">${a.l}${bd}</span><span class="sk-attr">${a.k}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollD20({k:'save',ab:'${a.k}',l:'${a.l} Save',mod:${b}})">🎲</span>`;
     r.onclick=(e)=>{if(e.target.closest('.sk-roll-ic'))return;if(auto){if(st.saveP[a.k])delete st.saveP[a.k];showToast(`${a.l}: proficient from Class`);}else st.saveP[a.k]=!st.saveP[a.k];buildSaves();autoSave()};g.appendChild(r);
   });
   const av=document.getElementById('saveAdv');
@@ -1898,9 +1934,9 @@ function crWeapons(){
 }
 function crWeaponsHtml(){
   const L=crWeapons();if(!L.length)return '';const rn=pkEsc(rcName('custom'));
-  return L.map(w=>`<div class="cr-nw"><div class="cr-nw-h">${pkEsc(w.n)}<span class="sk-bdg">${rn}</span></div>`
+  return L.map((w,i)=>`<div class="cr-nw"><div class="cr-nw-h">${pkEsc(w.n)}<span class="sk-bdg">${rn}</span></div>`
     +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${w.atk}</b></span><span><small>DAMAGE</small>${w.dmg?`<b>${pkEsc(w.dmg)}</b>`:'<b class="g" title="Enter the damage dice in Race › Natural weapons">set dice</b>'}</span><span><small>TYPE</small><b>${pkEsc(w.type||'—')}</b></span></div>`
-    +`<div class="cr-nw-s">Natural weapon · ${w.ab} + Proficiency · set in Race</div></div>`).join('');
+    +rlWpnBtns('rollNw',i,w.atk,w.dmg)+`<div class="cr-nw-s">Natural weapon · ${w.ab} + Proficiency · set in Race</div></div>`).join('');
 }
 function crUsesTxt(t){return t.uses?(t.uses==='pb'?'PB':t.uses+'×')+' / '+(t.restore==='short'?'Short':'Long')+' Rest':'';}
 const CR_SPU=u=>u==='pb'?'PB × / Long Rest':u?u+'× / Long Rest':'at will';
@@ -2332,7 +2368,7 @@ function buildSkills(){
     r.style.flexWrap='wrap';
     const miscColor=misc>0?'var(--green)':misc<0?'var(--red)':'var(--text3)';
     const miscStr=misc!==0?`<span style="font-size:var(--fs-xs);color:${miscColor};font-family:'Cinzel',serif;margin-left:2px">(${misc>0?'+':''}${misc})</span>`:'';
-    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':p==='half'?' h':''}"${p==='half'?' title="Half proficiency (Jack of All Trades)"':''}></div><span class="sk-name">${s.n}${miscStr}${bd}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollCheck('${s.n}',${b})">🎲</span>`
+    r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':p==='half'?' h':''}"${p==='half'?' title="Half proficiency (Jack of All Trades)"':''}></div><span class="sk-name">${s.n}${miscStr}${bd}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollD20({k:'check',ab:'${s.a}',sk:'${s.n}',l:'${s.n}',mod:${b}})">🎲</span>`
       +(skEditMode?`<div style="width:100%;padding:4px 20px 2px;display:flex;align-items:center;gap:6px"><span style="font-size:var(--fs-xs);color:var(--text3);font-family:'Cinzel',serif">Misc</span><input type="number" value="${misc||''}" placeholder="0" oninput="st.skillMisc['${s.n}']=parseInt(this.value)||0;autoSave();buildSkills()" onclick="event.stopPropagation()" style="width:56px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:var(--fs-md);padding:3px 6px;outline:none;font-family:'Cinzel',serif"></div>`:'');
     r.onclick=(e)=>{if(skEditMode||e.target.tagName==='INPUT'||e.target.closest('.sk-roll-ic'))return;const cyc=['','p','e'];let i=cyc.indexOf(man);do{i=(i+1)%3;}while(i&&PK_RANK[cyc[i]]<=PK_RANK[auto]);if(cyc[i])st.skillP[s.n]=cyc[i];else delete st.skillP[s.n];autoSave();buildSkills();};
     g.appendChild(r);
@@ -2363,17 +2399,17 @@ function buildWeapons(){
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
         <div>
           <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">ATK BONUS</div>
-          <input value="${w.atk||''}" placeholder="+5" oninput="st.weapons[${i}].atk=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gold);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
+          <input value="${w.atk||''}" placeholder="+5" oninput="st.weapons[${i}].atk=this.value;autoSave();rlWpnUpd(${i})" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gold);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
         </div>
         <div>
           <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">DAMAGE</div>
-          <input value="${w.dmg||''}" placeholder="1d8+3" oninput="st.weapons[${i}].dmg=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
+          <input value="${w.dmg||''}" placeholder="1d8+3" oninput="st.weapons[${i}].dmg=this.value;autoSave();rlWpnUpd(${i})" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
         </div>
         <div>
           <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">TYPE</div>
           <input value="${w.type||''}" placeholder="Slashing" oninput="st.weapons[${i}].type=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;padding:5px 8px;outline:none;text-align:center">
         </div>
-      </div>`;
+      </div>${rlWpnBtns('rollWpn',i,w.atk,w.dmg)}`;
     g.appendChild(d);
   });
 }
@@ -3345,7 +3381,7 @@ function togIns(i){const on=(st.ins||[]).some(Boolean);st.ins=[on?0:1,0,0];docum
 // ── EFFECTS & CONDITIONS (Paket E Teil 2, 02.10.2026; REFERENZ B18) ──
 // st.conditions = ['Poisoned', …] (Namen aus COND_DATA), st.exhaustion = 0–6, st.effects = [{id,n,k,s|c,t,v,from,note,conc,dur}]
 // k: 's' Zauber (Text ZB_SPELLS, Fassung s) | 'f' Feature (CLASS_DATA[c]) | 'x' eigener Eintrag; t: 'b' Buff | 'd' Debuff
-// Nur Anzeige (Entscheidung Simon 27.09.2026): nichts wird in Würfe/AC eingerechnet; Ausnahme Speed (Exhaustion, „Speed 0“-Zustände).
+// Seit Paket E Teil 3 (02.10.2026): Zustände/Effekte rechnen in Würfe (Chips im Würfel-Dialog, rollD20) und in AC/Speed (ROLL_FX).
 function fxCondNames(){return Object.keys(COND_DATA).filter(n=>!['Exhaustion','Bloodied','Concentration'].includes(n));} // COND_DATA steht weiter unten im Skript
 let _fxTab='cond',_fxQ='',_fxSel=null,_fxInfo=null,_fxView=null;
 function fxList(){if(!Array.isArray(st.effects))st.effects=[];return st.effects;}
@@ -3399,6 +3435,7 @@ function buildFx(){
   const add=`<button class="fx-chip fx-add" onclick="openFx()">+ Add</button>`;
   h+=`<div class="fx-row">${chips.join('')}${add}</div>`+(chips.length?'':`<div class="fx-empty" style="margin-top:6px">No conditions or effects. Add a condition, a spell or feature (Bless, Bardic Inspiration …) or your own effect.</div>`);
   box.innerHTML=h;
+  statRender(); // Paket E3: Effekte wirken auf AC/Speed
 }
 function fxSetEx(i){const ex=fxEx();st.exhaustion=i===ex?i-1:i;buildFx();statRender();autoSave();}
 function fxEndConc(){st.concActive=null;st.concActiveFeature=null;buildMySpells();buildAbilities();buildFx();autoSave();if(_fxView)closeFx();}
@@ -3458,7 +3495,7 @@ function fxForm(e,own){ // Eingabe für neuen Eintrag (Liste oder „Custom“)
   return `<div class="fx-form">${r?`<div class="fx-sub">${pkEsc(r.sub)}</div>`+fxRule(r.txt,false):''}
     ${own?`<label class="fx-f"><span>Name</span><input class="fx-in" id="fxOwnN" type="text" value="${pkEsc(o.n)}" placeholder="e.g. Blessing of the Forge" oninput="_fxOwn.n=this.value"></label>
       <div class="fx-f"><span>Type</span><div class="pk-chips"><button class="pk-chip${o.t!=='d'?' on':''}" onclick="_fxOwn.t='b';renderFx()">Buff</button><button class="pk-chip${o.t==='d'?' on':''}" onclick="_fxOwn.t='d';renderFx()">Debuff</button></div></div>`:''}
-    <label class="fx-f"><span>Value</span>${val}</label>
+    <label class="fx-f"><span>Value</span>${val}</label>${fxApHtml(o,own)}
     <label class="fx-f"><span>From</span><input class="fx-in" type="text" value="${pkEsc(o.from||'')}" placeholder="e.g. Lia (Bard)" oninput="${ref}.from=this.value"></label>
     <label class="fx-f"><span>Note</span><input class="fx-in" type="text" value="${pkEsc(o.note||'')}" placeholder="optional" oninput="${ref}.note=this.value"></label>
     <label class="fx-chk"><input type="checkbox"${o.conc?' checked':''} onchange="${ref}.conc=this.checked?1:0"> Concentration (marker only)</label>
@@ -3471,6 +3508,7 @@ function fxAdd(own){
   const e={id:fxNewId(),n,k:own?'x':s.k,t:s.t==='d'?'d':'b',v:String(s.v||'').trim(),from:String(s.from||'').trim(),note:String(s.note||'').trim(),conc:s.conc?1:0,dur:r?r.min:null};
   if(!own){if(s.k==='s')e.s=s.s;if(s.k==='f')e.c=s.c;}
   if(e.dur===Infinity)e.dur=-1; // JSON: „bis aufgehoben“
+  if(Array.isArray(s.ap)&&s.ap.length&&!(e.k!=='x'&&ROLL_FX.fx[e.n]))e.ap=s.ap.slice(); // Paket E3: eigene Würfe
   fxList().push(e);window._fxOwn=null;closeFx();buildFx();autoSave();showToast('✦ '+n+' added');
 }
 function fxGet(id){return fxList().find(e=>e.id===id)||null;}
@@ -3485,7 +3523,7 @@ function renderFxView(box){
   else if(v.kind==='cond'){head=v.key;body=`<div class="fx-txt">${fmtDesc(COND_DATA[v.key]||'')}</div>`;btn=`<button class="ws-btn fx-del" onclick="fxTogCond('${pkEsc(v.key)}');closeFx()">Remove</button>`;}
   else{const e=fxGet(v.key);if(!e){closeFx();return;}const r=fxRef(e),d=fxDice(e.v);head=e.n;
     body=`<div class="fx-form" style="padding:0">${r?`<div class="fx-sub">${pkEsc(r.sub)}</div>`:`<div class="fx-sub">${e.t==='d'?'Debuff':'Buff'} · custom</div>`}
-      <label class="fx-f"><span>Value</span><input class="fx-in" type="text" value="${pkEsc(e.v||'')}" placeholder="e.g. +1d4" onchange="fxSet('${e.id}','v',this.value);renderFx()"></label>
+      <label class="fx-f"><span>Value</span><input class="fx-in" type="text" value="${pkEsc(e.v||'')}" placeholder="e.g. +1d4" onchange="fxSet('${e.id}','v',this.value);renderFx()"></label>${fxApHtml(e,false)}
       <label class="fx-f"><span>From</span><input class="fx-in" type="text" value="${pkEsc(e.from||'')}" onchange="fxSet('${e.id}','from',this.value)"></label>
       <label class="fx-f"><span>Note</span><input class="fx-in" type="text" value="${pkEsc(e.note||'')}" onchange="fxSet('${e.id}','note',this.value)"></label>
       <label class="fx-chk"><input type="checkbox"${e.conc?' checked':''} onchange="fxSet('${e.id}','conc',this.checked)"> Concentration (marker only)</label>
@@ -5257,6 +5295,9 @@ const COND_DATA={"Blinded":"While you have the Blinded condition, you experience
 const EFFECT_DATA=[{"n":"Bless","k":"s","t":"b","s":"PHB'24","v":"+1d4 attacks & saves"},{"n":"Guidance","k":"s","t":"b","s":"PHB'24","v":"+1d4 checks (chosen skill)"},{"n":"Resistance","k":"s","t":"b","s":"PHB'24","v":"−1d4 damage (chosen type)"},{"n":"Shield of Faith","k":"s","t":"b","s":"PHB'24","v":"+2 AC"},{"n":"Haste","k":"s","t":"b","s":"PHB'24","v":"+2 AC · Speed ×2"},{"n":"Aid","k":"s","t":"b","s":"PHB'24","v":"+5 HP max"},{"n":"Heroism","k":"s","t":"b","s":"PHB'24","v":"Temp HP each turn"},{"n":"Longstrider","k":"s","t":"b","s":"PHB'24","v":"+10 ft Speed"},{"n":"Barkskin","k":"s","t":"b","s":"PHB'24","v":"AC at least 17"},{"n":"Warding Bond","k":"s","t":"b","s":"PHB'24","v":"+1 AC & saves"},{"n":"Mage Armor","k":"s","t":"b","s":"PHB'24","v":"AC 13 + DEX"},{"n":"Pass without Trace","k":"s","t":"b","s":"PHB'24","v":"+10 Stealth"},{"n":"Enhance Ability","k":"s","t":"b","s":"PHB'24","v":"Advantage (chosen ability)"},{"n":"Beacon of Hope","k":"s","t":"b","s":"PHB'24"},{"n":"Protection from Evil and Good","k":"s","t":"b","s":"PHB'24"},{"n":"Death Ward","k":"s","t":"b","s":"PHB'24"},{"n":"Freedom of Movement","k":"s","t":"b","s":"PHB'24"},{"n":"Fly","k":"s","t":"b","s":"PHB'24","v":"Fly Speed 60 ft"},{"n":"Invisibility","k":"s","t":"b","s":"PHB'24"},{"n":"Greater Invisibility","k":"s","t":"b","s":"PHB'24"},{"n":"Darkvision","k":"s","t":"b","s":"PHB'24","v":"Darkvision 150 ft"},{"n":"Spider Climb","k":"s","t":"b","s":"PHB'24"},{"n":"Water Breathing","k":"s","t":"b","s":"PHB'24"},{"n":"Stoneskin","k":"s","t":"b","s":"PHB'24","v":"Resistance B/P/S"},{"n":"Protection from Energy","k":"s","t":"b","s":"PHB'24","v":"Resistance (chosen type)"},{"n":"Magic Weapon","k":"s","t":"b","s":"PHB'24","v":"+1 attack & damage"},{"n":"Elemental Weapon","k":"s","t":"b","s":"PHB'24","v":"+1 attack · +1d4 damage"},{"n":"Crusader's Mantle","k":"s","t":"b","s":"PHB'24","v":"+1d4 Radiant on hit"},{"n":"Circle of Power","k":"s","t":"b","s":"PHB'24"},{"n":"Aura of Life","k":"s","t":"b","s":"PHB'24"},{"n":"Aura of Purity","k":"s","t":"b","s":"PHB'24"},{"n":"Heroes' Feast","k":"s","t":"b","s":"PHB'24"},{"n":"Sanctuary","k":"s","t":"b","s":"PHB'24"},{"n":"Foresight","k":"s","t":"b","s":"PHB'24"},{"n":"Holy Aura","k":"s","t":"b","s":"PHB'24"},{"n":"Mind Blank","k":"s","t":"b","s":"PHB'24"},{"n":"Shield","k":"s","t":"b","s":"PHB'24","v":"+5 AC"},{"n":"Blur","k":"s","t":"b","s":"PHB'24","v":"Attacks vs you: Disadvantage"},{"n":"Divine Favor","k":"s","t":"b","s":"PHB'24","v":"+1d4 Radiant on hit"},{"n":"Armor of Agathys","k":"s","t":"b","s":"PHB'24","v":"5 Temp HP"},{"n":"Bardic Inspiration","k":"f","t":"b","c":"Bard","d":60,"v":"+1d6","o":["+1d6","+1d8","+1d10","+1d12"]},{"n":"Aura of Protection","k":"f","t":"b","c":"Paladin","v":"+CHA mod to saves"},{"n":"Aura of Courage","k":"f","t":"b","c":"Paladin","v":"Immune to Frightened"},{"n":"Emboldening Bond","k":"f","t":"b","c":"Cleric","d":10,"v":"+1d4 once per turn"},{"n":"Bane","k":"s","t":"d","s":"PHB'24","v":"−1d4 attacks & saves"},{"n":"Slow","k":"s","t":"d","s":"PHB'24","v":"−2 AC & DEX saves · Speed ½"},{"n":"Faerie Fire","k":"s","t":"d","s":"PHB'24","v":"Attacks vs you: Advantage"},{"n":"Hex","k":"s","t":"d","s":"PHB'24","v":"Disadvantage (chosen ability checks)"},{"n":"Bestow Curse","k":"s","t":"d","s":"PHB'24"},{"n":"Ray of Enfeeblement","k":"s","t":"d","s":"PHB'24","v":"−1d8 damage rolls"},{"n":"Mind Sliver","k":"s","t":"d","s":"PHB'24","v":"−1d4 next save"},{"n":"Vicious Mockery","k":"s","t":"d","s":"PHB'24","v":"Disadvantage next attack"},{"n":"Guiding Bolt","k":"s","t":"d","s":"PHB'24","v":"Next attack vs you: Advantage"},{"n":"Shining Smite","k":"s","t":"d","s":"PHB'24","v":"Attacks vs you: Advantage"},{"n":"Starry Wisp","k":"s","t":"d","s":"PHB'24","v":"Can't be Invisible"},{"n":"Chill Touch","k":"s","t":"d","s":"PHB'24","v":"Can't regain HP"},{"n":"Frostbite","k":"s","t":"d","s":"XGE","v":"Disadvantage next weapon attack"},{"n":"Blindness/Deafness","k":"s","t":"d","s":"PHB'24"},{"n":"Hold Person","k":"s","t":"d","s":"PHB'24"},{"n":"Tasha's Hideous Laughter","k":"s","t":"d","s":"PHB'24"},{"n":"Contagion","k":"s","t":"d","s":"PHB'24"},{"n":"Polymorph","k":"s","t":"d","s":"PHB'24"}];
 const EFFECT_RULES={"Heroic Inspiration":"If you (a player character) have Heroic Inspiration, you can expend it to reroll any die immediately after rolling it, and you must use the new roll.\nIf you gain Heroic Inspiration but already have it, it's lost unless you give it to a player character who lacks it."};
 // EFFECT_DATA-END
+// ROLL_FX-START (tools/roll_fx.py; Würfel-Regeln für Zustände/Effekte, Belege aus COND_DATA/ZB_SPELLS/CLASS_DATA)
+const ROLL_FX={"cond":{"Blinded":[{"w":"atk","m":"dis"},{"w":"check","m":"fail","on":0,"note":"requires sight"}],"Deafened":[{"w":"check","m":"fail","on":0,"note":"requires hearing"}],"Exhaustion":[{"w":"d20","m":"ex"}],"Frightened":[{"w":"check atk","m":"dis","note":"source of fear in sight"}],"Grappled":[{"w":"atk","m":"dis","on":0,"note":"target other than the grappler"}],"Incapacitated":[{"w":"init","m":"dis"}],"Invisible":[{"w":"init","m":"adv"},{"w":"atk","m":"adv","note":"unless the target can see you"}],"Paralyzed":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Petrified":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Poisoned":[{"w":"atk check","m":"dis"}],"Prone":[{"w":"atk","m":"dis"}],"Restrained":[{"w":"atk","m":"dis"},{"w":"save","m":"dis","ab":["DEX"]}],"Stunned":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Unconscious":[{"c":"Incapacitated"},{"c":"Prone"},{"w":"save","m":"fail","ab":["STR","DEX"]}]},"fx":{"Bless":[{"w":"atk save","m":"+1d4"}],"Bane":[{"w":"atk save","m":"-1d4"}],"Guidance":[{"w":"check","m":"+1d4","sk":"*","note":"chosen skill"}],"Enhance Ability":[{"w":"check","m":"adv","ab":"*","note":"chosen ability"}],"Hex":[{"w":"check","m":"dis","ab":"*","note":"chosen ability"}],"Warding Bond":[{"w":"save","m":"+1"},{"w":"ac","m":"+1"}],"Pass without Trace":[{"w":"check","m":"+10","sk":"Stealth"}],"Magic Weapon":[{"w":"watk","m":"v","d":"+1"},{"w":"wdmg","m":"v","d":"+1"}],"Elemental Weapon":[{"w":"watk","m":"+1"},{"w":"wdmg","m":"+1d4"}],"Crusader's Mantle":[{"w":"wdmg","m":"+1d4"}],"Divine Favor":[{"w":"wdmg","m":"+1d4"}],"Haste":[{"w":"save","m":"adv","ab":["DEX"]},{"w":"ac","m":"+2"},{"w":"spd","m":"x2"}],"Slow":[{"w":"save","m":"-2","ab":["DEX"]},{"w":"ac","m":"-2"},{"w":"spd","m":"half"}],"Ray of Enfeeblement":[{"w":"d20","m":"dis","ab":["STR"]},{"w":"dmg","m":"-1d8"}],"Mind Sliver":[{"w":"save","m":"-1d4","once":1}],"Vicious Mockery":[{"w":"atk","m":"dis","once":1}],"Frostbite":[{"w":"watk","m":"dis","once":1}],"Beacon of Hope":[{"w":"save","m":"adv","ab":["WIS"]}],"Holy Aura":[{"w":"save","m":"adv"}],"Foresight":[{"w":"d20","m":"adv"}],"Circle of Power":[{"w":"save","m":"adv","on":0,"note":"vs. spells and magical effects"}],"Aura of Purity":[{"w":"save","m":"adv","on":0,"note":"vs. Blinded, Charmed, Deafened, Frightened, Paralyzed, Poisoned, Stunned"}],"Invisibility":[{"c":"Invisible"}],"Greater Invisibility":[{"c":"Invisible"}],"Hold Person":[{"c":"Paralyzed"}],"Tasha's Hideous Laughter":[{"c":"Prone"},{"c":"Incapacitated"}],"Shield of Faith":[{"w":"ac","m":"+2"}],"Shield":[{"w":"ac","m":"+5"}],"Barkskin":[{"w":"ac","m":"min17"}],"Mage Armor":[{"w":"ac","m":"base13"}],"Longstrider":[{"w":"spd","m":"+10"}],"Bardic Inspiration":[{"w":"d20","m":"v","on":0,"once":1,"note":"after a failed D20 Test"}],"Emboldening Bond":[{"w":"d20","m":"+1d4","on":0,"note":"once per turn"}],"Aura of Protection":[{"w":"save","m":"v"}]}};
+// ROLL_FX-END
 // RACE_PICKS-START
 const RACE_PICKS={"Aasimar":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"res":["Necrotic","Radiant"],"tr":[{"id":"rc_healinghands","t":"Healing Hands","tag":"aktion","uses":1,"restore":"long","ic":"✋"},{"id":"rc_celestialrevelation","t":"Celestial Revelation","tag":"bonus","uses":1,"restore":"long","ic":"🌟","minLvl":3}],"spk":[{"t":"Light Bearer","s":["Light"]}]},"Dragonborn":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"ch":[{"t":"Draconic Ancestry","o":[{"n":"Black","dmg":"Acid","res":["Acid"]},{"n":"Blue","dmg":"Lightning","res":["Lightning"]},{"n":"Brass","dmg":"Fire","res":["Fire"]},{"n":"Bronze","dmg":"Lightning","res":["Lightning"]},{"n":"Copper","dmg":"Acid","res":["Acid"]},{"n":"Gold","dmg":"Fire","res":["Fire"]},{"n":"Green","dmg":"Poison","res":["Poison"]},{"n":"Red","dmg":"Fire","res":["Fire"]},{"n":"Silver","dmg":"Cold","res":["Cold"]},{"n":"White","dmg":"Cold","res":["Cold"]}],"lk":["Breath Weapon","Damage Resistance"],"tbl":"Draconic Ancestors:\n• Black: Acid\n• Blue: Lightning\n• Brass: Fire\n• Bronze: Lightning\n• Copper: Acid\n• Gold: Fire\n• Green: Poison\n• Red: Fire\n• Silver: Cold\n• White: Cold"}],"tr":[{"id":"rc_breathweapon","t":"Breath Weapon","tag":"aktion","uses":"pb","restore":"long","ic":"🐉"},{"id":"rc_draconicflight","t":"Draconic Flight","tag":"bonus","uses":1,"restore":"long","ic":"🕊️","minLvl":5}]},"Dwarf":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"res":["Poison"],"adv":[{"t":"Dwarven Resilience","c":"Poisoned"}],"hp":{"t":"Dwarven Toughness","per":1},"tr":[{"id":"rc_stonecunning","t":"Stonecunning","tag":"bonus","uses":"pb","restore":"long","ic":"⛰️"}]},"Elf":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Keen Senses","f":["Insight","Perception","Survival"],"n":1},"ch":[{"t":"Elven Lineage","o":[{"n":"Drow","txt":"You are part of a lineage that grants you supernatural abilities. The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.\nWhen you reach character level 3, you learn the Faerie Fire spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","dv":120,"inn":[{"s":"Faerie Fire","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Dancing Lights"],"3":["Faerie Fire"],"5":["Darkness"]}},{"n":"High Elf","txt":"You are part of a lineage that grants you supernatural abilities. You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list.\nWhen you reach character level 3, you learn the Detect Magic spell. When you reach character level 5, you also learn the Misty Step spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","inn":[{"s":"Detect Magic","l":3,"u":1},{"s":"Misty Step","l":5,"u":1}],"sp":{"1":["Prestidigitation"],"3":["Detect Magic"],"5":["Misty Step"]}},{"n":"Wood Elf","txt":"You are part of a lineage that grants you supernatural abilities. Your Speed increases to 35 feet. You also know the Druidcraft cantrip.\nWhen you reach character level 3, you learn the Longstrider spell. When you reach character level 5, you also learn the Pass without Trace spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","speed":35,"inn":[{"s":"Longstrider","l":3,"u":1},{"s":"Pass without Trace","l":5,"u":1}],"sp":{"1":["Druidcraft"],"3":["Longstrider"],"5":["Pass without Trace"]}}],"ab":["INT","WIS","CHA"],"tbl":"Elven Lineages:\nLineage | Level 1 | Level 3 | Level 5\n• Drow | The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip. | Faerie Fire | Darkness\n• High Elf | You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. | Detect Magic | Misty Step\n• Wood Elf | Your Speed increases to 35 feet. You also know the Druidcraft cantrip. | Longstrider | Pass without Trace"}],"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Gnome":{"src":"XPHB","size":["S"],"speed":30,"dv":60,"ch":[{"t":"Gnomish Lineage","o":[{"n":"Forest Gnome","txt":"You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.","inn":[{"s":"Speak with Animals","l":1,"u":"pb"}],"sp":{"1":["Minor Illusion","Speak with Animals"]}},{"n":"Rock Gnome","txt":"You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.","sp":{"1":["Mending","Prestidigitation"]}}],"ab":["INT","WIS","CHA"]}],"adv":[{"t":"Gnomish Cunning","s":["INT","WIS","CHA"]}]},"Goliath":{"src":"XPHB","size":["M"],"speed":35,"ch":[{"t":"Giant Ancestry","o":[{"n":"Cloud's Jaunt","anc":"Cloud","txt":"As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.","tag":"bonus"},{"n":"Fire's Burn","anc":"Fire","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.","tag":"passiv"},{"n":"Frost's Chill","anc":"Frost","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.","tag":"passiv"},{"n":"Hill's Tumble","anc":"Hill","txt":"When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.","tag":"passiv"},{"n":"Stone's Endurance","anc":"Stone","txt":"When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.","tag":"reaktion"},{"n":"Storm's Thunder","anc":"Storm","txt":"When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.","tag":"reaktion"}]}],"tr":[{"id":"rc_giantancestry","t":"Giant Ancestry","tag":"passiv","uses":"pb","restore":"long","ic":"🗿"},{"id":"rc_largeform","t":"Large Form","tag":"bonus","uses":1,"restore":"long","ic":"🏔️","minLvl":5}]},"Half-Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Skill Versatility","any":2},"asi":{"fix":{"CHA":2},"ch":{"f":["STR","DEX","CON","INT","WIS"],"n":2,"v":1}},"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Half-Orc":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Menacing","fix":["Intimidation"]},"asi":{"fix":{"STR":2,"CON":1}},"tr":[{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Halfling":{"src":"XPHB","size":["S"],"speed":30,"adv":[{"t":"Brave","c":"Frightened"}]},"Human":{"src":"XPHB","size":["S","M"],"speed":30,"sk":{"t":"Skillful","any":1}},"Orc":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"tr":[{"id":"rc_adrenalinerush","t":"Adrenaline Rush","tag":"bonus","uses":"pb","restore":"short","ic":"💨"},{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Tiefling":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"ch":[{"t":"Fiendish Legacy","o":[{"n":"Abyssal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Poison damage. You also know the Poison Spray cantrip.\nWhen you reach character level 3, you learn the Ray of Sickness spell. When you reach character level 5, you also learn the Hold Person spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Poison"],"inn":[{"s":"Ray of Sickness","l":3,"u":1},{"s":"Hold Person","l":5,"u":1}],"sp":{"1":["Poison Spray"],"3":["Ray of Sickness"],"5":["Hold Person"]}},{"n":"Chthonic","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.\nWhen you reach character level 3, you learn the False Life spell. When you reach character level 5, you also learn the Ray of Enfeeblement spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Necrotic"],"inn":[{"s":"False Life","l":3,"u":1},{"s":"Ray of Enfeeblement","l":5,"u":1}],"sp":{"1":["Chill Touch"],"3":["False Life"],"5":["Ray of Enfeeblement"]}},{"n":"Infernal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Fire damage. You also know the Fire Bolt cantrip.\nWhen you reach character level 3, you learn the Hellish Rebuke spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Fire"],"inn":[{"s":"Hellish Rebuke","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Fire Bolt"],"3":["Hellish Rebuke"],"5":["Darkness"]}}],"ab":["INT","WIS","CHA"],"tbl":"Fiendish Legacies:\nLegacy | Level 1 | Level 3 | Level 5\n• Abyssal | You have Resistance to Poison damage. You also know the Poison Spray cantrip. | Ray of Sickness | Hold Person\n• Chthonic | You have Resistance to Necrotic damage. You also know the Chill Touch cantrip. | False Life | Ray of Enfeeblement\n• Infernal | You have Resistance to Fire damage. You also know the Fire Bolt cantrip. | Hellish Rebuke | Darkness"}],"spk":[{"t":"Otherworldly Presence","s":["Thaumaturgy"]}]}};
 // RACE_PICKS-END
@@ -8151,7 +8192,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02j';
+const APP_VERSION = 'willow-app-2026-10-02k';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -8304,6 +8345,7 @@ let diceCurrentMod=0;
 let diceCurrentLabel='';
 
 function openDice(label,mod){
+  rlClear(); // Paket E3: Chips des vorigen Wurfs weg (freie Würfe, Würfel-Knopf)
   diceCurrentLabel=label||'';
   diceCurrentMod=mod||0;
   const modal=document.getElementById('diceModal');
@@ -8319,9 +8361,8 @@ function closeDice(){
   const modal=document.getElementById('diceModal');
   if(modal) modal.classList.remove('on');
 }
-function rollCheck(label,mod){
-  openDice(label,mod);
-  setTimeout(()=>doRoll(`1d20${mod>=0?'+':''}${mod}`),120);
+function rollCheck(label,mod,ctx){ // seit Paket E3: d20-Wurf mit Effekten (rollD20); ctx = {k, ab, sk, …}
+  rollD20(Object.assign({l:label,mod},ctx||{}));
 }
 function rollPreset(spec){
   diceCurrentLabel='';
@@ -8395,6 +8436,197 @@ function renderDiceHistory(){
   if(!diceHistory.length){wrap.innerHTML='<div style="font-size:var(--fs-sm);color:var(--muted);text-align:center;padding:6px">No rolls yet</div>';return;}
   wrap.innerHTML=diceHistory.map(h=>'<div class="dice-history-row"><span>'+(h.label?h.label+' — ':'')+h.spec+'</span><span class="dh-result">'+h.total+'</span></div>').join('');
 }
+
+// ── WÜRFELN MIT EFFEKTEN (Paket E Teil 3, 02.10.2026; REFERENZ B19) ────────────────────────────────────────────────
+// rollD20({k,l,mod,ab,sk,init,wpn,dmg,dt}) – k: 'check' (auch Initiative, init:1; XPHB: Initiative = Dexterity check) |
+// 'save' | 'atk' | '' (ohne Art); rollDmg({l,spec,wpn,dt,crit,ab}). Modifikatoren erscheinen als Chips im Würfel-Dialog
+// (#diceMods): Regeln aus ROLL_FX (Zustände/Effekte, Belege im Regeltext, tools/roll_fx.py), Exhaustion (−2 × Stufe),
+// Rassen-Vorteile (rcAdv), Features „Advantage on Initiative rolls“, Rüstung mit Stealth-Nachteil (ARMOR_DATA, nur bei
+// berechneter AC), dazu Advantage/Disadvantage von Hand. Antippen schaltet an/aus, ohne neu zu würfeln (jeder Würfel wird
+// einmal geworfen und gemerkt, auch der zweite d20). Nichts still ändern: Einmal-Effekte (once) entfernt erst der Knopf
+// „… used – remove“, Heroic Inspiration wird nur per Knopf verbraucht. Eigene Effekte: Feld ap (['atk','save','check','dmg','ac']).
+let _rl=null;
+const RL_AP=[['atk','Attack rolls'],['save','Saving throws'],['check','Ability checks'],['dmg','Damage'],['ac','AC']];
+function rlParse(spec,strict){ // "1d8+3", "+1d4 attacks", "−2" → {d:[{n,s,g}],k} | null; strict = ganze Eingabe
+  const t=String(spec==null?'':spec).replace(/[−–]/g,'-').replace(/\s+/g,'').toLowerCase();
+  const re=/([+-]?)(?:(\d*)d(\d+)|(\d+))/y,d=[];let k=0,m,pos=0;
+  while(pos<t.length){re.lastIndex=pos;m=re.exec(t);if(!m||(pos>0&&!m[1]))break;
+    const g=m[1]==='-'?-1:1;
+    if(m[3])d.push({n:Math.max(1,Math.min(40,parseInt(m[2])||1)),s:Math.max(2,Math.min(100,+m[3])),g});else k+=g*(+m[4]);
+    pos=re.lastIndex;}
+  if(!pos||(strict&&pos<t.length))return null;
+  return {d,k};
+}
+function rlSpecTxt(P){if(!P)return '';const a=P.d.map(t=>(t.g<0?'−':'+')+t.n+'d'+t.s);if(P.k)a.push((P.k<0?'−':'+')+Math.abs(P.k));return a.join('');}
+function rlDice(key,n,s){const c=_rl.cache,a=c[key]||(c[key]=[]);while(a.length<2*n)a.push(1+Math.floor(Math.random()*s));return a;}
+function rlEval(id,P,crit){ // Summe eines Teils; crit = Würfel doppelt (nur positive Würfel, XPHB „roll the damage dice twice“)
+  let v=P.k;const txt=[];
+  P.d.forEach((t,i)=>{const n=crit&&t.g>0?2*t.n:t.n,a=rlDice(id+':'+i,t.n,t.s).slice(0,n),x=a.reduce((p,q)=>p+q,0);v+=t.g*x;txt.push(`${t.g<0?'−':''}${n}d${t.s} (${a.join('+')})`);});
+  if(P.k)txt.push((P.k<0?'− ':'+ ')+Math.abs(P.k));
+  return {v,txt:txt.join(' ')};
+}
+function rlOwnRules(e){ // eigener Effekt / Zauber ohne ROLL_FX-Eintrag: Würfe aus e.ap, Wert aus e.v
+  const ap=Array.isArray(e.ap)?e.ap.filter(x=>RL_AP.some(y=>y[0]===x)):[];if(!ap.length)return [];
+  const v=String(e.v||''),m=/disadvantage/i.test(v)?'dis':/advantage/i.test(v)?'adv':'v',r=[];
+  const roll=ap.filter(x=>x!=='ac');if(roll.length)r.push({w:roll.join(' '),m});
+  if(ap.includes('ac'))r.push({w:'ac',m:'v'});
+  return r;
+}
+function rlFxRules(e){return e.k!=='x'&&ROLL_FX.fx[e.n]?ROLL_FX.fx[e.n]:rlOwnRules(e);}
+function rlHit(r,R){ // 1 = gilt, 0 = nur anbieten (Attribut des Wurfs unbekannt), −1 = gilt nicht
+  const k=R.k,ok=r.w.split(' ').some(x=>x==='d20'?k!=='dmg':x==='atk'?k==='atk':x==='watk'?(k==='atk'&&!!R.wpn)
+    :x==='save'?k==='save':x==='check'?k==='check':x==='init'?(k==='check'&&!!R.init):x==='dmg'?k==='dmg':x==='wdmg'?(k==='dmg'&&!!R.wpn):false);
+  if(!ok)return -1;
+  if(r.sk&&(!R.sk||(r.sk!=='*'&&r.sk!==R.sk)))return -1;
+  if(r.ab==='*'&&!R.ab)return -1;
+  if(Array.isArray(r.ab)){if(!R.ab)return 0;if(!r.ab.includes(R.ab))return -1;}
+  return 1;
+}
+function rlChosen(r,e,R){ // „vom Wirker gewählt“: an, wenn Note/From das Attribut bzw. den Skill nennt
+  const t=' '+((e&&e.note)||'')+' '+((e&&e.from)||'')+' ';
+  if(r.ab==='*'){const n=(ATTRS.find(a=>a.k===R.ab)||{}).l||'';return new RegExp(`\\b(${R.ab}|${n})\\b`,'i').test(t);}
+  if(r.sk==='*')return t.toLowerCase().includes(String(R.sk).toLowerCase());
+  return true;
+}
+function rlParts(R){
+  const out=[],d20=R.k!=='dmg',add=p=>{p.id='p'+out.length;out.push(p);};
+  const push=(r,e,lbl)=>{
+    const h=rlHit(r,R);if(h<0)return;
+    let on=h===1&&r.on!==0&&(r.ab!=='*'&&r.sk!=='*'||rlChosen(r,e,R)),m=r.m,P=null;
+    if(m==='ex'){const ex=fxEx();if(!ex)return;P={d:[],k:-2*ex};m='n';lbl=`Exhaustion ${ex}`;}
+    else if(m==='v'){P=rlParse(e&&e.v);if(!P||(!P.d.length&&!P.k))P=r.d?rlParse(r.d):null;m='n';}
+    else if(!['adv','dis','fail'].includes(m)){P=rlParse(m);m='n';}
+    add({l:lbl,m,P,on:on&&(m!=='n'||!!P),na:m==='n'&&!P,once:r.once?1:0,fx:e?e.id:null,note:r.note||''});
+  };
+  if(d20){add({l:'',m:'adv',on:0,man:1});add({l:'',m:'dis',on:0,man:1});}
+  if(R.k==='dmg')add({l:'Critical hit',m:'crit',on:!!R.crit,man:1});
+  const seen=new Set(),cond=(c,via)=>{if(seen.has(c))return;seen.add(c);
+    (ROLL_FX.cond[c]||[]).forEach(r=>{if(r.c)cond(r.c,via||c);else push(r,null,via&&via!==c?`${c} (${via})`:c);});};
+  fxConds().forEach(c=>cond(c));
+  if(d20)(ROLL_FX.cond.Exhaustion||[]).forEach(r=>push(r,null,'Exhaustion'));
+  fxList().forEach(e=>rlFxRules(e).forEach(r=>{if(r.c)cond(r.c,e.n);else push(r,e,e.n);}));
+  if(R.k==='save'&&R.ab)rcAdv().forEach(x=>{if(x.s&&x.s.includes(R.ab))add({l:x.t,m:'adv',on:1});else if(x.c)add({l:x.t,m:'adv',on:0,note:'vs. '+x.c});});
+  if(R.k==='check'){
+    stFeatures().forEach(f=>{const t=f.desc||'';
+      if(R.init&&/Advantage on Initiative rolls/i.test(t)&&!out.some(p=>p.l===f.name))add({l:f.name,m:'adv',on:1});
+      if(R.sk==='Athletics'&&/Advantage on Initiative rolls and Strength \(Athletics\) checks/i.test(t))add({l:f.name,m:'adv',on:1});});
+    if(R.sk==='Stealth'&&statOn('ac')){const ar=stArmorOf(st.statSrc.ac);if(ar&&ar.st)add({l:ar.n,m:'dis',on:1});}
+  }
+  return out;
+}
+function rlStatFx(w){ // aktive Effekte für AC ('ac') bzw. Speed ('spd') → [{l,m,P}]
+  const out=[];
+  fxList().forEach(e=>rlFxRules(e).forEach(r=>{if(r.c||r.w!==w)return;
+    let P=null,m=r.m;if(m==='v'){P=rlParse(e.v);if(!P||P.d.length||!P.k)return;m='n';}else if(/^[+-]\d+$/.test(m)){P=rlParse(m);m='n';}
+    out.push({l:e.n,m,P});}));
+  return out;
+}
+function rlCalc(){
+  const R=_rl,on=R.parts.filter(p=>p.on&&!p.na),br=[];let t=0;
+  if(R.k==='dmg'){
+    const crit=on.some(p=>p.m==='crit');R.critOn=crit;
+    if(R.P){const b=rlEval('base',R.P,crit);t+=b.v;br.push(b.txt);}
+    on.filter(p=>p.P).forEach(p=>{const e=rlEval(p.id,p.P,crit);t+=e.v;br.push(`${/^[−-]/.test(e.txt)?'':'+ '}${e.txt} ${p.l}`);});
+    R.nat=null;R.fail=null;R.total=Math.max(0,t);
+  }else{
+    const adv=on.some(p=>p.m==='adv'),dis=on.some(p=>p.m==='dis'),a=rlDice('d20',1,20);
+    R.mode=adv&&!dis?'adv':dis&&!adv?'dis':adv&&dis?'both':'n';
+    const u=R.mode==='adv'?Math.max(a[0],a[1]):R.mode==='dis'?Math.min(a[0],a[1]):a[0];
+    R.nat=u;t=u+(R.mod||0);
+    br.push(R.mode==='adv'||R.mode==='dis'?`d20 ${a[0]} | ${a[1]} (${R.mode==='adv'?'Advantage':'Disadvantage'})`:`d20 ${a[0]}${R.mode==='both'?' (Adv. and Dis. cancel)':''}`);
+    if(R.mod)br.push(`${R.mod<0?'−':'+'} ${Math.abs(R.mod)} mod`);
+    on.filter(p=>p.P).forEach(p=>{const e=rlEval(p.id,p.P,false);t+=e.v;br.push(`${e.v<0?'−':'+'} ${Math.abs(e.v)} ${p.l}`);});
+    R.fail=on.find(p=>p.m==='fail')||null;R.total=t;
+  }
+  R.br=br;
+}
+function rlChipHtml(p,i){
+  const sp=p.P?rlSpecTxt(p.P):'';
+  let main;
+  if(p.man&&p.m==='adv')main='Advantage';else if(p.man&&p.m==='dis')main='Disadvantage';else if(p.m==='crit')main='Critical hit';
+  else if(p.m==='adv')main=`<b>Adv.</b> ${pkEsc(p.l)}`;else if(p.m==='dis')main=`<b>Dis.</b> ${pkEsc(p.l)}`;
+  else if(p.m==='fail')main=`<b>Auto-fail</b> ${pkEsc(p.l)}`;else main=`${pkEsc(p.l)} <b>${p.na?'set value':pkEsc(sp)}</b>`;
+  const neg=!!p.P&&(p.P.k<0||p.P.d.some(t=>t.g<0)),cls=p.m==='adv'||p.m==='crit'?'g':p.m==='dis'||p.m==='fail'||neg?'r':'';
+  return `<button class="rl-chip ${cls}${p.on&&!p.na?' on':''}${p.na?' na':''}" onclick="rlTog(${i})"${p.na?' title="Enter a number in the effect (e.g. +3)"':''}><span>${p.on&&!p.na?'✓ ':''}${main}</span>${p.note?`<small>${pkEsc(p.note)}</small>`:''}</button>`;
+}
+function rlModsHtml(){
+  const R=_rl;if(!R)return '';
+  const chips=R.parts.map(rlChipHtml).join('');
+  const acts=[];
+  acts.push(`<button class="rl-act" onclick="rlReroll()">↻ Roll again</button>`);
+  if(R.k==='atk'&&R.dmg){const P=rlParse(R.dmg);if(P)acts.push(`<button class="rl-act go" onclick="rlDmgFromAtk()">🎲 ${R.nat===20?'Critical damage':'Damage'}</button>`);}
+  if(R.k!=='dmg'&&(st.ins||[]).some(Boolean)&&!R.hi)acts.push(`<button class="rl-act" onclick="rlHeroic()" title="Reroll the lowest d20, you must use the new roll (XPHB)">✦ Heroic Inspiration: reroll</button>`);
+  R.parts.forEach((p,i)=>{if(p.on&&p.once&&p.fx&&fxGet(p.fx))acts.push(`<button class="rl-act" onclick="rlUsed(${i})">${pkEsc(p.l)} used · remove</button>`);});
+  const hint=R.parts.length>(R.k==='dmg'?1:2)?'':`<div class="rl-hint">${R.k==='dmg'?'Damage effects (Divine Favor …) appear here when active.':'Conditions and effects (Bless, Poisoned …) appear here when active.'}</div>`;
+  return `<div class="rl-chips">${chips}</div>${hint}<div class="rl-acts">${acts.join('')}</div>`;
+}
+function rlShow(anim){
+  rlCalc();const R=_rl,stage=document.getElementById('diceStage'),mods=document.getElementById('diceMods');if(!stage)return;
+  const cls=R.k==='dmg'?(R.critOn?' crit':''):R.fail?' fail':R.nat===20?' crit':R.nat===1?' fail':'';
+  const head=pkEsc(R.l)+(R.k==='dmg'&&R.dt?` · ${pkEsc(R.dt)}`:'')+(R.fail?` <span class="rl-bad">· automatic failure (${pkEsc(R.fail.l)})</span>`:'')+(R.k!=='dmg'&&R.nat===20?' <span class="rl-ok">· natural 20</span>':R.k!=='dmg'&&R.nat===1?' <span class="rl-bad">· natural 1</span>':'');
+  stage.innerHTML=`<div class="die-shape${anim?' rolling':cls}" id="rlDie">${anim?'?':R.total}</div><div class="dice-total">${head}</div><div class="dice-breakdown">${pkEsc(R.br.join('   '))}</div>`;
+  if(mods)mods.innerHTML=rlModsHtml();
+  const spec=R.k==='dmg'?(R.critOn?'Crit ':'')+(R.spec||''):`d20${R.mode==='adv'?' (Adv)':R.mode==='dis'?' (Dis)':''}${R.mod?fmt(R.mod):''}`;
+  if(!R.h){R.h={spec,label:R.l,total:R.total};diceHistory.unshift(R.h);if(diceHistory.length>DICE_HISTORY_MAX)diceHistory.length=DICE_HISTORY_MAX;}
+  else{R.h.spec=spec;R.h.total=R.total;}
+  renderDiceHistory();
+  if(anim){const die=document.getElementById('rlDie');let n=0;const sides=R.k==='dmg'?(R.P&&R.P.d[0]?R.P.d[0].s:6):20;
+    const tk=setInterval(()=>{if(!die.isConnected){clearInterval(tk);return;}die.textContent=1+Math.floor(Math.random()*sides);if(++n>6){clearInterval(tk);die.classList.remove('rolling');if(cls)die.className='die-shape'+cls;die.textContent=_rl===R?R.total:die.textContent;}},55);}
+}
+function rlStart(R){
+  R.cache={};R.parts=rlParts(R);
+  openDice(R.l,0);_rl=R; // openDice räumt den vorigen Wurf ab (rlClear)
+  const inp=document.getElementById('diceCustomInput');
+  if(inp)inp.value=R.k==='dmg'?(R.spec||''):`1d20${R.mod?fmt(R.mod):''}`;
+  rlShow(true);
+}
+function rollD20(o){rlStart({k:o.k||'',l:o.l||'Roll',mod:parseInt(o.mod)||0,ab:o.ab||'',sk:o.sk||'',init:o.init?1:0,wpn:o.wpn?1:0,dmg:o.dmg||'',dt:o.dt||'',dl:o.dl||''});}
+function rollDmg(o){const P=rlParse(o.spec);if(!P){showToast('Damage: enter dice, e.g. 1d8+3');return;}
+  rlStart({k:'dmg',l:o.l||'Damage',spec:String(o.spec).trim(),P,wpn:o.wpn?1:0,dt:o.dt||'',crit:!!o.crit,ab:o.ab||''});}
+function rlTog(i){const R=_rl,p=R&&R.parts[i];if(!p)return;if(p.na){showToast('Enter a value in the effect first (e.g. +3)');return;}p.on=!p.on;rlShow(false);}
+function rlReroll(){const R=_rl;if(!R)return;R.cache={};R.h=null;R.hi=0;rlShow(true);}
+function rlHeroic(){const R=_rl;if(!R||R.k==='dmg'||!(st.ins||[]).some(Boolean))return;
+  const a=rlDice('d20',1,20),i=R.mode==='adv'||R.mode==='dis'?(a[0]<=a[1]?0:1):0,old=a[i];a[i]=1+Math.floor(Math.random()*20);
+  R.hi=1;st.ins=[0,0,0];const el=document.getElementById('ins0');if(el)el.classList.remove('f');autoSave();
+  showToast(`✦ Heroic Inspiration used: d20 ${old} → ${a[i]}`);rlShow(false);}
+function rlUsed(i){const R=_rl,p=R&&R.parts[i];if(!p||!p.fx)return;const a=fxList(),j=a.findIndex(e=>e.id===p.fx);if(j<0)return;
+  const n=a[j].n;a.splice(j,1);buildFx();autoSave();showToast('✕ '+n+' removed');rlShow(false);}
+function rlDmgFromAtk(){const R=_rl;if(!R||!R.dmg)return;rollDmg({l:R.dl||R.l,spec:R.dmg,wpn:R.wpn,dt:R.dt,crit:R.nat===20,ab:R.ab});}
+const RL_W={d20:'D20 Tests',atk:'attack rolls',watk:'weapon attacks',save:'saving throws',check:'ability checks',init:'Initiative',dmg:'damage',wdmg:'weapon damage',ac:'AC',spd:'Speed'};
+function rlRulesTxt(rs,e){ // Kurzbeschreibung der Regeln eines Effekts (Fenster „Effects & Conditions“)
+  const M={adv:'Advantage',dis:'Disadvantage',fail:'automatic failure',ex:'−2 × level',min17:'at least 17',base13:'13 + DEX (no armor)',x2:'doubled',half:'halved'};
+  return rs.map(r=>r.c?`${r.c} condition`:`${r.w.split(' ').map(x=>RL_W[x]||x).join(', ')}${Array.isArray(r.ab)?' ('+r.ab.join('/')+')':r.ab==='*'?' (chosen ability)':''}${r.sk&&r.sk!=='*'?' ('+r.sk+')':r.sk==='*'?' (chosen skill)':''}: ${M[r.m]||(r.m==='v'?((e&&e.v)||r.d||'value'):r.m)}${r.on===0?' (optional)':''}`).join(' · ');
+}
+function rlClear(){_rl=null;const m=document.getElementById('diceMods');if(m)m.innerHTML='';}
+// Aufrufe aus der Oberfläche
+function rollAttr(k){attrSync();const a=ATTRS.find(x=>x.k===k);if(!a)return;rollD20({k:'check',ab:k,l:a.l+' Check',mod:md(st.attrs[k]||10)});}
+function rollInit(){statSync();rollD20({k:'check',ab:'DEX',init:1,l:'Initiative',mod:parseInt(document.getElementById('ini')?.value)||0});}
+function rollSpellAtk(){const a=document.getElementById('spAttr')?.value||'';calcSpell();rollD20({k:'atk',ab:a,l:'Spell Attack',mod:parseInt(document.getElementById('spAtk')?.value)||0});}
+function rlAtkNum(s){const m=/[+-]?\s*\d+/.exec(String(s||'').replace(/[−–]/g,'-'));return m?parseInt(m[0].replace(/\s/g,'')):0;}
+function rollWpn(i,dmg){const w=(st.weapons||[])[i];if(!w)return;const n=(w.name||'').trim()||'Weapon';
+  if(dmg)rollDmg({l:n+' Damage',spec:w.dmg,wpn:1,dt:w.type});
+  else rollD20({k:'atk',wpn:1,l:n+' Attack',mod:rlAtkNum(w.atk),dmg:w.dmg,dt:w.type,dl:n+' Damage'});}
+function rollNw(i,dmg){const w=crWeapons()[i];if(!w)return;
+  if(dmg)rollDmg({l:w.n+' Damage',spec:w.dmg,wpn:1,dt:w.type,ab:w.ab});
+  else rollD20({k:'atk',wpn:1,ab:w.ab,l:w.n+' Attack',mod:rlAtkNum(w.atk),dmg:w.dmg,dt:w.type,dl:w.n+' Damage'});}
+function rlWpnBtns(fn,i,atk,dmg){const P=rlParse(dmg);
+  return `<div class="rl-wbtns"><button class="rl-wbtn" id="${fn}A${i}" onclick="${fn}(${i},0)">🎲 Attack <b>${pkEsc(fmt(rlAtkNum(atk)))}</b></button>`
+    +`<button class="rl-wbtn" id="${fn}D${i}"${P?'':' disabled'} onclick="${fn}(${i},1)">🎲 Damage <b>${P?pkEsc(String(dmg).trim()):'—'}</b></button></div>`;}
+function rlWpnUpd(i){ // Beschriftung nach Eingabe aktualisieren (ohne Neuaufbau, damit die Tastatur offen bleibt)
+  const w=(st.weapons||[])[i];if(!w)return;const a=document.getElementById('rollWpnA'+i),d=document.getElementById('rollWpnD'+i),P=rlParse(w.dmg);
+  if(a)a.querySelector('b').textContent=fmt(rlAtkNum(w.atk));
+  if(d){d.disabled=!P;d.querySelector('b').textContent=P?String(w.dmg).trim():'—';}}
+// Fenster „Effects & Conditions“: wo ein Effekt mitrechnet (feste Regeln als Text, eigene als Auswahl e.ap)
+function fxApChips(ap,pre){return `<div class="pk-chips">${RL_AP.map(([k,l])=>`<button class="pk-chip${(ap||[]).includes(k)?' on':''}" onclick="${pre}'${k}')">${l}</button>`).join('')}</div>`;}
+function fxApHtml(e,own){
+  const rs=!own&&e.k!=='x'&&ROLL_FX.fx[e.n];
+  if(rs)return `<div class="fx-f"><span>Counts in</span><div class="fx-ap">${pkEsc(rlRulesTxt(rs,e))}</div></div>`;
+  const pre=own?'fxOwnAp(':e.id?`fxApTog('${e.id}',`:'fxSelAp(';
+  return `<div class="fx-f"><span>Counts in</span>${fxApChips(e.ap,pre)}</div><div class="rest-note">Optional: the value is added to these rolls (e.g. +2, +1d4, Advantage).</div>`;
+}
+function fxOwnAp(k){const o=window._fxOwn;if(!o)return;const a=o.ap=o.ap||[],i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);renderFx();}
+function fxSelAp(k){const o=_fxSel;if(!o)return;const a=o.ap=o.ap||[],i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);renderFxList();}
+function fxApTog(id,k){const e=fxGet(id);if(!e)return;const a=e.ap=e.ap||[],i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);if(!a.length)delete e.ap;buildFx();autoSave();renderFx();}
 
 slBuildFilters();
 initApp();
@@ -8528,6 +8760,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
         <div class="dice-total"></div>
         <div class="dice-breakdown"></div>
       </div>
+      <div class="rl-mods" id="diceMods"></div>
       <div class="dice-presets">
         <button class="dice-preset-btn" onclick="rollPreset('1d4')">d4</button>
         <button class="dice-preset-btn" onclick="rollPreset('1d6')">d6</button>
@@ -8539,7 +8772,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
         <button class="dice-preset-btn" onclick="rollPreset('1d100')">d100</button>
       </div>
       <div class="dice-custom-row">
-        <input type="text" id="diceCustomInput" placeholder="z.B. 2d6+3">
+        <input type="text" id="diceCustomInput" placeholder="e.g. 2d6+3">
         <button onclick="rollCustom()">Roll</button>
       </div>
       <div class="dice-history">

@@ -8,7 +8,7 @@ Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuers
 |---|---|---|
 | `index.html` | die App – **einzige maßgebliche Version** (B1a) | nie mit Read, nur Ausschnitte per grep/sed |
 | `docs/ANLEITUNG.md` | diese Datei: A1, A4, A6 (Kurzform), A7–A11, B1a | jede Sitzung ganz |
-| `docs/REFERENZ.md` | Technik: A2, A3, A5, B1–B9, B11–B14 | gezielt, z. B. `grep -n "^## B9" -A60 willow/docs/REFERENZ.md` |
+| `docs/REFERENZ.md` | Technik: A2, A3, A5, B1–B9, B11–B19 | gezielt, z. B. `grep -n "^## B9" -A60 willow/docs/REFERENZ.md` |
 | `docs/ARCHIV.md` | Verlauf: A6 (Reihenfolge), Liste der Regressionstests, B10 (Änderungsprotokoll) | nur beim Nachforschen; B10 wird dort ergänzt |
 | `docs/FIXLISTE.md` | offene Arbeitspakete und Punkte | bei Paket-Arbeit ganz |
 | `docs/FIXLISTE_INFO.md` | Punkte „nur zur Info“/„nur auf Wunsch“, Verlauf, Erledigtes | nur bei Bedarf |
@@ -51,7 +51,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A6. Reihenfolge (Kurzform)
 
-Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: E → P → A2 → F → J → M → N → O (O niedrige Prio) (J auch zusammen mit F möglich); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
+Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: P → A2 → F → J → M → N → O (O niedrige Prio) (J auch zusammen mit F möglich); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
 
 ## A7. Arbeitsregeln
 

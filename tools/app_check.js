@@ -1850,6 +1850,57 @@ const REGRESSION = [
       w.eval('st.conditions=[];st.effects=[];st.exhaustion=0;st.mySpells=[]'); w.buildFx();
       return true;
     } },
+  { name: 'Paket E3: Würfeln mit Effekten – Chips (Bless, Exhaustion, Poisoned, Guidance per Note, Bardic Inspiration aus), Umschalten ohne Neuwurf, Vor-/Nachteil, Auto-fail, Kette Stunned → Incapacitated, Waffen/Attribut/Initiative/Zauberangriff, Crit-Schaden, Heroic Inspiration, Effekte auf AC/Speed, eigener Effekt', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      if (typeof w.rollD20 !== 'function' || !w.eval('typeof ROLL_FX==="object"&&ROLL_FX.fx.Bless&&ROLL_FX.cond.Poisoned')) return 'rollD20/ROLL_FX fehlen';
+      sel('Paladin', '', 7);
+      w.eval("Object.assign(st.attrs,{STR:16,DEX:10,CON:14,INT:8,WIS:12,CHA:16});st.attrSrc=null;buildAttrs();buildSaves();buildSkills()");
+      w.eval(`st.exhaustion=2;st.conditions=['Poisoned'];st.effects=[{id:'b1',n:'Bless',k:'s',s:"PHB'24",t:'b',v:'+1d4 attacks & saves'},{id:'b2',n:'Bardic Inspiration',k:'f',c:'Bard',t:'b',v:'+1d8'},{id:'b3',n:'Divine Favor',k:'s',s:"PHB'24",t:'b',v:''},{id:'b4',n:'Guidance',k:'s',s:"PHB'24",t:'b',v:'',note:'Stealth'}];buildFx();`);
+      const P = n => w.eval(`(_rl.parts.find(p=>p.l===${JSON.stringify(n)})||{})`), on = n => !!P(n).on;
+      // Save über den 🎲 der Save-Zeile
+      const con = [...d.querySelectorAll('#savesGrid .sk-row')].find(r => r.textContent.includes('Constitution')); con.querySelector('.sk-roll-ic').click();
+      if (w.eval('_rl.k') !== 'save' || w.eval('_rl.ab') !== 'CON') return 'Save-Würfel ohne Kontext';
+      if (!on('Bless') || !on('Exhaustion 2') || on('Bardic Inspiration') || w.eval("_rl.parts.some(p=>p.l==='Poisoned')")) return 'Save-Chips: ' + w.eval("_rl.parts.map(p=>p.l+(p.on?'+':'-')).join()");
+      w.rlCalc(); const t1 = w.eval('_rl.total'), a = w.eval('_rl.cache.d20[0]'), bl = w.eval("_rl.cache[_rl.parts.find(p=>p.l==='Bless').id+':0'][0]"), mod = w.eval('_rl.mod');
+      if (t1 !== a + mod + bl - 4) return `Summe ${t1} ≠ ${a}+${mod}+${bl}−4`;
+      const bi = w.eval("_rl.parts.findIndex(p=>p.l==='Bardic Inspiration')"); w.rlTog(bi);
+      if (w.eval('_rl.cache.d20[0]') !== a || w.eval('_rl.total') !== t1 + w.eval(`_rl.cache[_rl.parts[${bi}].id+':0'][0]`)) return 'Umschalten würfelt neu oder rechnet falsch';
+      if (!d.getElementById('diceMods').textContent.includes('Bardic Inspiration used')) return 'Knopf „used · remove“ fehlt';
+      w.rlUsed(bi); if (w.eval("st.effects.some(e=>e.n==='Bardic Inspiration')")) return 'Bardic Inspiration nicht entfernt';
+      // Skill: Poisoned = Nachteil (niedrigerer d20), Guidance nur beim Skill aus der Note
+      w.rollD20({ k: 'check', ab: 'DEX', sk: 'Stealth', l: 'Stealth', mod: 0 }); w.rlCalc();
+      const c = w.eval('_rl.cache.d20'); if (w.eval('_rl.mode') !== 'dis' || w.eval('_rl.nat') !== Math.min(c[0], c[1]) || !on('Guidance') || w.eval("_rl.parts.some(p=>p.l==='Bless')")) return 'Stealth: Nachteil/Guidance/Bless';
+      w.rollD20({ k: 'check', ab: 'WIS', sk: 'Insight', l: 'Insight', mod: 0 }); if (on('Guidance')) return 'Guidance ohne passende Note an';
+      w.rlTog(0); if (w.eval('_rl.mode') !== 'both') return 'Vorteil von Hand + Poisoned heben sich nicht auf (XPHB)';
+      // Waffe: Knöpfe, Angriff mit nat 20 → Crit-Schaden (Würfel doppelt), Umschalten ohne Neuwurf
+      w.eval("st.weapons=[{name:'Longsword',atk:'+6',dmg:'1d8+3',type:'Slashing'}]"); w.buildWeapons();
+      if (!d.getElementById('rollWpnA0') || !d.getElementById('rollWpnD0').textContent.includes('1d8+3')) return 'Waffen-Knöpfe fehlen';
+      d.getElementById('rollWpnA0').click(); if (w.eval('_rl.mod') !== 6 || !on('Bless') || !on('Poisoned')) return 'Angriff: Bonus/Chips';
+      w.eval('_rl.cache.d20=[20,20]'); w.rlShow(false); if (!d.getElementById('diceMods').textContent.includes('Critical damage')) return 'nat 20 ohne „Critical damage“';
+      w.rlDmgFromAtk(); w.rlCalc();
+      const b = w.eval("_rl.cache['base:0']"), df = w.eval("_rl.cache[_rl.parts.find(p=>p.l==='Divine Favor').id+':0']");
+      if (w.eval('_rl.k') !== 'dmg' || w.eval('_rl.total') !== b[0] + b[1] + 3 + df[0] + df[1]) return 'Crit-Schaden: ' + w.eval('_rl.br.join(" ")');
+      w.rlTog(w.eval("_rl.parts.findIndex(p=>p.m==='crit')")); if (w.eval('_rl.total') !== b[0] + 3 + df[0]) return 'Crit aus';
+      // Attribut, Initiative, Zauberangriff
+      d.getElementById('m_STR').click(); if (w.eval('_rl.k') !== 'check' || w.eval('_rl.mod') !== 3 || w.eval('_rl.ab') !== 'STR') return 'Attributswurf';
+      w.eval("st.conditions=['Stunned']"); w.rollD20({ k: 'save', ab: 'DEX', l: 'D', mod: 0 }); w.rlCalc(); if (!w.eval('!!_rl.fail')) return 'Stunned: kein Auto-fail auf DEX-Save';
+      w.rollInit(); if (!w.eval("_rl.parts.some(p=>p.m==='dis'&&p.on&&/Incapacitated \\(Stunned\\)/.test(p.l))") || !w.eval('_rl.init')) return 'Initiative: Stunned → Incapacitated';
+      w.eval("document.getElementById('spAttr').value='CHA'"); w.rollSpellAtk(); if (w.eval('_rl.k') !== 'atk' || w.eval('_rl.mod') !== w.eval('prof()') + 3 || w.eval('_rl.wpn')) return 'Zauberangriff';
+      // Heroic Inspiration nur per Knopf
+      w.eval('st.ins=[1,0,0]'); w.rollD20({ k: 'save', ab: 'WIS', l: 'W', mod: 0 }); if (!w.eval('st.ins[0]')) return 'Heroic Inspiration still verbraucht';
+      w.rlHeroic(); if (w.eval('st.ins.some(Boolean)')) return 'Heroic Inspiration nicht verbraucht';
+      // AC/Speed aus Effekten, eigener Effekt mit ap
+      w.eval("st.conditions=[];st.exhaustion=0;st.effects=[];st.statSrc=statSrcNew()"); w.buildFx(); const ac0 = w.eval("statCalc('ac').t"), sp0 = w.eval("statCalc('spd').t");
+      w.eval(`st.effects=[{id:'s1',n:'Shield of Faith',k:'s',s:"PHB'24",t:'b',v:'+2 AC'},{id:'s2',n:'Haste',k:'s',s:"PHB'24",t:'b',v:''},{id:'s3',n:'Longstrider',k:'s',s:"PHB'24",t:'b',v:''}]`); w.buildFx();
+      if (d.getElementById('acV').textContent !== String(ac0 + 4) || w.eval("statCalc('spd').t") !== 2 * (sp0 + 10)) return `AC/Speed: ${d.getElementById('acV').textContent} / ${w.eval("statCalc('spd').t")}`;
+      w.eval(`st.effects=[{id:'m1',n:'Barkskin',k:'s',s:"PHB'24",t:'b',v:''}]`); w.buildFx(); if (w.eval("statCalc('ac').t") !== Math.max(17, ac0)) return 'Barkskin';
+      w.eval("st.effects=[{id:'x1',n:'Testsegen',k:'x',t:'b',v:'+2',ap:['save','ac']}]"); w.buildFx(); w.rollD20({ k: 'save', ab: 'WIS', l: 'W', mod: 0 });
+      if (!on('Testsegen') || P('Testsegen').P.k !== 2 || w.eval("statCalc('ac').t") !== ac0 + 2) return 'Eigener Effekt +2 Saves/AC';
+      // freier Wurf ohne Chips
+      w.closeDice(); w.openDice('', 0); w.rollPreset('2d6'); if (d.getElementById('diceMods').innerHTML || w.eval('_rl') !== null) return 'freier Wurf zeigt Chips';
+      w.eval('st.effects=[];st.ins=[0,0,0];st.weapons=[]'); w.buildFx(); w.closeDice();
+      return true;
+    } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
 
