@@ -1605,6 +1605,66 @@ const REGRESSION = [
       if (JSON.stringify(all().TestL) !== orig) return 'Backup: Abbrechen hat überschrieben';
       return true;
     } },
+  { name: 'Paket K: Custom-Rasse – Werte wirken auf Skills, Attribut-Abzeichen, Actions-Tab, Waffen, Log und Laden', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      sel('Druid', '', 5);
+      d.getElementById('charName').textContent = 'TestK';
+      d.getElementById('race').value = 'custom'; w.onRaceChange();
+      d.getElementById('raceCustom').value = 'Bearfolk';
+      if (!d.querySelector('#raceLoreBody .cr-add')) return 'Leere Custom-Rasse zeigt keine Eingabemaske';
+      w.eval(`st.customRace={size:'M',speed:30,climb:30,dv:60,res:['Cold'],sk:['Athletics'],lang:'Common',asi:{STR:2,CON:1},
+        tr:[{id:'rc_cu_1',n:'Testgebrüll',d:'You roar.',tag:'bonus',uses:'pb',restore:'long'},{id:'rc_cu_2',n:'Testpelz',d:'Thick fur.',tag:'passiv',uses:'',restore:'long'}],
+        nw:[{n:'Testklauen',dice:'1d6',type:'Slashing',ab:'STR'}],nid:2}; st.attrs.STR=16; document.getElementById('prof').value='3';`);
+      w.crFull(); w.saveChar();
+      const sk = [...d.querySelectorAll('#skillsGrid .sk-row, .sk-row')].find(r => r.textContent.includes('Athletics'));
+      if (!sk || !sk.textContent.includes('Bearfolk')) return 'Skill Athletics ohne Abzeichen „Bearfolk“';
+      if (!d.getElementById('attrGrid').textContent.includes('+2 Race')) return 'Attributs-Abzeichen „+2 Race“ fehlt';
+      const rs = d.getElementById('raceStats').textContent;
+      if (!/Climb 30 ft/.test(rs) || !/Darkvision 60 ft/.test(rs) || !/Cold/.test(rs) || !/Bearfolk/.test(rs)) return 'Werte-Zeile unvollständig: ' + rs;
+      w.buildAbilities();
+      const ab = d.getElementById('abList').textContent;
+      if (!ab.includes('Testgebrüll') || !ab.includes('Testpelz') || !ab.includes('Bearfolk')) return 'Traits fehlen im Actions-Tab';
+      if (w.eval("abMaxUses((rcTrackers('custom',5).find(t=>t.id==='rc_cu_1')||{}).uses,5)") !== 3) return 'Zähler PB bei Stufe 5 ≠ 3';
+      w.buildWeapons();
+      const wp = d.getElementById('weaponList').textContent;
+      if (!wp.includes('Testklauen') || !wp.includes('+6') || !wp.includes('1d6+3')) return 'Natürliche Waffe falsch: ' + wp.slice(0, 120);
+      // Log: lesbare Einträge
+      w.eval("st.customRace.speed=35"); w.autoSave();
+      if (!w.eval("(st.log||[]).some(e=>/Custom race Speed: 30 → 35/.test(e.m||e.x||''))")) return 'Log-Eintrag „Custom race Speed“ fehlt';
+      // Charakterwechsel: andere Figur übernimmt keine Custom-Werte; Laden stellt sie wieder her
+      w.saveChar(); w._doNewChar('TestK2');
+      if (w.eval("Object.keys(st.customRace||{}).length")) return 'Neuer Charakter übernimmt Custom-Werte';
+      w.loadChar('TestK');
+      if (w.eval("st.customRace.speed") !== 35 || w.eval("rcRace()") !== 'custom') return 'Laden stellt Custom-Werte nicht her';
+      if (!d.querySelector('#raceLoreBody .cr-mc')) return 'Gefüllte Custom-Rasse zeigt nicht die Werte-Ansicht';
+      return true;
+    } },
+  { name: 'Paket K: Custom-Rasse – Other/Weitere, ab Stufe, Vorteile, Natural AC, HP/Stufe, Sinne, Immunitäten, angeborene Zauber', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      sel('Fighter', '', 3);
+      d.getElementById('race').value = 'custom'; w.onRaceChange();
+      d.getElementById('raceCustom').value = 'Testvolk';
+      w.eval(`st.customRace={sub:'Testzweig',nac:13,hpl:1,tremor:30,immD:['Poison'],immC:['Charmed'],advS:['CON'],advC:['Frightened'],spAb:'WIS',
+        tr:[{id:'rc_cu_1',n:'Testalter',d:'Old.',tag:'weitere',uses:''},{id:'rc_cu_2',n:'Testflug',d:'Fly.',tag:'bonus',uses:1,restore:'long',lv:5}],
+        sp:[{n:'Guidance',l:1,u:''},{n:'Bless',l:3,u:1},{n:'Misty Step',l:5,u:1}],nid:2}; st.attrs.DEX=14; document.getElementById('ac').value='12';`);
+      w.crFull(); w.buildAbilities();
+      const grp = k => [...d.querySelectorAll(`#abList .ab-grp-box[data-grp="${k}"]`)].map(x => x.textContent).join('');
+      if (!grp('weitere').includes('Testalter')) return 'Typ „Other“ nicht in Gruppe „Weitere“';
+      if (d.getElementById('abList').textContent.includes('Testflug')) return 'Trait „ab Stufe 5“ schon bei Stufe 3 sichtbar';
+      if (w.eval("rcTrackers('custom',3).find(t=>t.id==='rc_cu_sp').sub.map(x=>x.l).join()") !== 'Bless') return 'Zauber-Tracker bei Stufe 3 ≠ Bless';
+      if (w.eval("rcSpells(3).map(x=>x.spells.join()).join()") !== 'Guidance,Bless') return 'Spell List ★: ' + w.eval("JSON.stringify(rcSpells(3))");
+      const rs = d.getElementById('raceStats').textContent;
+      if (!/Natural AC 15/.test(rs) || !/Tremorsense 30 ft/.test(rs) || !/Immunity: Poison, Charmed/.test(rs) || !/Adv\. vs\. Frightened/.test(rs)) return 'Werte-Zeile: ' + rs;
+      if (!d.querySelector('#raceStats .rc-chip.warn')) return 'AC-Feld 12 ≠ Natural AC 15 nicht markiert';
+      if (!/Testvolk \+3 HP/.test(d.getElementById('hpMHint').textContent)) return 'HP-Hinweis fehlt: ' + d.getElementById('hpMHint').textContent;
+      w.buildSaves();
+      const con = [...d.querySelectorAll('#savesGrid .sk-row')].find(r => r.textContent.includes('Constitution'));
+      if (!con || !con.textContent.includes('Adv')) return 'Vorteil auf CON-Save fehlt';
+      if (!d.getElementById('raceLoreTitle').textContent.includes('Testzweig')) return 'Subrace fehlt im Titel';
+      w.eval("document.getElementById('lvl').value='5'"); w.buildAbilities();
+      if (!d.getElementById('abList').textContent.includes('Testflug')) return 'Trait ab Stufe 5 fehlt bei Stufe 5';
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────

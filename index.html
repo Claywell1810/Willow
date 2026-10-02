@@ -148,6 +148,37 @@ input[type=number]{-moz-appearance:textfield}
 .rc-sp.off{opacity:.5}
 .rc-spl{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);min-width:52px;padding-top:2px}
 .rc-dc{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--purple);margin-top:4px}
+.cr-mc{font-size:var(--fs-xs);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)}
+.cr-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.cr-lbl{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin:10px 0 5px}
+.cr-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.cr-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.cr-f{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cr-f>span{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--text3)}
+.cr-in{width:100%;min-width:0;box-sizing:border-box;background:var(--bg3);background-color:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);-webkit-text-fill-color:var(--text);font-size:16px;padding:6px 8px;outline:none;font-family:'Crimson Pro',serif}
+.cr-in:focus{border-color:var(--purple)}
+.cr-in:disabled{opacity:.45}
+select.cr-in option{background:var(--bg2)}
+textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
+.cr-asi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.cr-asi>div{display:flex;align-items:center;gap:4px;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 6px}
+.cr-asi b{flex:1}
+.cr-asi b{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2);font-weight:normal}
+.cr-asi .v{min-width:22px;text-align:center;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-sm)}
+.cr-asi .v.z{color:var(--text3)}
+.cr-item{border:1px solid var(--border2);border-left:2px solid var(--purple2);border-radius:6px;padding:7px 8px;margin-bottom:6px;background:var(--bg2)}
+.cr-row{display:flex;gap:6px;align-items:center}
+.cr-x{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0}
+.cr-add{width:100%;background:none;border:1px dashed var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;padding:9px;cursor:pointer;margin-bottom:4px}
+.cr-meta{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);margin-bottom:3px}
+.cr-nw{background:var(--bg2);border:1px solid var(--border);border-left:2px solid var(--gold);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:5px}
+.cr-nw-h{display:flex;align-items:center;gap:4px;font-size:var(--fs-txt);color:var(--text)}
+.cr-nw-v{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.cr-nw-v>span{display:flex;flex-direction:column}
+.cr-nw-v small{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3)}
+.cr-nw-v b{font-weight:normal;font-family:'Crimson Pro',serif;font-size:var(--fs-txt);color:var(--text)}
+.cr-nw-v b.g{color:var(--gold)}
+.cr-nw-s{font-size:var(--fs-2xs);color:var(--text3);font-family:'Cinzel',serif}
 .rc-hint{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);margin-top:3px}
 #raceStats:empty,#saveAdv:empty,#hpMHint:empty{display:none}
 #saveAdv{font-size:var(--fs-sm);color:var(--text3);margin:6px 2px 0;line-height:1.5}
@@ -1247,7 +1278,7 @@ let st={
   slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,
   mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set(),
-  concActive:null, concActiveFeature:null
+  concActive:null, concActiveFeature:null, customRace:{}
 };
 
 const md=v=>Math.floor((v-10)/2);
@@ -1295,7 +1326,7 @@ function buildAttrs(){
         <input class="aval" type="number" min="1" max="30" value="${v}" id="a_${a.k}" style="width:38px">
         <button class="hbtn" onclick="chAttr('${a.k}',1)" style="width:22px;height:22px;font-size:var(--fs-txt)">+</button>
       </div>
-      <div class="amod" id="m_${a.k}">${fmt(m)}</div>${bg?`<div class="a-bdg" title="Background bonus – not added to the score">+${bg} BG</div>`:''}${rb?`<div class="a-bdg" title="Race bonus (PHB 2014) – not added to the score">+${rb} Race</div>`:''}`;
+      <div class="amod" id="m_${a.k}">${fmt(m)}</div>${bg?`<div class="a-bdg" title="Background bonus – not added to the score">+${bg} BG</div>`:''}${rb?`<div class="a-bdg" title="Race bonus${rcRace()==='custom'?' (custom race)':' (PHB 2014)'} – not added to the score">${fmt(rb)} Race</div>`:''}`;
     g.appendChild(d);
     d.querySelector('input').addEventListener('input',e=>{
       st.attrs[a.k]=parseInt(e.target.value)||10;
@@ -1331,7 +1362,7 @@ function buildSaves(){
     r.onclick=(e)=>{if(e.target.closest('.sk-roll-ic'))return;if(auto){if(st.saveP[a.k])delete st.saveP[a.k];showToast(`${a.l}: proficient from Class`);}else st.saveP[a.k]=!st.saveP[a.k];buildSaves();autoSave()};g.appendChild(r);
   });
   const av=document.getElementById('saveAdv');
-  if(av){const A=rcAdv(),race=rcRace();av.innerHTML=A.length?`<b style="color:var(--text2)">${pkEsc(race)}:</b> `+A.map(x=>`${pkEsc(x.t)} – Advantage `+(x.s?`on ${x.s.join(', ')} saves`:`vs. ${pkEsc(x.c)}`)).join(' · '):'';}
+  if(av){const A=rcAdv(),race=rcRace();av.innerHTML=A.length?`<b style="color:var(--text2)">${pkEsc(rcName(race))}:</b> `+A.map(x=>(x.t?`${pkEsc(x.t)} – `:'')+`Advantage `+(x.s?`on ${x.s.join(', ')} saves`:`vs. ${pkEsc(x.c)}`)).join(' · '):'';}
 }
 
 // ── Paket C1 (28.09.2026): Info-Tab verbunden ────────────────────────────────
@@ -1474,18 +1505,201 @@ function buildPkHints(G){
 //   Skill Versatility), race:<Trait>:ability (Zauberattribut), race:size (Small/Medium), race:Ability Score Increase (Half-Elf).
 // Speed/Size/Darkvision/Resistenzen werden nur angezeigt (Entscheidung 4), Attributsboni nur als Abzeichen (Entscheidung 1).
 const RC_SIZE={S:'Small',M:'Medium',L:'Large'};
-function rcRace(){const r=document.getElementById('race')?.value||'';return typeof RACE_PICKS!=='undefined'&&RACE_PICKS[r]?r:'';}
+function rcRace(){const r=document.getElementById('race')?.value||'';if(r==='custom')return 'custom';return typeof RACE_PICKS!=='undefined'&&RACE_PICKS[r]?r:'';}
 function rcKey(t){return 'race:'+t;}
-function rcLegacy(){const r=rcRace();return !!r&&RACE_PICKS[r].src==='PHB';}
+function rcLegacy(){const r=rcRace();return !!r&&rcP(r).src==='PHB';}
 function rcOpt(c){const n=pkValid(rcKey(c.t),c.o.map(x=>x.n),1)[0];return n?c.o.find(x=>x.n===n):null;}
 function rcSkOpts(sk){return sk.fix||sk.f||SKILLS.map(x=>x.n);}
 function rcSkN(sk){return sk.fix?0:(sk.n||sk.any||0);}
 function rcAsiOpts(a){return a&&a.ch?a.ch.f.filter(x=>!(x in a.fix)):[];}
-function rcAdv(){const r=rcRace();return r?(RACE_PICKS[r].adv||[]):[];}
+function rcAdv(){const r=rcRace();return r?(rcP(r).adv||[]):[];}
+// ── Paket K (02.10.2026): Custom-Rasse mit Werten ───────────────────────────────────────────
+// st.customRace (pro Charakter, Werte nur von Hand, keine 5e.tools-Daten): size 'S'|'M'|'L', speed/fly/swim/climb/dv (ft),
+// res [Schadensarten], sk [Skills], lang (Text), asi {STR:n …}, tr [{id,n,d,tag,uses,restore}] (id 'rc_cu_<n>', heilig wie
+// Tracker-ids, Verbrauch in st.abUses), nw [{n,dice,type,ab}] (natürliche Waffen), nid (Zähler für ids).
+// rcP('custom') baut daraus einen Eintrag im Schema von RACE_PICKS (B13) → rcVals/rcGrants/rcCard/rcTrackers ohne Sonderweg.
+// Wie bei 5e.tools-Rassen: Speed/HP-Felder bleiben von Hand (Entscheidung 4), Attributsboni nur als Abzeichen (Entscheidung 1).
+const CR_DMG=['Acid','Bludgeoning','Cold','Fire','Force','Lightning','Necrotic','Piercing','Poison','Psychic','Radiant','Slashing','Thunder'];
+const CR_TAGS=[['aktion','Action'],['bonus','Bonus'],['reaktion','Reaction'],['passiv','Passive'],['weitere','Other']];
+const CR_TAGL={aktion:'Action',bonus:'Bonus Action',reaktion:'Reaction',passiv:'Passive',weitere:'Other'};
+const CR_ICON={aktion:'⚔️',bonus:'⚡',reaktion:'🛡️',passiv:'✧',weitere:'📜'};
+// Zustände (XPHB, 5e.tools conditionsdiseases.json)
+const CR_COND=['Blinded','Charmed','Deafened','Exhaustion','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious'];
+const CR_SENSE=[['dv','Darkvision'],['blind','Blindsight'],['tremor','Tremorsense'],['truesight','Truesight']];
+const CR_NUM=['speed','fly','swim','climb','dv','blind','tremor','truesight','nac','hpl'];
+const crLv=v=>Math.max(1,Math.min(20,parseInt(v)||1));
+const crSlug=n=>String(n).toLowerCase().replace(/[^a-z0-9]+/g,'_');
+let _crMore=false; // „Advantages & immunities“ aufgeklappt (nur Anzeige)
+let _crEdit=null; // Maske offen (nur Anzeige, nicht gespeichert); null = beim nächsten Aufbau entscheiden (leer → offen)
+function crGet(){if(!st.customRace||typeof st.customRace!=='object'||Array.isArray(st.customRace))st.customRace={};return st.customRace;}
+function crEmpty(c){c=c||crGet();
+  return !Object.keys(c).some(k=>{if(k==='nid'||k==='nacAb'||k==='spAb')return false;const v=c[k];
+    return Array.isArray(v)?v.length:v&&typeof v==='object'?Object.values(v).some(x=>x):typeof v==='string'?v.trim():!!v;});}
+function rcName(race){return race==='custom'?((document.getElementById('raceCustom')?.value||'').trim()||'Custom'):race;}
+function rcP(race){
+  if(race!=='custom')return RACE_PICKS[race];
+  const c=crGet(),n=v=>Math.max(0,parseInt(v)||0),asi={};
+  ATTRS.forEach(a=>{const v=parseInt((c.asi||{})[a.k])||0;if(v)asi[a.k]=v;});
+  const sk=(c.sk||[]).filter(x=>SKILLS.some(s=>s.n===x)),tag=t=>CR_ICON[t]?t:'passiv';
+  const T=(c.tr||[]).filter(t=>t&&t.id&&(t.n||'').trim()),uses=t=>t.uses==='pb'?'pb':(parseInt(t.uses)||null);
+  const adv=[],advS=(c.advS||[]).filter(k=>ATTRS.some(a=>a.k===k));
+  if(advS.length)adv.push({t:'',s:advS});
+  (c.advC||[]).filter(x=>CR_COND.includes(x)).forEach(x=>adv.push({t:'',c:x}));
+  const fl={},more=[];T.forEach(t=>{const nm=t.n.trim();if(parseInt(t.lv)>1)fl[nm]=crLv(t.lv);if(t.tag==='weitere'&&!uses(t))more.push(nm);});
+  const nac=n(c.nac),ab=['DEX','CON',''].includes(c.nacAb)?c.nacAb:'DEX';
+  return {src:'Custom',custom:1,sub:(c.sub||'').trim(),size:RC_SIZE[c.size]?[c.size]:[],speed:n(c.speed),dv:n(c.dv),res:(c.res||[]).filter(x=>CR_DMG.includes(x)),
+    spx:{Fly:n(c.fly),Swim:n(c.swim),Climb:n(c.climb)},sense:{Blindsight:n(c.blind),Tremorsense:n(c.tremor),Truesight:n(c.truesight)},
+    imm:(c.immD||[]).filter(x=>CR_DMG.includes(x)).concat((c.immC||[]).filter(x=>CR_COND.includes(x))),
+    nac:nac?{b:nac,ab}:null,hp:n(c.hpl)?{t:rcName('custom'),per:n(c.hpl)}:undefined,adv,fl,more,
+    sk:sk.length?{t:'',fix:sk}:undefined,asi:Object.keys(asi).length?{fix:asi}:undefined,
+    tr:T.filter(t=>!more.includes(t.n.trim())).map(t=>{const u=uses(t),g=t.tag==='weitere'?'passiv':tag(t.tag);
+      return {id:t.id,t:t.n.trim(),d:t.d||'',tag:g,uses:u,restore:u?(t.restore==='short'?'short':'long'):null,minLvl:parseInt(t.lv)>1?crLv(t.lv):undefined,ic:CR_ICON[g]};}),
+    isp:(c.sp||[]).filter(x=>x&&(x.n||'').trim()).map(x=>({s:x.n.trim(),l:crLv(x.l),u:x.u==='pb'?'pb':(parseInt(x.u)||0),ok:ZB_SPELLS.some(z=>z.name===x.n.trim())})),
+    spAb:['INT','WIS','CHA'].includes(c.spAb)?c.spAb:'',
+    nw:(c.nw||[]).filter(w=>w&&(w.n||'').trim())};
+}
+// natürliche Waffen → Karte „Weapons“ (Actions-Tab): Angriff = Übungsbonus + Attributsmod., Schaden = Würfel + Mod.
+function crWeapons(){
+  if(rcRace()!=='custom')return [];
+  return rcP('custom').nw.map(w=>{const ab=w.ab==='DEX'?'DEX':'STR',m=getAbilityMod(ab),dc=(w.dice||'').trim();
+    return {n:w.n.trim(),ab,atk:fmt(prof()+m),dmg:dc?dc+(m?(m>0?'+':'')+m:''):'',type:w.type||''};});
+}
+function crWeaponsHtml(){
+  const L=crWeapons();if(!L.length)return '';const rn=pkEsc(rcName('custom'));
+  return L.map(w=>`<div class="cr-nw"><div class="cr-nw-h">${pkEsc(w.n)}<span class="sk-bdg">${rn}</span></div>`
+    +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${w.atk}</b></span><span><small>DAMAGE</small><b>${pkEsc(w.dmg||'—')}</b></span><span><small>TYPE</small><b>${pkEsc(w.type||'—')}</b></span></div>`
+    +`<div class="cr-nw-s">Natural weapon · ${w.ab} + Proficiency · set in Race</div></div>`).join('');
+}
+function crUsesTxt(t){return t.uses?(t.uses==='pb'?'PB':t.uses+'×')+' / '+(t.restore==='short'?'Short':'Long')+' Rest':'';}
+const CR_SPU=u=>u==='pb'?'PB × / Long Rest':u?u+'× / Long Rest':'at will';
+// angeborene Zauber: Zauberattribut, DC/Angriff und Liste je Stufe (Text für Info-Tab und Actions-Karte)
+function crSpellTxt(p,lvl){
+  const ab=p.spAb,m=ab?getAbilityMod(ab):0,head=ab?`Spellcasting ability: ${ab} (spell save DC ${8+prof()+m}, spell attack ${fmt(prof()+m)}).`:'Spellcasting ability: not set.';
+  return head+'\n'+p.isp.map(x=>`• ${x.s} – from level ${x.l}, ${CR_SPU(x.u)}${x.ok?'':' (not in the spell list)'}${lvl<x.l?' (not yet)':''}`).join('\n');
+}
+// Werte-Chips (Info-Tab Ansicht und Werte-Zeile)
+function crSenseChips(v){const r=[];Object.keys(v.sense||{}).forEach(k=>{if(v.sense[k])r.push(k+' '+v.sense[k]+' ft');});return r;}
+function crAdvTxt(p){return (p.adv||[]).map(x=>x.s?'Adv. on '+x.s.join(', ')+' saves':'Adv. vs. '+x.c);}
+function crNacVal(p){if(!p.nac)return 0;return p.nac.b+(p.nac.ab?getAbilityMod(p.nac.ab):0);}
+// Anzeige (Werte wie bei 5e.tools-Rassen) bzw. Eingabemaske
+function crHtml(){
+  const c=crGet();if(_crEdit===null)_crEdit=crEmpty(c);
+  return _crEdit?crForm(c):crView(c);
+}
+function crView(c){
+  const p=rcP('custom'),v=rcVals('custom'),m=[];
+  if(v.size)m.push('Size: '+v.size);
+  if(v.speed)m.push('Speed: '+v.speed+' ft');
+  Object.keys(v.spx).forEach(k=>{if(v.spx[k])m.push(k+': '+v.spx[k]+' ft');});
+  if(v.dv)m.push('Darkvision: '+v.dv+' ft');
+  crSenseChips(v).forEach(x=>m.push(x.replace(' ',': ')));
+  if(v.res.length)m.push('Resistance: '+v.res.join(', '));
+  if(v.imm.length)m.push('Immunity: '+v.imm.join(', '));
+  crAdvTxt(p).forEach(x=>m.push(x));
+  if(p.nac)m.push(`Natural AC: ${p.nac.b}${p.nac.ab?' + '+p.nac.ab:''} = ${crNacVal(p)}`);
+  if(p.hp)m.push(`HP: +${p.hp.per} per level`);
+  if(p.asi)m.push('Ability Scores: '+Object.keys(p.asi.fix).map(k=>fmt(p.asi.fix[k])+' '+k).join(', '));
+  if(p.sk)m.push('Skills: '+p.sk.fix.join(', '));
+  if((c.lang||'').trim())m.push('Languages: '+pkEsc(c.lang.trim()));
+  const card=(name,meta,body)=>`<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px"><div style="font-family:Cinzel,serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:3px">${pkEsc(name)}</div>${meta?`<div class="cr-meta">${meta}</div>`:''}<div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${body}</div></div>`;
+  return `<div class="cr-h"><span class="cr-lbl" style="margin:0">Your race values</span><button type="button" class="filter-toggle" onclick="crEditTog(true)" style="padding:3px 10px">✎ Edit</button></div>`
+    +(m.length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">${m.map(x=>`<span class="cr-mc">${x}</span>`).join('')}</div>`:`<div class="pk-note" style="margin:0 0 8px">No values yet – tap ✎ Edit.</div>`)
+    +(c.tr||[]).filter(t=>t&&(t.n||'').trim()).map(t=>{const x=p.tr.find(y=>y.id===t.id)||{tag:'weitere'};
+      return card(t.n.trim(),CR_TAGL[CR_TAGL[t.tag]?t.tag:'passiv']+(x.uses?' · '+crUsesTxt(x):'')+(parseInt(t.lv)>1?' · from level '+crLv(t.lv):''),t.d?fmtDesc(t.d):'');}).join('')
+    +(p.isp.length?card('Innate Spellcasting','',fmtDesc(crSpellTxt(p,fpLvl()))):'')
+    +crWeapons().map(w=>card(w.n,'Natural weapon',`${w.atk} to hit · ${pkEsc(w.dmg||'—')}${w.type?' '+pkEsc(w.type):''} (${w.ab})`)).join('')
+    +crNotes();
+}
+function crNotes(){return '<div class="cr-lbl">Notes</div><div class="nta-wrap"><textarea class="nta" id="n_race_custom" placeholder="Describe your race traits, abilities, features..." style="min-height:80px"></textarea><button class="nta-expand" onclick="openNoteModal(\'n_race_custom\',\'Race Traits Notes\')">⛶</button></div>';}
+function crChips(f,opts,multi,cur){
+  return '<div class="pk-chips">'+opts.map(([val,lbl])=>{const on=multi?(cur||[]).includes(val):cur===val;
+    return `<button type="button" class="pk-chip${on?' on':''}" data-f="${f}" data-v="${pkEsc(val)}" data-m="${multi?1:0}" onclick="crTog(this)">${pkEsc(lbl)}</button>`;}).join('')+'</div>';
+}
+function crForm(c){
+  const e=pkEsc,num=(k,l)=>`<label class="cr-f"><span>${l}</span><input class="cr-in" type="number" inputmode="numeric" min="0" step="5" placeholder="—" value="${c[k]||''}" oninput="crSet('${k}',this.value)" onchange="crSide()"></label>`;
+  const opt=(v,l,cur)=>`<option value="${e(v)}"${String(cur??'')===String(v)?' selected':''}>${e(l)}</option>`;
+  const asi=c.asi||{};
+  let h=`<div class="cr-h"><span class="cr-lbl" style="margin:0;color:var(--gold)">Edit race values</span><button type="button" class="filter-toggle on" onclick="crEditTog(false)" style="padding:3px 10px">✓ Done</button></div>`
+    +`<div class="pk-note" style="margin:0 0 4px">Your own values. They work like a species from 5e.tools: skills, ability badges, Actions tab, natural weapons.</div>`;
+  h+=`<div class="cr-lbl">Subrace (optional)</div><input class="cr-in" placeholder="—" value="${e(c.sub||'')}" oninput="crSet('sub',this.value)" onchange="crSide();buildRaceLoreTitle()">`;
+  h+='<div class="cr-lbl">Size</div>'+crChips('size',Object.keys(RC_SIZE).map(k=>[k,RC_SIZE[k]]),0,c.size);
+  h+='<div class="cr-lbl">Speed (ft)</div><div class="cr-grid">'+num('speed','Walk')+num('fly','Fly')+num('swim','Swim')+num('climb','Climb')+'</div>';
+  h+='<div class="cr-lbl">Senses (ft)</div><div class="cr-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+CR_SENSE.map(([k,l])=>num(k,l)).join('')+'</div>';
+  h+='<div class="cr-lbl">Armor &amp; hit points</div><div class="cr-grid3">'+num('nac','Natural AC').replace('step="5"','step="1"')
+    +`<label class="cr-f"><span>+ Ability</span><select class="cr-in" onchange="crSet('nacAb',this.value);crFull()">${['DEX','CON',''].map(v=>opt(v,v||'—',c.nacAb===undefined?'DEX':c.nacAb)).join('')}</select></label>`
+    +num('hpl','HP / level').replace('step="5"','step="1"')+'</div><div class="pk-note">Natural AC and HP are shown as a hint at the AC and Max HP fields (fields stay manual, e.g. when wearing armor).</div>';
+  h+='<div class="cr-lbl">Ability score bonuses</div><div class="cr-asi">'+ATTRS.map(a=>{const v=parseInt(asi[a.k])||0;
+    return `<div><b>${a.k}</b><button type="button" class="hbtn" style="width:26px;height:26px;font-size:var(--fs-txt)" onclick="crAsi('${a.k}',-1)">−</button><span class="v${v?'':' z'}">${v?fmt(v):'0'}</span><button type="button" class="hbtn" style="width:26px;height:26px;font-size:var(--fs-txt)" onclick="crAsi('${a.k}',1)">+</button></div>`;}).join('')+'</div>';
+  h+='<div class="cr-lbl">Skill proficiencies</div>'+crChips('sk',SKILLS.map(s=>[s.n,s.n]),1,c.sk);
+  h+='<div class="cr-lbl">Damage resistances</div>'+crChips('res',CR_DMG.map(x=>[x,x]),1,c.res);
+  // seltene Felder zugeklappt (offen, sobald etwas gewählt ist oder der Nutzer aufgeklappt hat)
+  const moreN=['advS','advC','immD','immC'].reduce((t,k)=>t+(c[k]||[]).length,0);
+  h+=`<details class="fp-more"${_crMore||moreN?' open':''} ontoggle="_crMore=this.open"><summary>Advantages &amp; immunities${moreN?' ('+moreN+')':''}</summary>`
+    +'<div class="cr-lbl">Advantage on saving throws</div>'+crChips('advS',ATTRS.map(a=>[a.k,a.k]),1,c.advS)
+    +'<div class="cr-lbl">Advantage on saves vs. conditions</div>'+crChips('advC',CR_COND.map(x=>[x,x]),1,c.advC)
+    +'<div class="cr-lbl">Damage immunities</div>'+crChips('immD',CR_DMG.map(x=>[x,x]),1,c.immD)
+    +'<div class="cr-lbl">Condition immunities</div>'+crChips('immC',CR_COND.map(x=>[x,x]),1,c.immC)+'</details>';
+  h+=`<div class="cr-lbl">Languages</div><input class="cr-in" placeholder="e.g. Common, …" value="${e(c.lang||'')}" oninput="crSet('lang',this.value)" onchange="crSide()">`;
+  h+='<div class="cr-lbl">Traits</div>'+(c.tr||[]).map((t,i)=>`<div class="cr-item">
+      <div class="cr-row"><input class="cr-in" placeholder="Trait name" value="${e(t.n||'')}" oninput="crTr(${i},'n',this.value)" onchange="crSide()"><button type="button" class="cr-x" onclick="crDel('tr',${i})" aria-label="Remove trait">&times;</button></div>
+      <textarea class="cr-in" rows="${Math.min(8,Math.max(2,Math.ceil((t.d||'').length/38)+((t.d||'').match(/\n/g)||[]).length))}" placeholder="Rules text" oninput="crTr(${i},'d',this.value)" onchange="crSide()">${e(t.d||'').replace(/>/g,'&gt;')}</textarea>
+      <div class="cr-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+        <label class="cr-f"><span>Type</span><select class="cr-in" onchange="crTr(${i},'tag',this.value);crFull()">${CR_TAGS.map(([v,l])=>opt(v,l,t.tag||'passiv')).join('')}</select></label>
+        <label class="cr-f"><span>From level</span><input class="cr-in" type="number" inputmode="numeric" min="1" max="20" value="${parseInt(t.lv)>1?crLv(t.lv):''}" placeholder="1" oninput="crTr(${i},'lv',this.value)" onchange="crSide()"></label>
+        <label class="cr-f"><span>Uses</span><select class="cr-in" onchange="crTr(${i},'uses',this.value);crFull()">${opt('','—',t.uses)}${[1,2,3,4,5,6].map(n=>opt(n,n,t.uses)).join('')}${opt('pb','PB',t.uses)}</select></label>
+        <label class="cr-f"><span>Recharge</span><select class="cr-in"${t.uses?'':' disabled'} onchange="crTr(${i},'restore',this.value);crFull()">${opt('long','Long Rest',t.restore||'long')}${opt('short','Short Rest',t.restore)}</select></label>
+      </div></div>`).join('')+`<button type="button" class="cr-add" onclick="crAdd('tr')">+ Add trait</button>`;
+  h+='<div class="cr-lbl">Innate spells</div>'+((c.sp||[]).length?'<div class="pk-h" style="margin-top:2px">Spellcasting ability</div>'+crChips('spAb',[['INT','INT'],['WIS','WIS'],['CHA','CHA']],0,c.spAb):'')
+    +(c.sp||[]).map((x,i)=>{const nm=(x.n||'').trim(),ok=!nm||ZB_SPELLS.some(z=>z.name===nm);return `<div class="cr-item">
+      <div class="cr-row"><input class="cr-in" list="crSpellNames" placeholder="Spell name" value="${e(x.n||'')}" oninput="crSp(${i},'n',this.value)" onchange="crFull()"><button type="button" class="cr-x" onclick="crDel('sp',${i})" aria-label="Remove spell">&times;</button></div>
+      ${ok?'':'<div class="rc-hint">Not in the app’s spell list – check the spelling</div>'}
+      <div class="cr-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px">
+        <label class="cr-f"><span>From level</span><input class="cr-in" type="number" inputmode="numeric" min="1" max="20" value="${crLv(x.l)}" oninput="crSp(${i},'l',this.value)" onchange="crSide()"></label>
+        <label class="cr-f"><span>Uses</span><select class="cr-in" onchange="crSp(${i},'u',this.value);crFull()">${opt('','At will',x.u||'')}${opt(1,'1 / Long',x.u)}${opt(2,'2 / Long',x.u)}${opt('pb','PB / Long',x.u)}</select></label>
+      </div></div>`;}).join('')+`<button type="button" class="cr-add" onclick="crAdd('sp')">+ Add spell</button>`+crSpellList();
+  h+='<div class="cr-lbl">Natural weapons</div>'+(c.nw||[]).map((w,i)=>`<div class="cr-item">
+      <div class="cr-row"><input class="cr-in" placeholder="e.g. Claws" value="${e(w.n||'')}" oninput="crNw(${i},'n',this.value)" onchange="crSide()"><button type="button" class="cr-x" onclick="crDel('nw',${i})" aria-label="Remove weapon">&times;</button></div>
+      <div class="cr-grid3" style="margin-top:6px">
+        <label class="cr-f"><span>Damage</span><input class="cr-in" placeholder="1d6" value="${e(w.dice||'')}" oninput="crNw(${i},'dice',this.value)" onchange="crSide()"></label>
+        <label class="cr-f"><span>Type</span><select class="cr-in" onchange="crNw(${i},'type',this.value);crFull()">${opt('','—',w.type)}${CR_DMG.map(x=>opt(x,x,w.type)).join('')}</select></label>
+        <label class="cr-f"><span>Ability</span><select class="cr-in" onchange="crNw(${i},'ab',this.value);crFull()">${opt('STR','STR',w.ab||'STR')}${opt('DEX','DEX',w.ab)}</select></label>
+      </div></div>`).join('')+`<button type="button" class="cr-add" onclick="crAdd('nw')">+ Add natural weapon</button>`;
+  return h+crNotes();
+}
+function crEditTog(on){_crEdit=!!on;buildRaceLore();}
+// Auswahlliste der Zaubernamen (einmal erzeugt, datalist)
+let _crSpL=null;
+function crSpellList(){if(_crSpL===null)_crSpL='<datalist id="crSpellNames">'+[...new Set(ZB_SPELLS.map(s=>s.name))].sort().map(n=>`<option value="${pkEsc(n)}">`).join('')+'</datalist>';return _crSpL;}
+function crSp(i,k,v){const x=(crGet().sp||[])[i];if(!x)return;x[k]=v;autoSave();}
+function buildRaceLoreTitle(){const t=document.getElementById('raceLoreTitle');if(t&&rcRace()==='custom'){const s=(crGet().sub||'').trim();t.textContent='Race: '+rcName('custom')+(s?' · '+s:'');}}
+// Tippen: speichern ohne die Maske neu zu bauen (Fokus bleibt); beim Verlassen des Felds (change) die übrigen Ansichten
+function crSet(k,v){const c=crGet();if(CR_NUM.includes(k)){const n=parseInt(v);if(n>0)c[k]=n;else delete c[k];}else c[k]=v;autoSave();}
+function crTr(i,k,v){const t=(crGet().tr||[])[i];if(!t)return;t[k]=v;autoSave();}
+function crNw(i,k,v){const w=(crGet().nw||[])[i];if(!w)return;w[k]=v;autoSave();}
+function crSide(){buildRaceStats();buildAttrs();buildSaves();buildSkills();buildAbilities();buildWeapons();}
+function crFull(){pkRefresh();buildWeapons();}
+function crTog(el){
+  const c=crGet(),f=el.dataset.f,v=el.dataset.v;
+  if(el.dataset.m==='1'){const a=(c[f]||[]).slice(),i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);c[f]=a;}
+  else c[f]=c[f]===v?'':v;
+  crFull();
+}
+function crAsi(k,dd){const c=crGet();c.asi=c.asi||{};const v=Math.max(-4,Math.min(4,(parseInt(c.asi[k])||0)+dd));if(v)c.asi[k]=v;else delete c.asi[k];crFull();}
+function crAdd(kind){
+  const c=crGet();
+  if(kind==='tr'){c.tr=c.tr||[];let n=parseInt(c.nid)||0;do{n++;}while(c.tr.some(t=>t.id==='rc_cu_'+n));c.nid=n;
+    c.tr.push({id:'rc_cu_'+n,n:'',d:'',tag:'passiv',uses:'',restore:'long'});}
+  else if(kind==='sp'){c.sp=c.sp||[];c.sp.push({n:'',l:1,u:''});}
+  else{c.nw=c.nw||[];c.nw.push({n:'',dice:'',type:'',ab:'STR'});}
+  crFull();
+  const its=[...document.querySelectorAll('#raceLoreBody .cr-item')].filter(x=>kind==='tr'?x.querySelector('textarea'):kind==='sp'?x.querySelector('[list]'):x.querySelector('[placeholder="e.g. Claws"]'));
+  const inp=its.length&&its[its.length-1].querySelector('input');if(inp)try{inp.focus();}catch(e){}
+}
+function crDel(kind,i){const a=crGet()[kind]||[];if(i<0||i>=a.length)return;a.splice(i,1);crFull();}
 // wirksame Werte: Grundwert der Rasse, durch die Wahl geändert (Wood Elf 35 ft, Drow 120 ft, Tiefling-Resistenz …)
 function rcVals(race){
-  const rp=RACE_PICKS[race];if(!rp)return null;
-  const v={speed:rp.speed,dv:rp.dv||0,res:(rp.res||[]).slice(),size:rp.size.length===1?RC_SIZE[rp.size[0]]:(pkValid('race:size',rp.size.map(x=>RC_SIZE[x]),1)[0]||''),by:{}};
+  const rp=rcP(race);if(!rp)return null;
+  const v={speed:rp.speed,dv:rp.dv||0,res:(rp.res||[]).slice(),spx:rp.spx||{},sense:rp.sense||{},imm:rp.imm||[],size:rp.size.length===1?RC_SIZE[rp.size[0]]:(pkValid('race:size',rp.size.map(x=>RC_SIZE[x]),1)[0]||''),by:{}};
   (rp.ch||[]).forEach(c=>{const o=rcOpt(c);if(!o)return;
     if(o.speed){v.speed=o.speed;v.by.speed=o.n;}
     if(o.dv){v.dv=o.dv;v.by.dv=o.n;}
@@ -1493,15 +1707,15 @@ function rcVals(race){
   return v;
 }
 function rcGrants(g){
-  const race=rcRace();if(!race)return;const rp=RACE_PICKS[race];
-  const add=(art,ziel,stufe)=>g.push({art,ziel,stufe,quelle:race,rc:1});
+  const race=rcRace();if(!race)return;const rp=rcP(race),rn=rcName(race);
+  const add=(art,ziel,stufe)=>g.push({art,ziel,stufe,quelle:rn,rc:1});
   const sk=rp.sk;
   if(sk){if(sk.fix)sk.fix.forEach(x=>add('skill',x,'p'));else pkValid(rcKey(sk.t),rcSkOpts(sk),rcSkN(sk)).forEach(x=>add('skill',x,'p'));}
   const a=rp.asi;
   if(a){Object.keys(a.fix).forEach(k=>add('attr',k,a.fix[k]));if(a.ch)pkValid(rcKey('Ability Score Increase'),rcAsiOpts(a),a.ch.n).forEach(k=>add('attr',k,a.ch.v));}
 }
 function rcOpen(){
-  const r=[],race=rcRace();if(!race)return r;const rp=RACE_PICKS[race];
+  const r=[],race=rcRace();if(!race)return r;const rp=rcP(race);
   if(rp.size.length>1&&!rcVals(race).size)r.push({wo:'race',txt:'Race size'});
   (rp.ch||[]).forEach(c=>{if(!rcOpt(c))r.push({wo:'race',txt:c.t});else if(c.ab&&!pkValid(rcKey(c.t)+':ability',c.ab,1).length)r.push({wo:'race',txt:c.t+' ability'});});
   if(rp.sk&&!rp.sk.fix){const n=rcSkN(rp.sk),c=pkValid(rcKey(rp.sk.t),rcSkOpts(rp.sk),n).length;if(c<n)r.push({wo:'race',txt:`${rp.sk.t} ${c}/${n}`});}
@@ -1515,7 +1729,7 @@ function rcSpellsHtml(sp){
 }
 // Karte eines Rassen-Traits mit Wahl: {suf, body} wie fpHtml
 function rcCard(race,g){
-  const rp=RACE_PICKS[race],desc=fmtDesc(g.desc),more=(l,x)=>`<details class="fp-more"><summary>${l}</summary>${x}</details>`;
+  const rp=rcP(race),desc=fmtDesc(g.desc),more=(l,x)=>`<details class="fp-more"><summary>${l}</summary>${x}</details>`;
   const c=(rp.ch||[]).find(x=>x.t===g.name);
   if(c){
     const key=rcKey(c.t),o=rcOpt(c),marks={};c.o.forEach(x=>{if(x.dmg)marks[x.n]=x.dmg;});
@@ -1548,6 +1762,7 @@ function rcCard(race,g){
 // ── RASSEN IM ACTIONS-TAB (Paket C4, 29.09.2026) ──
 // Trait-Karten aus RACE_DATA.traits: „• Name: …“ beginnt eine Karte; Folgezeilen und Aufzählungen ohne Namen gehören zur Karte davor
 function rcTraitGroups(race){
+  if(race==='custom')return (crGet().tr||[]).filter(t=>t&&(t.n||'').trim()).map(t=>({name:t.n.trim(),desc:t.d||''}));
   const r=RACE_DATA[race];if(!r)return [];
   const groups=[];
   for(const t of r.traits.split('\n').filter(t=>t.trim())){
@@ -1562,13 +1777,17 @@ function rcTraitGroups(race){
 const RC_MORE=new Set(['Age','Size','Languages','Alignment','Versatile','Draconic Ancestry']);
 // Tracker im Schema der Klassen-Tracker (B2): RACE_PICKS[].tr (ids rc_…, heilig) + Lineage/Legacy-Zauber (id rc_lineage, Einzel-Tracker je Zauber ab Stufe)
 function rcTrackers(race,lvl){
-  const rp=RACE_PICKS[race];if(!rp)return [];
+  const rp=rcP(race);if(!rp)return [];
   const G=rcTraitGroups(race),txt=n=>(G.find(g=>g.name===n)||{}).desc||'',out=[];
   (rp.tr||[]).forEach(t=>{
     if(t.minLvl&&lvl<t.minLvl)return;
     const c=(rp.ch||[]).find(x=>x.t===t.t),o=c&&rcOpt(c);
-    out.push({id:t.id,name:t.t,tag:(o&&o.tag)||t.tag,icon:t.ic,uses:t.uses,restore:t.restore,minLvl:t.minLvl,desc:txt(t.t),rc:race});
+    out.push({id:t.id,name:t.t,tag:(o&&o.tag)||t.tag,icon:t.ic,uses:t.uses,restore:t.restore,minLvl:t.minLvl,desc:t.d!==undefined?t.d:txt(t.t),rc:race});
   });
+  if(rp.custom&&rp.isp.length){ // Paket K: angeborene Zauber der Custom-Rasse (id rc_cu_sp, Einzel-Tracker je Zauber mit Nutzungen)
+    const sub=rp.isp.filter(x=>x.u&&lvl>=x.l).map(x=>({k:crSlug(x.s),l:x.s,uses:x.u}));
+    out.push({id:'rc_cu_sp',name:'Innate Spellcasting',tag:'passiv',icon:'📖',uses:sub.length?1:null,restore:sub.length?'long':null,sub:sub.length?sub:undefined,desc:crSpellTxt(rp,lvl),rc:race});
+  }
   (rp.ch||[]).forEach(c=>{
     if(!c.ab)return;
     const o=rcOpt(c),sub=o?(o.inn||[]).filter(x=>lvl>=x.l).map(x=>({k:'l'+x.l,l:x.s,uses:x.u})):[];
@@ -1578,9 +1797,10 @@ function rcTrackers(race,lvl){
 }
 // Trait-Karten ohne Tracker: {g, i, more}; Traits mit Tracker ab höherer Stufe (Draconic Flight, Large Form …) erscheinen erst mit ihm
 function rcFeatures(race,trs){
-  const rp=RACE_PICKS[race];if(!rp)return [];
-  return rcTraitGroups(race).map((g,i)=>({g,i})).filter(x=>x.g.name&&!trs.some(t=>t.name===x.g.name)&&!(rp.tr||[]).some(t=>t.t===x.g.name))
-    .map(x=>Object.assign(x,{more:RC_MORE.has(x.g.name)||!!(rp.sk&&rp.sk.t===x.g.name)}));
+  const rp=rcP(race);if(!rp)return [];
+  const lvl=fpLvl();
+  return rcTraitGroups(race).map((g,i)=>({g,i})).filter(x=>x.g.name&&!trs.some(t=>t.name===x.g.name)&&!(rp.tr||[]).some(t=>t.t===x.g.name)&&!(rp.fl&&rp.fl[x.g.name]>lvl))
+    .map(x=>Object.assign(x,{more:RC_MORE.has(x.g.name)||!!(rp.sk&&rp.sk.t===x.g.name)||!!(rp.more&&rp.more.includes(x.g.name))}));
 }
 // Werte aus dem Trait-Text der aktuellen Stufe (nur Anzeige): Save-DC, Schaden nach Charakterstufe, Würfel/Werte = Übungsbonus
 function rcCalc(desc){
@@ -1598,7 +1818,8 @@ function rcCalc(desc){
 // „Meine Klasse“ im Spell-List-Filter: feste Zauber der Rasse (spk) und der gewählten Lineage/Legacy bis zur Stufe
 function rcSpells(lvl){
   const race=rcRace();if(!race)return [];
-  const rp=RACE_PICKS[race],out=[];
+  const rp=rcP(race),out=[];
+  if(rp.custom){const s=rp.isp.filter(x=>lvl>=x.l).map(x=>x.s);if(s.length)out.push({via:rcName(race)+': Innate Spellcasting',spells:s});}
   (rp.spk||[]).forEach(x=>out.push({via:race+': '+x.t,spells:x.s}));
   (rp.ch||[]).forEach(c=>{const o=rcOpt(c);if(!o||!o.sp)return;
     const sp=[];Object.keys(o.sp).forEach(L=>{if(lvl>=+L)sp.push(...o.sp[L]);});
@@ -1608,16 +1829,25 @@ function rcSpells(lvl){
 // Werte-Zeile unter AC/Initiative/Speed (Info-Tab) und Hinweis bei Max HP (Actions-Tab)
 function buildRaceStats(){
   const el=document.getElementById('raceStats'),hp=document.getElementById('hpMHint');
-  const race=rcRace(),v=race&&rcVals(race),rp=race&&RACE_PICKS[race];
-  if(hp)hp.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}`:'';
+  const race=rcRace(),v=race&&rcVals(race),rp=race&&rcP(race);
+  if(hp)hp.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}${rp.custom?' HP':''}`:'';
   if(!el)return;if(!v){el.innerHTML='';return;}
   const spd=parseInt(document.getElementById('spd')?.value)||0,ch=[];
-  ch.push(`<span class="rc-chip${spd!==v.speed?' warn':''}" title="${spd!==v.speed?'Speed field: '+spd+' ft (set by hand)':''}">Speed ${v.speed} ft</span>`);
-  ch.push(v.size?`<span class="rc-chip">${v.size}</span>`:`<span class="rc-chip warn">Size: ${rp.size.map(x=>RC_SIZE[x]).join(' or ')}</span>`);
+  if(v.speed||!rp.custom)ch.push(`<span class="rc-chip${spd!==v.speed?' warn':''}" title="${spd!==v.speed?'Speed field: '+spd+' ft (set by hand)':''}">Speed ${v.speed} ft</span>`);
+  Object.keys(v.spx).forEach(k=>{if(v.spx[k])ch.push(`<span class="rc-chip">${k} ${v.spx[k]} ft</span>`);});
+  if(v.size)ch.push(`<span class="rc-chip">${v.size}</span>`);else if(rp.size.length)ch.push(`<span class="rc-chip warn">Size: ${rp.size.map(x=>RC_SIZE[x]).join(' or ')}</span>`);
   if(v.dv)ch.push(`<span class="rc-chip">Darkvision ${v.dv} ft</span>`);
   if(v.res.length)ch.push(`<span class="rc-chip">Resistance: ${v.res.join(', ')}</span>`);
+  if(rp.custom){
+    crSenseChips(v).forEach(x=>ch.push(`<span class="rc-chip">${x}</span>`));
+    if(v.imm.length)ch.push(`<span class="rc-chip">Immunity: ${v.imm.join(', ')}</span>`);
+    (rp.adv||[]).filter(x=>x.c).forEach(x=>ch.push(`<span class="rc-chip">Adv. vs. ${pkEsc(x.c)}</span>`));
+    if(rp.nac){const a=parseInt(document.getElementById('ac')?.value)||0,n=crNacVal(rp);
+      ch.push(`<span class="rc-chip${a!==n?' warn':''}" title="Natural AC ${rp.nac.b}${rp.nac.ab?' + '+rp.nac.ab:''}${a!==n?' – AC field: '+a+' (set by hand, e.g. armor)':''}">Natural AC ${n}</span>`);}
+  }
   (rp.ch||[]).forEach(c=>{if(!rcOpt(c))ch.push(`<span class="rc-chip warn">${pkEsc(c.t)}: choose</span>`);});
-  el.innerHTML=`<div class="rc-row"><span class="rc-lbl">${pkEsc(race)}</span>${ch.join('')}</div>`;
+  if(rp.custom&&!ch.length)ch.push(`<span class="rc-chip warn">No values yet</span>`);
+  el.innerHTML=`<div class="rc-row"><span class="rc-lbl">${pkEsc(rcName(race))}</span>${ch.join('')}</div>`;
 }
 
 // ── Paket C2 (29.09.2026): Feature-Auswahl, Bonus-Skills, Expertise, Saves ────────────────────
@@ -1785,8 +2015,9 @@ function delWeapon(i){
 }
 function buildWeapons(){
   const g=document.getElementById('weaponList');if(!g)return;
-  if(!st.weapons||!st.weapons.length){g.innerHTML='<div style="font-size:var(--fs-md);color:var(--muted);padding:6px 2px">No weapons added.</div>';return;}
-  g.innerHTML='';
+  const nwH=crWeaponsHtml(); // Paket K: natürliche Waffen der Custom-Rasse (berechnet, nicht in st.weapons)
+  if(!st.weapons||!st.weapons.length){g.innerHTML=nwH||'<div style="font-size:var(--fs-md);color:var(--muted);padding:6px 2px">No weapons added.</div>';return;}
+  g.innerHTML=nwH;
   st.weapons.forEach((w,i)=>{
     const d=document.createElement('div');
     d.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px';
@@ -4859,8 +5090,8 @@ function onRaceChange(){
 
 // Also rebuild race lore when custom name changes
 document.addEventListener('input', e=>{
-  if(e.target.id==='raceCustom') buildRaceLore();
-  if(e.target.id==='spd') buildRaceStats();
+  if(e.target.id==='raceCustom'){buildRaceLore();if(rcRace()==='custom'){buildSkills();buildAbilities();buildWeapons();}}
+  if(e.target.id==='spd'||e.target.id==='ac') buildRaceStats();
 });
 
 function buildRaceLore(){
@@ -4874,8 +5105,8 @@ function buildRaceLore(){
   // Custom race
   if(race==='custom'){
     sec.style.display='';
-    title.textContent='Race: '+(customName||'Custom');
-    body.innerHTML='<div class="nta-wrap"><textarea class="nta" id="n_race_custom" placeholder="Describe your race traits, abilities, features..." style="min-height:100px"></textarea><button class="nta-expand" onclick="openNoteModal(\'n_race_custom\',\'Race Traits Notes\')">⛶</button></div>';
+    body.innerHTML=crHtml();
+    title.textContent='Race: '+(customName||'Custom')+((crGet().sub||'').trim()?' · '+crGet().sub.trim():'');   // Paket K: Werte bzw. Eingabemaske, darunter der bisherige Freitext
     // restore saved value
     const saved=document.getElementById('n_race_custom');
     if(saved && typeof st.raceNotes!=='undefined') saved.value=st.raceNotes||'';
@@ -5616,7 +5847,7 @@ function buildAbilities(){
         <div class="ab-title">
           <div class="ab-name">${ab.name}<span class="fp-suf">${fpT.suf}</span>${isConc?`<span class="sp-badge sp-conc${concFeatActive?' active':''}" onclick="event.stopPropagation();togConcFeature('${ab.id}')" title="Concentration" style="margin-left:6px">C</span>`:''}
           </div>
-          <div class="ab-tag">${tagLabel}${ab.rc?' · '+ab.rc:''}</div>
+          <div class="ab-tag">${tagLabel}${ab.rc?' · '+pkEsc(rcName(ab.rc)):''}</div>
         </div>
         ${usesHtml}
       </div>${subsHtml}
@@ -5660,7 +5891,7 @@ function buildAbilities(){
         <div class="ab-icon ${k}">${FICON[k]}</div>
         <div class="ab-title">
           <div class="ab-name">${x.g.name}<span class="fp-suf">${rc.suf}</span></div>
-          <div class="ab-tag">${race}</div>
+          <div class="ab-tag">${pkEsc(rcName(race))}</div>
         </div>
       </div>
       <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
@@ -6479,7 +6710,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{}
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -6540,6 +6771,7 @@ function loadChar(name){
   const chars = getAllChars();
   if(!chars[name]) return;
   _saving = true;
+  _crEdit = null; // Paket K: Maske je Charakter neu entscheiden (leer → offen)
   applyState(chars[name]);
   st.log = chars[name].log || [];
   refreshCharSel(name);
@@ -6578,13 +6810,14 @@ function confirmNewChar(){
   }
 }
 function resetUI(){
+  _crEdit=null;
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
     saveP:{},skillP:{},skillMisc:{},skillNotes:'',
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{}
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -6605,6 +6838,7 @@ function resetUI(){
 
 function _doNewChar(name){
   const _name=name;
+  _crEdit=null;
   {
   _saving = true;
   // Reset state
@@ -6614,7 +6848,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:""
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{}
   });
   document.getElementById('charName').textContent=_name;
   TEXT_IDS.forEach(id=>{
@@ -6712,7 +6946,11 @@ function _abLabel(id){
     try{Object.values(CLASS_DATA).forEach(c=>Object.values(c.abilities||{}).forEach(l=>(l||[]).forEach(add)));}catch(e){}
     try{if(typeof RACE_PICKS!=='undefined')Object.keys(RACE_PICKS).forEach(r=>(rcTrackers(r,20)||[]).forEach(add));}catch(e){}
   }
-  return _abNames[id]||id;
+  if(_abNames[id])return _abNames[id];
+  const cu=/^rc_cu_\d+/.exec(id),t=cu&&((st.customRace||{}).tr||[]).find(x=>x.id===cu[0]);   // Paket K: Custom-Traits
+  if(id==='rc_cu_sp')return 'Innate Spellcasting';
+  if(/^rc_cu_sp\./.test(id)){const s=((st.customRace||{}).sp||[]).find(x=>crSlug((x.n||'').trim())===id.slice(9));return 'Innate Spellcasting · '+(s?s.n.trim():id.slice(9));}
+  return t?(t.n||id):id;
 }
 function _pickLabel(k){
   let m;
@@ -6753,6 +6991,18 @@ function _logTxtMsg(label,a,b){
   return `${label} changed: "${_logCut(r.a,25)}" → "${_logCut(r.b,25)}"`;
 }
 // generischer Vergleich beliebiger Werte (Objekte rekursiv, Listen je Eintrag)
+// Paket K: Werte der Custom-Rasse lesbar ins Log
+function _crLog(out,a,b){
+  a=a&&typeof a==='object'?a:{};b=b&&typeof b==='object'?b:{};const L='Custom race';
+  const F={sub:'Subrace',size:'Size',speed:'Speed',fly:'Fly speed',swim:'Swim speed',climb:'Climb speed',dv:'Darkvision',blind:'Blindsight',tremor:'Tremorsense',truesight:'Truesight',
+    nac:'Natural AC',nacAb:'Natural AC ability',hpl:'HP per level',lang:'Languages',spAb:'Spellcasting ability'};
+  Object.keys(F).forEach(k=>{const x=a[k]??'',y=b[k]??'';if(String(x)!==String(y))out.push(`${L} ${F[k]}: ${x===''?'—':x} → ${y===''?'—':y}`);});
+  [['res','Resistances'],['sk','Skills'],['immD','Damage immunities'],['immC','Condition immunities'],['advS','Advantage on saves'],['advC','Advantage vs. conditions']].forEach(([k,l])=>{const x=(a[k]||[]).join(', '),y=(b[k]||[]).join(', ');if(x!==y)out.push(`${L} ${l}: "${x||'—'}" → "${y||'—'}"`);});
+  ATTRS.forEach(({k})=>{const x=parseInt((a.asi||{})[k])||0,y=parseInt((b.asi||{})[k])||0;if(x!==y)out.push(`${L} ${k} bonus: ${fmt(x)} → ${fmt(y)}`);});
+  _logList(out,a.tr,b.tr,L+' trait',x=>x&&x.id,{name:x=>(x&&x.n)||'(unnamed)',txt:['d'],skip:['id'],fl:{n:'Name',d:'Text',tag:'Action type',uses:'Uses',restore:'Recharge',lv:'From level'}});
+  _logList(out,a.sp,b.sp,L+' spell',null,{name:(x,i)=>(x&&x.n)||('#'+(i+1)),fl:{n:'Name',l:'From level',u:'Uses'},lblF:(f,x,i,lbl)=>f==='n'?`${L} spell ${i+1}`:lbl});
+  _logList(out,a.nw,b.nw,L+' natural weapon',null,{name:(x,i)=>(x&&x.n)||('#'+(i+1)),fl:{n:'Name',dice:'Damage',type:'Damage Type',ab:'Ability'},lblF:(f,x,i,lbl)=>f==='n'?`${L} natural weapon ${i+1}`:lbl});
+}
 function _logGen(out,label,va,vb,path){
   if(JSON.stringify(va)===JSON.stringify(vb))return;
   const isO=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -6891,6 +7141,7 @@ function _diffSnaps(a,b){
   }
   done.add('saveP');profDiff(a.saveP,b.saveP,'Save',k=>k);
   done.add('skillP');profDiff(a.skillP,b.skillP,'Skill',_skillLabel);
+  done.add('customRace');_crLog(out,a.customRace,b.customRace);
   done.add('picks');const pA=a.picks||{}, pB=b.picks||{};
   new Set([...Object.keys(pA),...Object.keys(pB)]).forEach(k=>{ const x=(pA[k]||[]).join(', '), y=(pB[k]||[]).join(', '); if(x!==y) out.push(`Choice ${_pickLabel(k)}: "${x||'—'}" → "${y||'—'}"`); });
   // alles Übrige (auch künftige Felder aus Paket E/F) generisch
@@ -7249,7 +7500,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02e';
+const APP_VERSION = 'willow-app-2026-10-02f';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
