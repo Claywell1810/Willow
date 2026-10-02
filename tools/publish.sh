@@ -75,6 +75,7 @@ if [ $APP = 1 ]; then
   GH=$(curl -sS "https://raw.githubusercontent.com/Claywell1810/Willow/$H/index.html" | wc -c)
   echo "   index.html lokal $LOK Bytes, GitHub (Commit $H) $GH Bytes $([ "$LOK" = "$GH" ] && echo ✔ || echo '✘ ABWEICHUNG')"
   echo "== Fertig: Commit $H, Version $V"
+  cp DnD_Character_App.html ALT.html   # neue Basis: weitere Doku-Commits in derselben Sitzung ohne neue App-Version (Fund 02.10.2026)
 else
   echo "== Fertig: Commit $H (keine neue App-Version)"
 fi
