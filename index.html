@@ -130,6 +130,31 @@ input[type=number]{-moz-appearance:textfield}
 .pk-pend{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);letter-spacing:.5px;margin-left:6px}
 .sk-bdg{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.3px;color:var(--purple);border:1px solid color-mix(in srgb, var(--purple) 45%, transparent);border-radius:8px;padding:0 5px;margin-left:5px;white-space:nowrap;vertical-align:middle}
 .a-bdg{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);margin-top:1px}
+.a-bdg.off{color:var(--text3)}
+/* Paket E (02.10.2026): Attributswert als Knopf, Fenster mit Quellen */
+.acard{cursor:pointer}
+.acard .aname,.st-card .aname{color:var(--gold)}
+.st-card{cursor:pointer;text-align:center}
+.at-sel{max-width:60%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:var(--fs-sm);padding:5px 6px;outline:none} /* Attributsname in Akzentfarbe (Wunsch Simon 02.10.2026) */
+.amod.hl{display:inline-block;background:color-mix(in srgb,var(--purple) 16%,transparent);border:none;border-radius:12px;padding:0 10px;margin-top:3px;font-weight:600;line-height:1.5}
+.aval-btn{font-family:'Cinzel',serif;font-size:26px;font-weight:600;color:var(--text);background:transparent;border:none;min-width:46px;padding:0 8px;line-height:1.35;cursor:pointer;-webkit-tap-highlight-color:transparent} /* wie früher ohne Kasten (Wunsch Simon 02.10.2026), Tippen öffnet das Fenster */
+.at-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.at-chip{flex:1 1 0;min-width:44px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);padding:4px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.at-chip b{font-size:var(--fs-md);color:var(--text2);font-weight:600}
+.at-chip.on{border-color:var(--gold);color:var(--gold)}.at-chip.on b{color:var(--gold)}
+.at-tot{display:flex;align-items:baseline;justify-content:center;gap:8px}
+.at-big{font-family:'Cinzel',serif;font-size:34px;font-weight:600;color:var(--text)}
+.at-mod{font-family:'Cinzel',serif;font-size:var(--fs-lg);color:var(--purple)}
+.at-form{text-align:center;font-size:var(--fs-sm);color:var(--text3);margin:0 0 8px;line-height:1.4}
+.at-rows{display:flex;flex-direction:column;gap:5px;margin:6px 0}
+.at-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 8px}
+.at-row.auto{opacity:.9}
+.at-l{min-width:0;font-size:var(--fs-txt);color:var(--text)}
+.at-l small{display:block;font-size:var(--fs-xs);color:var(--text3);line-height:1.3}
+.at-v{font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold);text-align:right;white-space:nowrap}
+.at-v small{display:block;font-family:'Crimson Pro',serif;font-size:var(--fs-xs);color:var(--text3)}
+.at-ctrl{display:flex;align-items:center;gap:3px;flex:0 0 auto}
+.at-in{width:40px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-md);text-align:center;padding:3px 0;outline:none}
 #pkHints:empty{display:none}
 /* Paket C2: Feature-Auswahl (fpHtml) */
 .sk-pip.h{background:linear-gradient(90deg,var(--gold) 50%,transparent 50%);border-color:var(--gold)}
@@ -775,9 +800,10 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div class="attr-grid" id="attrGrid"></div>
       <div style="border-top:1px solid var(--border2);margin:10px 0 10px"></div>
       <div class="stat3">
-        <div class="sbox"><div class="hp-lbl">Armor (AC)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ac',-1)">−</button><input class="hpin" type="number" id="ac" value="10" style="font-size:20px;color:var(--gold)"><button class="hbtn" onclick="chStat('ac',1)">+</button></div></div>
-        <div class="sbox"><div class="hp-lbl">Initiative</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('ini',-1)">−</button><input class="hpin" type="number" id="ini" value="0" style="font-size:20px;color:var(--purple)"><button class="hbtn" onclick="chStat('ini',1)">+</button></div></div>
-        <div class="sbox"><div class="hp-lbl">Speed (ft)</div><div class="hp-ctrl"><button class="hbtn" onclick="chStat('spd',-5)">−</button><input class="hpin" type="number" id="spd" value="30" style="font-size:20px"><button class="hbtn" onclick="chStat('spd',5)">+</button></div></div>
+        <!-- Paket E (02.10.2026): wie die Attribute – nur Wert, Tippen öffnet die Quellen (openStat); Felder ac/ini/spd bleiben (TEXT_IDS, versteckt) -->
+        <div class="sbox st-card" onclick="openStat('ac')"><div class="aname">Armor (AC)</div><button class="aval-btn" id="acV" aria-label="Armor Class, details">10</button><input type="number" id="ac" value="10" style="display:none"></div>
+        <div class="sbox st-card" onclick="openStat('ini')"><div class="aname">Initiative</div><button class="aval-btn" id="iniV" aria-label="Initiative, details">+0</button><input type="number" id="ini" value="0" style="display:none"></div>
+        <div class="sbox st-card" onclick="openStat('spd')"><div class="aname">Speed (ft)</div><button class="aval-btn" id="spdV" aria-label="Speed, details">30</button><input type="number" id="spd" value="30" style="display:none"></div>
       </div>
       <div id="raceStats"></div>
       </div></div>
@@ -1280,7 +1306,7 @@ let st={
   slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,
   mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set(),
-  concActive:null, concActiveFeature:null, customRace:{}
+  concActive:null, concActiveFeature:null, customRace:{}, attrSrc:null, statSrc:null
 };
 
 const md=v=>Math.floor((v-10)/2);
@@ -1315,27 +1341,274 @@ function showToast(msg){
 }
 
 // ATTRS
+// Paket E (02.10.2026): Attribute = Grundwert + Boni. st.attrSrc = {STR:{base, asi, cls, item, set, tmp, dm}, …} (null = alter
+// Charakter mit nur einer Zahl je Attribut, st.attrs von Hand). Background- und Rassen-Boni kommen automatisch aus calcGrants
+// (Rasse eingerechnet, Entscheidung Simon 02.10.2026). st.attrs bleibt der Endwert (attrSync), alle Rechnungen lesen weiter st.attrs.
+// Karte ohne −/+ (Entscheidung Simon): Tippen auf den Wert öffnet das Fenster mit allen Quellen (openAttr).
+const ATTR_ROWS=[
+  {k:'base',l:'Base',d:'Points from character creation (Standard Array, Point Buy or rolled)',min:1,max:30},
+  {k:'bg',l:'Background',auto:1},
+  {k:'race',l:'Race',auto:1},
+  {k:'asi',l:'Ability Score Improvement / Feats',min:0,max:10,sh:'ASI'},
+  {k:'cls',l:'Class Feature',d:'e.g. a level 20 capstone',min:-10,max:10,sh:'Class'},
+  {k:'item',l:'Item (bonus)',d:'e.g. Tome / Manual: permanent +',min:-10,max:10,sh:'Item'},
+  {k:'set',l:'Item (sets the score)',d:'e.g. Gauntlets of Ogre Power: score becomes 19, no effect if already higher',min:0,max:30,set:1},
+  {k:'tmp',l:'Temporary / Effects',d:'e.g. a reduction until the next rest',min:-30,max:30,sh:'Temp'},
+  {k:'dm',l:'Other / DM',min:-10,max:10,sh:'Other'}
+];
+let _atK=null;
+function attrSrcNew(){const o={};ATTRS.forEach(a=>o[a.k]={base:10});return o;}
+function attrOn(){return !!(st.attrSrc&&typeof st.attrSrc==='object');}
+function attrAuto(k,G){
+  G=G||calcGrants();const f=rc=>G.filter(x=>x.art==='attr'&&x.ziel===k&&!!x.rc===rc).reduce((t,x)=>t+(+x.stufe||0),0);
+  return {bg:f(false),race:f(true)};
+}
+function attrCalc(k,G){
+  const s=(st.attrSrc&&st.attrSrc[k])||{},au=attrAuto(k,G);
+  const r={base:+s.base||10,bg:au.bg,race:au.race,asi:+s.asi||0,cls:+s.cls||0,item:+s.item||0,set:+s.set||0,tmp:+s.tmp||0,dm:+s.dm||0};
+  r.sum=r.base+r.bg+r.race+r.asi+r.cls+r.item+r.tmp+r.dm;
+  r.setWins=r.set>0&&r.set>r.sum;
+  r.total=Math.max(1,Math.min(30,r.setWins?r.set:r.sum));
+  r.cap=(r.bg>0||r.race>0||r.asi>0)&&r.base+r.bg+r.race+r.asi>20; // XPHB: Background-Boni und ASI nicht über 20
+  return r;
+}
+function attrSync(){if(!attrOn())return;const G=calcGrants();ATTRS.forEach(a=>{st.attrs[a.k]=attrCalc(a.k,G).total;});}
 function buildAttrs(){
   const g=document.getElementById('attrGrid');if(!g)return;g.innerHTML='';
-  const G=calcGrants();
+  attrSync();
   ATTRS.forEach(a=>{
+    // Karte nur Name, große Zahl, Modifikator hervorgehoben (Wunsch Simon 02.10.2026); alle Boni im Fenster (Tippen)
     const v=st.attrs[a.k],m=md(v);
-    const bg=G.filter(x=>x.art==='attr'&&x.ziel===a.k&&!x.rc).reduce((t,x)=>t+x.stufe,0),rb=G.filter(x=>x.art==='attr'&&x.ziel===a.k&&x.rc).reduce((t,x)=>t+x.stufe,0);
-    const d=document.createElement('div');d.className='acard';
+    const d=document.createElement('div');d.className='acard';d.onclick=()=>openAttr(a.k);
     d.innerHTML=`<div class="aname">${a.l}</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:2px">
-        <button class="hbtn" onclick="chAttr('${a.k}',-1)" style="width:22px;height:22px;font-size:var(--fs-txt)">−</button>
-        <input class="aval" type="number" min="1" max="30" value="${v}" id="a_${a.k}" style="width:38px">
-        <button class="hbtn" onclick="chAttr('${a.k}',1)" style="width:22px;height:22px;font-size:var(--fs-txt)">+</button>
-      </div>
-      <div class="amod" id="m_${a.k}">${fmt(m)}</div>${bg?`<div class="a-bdg" title="Background bonus – not added to the score">+${bg} BG</div>`:''}${rb?`<div class="a-bdg" title="Race bonus${rcRace()==='custom'?' (custom race)':' (PHB 2014)'} – not added to the score">${fmt(rb)} Race</div>`:''}`;
+      <button class="aval-btn" id="a_${a.k}" aria-label="${a.l} ${v}, details">${v}</button>
+      <div><span class="amod hl" id="m_${a.k}">${fmt(m)}</span></div>`;
     g.appendChild(d);
-    d.querySelector('input').addEventListener('input',e=>{
-      st.attrs[a.k]=parseInt(e.target.value)||10;
-      document.getElementById('m_'+a.k).textContent=fmt(md(st.attrs[a.k]));
-      buildSaves();buildSkills();calcSpell();buildRaceLore();
-    });
   });
+  statRender(); // Paket E: AC/Initiative/Speed hängen an den Attributen
+}
+// ── Paket E (02.10.2026): AC / Initiative / Speed wie die Attribute ─────────────────────────────────────────────
+// st.statSrc = {ac:{arm, sh, item, feat, dm}, ini:{feat, item, dm}, spd:{base, feat, item, dm}}; fehlt ein Schlüssel (alte
+// Charaktere: statSrc null), bleibt das Feld von Hand. Felder ac/ini/spd (TEXT_IDS, versteckt) = berechneter Wert (statSync).
+// Automatisch (nur aus App-/5e.tools-Daten): Rüstung ARMOR_DATA (XPHB: Light + DEX, Medium + DEX max 2, Heavy ohne DEX,
+// Shield +2, Stärke-Mindestwert sonst Speed −10), Unarmored Defense u. ä. aus dem Feature-Text („base Armor Class equals 10
+// plus your X and Y modifiers“), Natural Armor der Custom-Rasse; Initiative = DEX-Mod. + Alert (Proficiency) bzw. Jack of All
+// Trades (halbe Proficiency); Speed = Rasse + Features „Your Speed increases by N feet [while you aren't wearing …]“ am
+// Textanfang (Monk: Spalte „Unarmored Movement“ der Class Table) − Exhaustion (5 × Stufe, XPHB).
+const STAT_DEF={ac:{l:'Armor Class',c:'AC'},ini:{l:'Initiative',c:'Initiative'},spd:{l:'Speed',c:'Speed'}};
+const STAT_ROWS={
+  ac:[{k:'item',l:'Item (bonus)',d:'e.g. +1 Armor, Ring of Protection',min:-10,max:10},{k:'feat',l:'Feat / Feature',d:'e.g. Defense Fighting Style',min:-10,max:10},{k:'dm',l:'Other / DM',min:-20,max:20}],
+  ini:[{k:'feat',l:'Feat / Feature',min:-10,max:10},{k:'item',l:'Item',min:-10,max:10},{k:'dm',l:'Other / DM',min:-20,max:20}],
+  spd:[{k:'base',l:'Base',d:'Speed without a race',min:0,max:200,st:5,noRace:1},{k:'feat',l:'Feat / Feature',d:'e.g. Speedy',min:-60,max:60,st:5},{k:'item',l:'Item',d:'e.g. Boots of Speed',min:-60,max:60,st:5},{k:'dm',l:'Other / DM',min:-60,max:60,st:5}]
+};
+let _stK=null,_stDraft=null;
+function statSrcNew(){return {ac:{arm:''},ini:{},spd:{base:30}};}
+function statOn(k){return !!(st.statSrc&&typeof st.statSrc==='object'&&st.statSrc[k]);}
+function stFeatures(){
+  const cls=document.getElementById('cls')?.value||'',cd=CLASS_DATA[cls],lvl=curLvl();if(!cd)return [];
+  const sk=clsSubKey(cd.subclass||{},document.getElementById('subcls')?.value||'');
+  return (cd.base||[]).concat(sk?(cd.subclass[sk]||[]):[]).filter(f=>f&&f.lvl<=lvl);
+}
+function stUnarmored(){
+  const out=[];
+  stFeatures().forEach(f=>{const t=f.desc||'';let m=/base Armor Class equals (\d+) plus your (\w+)(?: and (\w+))? modifiers?/i.exec(t),b,ab=[];
+    if(m&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];if(m[3]&&AB_FULL[m[3]])ab.push(AB_FULL[m[3]]);}
+    else if((m=/your AC equals (\d+) \+ your (\w+) modifier/i.exec(t))&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];}
+    else return;
+    if(!out.some(o=>o.n===f.name))out.push({n:f.name,b,ab,noSh:/armor or wielding a Shield/i.test(t)});});
+  return out;
+}
+function stArmorOf(s){const a=(s&&s.arm)||'';return ARMOR_DATA.find(x=>x.n===a&&x.c!=='S')||null;}
+function stAcCalc(s){
+  const r={parts:[],warn:[],t:0},add=(v,l,auto)=>{if(!v&&!auto)return;r.t+=v;r.parts.push({v,l});};
+  const a=s.arm||'',ar=stArmorOf(s),dex=getAbilityMod('DEX');
+  if(ar){r.t=ar.ac;r.base=`${ar.ac} ${ar.n}`;
+    if(ar.c==='L')add(dex,'DEX');else if(ar.c==='M')add(Math.min(2,dex),dex>2?'DEX (max 2)':'DEX');
+    if(ar.str&&(st.attrs.STR||10)<ar.str)r.warn.push(`${ar.n} needs Strength ${ar.str} – otherwise Speed −10 ft (XPHB).`);
+    if(ar.st)r.warn.push(`${ar.n}: Disadvantage on Dexterity (Stealth) checks.`);}
+  else if(a.startsWith('ud:')&&stUnarmored().some(u=>'ud:'+u.n===a)){const u=stUnarmored().find(x=>'ud:'+x.n===a);r.t=u.b;r.base=`${u.b} ${u.n}`;u.ab.forEach(x=>add(getAbilityMod(x),x,1));if(s.sh&&u.noSh)r.warn.push(`${u.n} doesn't work while wielding a Shield.`);}
+  else if(a==='nat'&&rcRace()==='custom'&&rcP('custom').nac){const p=rcP('custom');r.t=p.nac.b;r.base=`${p.nac.b} Natural Armor`;if(p.nac.ab)add(getAbilityMod(p.nac.ab),p.nac.ab,1);}
+  else{r.t=10;r.base='10 Unarmored';add(dex,'DEX',1);}
+  if(s.sh){const sh=ARMOR_DATA.find(x=>x.c==='S');add(sh?sh.ac:2,'Shield');}
+  add(+s.item||0,'Item');add(+s.feat||0,'Feat / Feature');add(+s.dm||0,'Other');
+  return r;
+}
+function stIniCalc(s){
+  const r={parts:[],warn:[],t:0},add=(v,l,auto)=>{if(!v&&!auto)return;r.t+=v;r.parts.push({v,l,auto});};
+  r.base='';add(getAbilityMod('DEX'),'DEX',1);
+  const alert=(st.feats||[]).some(f=>f&&f.name==='Alert'),jack=stFeatures().some(f=>f.name==='Jack of All Trades');
+  if(alert)add(prof(),'Alert (Proficiency)',1);else if(jack)add(Math.floor(prof()/2),'Jack of All Trades',1);
+  add(+s.feat||0,'Feat / Feature');add(+s.item||0,'Item');add(+s.dm||0,'Other');
+  return r;
+}
+function stSpdCalc(s){
+  const r={parts:[],warn:[],t:0},add=(v,l,auto)=>{if(!v)return;r.t+=v;r.parts.push({v,l,auto});};
+  const race=rcRace(),v=race&&rcVals(race);
+  if(v&&v.speed){r.t=v.speed;r.base=`${v.speed} ${rcName(race)}`;r.race=1;}else{r.t=+s.base||0;r.base=`${r.t} Base`;}
+  const ac=(st.statSrc&&st.statSrc.ac)||null,ar=ac?stArmorOf(ac):null,sh=!!(ac&&ac.sh),cls=document.getElementById('cls')?.value||'';
+  stFeatures().forEach(f=>{const m=/^(?:At \d+\w* level, )?Your (?:walking )?speed increases by (\d+) feet(?: while you aren't wearing (Heavy armor|armor)( or wielding a Shield)?)?\./i.exec(f.desc||'');if(!m)return;
+    if(r.parts.some(p=>p.l===f.name))return;
+    let n=+m[1];
+    if(/as shown on the/i.test(f.desc)){const row=(CLASS_TABLES[cls]&&CLASS_TABLES[cls].rows||[])[curLvl()-1],c=row&&/(\d+)/.exec(row.unarmored||'');if(c)n=+c[1];}
+    if(m[2]){const heavyOnly=/heavy/i.test(m[2]);if(ac&&((heavyOnly&&ar&&ar.c==='H')||(!heavyOnly&&(ar||(m[3]&&sh))))){r.warn.push(`${f.name}: no bonus while wearing ${heavyOnly?'Heavy armor':'armor'+(m[3]?' or a Shield':'')}.`);return;}}
+    add(n,f.name,1);});
+  if(ar&&ar.str&&(st.attrs.STR||10)<ar.str)add(-10,`${ar.n} (Strength ${ar.str})`,1);
+  const ex=+st.exhaustion||0;if(ex)add(-5*ex,`Exhaustion ${ex}`,1);
+  add(+s.feat||0,'Feat / Feature');add(+s.item||0,'Item');add(+s.dm||0,'Other');
+  r.t=Math.max(0,r.t);return r;
+}
+function statCalc(k,s){s=s||(st.statSrc&&st.statSrc[k])||{};return k==='ac'?stAcCalc(s):k==='ini'?stIniCalc(s):stSpdCalc(s);}
+function statFmt(k,v){return k==='ini'?fmt(v):String(v);}
+function statForm(k,r){
+  const p=r.parts.map(x=>`${x.v<0?'− '+(-x.v):'+ '+x.v} ${x.l}`);
+  if(k==='ini')return p.join(' ').replace(/^\+ /,'')||'0';
+  return [r.base].concat(p).join(' ');
+}
+function statSync(){
+  if(!st.statSrc||typeof st.statSrc!=='object')return;
+  ['ac','ini','spd'].forEach(k=>{if(!statOn(k))return;const el=document.getElementById(k);if(el)el.value=statCalc(k).t;});
+}
+function statRender(){
+  statSync();
+  ['ac','ini','spd'].forEach(k=>{const el=document.getElementById(k),b=document.getElementById(k+'V');if(!b)return;
+    const v=el&&el.value!==''?parseInt(el.value):NaN;b.textContent=isNaN(v)?'—':statFmt(k,v);});
+}
+function openStat(k){_stK=k;_stDraft=null;renderStat();document.getElementById('attrModal').classList.add('on');}
+function stSrcObj(k){if(statOn(k))return st.statSrc[k];if(!_stDraft||_stDraft.k!==k)_stDraft={k,s:k==='ac'?{arm:''}:k==='spd'?{base:parseInt(document.getElementById('spd')?.value)||30}:{}};return _stDraft.s;}
+function renderStat(){
+  const box=document.getElementById('attrBox');if(!box||!_stK)return;
+  const k=_stK,on=statOn(k),s=stSrcObj(k),r=statCalc(k,s),D=STAT_DEF[k];
+  const chips=`<div class="at-chips">${['ac','ini','spd'].map(x=>{const el=document.getElementById(x);return `<button class="at-chip${x===k?' on':''}" onclick="_stK='${x}';_stDraft=null;renderStat()">${STAT_DEF[x].c}<b>${el&&el.value!==''?statFmt(x,parseInt(el.value)):'—'}</b></button>`;}).join('')}</div>`;
+  let rows='';
+  if(k==='ac'){
+    const ud=stUnarmored(),p=rcRace()==='custom'?rcP('custom'):null,dex=getAbilityMod('DEX');
+    const opt=(v,l)=>`<option value="${pkEsc(v)}"${(s.arm||'')===v?' selected':''}>${pkEsc(l)}</option>`;
+    let o=opt('',`Unarmored (10 + DEX)`);
+    ud.forEach(u=>{o+=opt('ud:'+u.n,`${u.n} (${u.b} + ${u.ab.join(' + ')})`);});
+    if(p&&p.nac)o+=opt('nat',`Natural Armor (${p.nac.b}${p.nac.ab?' + '+p.nac.ab:''})`);
+    [['L','Light Armor',' + DEX'],['M','Medium Armor',' + DEX (max 2)'],['H','Heavy Armor','']].forEach(([c,l,x])=>{o+=`<optgroup label="${l}">`+ARMOR_DATA.filter(a=>a.c===c).map(a=>opt(a.n,`${a.n} (${a.ac}${x})`)).join('')+'</optgroup>';});
+    const sh=ARMOR_DATA.find(x=>x.c==='S');
+    rows+=`<div class="at-row"><div class="at-l">Armor<small>5e.tools (XPHB)</small></div><select class="at-sel" onchange="statArm(this.value)">${o}</select></div>
+      <div class="at-row"><div class="at-l">Shield<small>+${sh?sh.ac:2} AC</small></div><button class="pk-chip${s.sh?' on':''}" onclick="statPut('sh',${s.sh?0:1});renderStat()">${s.sh?'✓ Shield':'No shield'}</button></div>`;
+  }else{
+    r.parts.filter(x=>x.auto).forEach(x=>{
+      rows+=`<div class="at-row auto"><div class="at-l">${pkEsc(x.l)}<small>automatic</small></div><div class="at-v">${fmt(x.v)}</div></div>`;});
+    if(k==='spd'&&r.race)rows=`<div class="at-row auto"><div class="at-l">Race<small>${pkEsc(rcName(rcRace()))} · automatic</small></div><div class="at-v">${rcVals(rcRace()).speed}</div></div>`+rows;
+  }
+  STAT_ROWS[k].forEach(x=>{
+    if(x.noRace&&r.race)return;
+    const v=+s[x.k]||0,shown=x.k==='base'?v:fmt(v);
+    rows+=`<div class="at-row"><div class="at-l">${x.l}${x.d?`<small>${x.d}</small>`:''}</div>
+      <div class="at-ctrl"><button class="hbtn" onclick="statStep('${x.k}',-1)">−</button>
+      <input class="at-in" type="text" inputmode="numeric" value="${shown}" placeholder="0" oninput="statIn('${x.k}',this.value)" onchange="renderStat()">
+      <button class="hbtn" onclick="statStep('${x.k}',1)">+</button></div></div>`;
+  });
+  const old=document.getElementById(k)?.value;
+  const foot=on?`<div class="rest-foot"><button class="ws-btn" onclick="closeAttr()">Done</button></div>`
+    :`<div class="rest-note">This ${D.l} is still set by hand: <b>${old!==''&&old!=null?statFmt(k,parseInt(old)):'—'}</b>. Choose the sources above, then switch to the calculated value.</div>
+      <div class="rest-foot"><button class="ws-btn" onclick="closeAttr()">Keep hand value</button><button class="ws-btn ws-go" onclick="statSetup()">Use calculated ${statFmt(k,r.t)}</button></div>`;
+  box.innerHTML=`<div class="ws-head">✧ ${D.l}</div>${chips}
+    <div class="at-tot"><span class="at-big" id="atBig">${statFmt(k,r.t)}</span>${k==='spd'?'<span class="at-mod">ft</span>':''}</div>
+    <div class="at-form" id="atForm">= ${pkEsc(statForm(k,r))}</div>
+    <div class="at-rows">${rows}</div>
+    ${r.warn.map(w=>`<div class="rest-note warn">${pkEsc(w)}</div>`).join('')}${foot}`;
+}
+function statRefresh(){statRender();buildRaceStats();}
+function statSetup(){
+  const k=_stK;if(!k||statOn(k))return;
+  if(!st.statSrc||typeof st.statSrc!=='object')st.statSrc={};
+  st.statSrc[k]=stSrcObj(k);_stDraft=null;statRefresh();renderStat();autoSave();showToast(STAT_DEF[k].l+': calculated');
+}
+function statPut(row,v){
+  const k=_stK,s=stSrcObj(k),x=STAT_ROWS[k].find(y=>y.k===row);
+  if(x)v=Math.max(x.min,Math.min(x.max,v));
+  if(v||row==='base'||row==='arm')s[row]=v;else delete s[row];
+  if(statOn(k)){statRefresh();autoSave();}
+}
+function statArm(v){statPut('arm',v);if(_stK!=='ac'||!statOn('ac'))renderStat();else{statRefresh();renderStat();}}
+function statStep(row,dl){const s=stSrcObj(_stK),x=STAT_ROWS[_stK].find(y=>y.k===row);statPut(row,(+s[row]||0)+dl*((x&&x.st)||1));renderStat();}
+function statIn(row,txt){
+  const n=parseInt(String(txt).replace(/[^0-9-]/g,''));statPut(row,isNaN(n)?0:n);
+  const k=_stK,r=statCalc(k,stSrcObj(k)),b=document.getElementById('atBig'),f=document.getElementById('atForm');
+  if(b)b.textContent=statFmt(k,r.t);if(f)f.textContent='= '+statForm(k,r);
+}
+
+// Fenster „Strength 12 = 10 Base + 2 Background …“ (Paket E, 02.10.2026)
+function openAttr(k){_atK=k;renderAttr();document.getElementById('attrModal').classList.add('on');}
+function closeAttr(){document.getElementById('attrModal').classList.remove('on');_atK=null;_stK=null;_stDraft=null;}
+function attrRefresh(){buildAttrs();buildSaves();buildSkills();calcSpell();buildRaceLore();buildRaceStats();buildAbilities();buildWeapons();}
+function renderAttr(){
+  const box=document.getElementById('attrBox');if(!box||!_atK)return;
+  const k=_atK,a=ATTRS.find(x=>x.k===k),G=calcGrants();
+  const chips=`<div class="at-chips">${ATTRS.map(x=>`<button class="at-chip${x.k===k?' on':''}" onclick="_atK='${x.k}';renderAttr()">${x.k}<b>${st.attrs[x.k]}</b></button>`).join('')}</div>`;
+  if(!attrOn()){
+    const rows=ATTRS.map(x=>{const au=attrAuto(x.k,G),p=[];if(au.bg)p.push(fmt(au.bg)+' Background');if(au.race)p.push(fmt(au.race)+' Race');
+      return `<div class="at-row"><div class="at-l">${x.l}</div><div class="at-v">${st.attrs[x.k]}${p.length?`<small>${p.join(' · ')}</small>`:''}</div></div>`;}).join('');
+    const any=ATTRS.some(x=>{const au=attrAuto(x.k,G);return au.bg||au.race;});
+    box.innerHTML=`<div class="ws-head">✧ Ability Scores</div>
+      <div class="rest-note">Willow now keeps every ability as <b>Base</b> + bonuses (Background, Race, ASI / Feats, items, effects). Each source can be checked and changed here later. This character still has a single number per ability:</div>
+      <div class="at-rows">${rows}</div>
+      ${any?`<div class="rest-note">Are the Background / Race bonuses <b>already included</b> in these numbers?</div>
+      <div class="cast-opts"><button class="cast-opt" onclick="attrSetup(true)">Yes – already included<span>Base = score − bonus</span></button>
+      <button class="cast-opt" onclick="attrSetup(false)">No – add them now<span>Base = score</span></button></div>`
+      :`<div class="cast-opts"><button class="cast-opt" onclick="attrSetup(false)">Set up base values<span>Base = score</span></button></div>`}
+      <div class="rest-foot"><button class="ws-btn" onclick="closeAttr()">Cancel</button></div>`;
+    return;
+  }
+  const r=attrCalc(k,G),bgN=st.bg||'',rcN=rcRace()?rcName(rcRace()):'',form=attrForm(r);
+  const rows=ATTR_ROWS.map(x=>{
+    if(x.auto){
+      const nm=x.k==='bg'?(bgN||'none'):(rcN||'none');
+      return `<div class="at-row auto"><div class="at-l">${x.l}<small>${nm} · automatic</small></div><div class="at-v">${r[x.k]?fmt(r[x.k]):'—'}</div></div>`;
+    }
+    const v=x.k==='base'?r.base:(st.attrSrc[k]&&+st.attrSrc[k][x.k])||0;
+    const shown=x.set&&!v?'':(x.k==='base'||x.set?v:fmt(v));
+    return `<div class="at-row"><div class="at-l">${x.l}${x.d?`<small>${x.d}</small>`:''}</div>
+      <div class="at-ctrl"><button class="hbtn" onclick="attrStep('${x.k}',-1)">−</button>
+      <input class="at-in" type="text" inputmode="numeric" value="${shown}" placeholder="${x.set?'—':'0'}" oninput="attrIn('${x.k}',this.value)" onchange="renderAttr()">
+      <button class="hbtn" onclick="attrStep('${x.k}',1)">+</button></div></div>`;
+  }).join('');
+  box.innerHTML=`<div class="ws-head">✧ ${a.l}</div>${chips}
+    <div class="at-tot"><span class="at-big" id="atBig">${r.total}</span><span class="at-mod" id="atMod">${fmt(md(r.total))}</span></div>
+    <div class="at-form" id="atForm">= ${form}</div>
+    <div class="at-rows">${rows}</div>
+    <div class="rest-note warn" id="atCap"${r.cap?'':' style="display:none"'}>XPHB: Background increases and Ability Score Improvements can't raise a score above 20.</div>
+    <div class="rest-foot"><button class="ws-btn" onclick="closeAttr()">Done</button></div>`;
+}
+function attrForm(r){
+  const bgN=st.bg||'',rcN=rcRace()?rcName(rcRace()):'',parts=[`${r.base} Base`];
+  ATTR_ROWS.forEach(x=>{if(x.k!=='base'&&!x.set&&r[x.k])parts.push(`${r[x.k]<0?'− '+(-r[x.k]):'+ '+r[x.k]} ${x.k==='bg'?'Background'+(bgN?' ('+bgN+')':''):x.k==='race'?'Race'+(rcN?' ('+rcN+')':''):(x.sh||x.l)}`);});
+  let form=parts.join(' ');
+  if(r.set)form+=r.setWins?` → set to ${r.set} (Item)`:` · Item “set to ${r.set}” has no effect`;
+  return form;
+}
+function attrSetup(incl){
+  const G=calcGrants(),o={};
+  ATTRS.forEach(x=>{const au=attrAuto(x.k,G),v=st.attrs[x.k]||10;o[x.k]={base:Math.max(1,Math.min(30,incl?v-au.bg-au.race:v))};});
+  st.attrSrc=o;attrRefresh();renderAttr();autoSave();
+  showToast('Base values set up');
+}
+function attrPut(row,v){
+  const x=ATTR_ROWS.find(y=>y.k===row);if(!x||x.auto||!attrOn())return;
+  const k=_atK;if(!st.attrSrc[k])st.attrSrc[k]={base:10};
+  v=Math.max(x.min,Math.min(x.max,v));
+  if(row==='base'||v)st.attrSrc[k][row]=v;else delete st.attrSrc[k][row];
+}
+function attrStep(row,dlt){
+  const k=_atK;if(!k||!attrOn())return;const s=st.attrSrc[k]||{},x=ATTR_ROWS.find(y=>y.k===row);
+  let v=row==='base'?(+s.base||10):(+s[row]||0);
+  if(x&&x.set&&!v&&dlt>0)v=Math.min(30,attrCalc(k).sum+1);else v+=dlt;
+  attrPut(row,v);attrRefresh();renderAttr();autoSave();
+}
+function attrIn(row,txt){
+  const k=_atK;if(!k||!attrOn())return;const n=parseInt(String(txt).replace(/[^0-9-]/g,''));
+  if(isNaN(n)){if(row==='base')return;attrPut(row,0);}else attrPut(row,n);
+  attrRefresh();
+  const r=attrCalc(k),b=document.getElementById('atBig'),m=document.getElementById('atMod'),c=document.getElementById('atCap');
+  if(b)b.textContent=r.total;if(m)m.textContent=fmt(md(r.total));if(c)c.style.display=r.cap?'':'none';
+  const f=document.getElementById('atForm');if(f)f.textContent='= '+attrForm(r);
+  document.querySelectorAll('#attrBox .at-chip b').forEach((e,i)=>{e.textContent=st.attrs[ATTRS[i].k];});
+  autoSave();
 }
 
 function chLvl(d){
@@ -1343,18 +1616,16 @@ function chLvl(d){
   const v=Math.max(1,Math.min(20,(parseInt(el.value)||1)+d));
   el.value=v;buildAbilities();buildClassTable();buildRaceLore();buildSaves();buildSkills();
 }
-function chAttr(k,d){
-  st.attrs[k]=Math.max(1,Math.min(30,(st.attrs[k]||10)+d));
-  const inp=document.getElementById('a_'+k);
-  if(inp) inp.value=st.attrs[k];
-  document.getElementById('m_'+k).textContent=fmt(md(st.attrs[k]));
-  buildSaves();buildSkills();calcSpell();buildRaceLore();autoSave();
+function chAttr(k,d){ // seit Paket E ohne Knopf auf der Karte; ändert bei Charakteren mit Grundwerten den Grundwert
+  if(attrOn()){const s=st.attrSrc[k]||(st.attrSrc[k]={base:10});s.base=Math.max(1,Math.min(30,(+s.base||10)+d));}
+  else st.attrs[k]=Math.max(1,Math.min(30,(st.attrs[k]||10)+d));
+  attrRefresh();autoSave();
 }
 
 function chStat(id,d){const el=document.getElementById(id);if(!el)return;el.value=parseInt(el.value||0)+d;el.dispatchEvent(new Event('input'));}
 
 function buildSaves(){
-  const g=document.getElementById('savesGrid');if(!g)return;g.innerHTML='';
+  const g=document.getElementById('savesGrid');if(!g)return;g.innerHTML='';attrSync();
   const G=calcGrants();
   ATTRS.forEach(a=>{
     const auto=grantLvl(G,'save',a.k),p=!!st.saveP[a.k]||!!auto;const b=md(st.attrs[a.k])+(p?prof():0);
@@ -1830,12 +2101,14 @@ function rcSpells(lvl){
 }
 // Werte-Zeile unter AC/Initiative/Speed (Info-Tab) und Hinweis bei Max HP (Actions-Tab)
 function buildRaceStats(){
+  statRender();
   const el=document.getElementById('raceStats'),hp=document.getElementById('hpMHint');
   const race=rcRace(),v=race&&rcVals(race),rp=race&&rcP(race);
   if(hp)hp.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}${rp.custom?' HP':''}`:'';
   if(!el)return;if(!v){el.innerHTML='';return;}
   const spd=parseInt(document.getElementById('spd')?.value)||0,ch=[];
-  if(v.speed||!rp.custom)ch.push(`<span class="rc-chip${spd!==v.speed?' warn':''}" title="${spd!==v.speed?'Speed field: '+spd+' ft (set by hand)':''}">Speed ${v.speed} ft</span>`);
+  const spW=!statOn('spd')&&spd!==v.speed; // seit Paket E: berechnete Speed weicht absichtlich ab (Klasse, Exhaustion …)
+  if(v.speed||!rp.custom)ch.push(`<span class="rc-chip${spW?' warn':''}" title="${spW?'Speed field: '+spd+' ft (set by hand)':''}">Speed ${v.speed} ft</span>`);
   Object.keys(v.spx).forEach(k=>{if(v.spx[k])ch.push(`<span class="rc-chip">${k} ${v.spx[k]} ft</span>`);});
   if(v.size)ch.push(`<span class="rc-chip">${v.size}</span>`);else if(rp.size.length)ch.push(`<span class="rc-chip warn">Size: ${rp.size.map(x=>RC_SIZE[x]).join(' or ')}</span>`);
   if(v.dv)ch.push(`<span class="rc-chip">Darkvision ${v.dv} ft</span>`);
@@ -1844,8 +2117,8 @@ function buildRaceStats(){
     crSenseChips(v).forEach(x=>ch.push(`<span class="rc-chip">${x}</span>`));
     if(v.imm.length)ch.push(`<span class="rc-chip">Immunity: ${v.imm.join(', ')}</span>`);
     (rp.adv||[]).filter(x=>x.c).forEach(x=>ch.push(`<span class="rc-chip">Adv. vs. ${pkEsc(x.c)}</span>`));
-    if(rp.nac){const a=parseInt(document.getElementById('ac')?.value)||0,n=crNacVal(rp);
-      ch.push(`<span class="rc-chip${a!==n?' warn':''}" title="Natural AC ${rp.nac.b}${rp.nac.ab?' + '+rp.nac.ab:''}${a!==n?' – AC field: '+a+' (set by hand, e.g. armor)':''}">Natural AC ${n}</span>`);}
+    if(rp.nac){const a=parseInt(document.getElementById('ac')?.value)||0,n=crNacVal(rp),nw=!statOn('ac')&&a!==n;
+      ch.push(`<span class="rc-chip${nw?' warn':''}" title="Natural AC ${rp.nac.b}${rp.nac.ab?' + '+rp.nac.ab:''}${nw?' – AC field: '+a+' (set by hand, e.g. armor)':''}">Natural AC ${n}</span>`);}
   }
   (rp.ch||[]).forEach(c=>{if(!rcOpt(c))ch.push(`<span class="rc-chip warn">${pkEsc(c.t)}: choose</span>`);});
   if(rp.custom&&!ch.length)ch.push(`<span class="rc-chip warn">No values yet</span>`);
@@ -1979,7 +2252,7 @@ function toggleSkEdit(){
 }
 
 function buildSkills(){
-  const g=document.getElementById('skillsGrid');if(!g)return;g.innerHTML='';
+  const g=document.getElementById('skillsGrid');if(!g)return;g.innerHTML='';attrSync();
   const G=calcGrants();buildPkHints(G);
   const attrNames={STR:'Strength',DEX:'Dexterity',CON:'Constitution',INT:'Intelligence',WIS:'Wisdom',CHA:'Charisma'};
   let lastA='';
@@ -2047,7 +2320,7 @@ function buildWeapons(){
 }
 
 function calcSpell(){
-  const a=document.getElementById('spAttr')?.value;if(!a)return;
+  const a=document.getElementById('spAttr')?.value;if(!a)return;attrSync();
   const m=md(st.attrs[a]||10),p=prof();
   const dc=document.getElementById('spDC'),atk=document.getElementById('spAtk');
   if(dc)dc.value=8+p+m;if(atk)atk.value=fmt(p+m);
@@ -2881,6 +3154,7 @@ function addSpellManual(){
 
 // FEATURES
 function buildFeats(){
+  statRender(); // Paket E: Alert → Initiative
   const list=document.getElementById('featList');if(!list)return;list.innerHTML='';
   st.feats.forEach((f,i)=>{
     const d=document.createElement('div');d.className='feat-card';
@@ -4655,6 +4929,12 @@ const RACE_DATA={
   "Tiefling":{src:"XPHB",speed:30,size:"S/M",ability:"",traits:"• Darkvision: You have Darkvision with a range of 60 feet.\n• Fiendish Legacy: You are the recipient of a legacy that grants you supernatural abilities. Choose a legacy from the Fiendish Legacies table. You gain the level 1 benefit of the chosen legacy.\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level. Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).\n• Otherworldly Presence: You know the Thaumaturgy cantrip. When you cast it with this trait, the spell uses the same spellcasting ability you use for your Fiendish Legacy Trait."}
 };
 
+// ARMOR_DATA-START (tools/armor_convert.py, 5e.tools items-base.json XPHB)
+const ARMOR_DATA=[{"n":"Leather Armor","c":"L","ac":11},{"n":"Padded Armor","c":"L","ac":11,"st":1},{"n":"Studded Leather Armor","c":"L","ac":12},{"n":"Hide Armor","c":"M","ac":12},{"n":"Chain Shirt","c":"M","ac":13},{"n":"Breastplate","c":"M","ac":14},{"n":"Scale Mail","c":"M","ac":14,"st":1},{"n":"Half Plate Armor","c":"M","ac":15,"st":1},{"n":"Ring Mail","c":"H","ac":14,"st":1},{"n":"Chain Mail","c":"H","ac":16,"str":13,"st":1},{"n":"Splint Armor","c":"H","ac":17,"str":15,"st":1},{"n":"Plate Armor","c":"H","ac":18,"str":15,"st":1},{"n":"Shield","c":"S","ac":2}];
+// ARMOR_DATA-END
+// COND_DATA-START (tools/cond_convert.py, 5e.tools conditionsdiseases.json XPHB)
+const COND_DATA={"Blinded":"While you have the Blinded condition, you experience the following effects.\nCan't See. You can't see and automatically fail any ability check that requires sight.\nAttacks Affected. Attack rolls against you have Advantage, and your attack rolls have Disadvantage.","Charmed":"While you have the Charmed condition, you experience the following effects.\nCan't Harm the Charmer. You can't attack the charmer or target the charmer with damaging abilities or magical effects.\nSocial Advantage. The charmer has Advantage on any ability check to interact with you socially.","Deafened":"While you have the Deafened condition, you experience the following effect.\nCan't Hear. You can't hear and automatically fail any ability check that requires hearing.","Exhaustion":"While you have the Exhaustion condition, you experience the following effects.\nExhaustion Levels. This condition is cumulative. Each time you receive it, you gain 1 Exhaustion level. You die if your Exhaustion level is 6.\nD20 Tests Affected. When you make a D20 Test, the roll is reduced by 2 times your Exhaustion level.\nSpeed Reduced. Your Speed is reduced by a number of feet equal to 5 times your Exhaustion level.\nRemoving Exhaustion Levels. Finishing a Long Rest removes 1 of your Exhaustion levels. When your Exhaustion level reaches 0, the condition ends.","Frightened":"While you have the Frightened condition, you experience the following effects.\nAbility Checks and Attacks Affected. You have Disadvantage on ability checks and attack rolls while the source of fear is within line of sight.\nCan't Approach. You can't willingly move closer to the source of fear.","Grappled":"While you have the Grappled condition, you experience the following effects.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. You have Disadvantage on attack rolls against any target other than the grappler.\nMovable. The grappler can drag or carry you when it moves, but every foot of movement costs it 1 extra foot unless you are Tiny or two or more sizes smaller than it.","Incapacitated":"While you have the Incapacitated condition, you experience the following effects.\nInactive. You can't take any action, Bonus Action, or Reaction.\nNo Concentration. Your Concentration is broken.\nSpeechless. You can't speak.\nSurprised. If you're Incapacitated when you roll Initiative, you have Disadvantage on the roll.","Invisible":"While you have the Invisible condition, you experience the following effects.\nSurprise. If you're Invisible when you roll Initiative, you have Advantage on the roll.\nConcealed. You aren't affected by any effect that requires its target to be seen unless the effect's creator can somehow see you. Any equipment you are wearing or carrying is also concealed.\nAttacks Affected. Attack rolls against you have Disadvantage, and your attack rolls have Advantage. If a creature can somehow see you, you don't gain this benefit against that creature.","Paralyzed":"While you have the Paralyzed condition, you experience the following effects.\nIncapacitated. You have the Incapacitated condition.\nSpeed 0. Your Speed is 0 and can't increase.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAttacks Affected. Attack rolls against you have Advantage.\nAutomatic Critical Hits. Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.","Petrified":"While you have the Petrified condition, you experience the following effects.\nTurned to Inanimate Substance. You are transformed, along with any nonmagical objects you are wearing and carrying, into a solid inanimate substance (usually stone). Your weight increases by a factor of ten, and you cease aging.\nIncapacitated. You have the Incapacitated condition.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nResist Damage. You have Resistance to all damage.\nPoison Immunity. You have Immunity to the Poisoned condition.","Poisoned":"While you have the Poisoned condition, you experience the following effect.\nAbility Checks and Attacks Affected. You have Disadvantage on attack rolls and ability checks.","Prone":"While you have the Prone condition, you experience the following effects.\nRestricted Movement. Your only movement options are to crawl or to spend an amount of movement equal to half your Speed (round down) to right yourself and thereby end the condition. If your Speed is 0, you can't right yourself.\nAttacks Affected. You have Disadvantage on attack rolls. An attack roll against you has Advantage if the attacker is within 5 feet of you. Otherwise, that attack roll has Disadvantage.","Restrained":"While you have the Restrained condition, you experience the following effects.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage, and your attack rolls have Disadvantage.\nSaving Throws Affected. You have Disadvantage on Dexterity saving throws.","Stunned":"While you have the Stunned condition, you experience the following effects.\nIncapacitated. You have the Incapacitated condition.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAttacks Affected. Attack rolls against you have Advantage.","Unconscious":"While you have the Unconscious condition, you experience the following effects.\nInert. You have the Incapacitated and Prone conditions, and you drop whatever you're holding. When this condition ends, you remain Prone.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAutomatic Critical Hits. Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.\nUnaware. You're unaware of your surroundings.","Bloodied":"A creature is Bloodied while it has half its Hit Points or fewer remaining.","Concentration":"Some spells and other effects require Concentration to remain active, as specified in their descriptions. If the effect's creator loses Concentration, the effect ends. If the effect has a maximum duration, the effect's description specifies how long the creator can concentrate on it: up to 1 minute, 1 hour, or some other duration. The creator can end Concentration at any time (no action required). The following factors break Concentration.\nAnother Concentration Effect. You lose Concentration on an effect the moment you start casting a spell that requires Concentration or activate another effect that requires Concentration.\nDamage. If you take damage, you must succeed on a Constitution saving throw to maintain Concentration. The DC equals 10 or half the damage taken (round down), whichever number is higher, up to a maximum DC of 30.\nIncapacitated or Dead. Your Concentration ends if you have the Incapacitated condition or you die."};
+// COND_DATA-END
 // RACE_PICKS-START
 const RACE_PICKS={"Aasimar":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"res":["Necrotic","Radiant"],"tr":[{"id":"rc_healinghands","t":"Healing Hands","tag":"aktion","uses":1,"restore":"long","ic":"✋"},{"id":"rc_celestialrevelation","t":"Celestial Revelation","tag":"bonus","uses":1,"restore":"long","ic":"🌟","minLvl":3}],"spk":[{"t":"Light Bearer","s":["Light"]}]},"Dragonborn":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"ch":[{"t":"Draconic Ancestry","o":[{"n":"Black","dmg":"Acid","res":["Acid"]},{"n":"Blue","dmg":"Lightning","res":["Lightning"]},{"n":"Brass","dmg":"Fire","res":["Fire"]},{"n":"Bronze","dmg":"Lightning","res":["Lightning"]},{"n":"Copper","dmg":"Acid","res":["Acid"]},{"n":"Gold","dmg":"Fire","res":["Fire"]},{"n":"Green","dmg":"Poison","res":["Poison"]},{"n":"Red","dmg":"Fire","res":["Fire"]},{"n":"Silver","dmg":"Cold","res":["Cold"]},{"n":"White","dmg":"Cold","res":["Cold"]}],"lk":["Breath Weapon","Damage Resistance"],"tbl":"Draconic Ancestors:\n• Black: Acid\n• Blue: Lightning\n• Brass: Fire\n• Bronze: Lightning\n• Copper: Acid\n• Gold: Fire\n• Green: Poison\n• Red: Fire\n• Silver: Cold\n• White: Cold"}],"tr":[{"id":"rc_breathweapon","t":"Breath Weapon","tag":"aktion","uses":"pb","restore":"long","ic":"🐉"},{"id":"rc_draconicflight","t":"Draconic Flight","tag":"bonus","uses":1,"restore":"long","ic":"🕊️","minLvl":5}]},"Dwarf":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"res":["Poison"],"adv":[{"t":"Dwarven Resilience","c":"Poisoned"}],"hp":{"t":"Dwarven Toughness","per":1},"tr":[{"id":"rc_stonecunning","t":"Stonecunning","tag":"bonus","uses":"pb","restore":"long","ic":"⛰️"}]},"Elf":{"src":"XPHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Keen Senses","f":["Insight","Perception","Survival"],"n":1},"ch":[{"t":"Elven Lineage","o":[{"n":"Drow","txt":"You are part of a lineage that grants you supernatural abilities. The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.\nWhen you reach character level 3, you learn the Faerie Fire spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","dv":120,"inn":[{"s":"Faerie Fire","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Dancing Lights"],"3":["Faerie Fire"],"5":["Darkness"]}},{"n":"High Elf","txt":"You are part of a lineage that grants you supernatural abilities. You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list.\nWhen you reach character level 3, you learn the Detect Magic spell. When you reach character level 5, you also learn the Misty Step spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","inn":[{"s":"Detect Magic","l":3,"u":1},{"s":"Misty Step","l":5,"u":1}],"sp":{"1":["Prestidigitation"],"3":["Detect Magic"],"5":["Misty Step"]}},{"n":"Wood Elf","txt":"You are part of a lineage that grants you supernatural abilities. Your Speed increases to 35 feet. You also know the Druidcraft cantrip.\nWhen you reach character level 3, you learn the Longstrider spell. When you reach character level 5, you also learn the Pass without Trace spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).","speed":35,"inn":[{"s":"Longstrider","l":3,"u":1},{"s":"Pass without Trace","l":5,"u":1}],"sp":{"1":["Druidcraft"],"3":["Longstrider"],"5":["Pass without Trace"]}}],"ab":["INT","WIS","CHA"],"tbl":"Elven Lineages:\nLineage | Level 1 | Level 3 | Level 5\n• Drow | The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip. | Faerie Fire | Darkness\n• High Elf | You know the Prestidigitation cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. | Detect Magic | Misty Step\n• Wood Elf | Your Speed increases to 35 feet. You also know the Druidcraft cantrip. | Longstrider | Pass without Trace"}],"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Gnome":{"src":"XPHB","size":["S"],"speed":30,"dv":60,"ch":[{"t":"Gnomish Lineage","o":[{"n":"Forest Gnome","txt":"You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell.","inn":[{"s":"Speak with Animals","l":1,"u":"pb"}],"sp":{"1":["Minor Illusion","Speak with Animals"]}},{"n":"Rock Gnome","txt":"You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell's ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn't do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.","sp":{"1":["Mending","Prestidigitation"]}}],"ab":["INT","WIS","CHA"]}],"adv":[{"t":"Gnomish Cunning","s":["INT","WIS","CHA"]}]},"Goliath":{"src":"XPHB","size":["M"],"speed":35,"ch":[{"t":"Giant Ancestry","o":[{"n":"Cloud's Jaunt","anc":"Cloud","txt":"As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.","tag":"bonus"},{"n":"Fire's Burn","anc":"Fire","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.","tag":"passiv"},{"n":"Frost's Chill","anc":"Frost","txt":"When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.","tag":"passiv"},{"n":"Hill's Tumble","anc":"Hill","txt":"When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.","tag":"passiv"},{"n":"Stone's Endurance","anc":"Stone","txt":"When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.","tag":"reaktion"},{"n":"Storm's Thunder","anc":"Storm","txt":"When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.","tag":"reaktion"}]}],"tr":[{"id":"rc_giantancestry","t":"Giant Ancestry","tag":"passiv","uses":"pb","restore":"long","ic":"🗿"},{"id":"rc_largeform","t":"Large Form","tag":"bonus","uses":1,"restore":"long","ic":"🏔️","minLvl":5}]},"Half-Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Skill Versatility","any":2},"asi":{"fix":{"CHA":2},"ch":{"f":["STR","DEX","CON","INT","WIS"],"n":2,"v":1}},"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Half-Orc":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Menacing","fix":["Intimidation"]},"asi":{"fix":{"STR":2,"CON":1}},"tr":[{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Halfling":{"src":"XPHB","size":["S"],"speed":30,"adv":[{"t":"Brave","c":"Frightened"}]},"Human":{"src":"XPHB","size":["S","M"],"speed":30,"sk":{"t":"Skillful","any":1}},"Orc":{"src":"XPHB","size":["M"],"speed":30,"dv":120,"tr":[{"id":"rc_adrenalinerush","t":"Adrenaline Rush","tag":"bonus","uses":"pb","restore":"short","ic":"💨"},{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"Tiefling":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"ch":[{"t":"Fiendish Legacy","o":[{"n":"Abyssal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Poison damage. You also know the Poison Spray cantrip.\nWhen you reach character level 3, you learn the Ray of Sickness spell. When you reach character level 5, you also learn the Hold Person spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Poison"],"inn":[{"s":"Ray of Sickness","l":3,"u":1},{"s":"Hold Person","l":5,"u":1}],"sp":{"1":["Poison Spray"],"3":["Ray of Sickness"],"5":["Hold Person"]}},{"n":"Chthonic","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.\nWhen you reach character level 3, you learn the False Life spell. When you reach character level 5, you also learn the Ray of Enfeeblement spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Necrotic"],"inn":[{"s":"False Life","l":3,"u":1},{"s":"Ray of Enfeeblement","l":5,"u":1}],"sp":{"1":["Chill Touch"],"3":["False Life"],"5":["Ray of Enfeeblement"]}},{"n":"Infernal","txt":"You are the recipient of a legacy that grants you supernatural abilities. You have Resistance to Fire damage. You also know the Fire Bolt cantrip.\nWhen you reach character level 3, you learn the Hellish Rebuke spell. When you reach character level 5, you also learn the Darkness spell. You always have these spells prepared, and you can cast each spell once without a spell slot. Once you cast either of these spells with this trait, you can't cast that spell with it again until you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the legacy).","res":["Fire"],"inn":[{"s":"Hellish Rebuke","l":3,"u":1},{"s":"Darkness","l":5,"u":1}],"sp":{"1":["Fire Bolt"],"3":["Hellish Rebuke"],"5":["Darkness"]}}],"ab":["INT","WIS","CHA"],"tbl":"Fiendish Legacies:\nLegacy | Level 1 | Level 3 | Level 5\n• Abyssal | You have Resistance to Poison damage. You also know the Poison Spray cantrip. | Ray of Sickness | Hold Person\n• Chthonic | You have Resistance to Necrotic damage. You also know the Chill Touch cantrip. | False Life | Ray of Enfeeblement\n• Infernal | You have Resistance to Fire damage. You also know the Fire Bolt cantrip. | Hellish Rebuke | Darkness"}],"spk":[{"t":"Otherworldly Presence","s":["Thaumaturgy"]}]}};
 // RACE_PICKS-END
@@ -5778,6 +6058,7 @@ function abGrpIsClosed(k){const g=st.abGrpClosed||{};return k in g?!!g[k]:(k==='
 function togAbGrp(k){st.abGrpClosed=st.abGrpClosed||{};st.abGrpClosed[k]=!abGrpIsClosed(k);buildAbilities();autoSave();}
 
 function buildAbilities(){
+  statRender(); // Paket E: Stufe/Klasse/Subklasse ändern AC/Initiative/Speed
   const cls=document.getElementById('cls').value;
   const subcls=document.getElementById('subcls').value;
   const lvl=parseInt(document.getElementById('lvl').value)||1;
@@ -6689,6 +6970,7 @@ function getAllChars(){
 }
 
 function collectState(){
+  attrSync();statSync(); // Paket E: Endwert der Attribute mitspeichern (ältere App-Versionen lesen st.attrs)
   const snap = JSON.parse(JSON.stringify(st, (k,v) => v instanceof Set ? [...v] : v));
   TEXT_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -6712,7 +6994,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -6819,7 +7101,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -6850,8 +7132,9 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null
   });
+  st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
   document.getElementById('charName').textContent=_name;
   TEXT_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -7067,6 +7350,22 @@ function _logList(out,la,lb,label,keyFn,cfg){
   rem.forEach(([x,i])=>out.push(`− ${label} removed: ${nm(x,i)}`));
 }
 
+function _statLog(out,a,b){
+  ['ac','ini','spd'].forEach(k=>{const sa=a&&a[k],sb=b&&b[k],L=STAT_DEF[k].l;
+    if(!sa&&!sb)return;if(!sa){out.push(`${L}: calculated from sources`);return;}if(!sb){out.push(`${L}: set by hand again`);return;}
+    if((sa.arm||'')!==(sb.arm||''))out.push(`${L} Armor: ${(sa.arm||'Unarmored').replace(/^ud:/,'')} → ${(sb.arm||'Unarmored').replace(/^ud:/,'')}`);
+    if(!!sa.sh!==!!sb.sh)out.push(`${L} Shield: ${sb.sh?'on':'off'}`);
+    STAT_ROWS[k].forEach(r=>{const va=+sa[r.k]||0,vb=+sb[r.k]||0;if(va!==vb)out.push(`${L} ${r.l}: ${r.k==='base'?va:fmt(va)} → ${r.k==='base'?vb:fmt(vb)}`);});});
+}
+// Paket E (02.10.2026): Attribut-Quellen lesbar („Strength Base: 10 → 12“)
+function _attrLog(out,a,b){
+  if(!a&&!b)return;
+  if(!a&&b){out.push('Ability scores: base values set up ('+ATTRS.map(x=>x.k+' '+((b[x.k]&&b[x.k].base)||10)).join(', ')+')');return;}
+  if(a&&!b){out.push('Ability scores: base values removed');return;}
+  ATTRS.forEach(x=>{const sa=a[x.k]||{},sb=b[x.k]||{};ATTR_ROWS.forEach(r=>{if(r.auto)return;
+    const va=r.k==='base'?(sa.base??10):(sa[r.k]||0),vb=r.k==='base'?(sb.base??10):(sb[r.k]||0);
+    if(va!==vb)out.push(`${x.l} ${r.l}: ${r.k==='base'||r.set?va||'—':fmt(va)} → ${r.k==='base'||r.set?vb||'—':fmt(vb)}`);});});
+}
 function _diffSnaps(a,b){
   const out=[];a=a||{};b=b||{};
   const done=new Set(LOG_SKIP);
@@ -7099,7 +7398,9 @@ function _diffSnaps(a,b){
     if(b.concActiveFeature!=null) out.push(`Concentration: ${_abLabel(b.concActiveFeature)}`);
     else out.push(`Concentration ended (was ${_abLabel(a.concActiveFeature)})`);
   }
-  done.add('attrs');{const xa=a.attrs||{},xb=b.attrs||{};new Set([...Object.keys(xa),...Object.keys(xb)]).forEach(k=>{ if(xa[k]!==xb[k]) out.push(`${k}: ${xa[k]??'?'} → ${xb[k]??'?'}`); });}
+  done.add('attrs');{const xa=a.attrs||{},xb=b.attrs||{};new Set([...Object.keys(xa),...Object.keys(xb)]).forEach(k=>{ if(xa[k]!==xb[k]) out.push(`${k}${b.attrSrc?' (score)':''}: ${xa[k]??'?'} → ${xb[k]??'?'}`); });}
+  done.add('attrSrc');_attrLog(out,a.attrSrc,b.attrSrc);
+  done.add('statSrc');_statLog(out,a.statSrc,b.statSrc);
   done.add('slotMax');const smA=a.slotMax||[], smB=b.slotMax||[];
   for(let i=0;i<9;i++){ if((smA[i]??0)!==(smB[i]??0)) out.push(`Spell slots level ${i+1} (max): ${smA[i]??0} → ${smB[i]??0}`); }
   done.add('slotAdj');const saA=a.slotAdj||[], saB=b.slotAdj||[];
@@ -7502,7 +7803,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02g';
+const APP_VERSION = 'willow-app-2026-10-02h';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -7777,6 +8078,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   </div>
 </div>
 <!-- RAST / ZAUBERN (Paket D, 29.09.2026): Dialog für Short Rest, Long Rest und „Cast“ -->
+<div id="attrModal" class="ws-overlay" onclick="if(event.target===this)closeAttr()"><div class="ws-box rest-box" id="attrBox"></div></div>
 <div id="restModal" class="ws-overlay" onclick="if(event.target===this)closeRest()"><div class="ws-box rest-box" id="restBox"></div></div>
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">

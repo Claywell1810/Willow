@@ -6,6 +6,7 @@
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium für BST_DATA und SPELL_STATBLOCKS (+ spells)
 #   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
+#   bash willow/tools/setup.sh effekte      # + conditionsdiseases/variantrules/items-base.json (cond_convert.py, armor_convert.py, Paket E)
 #   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen, echte Schriften (ui_shots.py, theme_shots.py)
 #   bash willow/tools/setup.sh alle         # alles
 # Mehrere Angaben gehen zusammen: bash willow/tools/setup.sh klassen zauber
@@ -30,7 +31,7 @@ fi
 if [ ! -d node_modules/jsdom ]; then npm i jsdom@24 --silent >/dev/null 2>&1 && echo "   jsdom installiert"; else echo "   jsdom vorhanden"; fi
 
 get() { mkdir -p src; [ -s "src/$(basename "$1")" ] || curl -sSf -o "src/$(basename "$1")" "$B/$1"; }
-if has klassen zauber bestien rassen; then
+if has klassen zauber bestien rassen effekte; then
   echo "== 5e.tools main: $(git ls-remote https://github.com/5etools-mirror-3/5etools-src refs/heads/main | cut -c1-8)"
 fi
 if has klassen; then
@@ -46,6 +47,10 @@ fi
 if has rassen; then
   get races.json; get spells/spells-xphb.json; get spells/spells-phb.json
   echo "   Rassen-Quellen in src/ (races.json + spells-xphb/phb)"
+fi
+if has effekte; then
+  get conditionsdiseases.json; get variantrules.json; get items-base.json
+  echo "   Effekt-Quellen in src/ (conditionsdiseases.json, variantrules.json, items-base.json)"
 fi
 if has bestien; then
   get bestiary/fluff-bestiary-xmm.json

@@ -875,7 +875,7 @@ const REGRESSION = [
       const ab = v => [...d.querySelectorAll('#bgLoreBody .pk-chip')].find(c => c.dataset.v === v);
       if (!d.getElementById('bgLorePend').textContent) return 'offene Attributswahl nicht markiert';
       ab('+2/+1').click(); ab('INT:+2').click(); ab('WIS:+1').click();
-      const aB = k => { const c = d.getElementById('a_' + k).closest('.acard').querySelector('.a-bdg'); return c ? c.textContent : ''; };
+      const aB = k => { const b = w.attrAuto(k).bg; return b ? '+' + b + ' BG' : ''; }; // seit Paket E: Boni nur im Fenster (Tippen auf den Wert)
       if (aB('INT') !== '+2 BG' || aB('WIS') !== '+1 BG' || aB('CON') !== '' || w.eval('st.attrs.INT') !== 16) return 'Attributs-Abzeichen / Wert verändert';
       if (d.getElementById('bgLorePend').textContent) return 'Attributswahl fertig, Marker bleibt';
       ab('+1/+1/+1').click(); if (aB('CON') !== '+1 BG' || aB('INT') !== '+1 BG') return '+1/+1/+1';
@@ -1084,11 +1084,11 @@ const REGRESSION = [
       // Half-Orc (PHB): Intimidation fest, +2 STR/+1 CON nur als Abzeichen; Half-Elf: +2 CHA fest, +1/+1 Wahl
       race('Half-Orc');
       if (pip(sk('Intimidation')) !== 'p' || bdg(sk('Intimidation')) !== 'Half-Orc') return 'Menacing';
-      const ab = k => [...d.querySelectorAll('#attrGrid .acard')].find(c => c.querySelector('input').id === 'a_' + k);
-      if (ab('STR').querySelector('.a-bdg').textContent !== '+2 Race' || ab('CON').querySelector('.a-bdg').textContent !== '+1 Race' || w.eval('st.attrs.STR') !== 10) return 'Half-Orc-Boni';
+      const ab = k => [...d.querySelectorAll('#attrGrid .acard')].find(c => c.querySelector('[id^="a_"]').id === 'a_' + k); // seit Paket E Knopf statt input
+      if (!ab('STR') || w.attrAuto('STR').race !== 2 || w.attrAuto('CON').race !== 1 || w.eval('st.attrs.STR') !== 10) return 'Half-Orc-Boni'; // seit Paket E: Boni im Fenster
       race('Half-Elf'); if (!body.textContent.includes('+2 CHA (fixed), +1 to 2 others')) return 'Half-Elf ASI-Karte';
       chip(rcard('Ability Score Increase'), 'DEX').click(); chip(rcard('Ability Score Increase'), 'WIS').click();
-      if (ab('DEX').querySelector('.a-bdg').textContent !== '+1 Race' || ab('CHA').querySelector('.a-bdg').textContent !== '+2 Race') return 'Half-Elf-Boni';
+      if (w.attrAuto('DEX').race !== 1 || w.attrAuto('CHA').race !== 2) return 'Half-Elf-Boni';
       if (w.eval('RACE_DATA["Half-Elf"].ability') !== '+2 cha, +1 to two others' || w.eval('RACE_DATA.Tiefling.size') !== 'S/M') return 'RACE_DATA-Fehler';
       // Speichern/Laden, alter Save ohne Rassen-picks, Charakterwechsel
       const snap = w.eval('collectState()'); if (!snap.picks['race:Elven Lineage'] || !snap.picks['race:Ability Score Increase']) return 'race-picks nicht gespeichert';
@@ -1562,8 +1562,8 @@ const REGRESSION = [
       if (w.getComputedStyle(d.querySelector('.ds-death')).alignItems !== 'center') return 'Death Saves nicht zentriert';
       if ((css.match(/\.ds-insp \.ds-sub\{display:none\}/g) || []).length !== 4) return 'Inspiration-Platzhalter nicht in allen 2-Spalten-Regeln ausgeblendet';
       if (!/\u2600\uFE0E Long Rest/.test(d.querySelector('.rest-btn.long').textContent)) return 'Long-Rest-Sonne als Emoji';
-      const inp = d.querySelector('.sbox .hpin');
-      if (!inp || w.getComputedStyle(inp).flexGrow !== '1') return 'AC/Initiative/Speed: Zahlenfeld fest breit (+/− ragen über die Karte)';
+      // seit Paket E (02.10.2026): AC/Initiative/Speed ohne −/+ (wie die Attribute, Tippen öffnet das Fenster)
+      if (d.querySelector('.stat3 .hbtn') || !d.getElementById('acV')) return 'AC/Initiative/Speed: Karte hat noch −/+ oder keinen Wert-Knopf';
       const top = d.createElement('div'); top.className = 'ab-top'; const t = d.createElement('div'); t.className = 'ab-title'; top.appendChild(t); d.body.appendChild(top);
       const mw = w.getComputedStyle(t).minWidth; top.remove();
       if (mw !== '36%') return 'Feature-Titel ohne Mindestbreite: ' + mw;
@@ -1618,7 +1618,7 @@ const REGRESSION = [
       w.crFull(); w.saveChar();
       const sk = [...d.querySelectorAll('#skillsGrid .sk-row, .sk-row')].find(r => r.textContent.includes('Athletics'));
       if (!sk || !sk.textContent.includes('Bearfolk')) return 'Skill Athletics ohne Abzeichen „Bearfolk“';
-      if (!d.getElementById('attrGrid').textContent.includes('+2 Race')) return 'Attributs-Abzeichen „+2 Race“ fehlt';
+      if (w.attrAuto('STR').race !== 2) return 'Rassen-Bonus +2 STR fehlt (seit Paket E im Fenster statt Abzeichen)';
       const rs = d.getElementById('raceStats').textContent;
       if (!/Climb 30 ft/.test(rs) || !/Darkvision 60 ft/.test(rs) || !/Cold/.test(rs) || !/Bearfolk/.test(rs)) return 'Werte-Zeile unvollständig: ' + rs;
       w.buildAbilities();
@@ -1674,6 +1674,89 @@ const REGRESSION = [
       if (!d.getElementById('weaponList').textContent.includes('set dice')) return 'Leerer Würfel nicht als „set dice“ markiert';
       return true;
     } },
+  { name: 'Paket E1: Attribute – Grundwert + Boni (Background/Rasse eingerechnet), Fenster mit Quellen, Umstellung alter Charaktere, Log, Laden', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      if (typeof w.openAttr !== 'function' || typeof w.attrCalc !== 'function') return 'openAttr/attrCalc fehlen';
+      sel('Wizard', '', 4);
+      // alter Charakter (nur st.attrs): Werte bleiben, Boni nur als Abzeichen, nichts still geändert
+      w.applyState({ attrs: { STR: 8, DEX: 14, CON: 13, INT: 17, WIS: 12, CHA: 10 }, _f_cls: 'Wizard', _f_lvl: '4', bg: 'Sage', picks: { 'bg:Sage:ability': ['+2/+1', 'INT:+2', 'WIS:+1'] } });
+      if (w.eval('st.attrSrc') !== null || w.eval('st.attrs.INT') !== 17) return 'Alter Save: Werte verändert';
+      const card = k => d.getElementById('a_' + k).closest('.acard');
+      if (card('INT').querySelector('.a-bdg') || card('INT').querySelector('button.hbtn')) return 'Karte zeigt Abzeichen oder −/+ (Entscheidung Simon: nur Name, Zahl, Modifikator)';
+      // Fenster: Umstellung „schon eingerechnet“ → Base = Wert − Bonus, Endwert gleich
+      d.getElementById('a_INT').click();
+      if (!d.getElementById('attrModal').classList.contains('on') || !d.getElementById('attrBox').textContent.includes('already included')) return 'Umstellungs-Frage fehlt';
+      w.attrSetup(true);
+      if (w.eval('st.attrSrc.INT.base') !== 15 || w.eval('st.attrSrc.WIS.base') !== 11 || w.eval('st.attrs.INT') !== 17 || w.eval('st.attrs.WIS') !== 12) return 'Umstellung (eingerechnet): ' + JSON.stringify(w.eval('st.attrSrc'));
+      const box = () => d.getElementById('attrBox').textContent;
+      if (!box().includes('15 Base + 2 Background (Sage)')) return 'Herkunft im Fenster: ' + box().slice(0, 200);
+      // ASI +2 über das Fenster → Endwert 19, Spell DC/Skills folgen; Kappung-Hinweis bei > 20
+      w.attrStep('asi', 1); w.attrStep('asi', 1);
+      if (w.eval('st.attrs.INT') !== 19 || d.getElementById('spDC') && w.eval('document.getElementById("spAttr").value') === 'INT' && +d.getElementById('spDC').value !== 8 + 2 + 4) return 'ASI: ' + w.eval('st.attrs.INT');
+      if (!box().includes('+ 2 ASI')) return 'Fenster zeigt ASI nicht';
+      w.attrStep('asi', 1); w.attrStep('asi', 1);
+      if (d.getElementById('atCap').style.display === 'none') return 'Hinweis „nicht über 20“ fehlt';
+      w.attrStep('asi', -1); w.attrStep('asi', -1);
+      // Item „set to 19“: wirkt nur, wenn höher
+      w.eval("_atK='STR'"); w.attrIn('set', '19');
+      if (w.eval('st.attrs.STR') !== 19 || !box().includes('set to 19')) return 'Set to 19: ' + w.eval('st.attrs.STR');
+      w.eval("_atK='INT'"); w.attrIn('set', '18'); if (w.eval('st.attrs.INT') !== 19) return 'Set to 18 darf 19 nicht senken';
+      w.attrIn('set', ''); w.closeAttr();
+      // Background wechseln → Endwert folgt automatisch
+      w.eval("st.picks['bg:Sage:ability']=['+1/+1/+1']"); w.pkRefresh();
+      if (w.eval('st.attrs.INT') !== 18 || w.eval('st.attrs.CON') !== 14) return 'Background-Wechsel: INT ' + w.eval('st.attrs.INT') + ' CON ' + w.eval('st.attrs.CON');
+      // Rasse eingerechnet (Half-Orc +2 STR / +1 CON, Entscheidung Simon)
+      d.getElementById('race').value = 'Half-Orc'; w.onRaceChange();
+      if (w.eval('st.attrs.CON') !== 15 || w.attrAuto('CON').race !== 1) return 'Rasse nicht eingerechnet: CON ' + w.eval('st.attrs.CON');
+      // Log lesbar, Speichern/Laden, Charakterwechsel
+      const lg = w.eval('_diffSnaps({attrSrc:{INT:{base:15}},attrs:{INT:17}},{attrSrc:{INT:{base:15,asi:2}},attrs:{INT:19}})').join('|');
+      if (!lg.includes('Intelligence Ability Score Improvement / Feats: +0 → +2')) return 'Log: ' + lg;
+      const snap = w.eval('collectState()'); if (!snap.attrSrc || snap.attrSrc.INT.asi !== 2 || snap.attrs.CON !== 15) return 'nicht gespeichert';
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
+      if (w.eval('st.attrSrc') !== null) return 'Charakterwechsel übernimmt Grundwerte';
+      w.applyState(snap); if (w.eval('st.attrs.INT') !== 18 || w.eval('st.attrSrc.INT.base') !== 15) return 'Laden: ' + w.eval('st.attrs.INT');
+      // Umstellung „nicht eingerechnet“ und neuer Charakter
+      w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 15, WIS: 10, CHA: 10 }, bg: 'Sage', picks: { 'bg:Sage:ability': ['+2/+1', 'INT:+2', 'WIS:+1'] } });
+      w.eval("_atK='INT'"); w.attrSetup(false); if (w.eval('st.attrs.INT') !== 17 || w.eval('st.attrSrc.INT.base') !== 15) return 'Umstellung (nicht eingerechnet)';
+      if (JSON.stringify(w.eval('attrSrcNew()').STR) !== '{"base":10}') return 'Neuer Charakter: Base 10';
+      return true;
+    } },
+  { name: 'Paket E1: AC/Initiative/Speed aus Quellen (Rüstung XPHB, Unarmored Defense, Shield, Fast/Unarmored Movement, Alert/Jack of All Trades), alte Werte von Hand, Log', datum: '02.10.2026',
+    run: ({w, d, sel}) => {
+      if (typeof w.openStat !== 'function' || !w.eval('typeof ARMOR_DATA==="object"&&ARMOR_DATA.length===13')) return 'openStat/ARMOR_DATA fehlen';
+      const val = id => d.getElementById(id + 'V').textContent;
+      // alter Charakter: Feld von Hand bleibt
+      w.applyState({ attrs: { STR: 10, DEX: 14, CON: 16, INT: 10, WIS: 14, CHA: 10 }, _f_cls: 'Barbarian', _f_lvl: '5', _f_ac: '16', _f_ini: '3', _f_spd: '30' });
+      if (w.eval('st.statSrc') !== null || val('ac') !== '16' || val('ini') !== '+3') return 'Alter Save: AC ' + val('ac') + ' Ini ' + val('ini');
+      w.openStat('ac'); if (!d.getElementById('attrBox').textContent.includes('still set by hand')) return 'Hinweis „von Hand“ fehlt';
+      w.statArm('ud:Unarmored Defense'); if (val('ac') !== '16') return 'Entwurf ändert schon den Wert';
+      w.statSetup(); if (val('ac') !== '15' || w.eval('document.getElementById("ac").value') !== '15') return 'Unarmored Defense 10+DEX+CON: ' + val('ac');
+      w.statPut('sh', 1); if (val('ac') !== '17') return 'Shield +2: ' + val('ac');
+      // Plate (Heavy, STR 15): kein DEX, Fast Movement entfällt, Speed −10
+      w.eval("_stK='spd'"); w.statSetup();
+      if (val('spd') !== '40') return 'Fast Movement +10: ' + val('spd');
+      w.eval("_stK='ac'"); w.statArm('Plate Armor');
+      if (val('ac') !== '20' || val('spd') !== '20') return 'Plate: AC ' + val('ac') + ' Speed ' + val('spd');
+      w.eval("_stK='ac'"); w.statArm('Breastplate'); if (val('ac') !== '18') return 'Breastplate 14 + DEX (max 2) + Shield: ' + val('ac');
+      const lg = w.eval("_diffSnaps({statSrc:{ac:{arm:''}}},{statSrc:{ac:{arm:'Breastplate',sh:1,item:1}}})").join('|');
+      if (!lg.includes('Armor Class Armor: Unarmored → Breastplate') || !lg.includes('Armor Class Shield: on') || !lg.includes('Armor Class Item (bonus): +0 → +1')) return 'Log: ' + lg;
+      w.closeAttr();
+      // Monk: Unarmored Movement aus der Class Table (L6 +15), Unarmored Defense DEX+WIS
+      w.eval('st.statSrc=statSrcNew()'); sel('Monk', '', 6);
+      if (val('spd') !== '45') return 'Monk Unarmored Movement: ' + val('spd');
+      // Bard: Jack of All Trades auf Initiative, Alert ersetzt es (Proficiency)
+      sel('Bard', '', 4); d.getElementById('prof').value = '2'; w.buildAttrs();
+      if (val('ini') !== '+3') return 'Jack of All Trades: ' + val('ini');
+      w.eval("st.feats.push({name:'Alert',tag:'Feat',desc:''})"); w.buildFeats();
+      if (val('ini') !== '+4') return 'Alert: ' + val('ini');
+      // Speichern/Laden, Charakterwechsel, Exhaustion senkt Speed
+      const snap = w.eval('collectState()'); if (!snap.statSrc || snap._f_ini !== '4') return 'nicht gespeichert';
+      w.applyState({ attrs: {}, _f_ac: '12' }); if (w.eval('st.statSrc') !== null || val('ac') !== '12') return 'Charakterwechsel';
+      w.applyState(snap); if (val('ini') !== '+4') return 'Laden: ' + val('ini');
+      w.eval('st.exhaustion=2'); w.buildAttrs(); if (val('spd') !== '20') return 'Exhaustion 2 → Speed −10: ' + val('spd');
+      w.eval('st.exhaustion=0'); w.buildAttrs();
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
@@ -1724,7 +1807,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
     rset('subcls', sub || ''); R.w.onSubclsChange ? R.w.onSubclsChange() : (R.w.buildAbilities && R.w.buildAbilities());
   };
   for (const t of REGRESSION) {
-    let res; try { res = await t.run({ w: R.w, d: R.d, set: rset, vis: rvis, CD, sel }); } catch (e) { res = 'Ausnahme: ' + e.message; }
+    let res; try { res = await t.run({ w: R.w, d: R.d, set: rset, vis: rvis, CD, sel }); } catch (e) { res = 'Ausnahme: ' + e.message + ' ' + (e.stack||'').split('\n').slice(1,5).join(' | '); }
     if (res === true) console.log(`   ✔ ${t.name}`); else bad(`${t.name} (${t.datum}): ${res}`);
   }
   if (R.errs.length) R.errs.forEach(e => bad('JS-Fehler in Regressionstests: ' + e));

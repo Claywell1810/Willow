@@ -20,7 +20,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 **Sitzungsstart (immer, in dieser Reihenfolge):**
 1. Repo holen: Werkzeug `add_repo` (owner `claywell1810`, repo `willow`, access `push`), dann dessen Klon-Anweisung (einmal klonen, langes Timeout).
 2. Diese Datei lesen (`willow/docs/ANLEITUNG.md`), bei Paket-Arbeit zusätzlich `willow/docs/FIXLISTE.md`.
-3. `bash willow/tools/setup.sh` mit dem, was die Sitzung braucht: `klassen`, `zauber`, `bestien`, `rassen`, `fotos` oder `alle` (B1a Schritt 1). Reine UI-/Code-Arbeit: ohne Angabe, bei Fotos `fotos`.
+3. `bash willow/tools/setup.sh` mit dem, was die Sitzung braucht: `klassen`, `zauber`, `bestien`, `rassen`, `effekte`, `fotos` oder `alle` (B1a Schritt 1). Reine UI-/Code-Arbeit: ohne Angabe, bei Fotos `fotos`.
 
 ---
 
@@ -147,7 +147,7 @@ Claude arbeitet sie ab und meldet sie in der Schlussnachricht als Kurzliste (✔
 
 **1. Laden** (seit 28.09.2026 mit `setup.sh`)
 - Repo in die Sitzung holen: Werkzeug `add_repo` (owner `claywell1810`, repo `willow`, access `push`), danach dessen Klon-Anweisung befolgen (einmal klonen, langes Timeout), danach `register_repo_root` (falls vorhanden; fehlt das Werkzeug, einfach weiter).
-- `bash willow/tools/setup.sh [klassen] [zauber] [bestien] [rassen] [fotos] [alle]` (aus dem Ordner über dem Klon): zeigt den Willow-Commit, legt `DnD_Character_App.html` und `ALT.html` an (Größe, Ende `</html>`), installiert jsdom, lädt die gewählten 5e.tools-Quellen nach `src/` (A3) und nennt den 5e.tools-Commit; `fotos` prüft Playwright/Chromium. Ohne Angabe nur Arbeitskopie + jsdom (reine UI-/Code-Arbeit).
+- `bash willow/tools/setup.sh [klassen] [zauber] [bestien] [rassen] [effekte] [fotos] [alle]` (aus dem Ordner über dem Klon): zeigt den Willow-Commit, legt `DnD_Character_App.html` und `ALT.html` an (Größe, Ende `</html>`), installiert jsdom, lädt die gewählten 5e.tools-Quellen nach `src/` (A3) und nennt den 5e.tools-Commit; `fotos` prüft Playwright/Chromium. Ohne Angabe nur Arbeitskopie + jsdom (reine UI-/Code-Arbeit).
 - Rückfall ohne GitHub: Simon hängt die Datei im Chat an.
 
 **2. Ansehen:** nur Ausschnitte per `grep -n … | cut -c1-200` oder `sed -n 'a,bp' … | cut -c1-200`.
