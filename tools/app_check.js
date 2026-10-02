@@ -1569,6 +1569,42 @@ const REGRESSION = [
       if (mw !== '36%') return 'Feature-Titel ohne Mindestbreite: ' + mw;
       return true;
     } },
+  { name: 'Paket L: Charakter teilen/importieren – gleicher Zustand, kein stilles Überschreiben', datum: '02.10.2026',
+    run: async ({w, d, sel}) => {
+      const imp = async obj => { const f = new w.File([JSON.stringify(obj)], 'x.json', {type: 'application/json'});
+        w.importChars({target: {files: [f], value: ''}}); await new Promise(r => setTimeout(r, 300)); };
+      const all = () => JSON.parse(w.localStorage.getItem('dnd5e_chars') || '{}');
+      const modal = () => d.getElementById('impConfModal').style.display === 'flex';
+      sel('Druid', '', 5);
+      d.getElementById('charName').textContent = 'TestL';
+      w.eval("st.hpC=17; st.log=[{t:1,x:'Testeintrag'}]"); w.saveChar();
+      const obj = w.charExportObj('TestL');
+      if (!obj || obj.willow !== 'char' || obj.name !== 'TestL' || !obj.app) return 'Exportobjekt falsch: ' + JSON.stringify(obj && {willow: obj.willow, name: obj.name, app: obj.app});
+      if (!(obj.data.log || []).length) return 'Log wird nicht mitgeschickt';
+      const orig = JSON.stringify(all().TestL);
+      // Konflikt: Dialog statt stillem Überschreiben; Abbrechen lässt alles unverändert
+      w.eval('st.hpC=3'); w.saveChar(); const geaendert = JSON.stringify(all().TestL);
+      await imp(obj);
+      if (!modal()) return 'Kein Rückfrage-Dialog bei gleichem Namen';
+      if (JSON.stringify(all().TestL) !== geaendert) return 'Vor der Rückfrage überschrieben';
+      w.impConfirm('skip');
+      if (JSON.stringify(all().TestL) !== geaendert) return 'Abbrechen hat überschrieben';
+      // Als Kopie: „TestL (2)“ = exportierter Zustand
+      await imp(obj); w.impConfirm('copy');
+      if (JSON.stringify(all()['TestL (2)']) !== orig) return 'Kopie ≠ exportierter Zustand';
+      if (JSON.stringify(all().TestL) !== geaendert) return 'Kopie hat Original verändert';
+      if (d.getElementById('charName').textContent !== 'TestL (2)' || !w.eval("(st.log||[]).some(e=>e.x==='Testeintrag')")) return 'Kopie nicht geladen (Name oder Log)';
+      // Überschreiben
+      await imp(obj); w.impConfirm('over');
+      if (JSON.stringify(all().TestL) !== orig) return 'Überschreiben ergibt nicht den exportierten Zustand';
+      // Gesamt-Backup: neuer Name direkt, vorhandener mit Rückfrage
+      await imp({TestL: obj.data, NeuL: obj.data});
+      if (!modal()) return 'Backup: keine Rückfrage bei vorhandenem Namen';
+      w.impConfirm('skip');
+      if (!all().NeuL) return 'Backup: neuer Charakter fehlt';
+      if (JSON.stringify(all().TestL) !== orig) return 'Backup: Abbrechen hat überschrieben';
+      return true;
+    } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
 ];
 // ────────────────────────────────────────────────────────────────────────────

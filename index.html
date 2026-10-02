@@ -6673,7 +6673,7 @@ function refreshCharSel(active){
   const chars = getAllChars();
   const names = Object.keys(chars);
   sel.innerHTML = names.length
-    ? names.map(n=>`<option value="${n}" ${n===active?'selected':''}>${n}</option>`).join('')
+    ? names.map(n=>{const e=String(n).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');return `<option value="${e}" ${n===active?'selected':''}>${e}</option>`;}).join('')
     : '<option value="">— Kein Charakter —</option>';
   // style the select to match theme
   sel.style.color = names.length ? 'var(--text)' : 'var(--text3)';
@@ -7125,27 +7125,105 @@ function exportChars(){
   showToast('Characters exported!');
 }
 
+// Paket L (02.10.2026): einzelnen Charakter teilen + Import mit Rückfrage bei Namensgleichheit
+function _dlFile(text,fname){
+  const blob=new Blob([text],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=fname;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function charExportObj(name){
+  const data=getAllChars()[name];
+  if(!data) return null;
+  return {willow:'char',v:1,app:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),name,data};
+}
+function shareChar(){
+  const name=document.getElementById('charName')?.textContent.trim();
+  if(!name){showToast('Kein Charakter geladen');return;}
+  saveChar();
+  const obj=charExportObj(name);
+  if(!obj){showToast('Export fehlgeschlagen');return;}
+  const json=JSON.stringify(obj);
+  const base=name.replace(/[\\/:*?"<>|\x00-\x1f]+/g,'_').trim()||'Charakter';
+  const fname=base+'.willow.json';
+  const tryFiles=[];
+  try{tryFiles.push(new File([json],fname,{type:'application/json'}));}catch(err){}
+  try{tryFiles.push(new File([json],base+'.willow.txt',{type:'text/plain'}));}catch(err){}
+  const f=(navigator.share&&navigator.canShare)?tryFiles.find(x=>{try{return navigator.canShare({files:[x]});}catch(err){return false;}}):null;
+  if(f){
+    navigator.share({files:[f],title:name}).then(()=>showToast('📤 '+name+' geteilt')).catch(err=>{
+      if(err&&err.name==='AbortError') return;
+      _dlFile(json,fname);showToast('⬇ '+fname);
+    });
+  } else {_dlFile(json,fname);showToast('⬇ '+fname);}
+}
+// Datei → {Name: Zustand} (Einzel-Datei oder Gesamt-Backup), sonst null
+function _parseImport(data){
+  if(!data||typeof data!=='object'||Array.isArray(data)) return null;
+  if(data.willow==='char'){
+    if(typeof data.name!=='string'||!data.name.trim()||!data.data||typeof data.data!=='object'||Array.isArray(data.data)) return null;
+    return {[data.name.trim()]:data.data};
+  }
+  const out={};
+  Object.entries(data).forEach(([n,v])=>{ if(n.trim()&&v&&typeof v==='object'&&!Array.isArray(v)) out[n.trim()]=v; });
+  return Object.keys(out).length?out:null;
+}
+function _copyName(name,taken){
+  let i=2; while(taken[name+' ('+i+')']) i++;
+  return name+' ('+i+')';
+}
+let _impQ=null;
 function importChars(e){
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      if(typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid format');
-      const existing = getAllChars();
-      const merged = {...existing, ...data};
-      localStorage.setItem(LS_KEY, JSON.stringify(merged));
-      const names = Object.keys(data);
-      refreshCharSel(names[0]||Object.keys(existing)[0]||'');
-      if(names[0]) loadChar(names[0]);
-      showToast(`Imported ${names.length} character(s)`);
-    } catch(err) {
-      showToast('Import failed: invalid file');
-    }
+    let inc=null;
+    try { inc=_parseImport(JSON.parse(ev.target.result)); } catch(err) { inc=null; }
+    if(!inc){ showToast('Import failed: invalid file'); return; }
+    _impQ={list:Object.entries(inc),i:0,chars:getAllChars(),done:[],all:null};
+    _impNext();
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+function _impNext(){
+  const q=_impQ; if(!q) return;
+  while(q.i<q.list.length){
+    const [name,data]=q.list[q.i];
+    if(!q.chars[name]){ q.chars[name]=data; q.done.push(name); q.i++; continue; }
+    if(q.all){ _impApply(q.all); continue; }
+    const rest=q.list.slice(q.i+1).filter(([n])=>q.chars[n]).length;
+    document.getElementById('impConfName').textContent=name;
+    document.getElementById('impConfAllRow').style.display=rest?'flex':'none';
+    document.getElementById('impConfAll').checked=false;
+    document.getElementById('impConfModal').style.display='flex';
+    return;
+  }
+  _impFinish();
+}
+function _impApply(choice){
+  const q=_impQ; if(!q) return;
+  const [name,data]=q.list[q.i];
+  if(choice==='over'){ q.chars[name]=data; q.done.push(name); }
+  else if(choice==='copy'){ const nn=_copyName(name,q.chars); q.chars[nn]=data; q.done.push(nn); }
+  q.i++;
+}
+function impConfirm(choice){
+  document.getElementById('impConfModal').style.display='none';
+  const q=_impQ; if(!q) return;
+  if(document.getElementById('impConfAll').checked) q.all=choice;
+  _impApply(choice);
+  _impNext();
+}
+function _impFinish(){
+  const q=_impQ; _impQ=null; if(!q) return;
+  if(!q.done.length){ showToast('Nichts importiert'); return; }
+  localStorage.setItem(LS_KEY, JSON.stringify(q.chars));
+  refreshCharSel(q.done[0]);
+  loadChar(q.done[0]);
+  showToast(q.done.length===1?('⬆ '+q.done[0]+' importiert'):(`Imported ${q.done.length} character(s)`));
 }
 
 // SETTINGS
@@ -7171,7 +7249,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-02c';
+const APP_VERSION = 'willow-app-2026-10-02d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -7457,6 +7535,18 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
     </div>
   </div>
 </div>
+<div id="impConfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1001;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:300px;width:90%;text-align:center">
+    <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:8px">Character already exists</div>
+    <div id="impConfName" style="font-family:'Cinzel',serif;font-size:16px;color:var(--gold);margin-bottom:16px;word-break:break-word"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="char-btn danger" style="width:100%" onclick="impConfirm('over')">Overwrite</button>
+      <button class="char-btn" style="width:100%" onclick="impConfirm('copy')">Import as Copy</button>
+      <button class="char-btn" style="width:100%" onclick="impConfirm('skip')">Abbrechen</button>
+    </div>
+    <label id="impConfAllRow" style="display:none;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:var(--fs-sm);color:var(--text2)"><input type="checkbox" id="impConfAll"> Apply to all remaining</label>
+  </div>
+</div>
 <nav class="bottom-nav" id="bottomNav">
   <button class="bnav-btn on" data-tab="info" onclick="switchTabAll('info',this)">
     <span class="bnav-icon">📜</span><span class="bnav-label">Info</span>
@@ -7491,20 +7581,21 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
           <button class="fbtn" data-ts="sehrgross" onclick="setTextSize('sehrgross')">X-Large</button>
         </div>
         <div style="font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:12px">DATA</div>
-        <div style="font-size:var(--fs-md);color:var(--text2);margin-bottom:10px">Backup your characters or restore from a previous export.</div>
+        <div style="font-size:var(--fs-md);color:var(--text2);margin-bottom:10px">Share the current character, back up all characters, or import a character or backup file.</div>
+        <button onclick="shareChar()" style="width:100%;padding:10px;margin-bottom:8px;background:transparent;border:1px solid var(--gold2);border-radius:8px;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer">📤 Share Character</button>
         <div style="display:flex;gap:8px;margin-bottom:20px">
-          <button onclick="exportChars()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer">⬇ Export</button>
-          <label style="flex:1;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;text-align:center;display:block">⬆ Import<input type="file" accept=".json" onchange="importChars(event)" style="display:none"></label>
+          <button onclick="exportChars()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer">⬇ Backup All</button>
+          <label style="flex:1;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;text-align:center;display:block">⬆ Import<input type="file" id="impFile" onchange="importChars(event)" style="display:none"></label>
         </div>
         <div style="font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:12px">COLOR SCHEME</div>
         <div style="font-size:var(--fs-md);color:var(--text2);margin-bottom:10px">Customize accent colors per class. Changes are saved automatically.</div>
         <div id="settingsClassPicker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
         <div id="settingsColorPanels"></div>
-        <div style="display:flex;gap:8px;margin-top:16px">
-          <div style="margin-bottom:12px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+          <div style="flex:1 1 100%;min-width:0;margin-bottom:4px">
             <div style="font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:8px">COPY THEME FROM</div>
             <div style="display:flex;gap:8px">
-              <select id="copyThemeSel" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-sm);padding:8px 10px;outline:none;-webkit-appearance:none">
+              <select id="copyThemeSel" style="flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-sm);padding:8px 10px;outline:none;-webkit-appearance:none">
                 <option value="">— Select Class —</option>
                 <option>Barbarian</option><option>Bard</option><option>Cleric</option><option>Druid</option>
                 <option>Fighter</option><option>Monk</option><option>Paladin</option><option>Ranger</option>
@@ -7514,8 +7605,8 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
               <button onclick="applyThemeFrom()" style="padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer">Apply</button>
             </div>
           </div>
-          <button onclick="resetClassTheme()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;width:100%;margin-bottom:6px">↺ Reset Class</button>
-          <button onclick="resetAllThemes()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--red);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;width:100%">↺ Reset All</button>
+          <button onclick="resetClassTheme()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;min-width:0">↺ Reset Class</button>
+          <button onclick="resetAllThemes()" style="flex:1;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--red);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer;min-width:0">↺ Reset All</button>
         </div>
       </div>
     </div>
