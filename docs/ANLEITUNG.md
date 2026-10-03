@@ -51,7 +51,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A6. Reihenfolge (Kurzform)
 
-Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2 sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F → J → M → N → O (O niedrige Prio) (J auch zusammen mit F möglich); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
+Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2 sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, Bau F1 → F5, vorher Entscheidungen E1–E8) → J → M → N → O (O niedrige Prio) (J auch zusammen mit F1 möglich); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
 
 ## A7. Arbeitsregeln
 
@@ -71,7 +71,7 @@ Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umb
 - **Nur Zauber:** „Ergänze die Zauber des **Warlock** in `ZB_SPELLS` nach B5."
 - **Fehler:** „Im Tab **Actions** passiert: … Erwartet: …"
 - **Lücke schließen:** „Ergänze die Class Table für den **Wizard**."
-- **Arbeitspakete (Reihenfolge A6):** „Arbeite die Fixliste ab: Paket L.“ (einzelnen Charakter teilen) · „… Paket K.“ (Custom-Rasse) · „… Paket E.“ · „… Paket P.“ (Schaden/Heilung) · „… Paket A2.“ · „Plane Paket F (Multiclass).“ (danach Bau in Teilen) · „… Paket J.“ (Character Info, nach oder mit F)
+- **Arbeitspakete (Reihenfolge A6):** „Arbeite die Fixliste ab: Paket L.“ (einzelnen Charakter teilen) · „… Paket K.“ (Custom-Rasse) · „… Paket E.“ · „… Paket P.“ (Schaden/Heilung) · „… Paket A2.“ · „Arbeite die Fixliste ab: Paket F1.“ (Multiclass, dann F2 … F5) · „… Paket J.“ (Character Info, nach oder mit F)
 - **Neue [Sonnet]-Punkte der Fixliste:** „Arbeite die Fixliste ab, nur Sonnet-Teil."
 - **Ausschlussliste (Gruppe „Weitere“):** „Verschiebe im Actions-Tab das Feature **X** nach ‚Weitere‘.“ (Opus Mittel, B1c)
 - **Rückfall ohne GitHub:** zusätzlich „Anbei `class-warlock.json`."
