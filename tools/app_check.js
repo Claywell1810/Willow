@@ -2156,7 +2156,7 @@ const REGRESSION = [
   { name: 'Paket F3: Multiclass – Saves nur Startklasse, Skill-Wahl der weiteren Klasse (CLASS_MC_GAINS), Expertise/Jack of All Trades nach Klassenstufe, Proficiencies in Core Traits', datum: '03.10.2026',
     run: ({w, d, sel}) => {
       const ev = s => w.eval(s);
-      if (ev("typeof CLASS_MC_GAINS") !== 'object' || ev("Object.keys(CLASS_MC_GAINS).length") !== 12) return 'CLASS_MC_GAINS fehlt';
+      if (ev("typeof CLASS_MC_GAINS") !== 'object' || ev("Object.keys(CLASS_MC_GAINS).length") !== ev("mcAllCls().length")) return 'CLASS_MC_GAINS fehlt';   // seit Paket M: alle Klassen im Klassen-Feld (13)
       if (ev("CLASS_MC_GAINS.Druid.a.join()") !== 'Light armor,Shields') return 'Druid-Gains nicht nach XPHB';
       sel('Wizard', '', 3);
       const g1 = ev("JSON.stringify(calcGrants().filter(x=>x.art!=='attr'))");
@@ -2273,6 +2273,53 @@ const REGRESSION = [
       w.mcDel(0); w.mcDel(0);
       if (d.querySelectorAll('#hdPips .hdpip').length !== 5) return 'nach Entfernen nicht 5d8';
       w.resetUI(); return true;
+    } },
+  { name: 'Paket M: Artificer (EFA) – wählbar (Info + Multiclass), Tracker (INT, 2×INT, Drain/Transmute), Refreshed Genius ab L14, Plätze ab L1, Always Prepared, ★ Mending, Armor Model mit Guardian-Liste, Stat-Blöcke Steel Defender/Eldritch Cannon (Objekt)/Reanimated Companion, Multiclass aufgerundet', datum: '03.10.2026',
+    run: ({ w, d, sel, set }) => {
+      const ev = s => w.eval(s);
+      if (!ev("mcAllCls().includes('Artificer')") || !ev("SL_CLASSES.includes('Artificer')") || !ev("!!CLASS_THEMES.Artificer")) return 'Artificer fehlt in Klassen-Feld/Spell-List-Filter/Themes';
+      const subs = ev("Object.keys(CLASS_DATA.Artificer.subclass).join('|')");
+      if (subs !== 'Alchemist|Armorer|Artillerist|Battle Smith|Cartographer|Reanimator') return 'Subklassen: ' + subs;
+      if (/\bEFA\b/.test(ev("CLASS_DATA.Artificer.base.find(f=>f.name==='Artificer Subclass').desc"))) return '{@subclass}-Tag falsch aufgelöst (EFA statt Name)';
+      if (ev("CLASS_TABLES.Artificer.rows.filter(r=>/Subclass feature/.test(r.f)).length")) return 'Class Table: „Subclass feature“ klein';
+      ev("st.attrs.INT=16");
+      const mx = id => ev(`(t=>t?abMaxUses(t.ab.uses,t.lvl):null)(allTrackers().find(x=>x.ab.id==='${id}'))`);
+      const rk = () => ev("(t=>restKind(t.ab,t.lvl))(allTrackers().find(x=>x.ab.id==='af_flashofgenius'))");
+      sel('Artificer', 'Alchemist (EFA)', 1);
+      if (ev("JSON.stringify(slotTableRow())") !== '[2,0,0,0,0,0,0,0,0]') return 'L1 Zauberplätze: ' + ev("JSON.stringify(slotTableRow())");
+      if (mx('af_tinkersmagic') !== 3) return "Tinker's Magic nicht INT-Mod.";
+      sel('Artificer', 'Alchemist (EFA)', 11);
+      if (mx('af_spellstoringitem') !== 6) return 'Spell-Storing Item nicht 2 × INT-Mod.';
+      ev("st.attrs.INT=8"); const m2 = mx('af_spellstoringitem'); ev("st.attrs.INT=16");
+      if (m2 !== 2) return 'Spell-Storing Item: Minimum 2, ist ' + m2;
+      if (mx('al_experimentalelixir') !== 4) return 'Experimental Elixir L11: ' + mx('al_experimentalelixir');
+      if (ev("JSON.stringify((allTrackers().find(x=>x.ab.id==='af_magicitemtinker')||{ab:{}}).ab.sub.map(s=>s.k))") !== '["drain","transmute"]') return 'Magic Item Tinker ohne Drain/Transmute';
+      if (rk() !== 'long') return 'Flash of Genius L11 nicht Long Rest';
+      sel('Artificer', 'Alchemist (EFA)', 14);
+      if (rk() !== 'one') return 'Refreshed Genius L14: Short Rest nicht +1';
+      if (ev("JSON.stringify(slotTableRow())") !== '[4,3,3,1,0,0,0,0,0]') return 'L14 Zauberplätze';
+      w.autoSave();
+      const auto = ev("(st.mySpells||[]).filter(s=>s.auto).map(s=>s.name).join('|')");
+      if (!auto.includes('Healing Word') || !auto.includes('Death Ward') || auto.includes('Cloudkill')) return 'Always Prepared Alchemist L14: ' + auto;
+      if (ev("slMyVia(slMySpellCtx(),ZB_SPELLS.find(s=>s.name==='Mending'))") !== "Tinker's Magic") return '★-Liste ohne Mending (Tinker\'s Magic)';
+      if (ev("slMyVia(slMySpellCtx(),ZB_SPELLS.find(s=>s.name==='Homunculus Servant'))") !== '') return 'Homunculus Servant nicht Artificer-Zauber';
+      sel('Artificer', 'Armorer (EFA)', 15);
+      const fp = ev("JSON.stringify(FEATURE_PICKS['Artificer|Armorer|Armor Model'])");
+      if (!fp || !fp.includes('"Guardian"') || !fp.includes('"sw"')) return 'Armor Model nicht wählbar: ' + fp;
+      if (!ev("fpOptText(CLASS_DATA.Artificer.subclass.Armorer.find(f=>f.name==='Armor Model').desc,'Guardian')").includes('• Defensive Field')) return 'Guardian ohne Thunder Pulse/Defensive Field';
+      set('prof', '3'); set('spAttr', 'INT');
+      const you = () => [...d.querySelectorAll('#subclsLoreBody .sb-you')].map(x => x.textContent.replace(/\s+/g, ' ')).join(' / ');
+      sel('Artificer', 'Battle Smith (EFA)', 6); w.buildSubclsLore();
+      if (!you().includes('HP 35 (6d8)') || !you().includes('AC 15') || !you().includes('Spell attack +6')) return 'Steel Defender: ' + you();
+      sel('Artificer', 'Artillerist (EFA)', 6); w.buildSubclsLore();
+      if (!you().includes('HP 30') || !you().includes('Spell save DC 14')) return 'Eldritch Cannon: ' + you();
+      if (d.querySelector('#subclsLoreBody .sb-abrow')) return 'Eldritch Cannon zeigt Attribute';
+      sel('Artificer', 'Reanimator (RHW)', 6); w.buildSubclsLore();
+      if (!you().includes('AC 13')) return 'Reanimated Companion: ' + you();
+      // Multiclass: Wizard 2 / Artificer 3 → 2 + ⌈3/2⌉ = 4 (Artificer rundet auf)
+      sel('Wizard', '', 2); w.mcAdd(); w.mcSet(0, 'cls', 'Artificer'); w.mcLv(0, 2);
+      if (ev("mcSlotLvl()") !== 4 || ev("JSON.stringify(slotTableRow())") !== '[4,3,0,0,0,0,0,0,0]') return 'Multiclass Wizard 2 / Artificer 3: ' + ev("mcSlotLvl()");
+      w.mcDel(0); w.resetUI(); return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
 

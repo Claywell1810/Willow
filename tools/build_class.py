@@ -128,7 +128,7 @@ if __name__ == '__main__':
     L.append(f'CLASS_DATA["{cls_name}"]={{')
     L.append('special:' + special + ',')
     L.append('subclassList:' + m.group(1) + ',')
-    L.append('// Quelle: 5e.tools class-%s.json (XPHB); Subklassen neueste Fassung: %s' % (cls_name.lower(), ', '.join(f'{k}={v}' for k, v in srcs.items())))
+    L.append('// Quelle: 5e.tools class-%s.json (%s); Subklassen neueste Fassung: %s' % (cls_name.lower(), cls['source'], ', '.join(f'{k}={v}' for k, v in srcs.items())))
     L.append('abilities:{')
     for grp, lst in abil.items():
         L.append(f'    {J(grp)}:[' if grp != 'base' else '    base:[')
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     feat_lv = {}
     for ref in cls['classFeatures']:
         r = ref['classFeature'] if isinstance(ref, dict) else ref
-        p = r.split('|'); feat_lv.setdefault(int(p[3]), []).append(p[0])
+        p = r.split('|'); feat_lv.setdefault(int(p[3]), []).append('Subclass Feature' if p[0].lower() == 'subclass feature' else p[0])  # EFA: „Subclass feature“
     rows = []
     for lvl in range(1, 21):
         row = {'lvl': lvl, 'pb': math.ceil(lvl / 4) + 1, 'f': ', '.join(feat_lv.get(lvl, [])) or '—'}

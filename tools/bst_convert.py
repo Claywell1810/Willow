@@ -29,6 +29,7 @@ def tag(m):
     if t == 'atk': return ATK14[a]
     if t == 'hit': a = a.replace('summonSpellLevel', "the spell's level"); return ('+' if not a.startswith('-') else '') + a
     if t == 'hitYourSpellAttack': return a or 'Bonus equals your spell attack modifier'
+    if t == 'dcYourSpellSave': return a or 'your spell save DC'   # 5e.tools-Renderer (Eldritch Cannon, Paket M)
     if t == 'h': return 'Hit: '
     if t == 'm': return 'Miss: '
     if t == 'hom': return 'Hit or Miss: '
@@ -235,6 +236,22 @@ def convert(m, fluff=None, keep_type=None):
     return e
 
 
+def convert_object(o):
+    """Objekt aus objects.json (Eldritch Cannon, Paket M 03.10.2026) -> Eintrag wie convert(), ohne Attribute/CR/Speed.
+    Feld obj:1 → sbHtml lässt die Attributszeile weg."""
+    ac = o['ac']; ac = str(ac) if isinstance(ac, int) else acs({'ac': ac if isinstance(ac, list) else [ac]})
+    hp = o['hp']; hp = str(hp) if isinstance(hp, int) else (f"{hp['average']} ({hp['formula']})" if 'average' in hp else clean(hp['special']))
+    sz = o.get('size', []); sz = sz if isinstance(sz, list) else [sz]
+    e = {'n': o['name'], 'type': 'object', 'size': '/'.join(sz), 'cr': '', 'ac': ac, 'hp': hp, 'spd': speed(o['speed']) if o.get('speed') else '',
+         'obj': 1, 'tt': 'Object', 'actions': block(o.get('actionEntries')), 'traits': [], 'fluff': ''}
+    imm = [dmglist(o.get('immune'), 'immune'), dmglist(o.get('conditionImmune'), 'conditionImmune')]
+    imm = '; '.join(x for x in imm if x)
+    if imm: e['imm'] = imm
+    for k, f in (('res', 'resist'), ('vuln', 'vulnerable')):
+        if o.get(f): e[k] = dmglist(o[f], f)
+    return e
+
+
 def load(src, *names):
     M = {}
     for n in names:
@@ -362,6 +379,10 @@ FEATURES = {
     'Wizard|School of Necromancy|Necromancy Spellbook': [('Undead Familiar', ['Skeleton|XMM', 'Zombie|XMM']), '@Find Familiar'],
     'Wizard|School of Necromancy|Undead Thralls': ['@Animate Dead'],
     'Wizard|Illusionist|Phantasmal Creatures': ['@Summon Beast', '@Summon Fey'],
+    # Artificer (Paket M, 03.10.2026); "obj:Name|Quelle" = Objekt aus objects.json
+    'Artificer|Battle Smith|Steel Defender': ['Steel Defender|EFA'],
+    'Artificer|Artillerist|Eldritch Cannon': ['obj:Eldritch Cannon|EFA'],
+    'Artificer|Reanimator|Reanimated Companion': ['Reanimated Companion|RHW'],
 }
 # Bewusst nicht (Prüfliste unten meldet sie als "nicht übernommen"): Beispiele/Erscheinungsbild statt Stat-Block
 # (Wild Shape-Beispielformen, Wild Surge/Wild Magic Surge flumph/pixie/unicorn, Genie-Arten, Favored Enemy, Winter Walker),
@@ -373,6 +394,8 @@ def cmd_features(html_p, src, write):
     D = dump(html_p, '{cd:Object.fromEntries(Object.entries(CLASS_DATA).map(([c,v])=>[c,{base:v.base.map(f=>[f.name,f.desc]),'
                      'sub:Object.fromEntries(Object.entries(v.subclass).map(([k,l])=>[k,l.map(f=>[f.name,f.desc])]))}])),ss:Object.keys(SPELL_STATBLOCKS)}')
     M = load(src, *[os.path.basename(p) for p in glob.glob(os.path.join(src, 'bestiary-*.json'))])
+    op = os.path.join(src, 'objects.json')
+    OBJ = json.load(open(op, encoding='utf-8'))['object'] if os.path.exists(op) else []
     out, err = {}, []
     for key, items in FEATURES.items():
         c, g, n = key.split('|')
@@ -390,6 +413,12 @@ def cmd_features(html_p, src, write):
                     elif x[1:].lower() not in low: err.append(f'{key}: Zauber nicht im Text {x}')
                     else: res.append({'sp': x[1:]})
                     continue
+                if x.startswith('obj:'):   # Objekt aus objects.json (Paket M: Eldritch Cannon)
+                    nm, q = x[4:].split('|')
+                    o = next((y for y in OBJ if y['name'].lower() == nm.lower() and y['source'] == q), None)
+                    if not o: err.append(f'{key}: FEHLT in objects.json {x}'); continue
+                    if nm.lower() not in low: err.append(f'{key}: Objekt nicht im Text {x}')
+                    res.append(dict(convert_object(o), src=q)); continue
                 nm, q = x.split('|'); k = (nm.lower(), q)
                 if k not in M: err.append(f'{key}: FEHLT im Bestiarium {x}'); continue
                 if nm.lower() not in low: err.append(f'{key}: Kreatur nicht im Text {x}')

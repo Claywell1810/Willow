@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import shot_fonts   # echte Schriften (02.10.2026)
 from playwright.sync_api import sync_playwright
 html, out = sys.argv[1], sys.argv[2]; os.makedirs(out, exist_ok=True)
-CL = [('', ''), ('Barbarian', 'Path of the Berserker (PHB)'), ('Bard', 'College of Lore (PHB)'), ('Cleric', 'Life Domain (PHB)'),
+CL = [('', ''), ('Artificer', 'Battle Smith (EFA)'), ('Barbarian', 'Path of the Berserker (PHB)'), ('Bard', 'College of Lore (PHB)'), ('Cleric', 'Life Domain (PHB)'),
       ('Druid', 'Circle of the Stars (XPHB)'), ('Fighter', 'Champion (PHB)'), ('Monk', 'Warrior of the Open Hand (XPHB)'),
       ('Paladin', 'Oath of Devotion (PHB)'), ('Ranger', 'Hunter (PHB)'), ('Rogue', 'Thief (PHB)'), ('Sorcerer', 'Draconic Sorcery (XPHB)'),
       ('Warlock', 'Fiend Patron (XPHB)'), ('Wizard', 'Evoker (XPHB)')]

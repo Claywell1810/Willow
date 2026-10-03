@@ -5,7 +5,7 @@ Aufruf:  python3 class_extract.py class-cleric.json "Knowledge Domain (PHB)|Life
          (zweites Argument = subclassList aus der App, mit | getrennt)
 
 Ausgabe (JSON): base, subclass, table, traits, subclassSources
-- Klasse: XPHB-Fassung.
+- Klasse: XPHB-Fassung; gibt es keine (Artificer, seit 03.10.2026), die Fassung ohne `reprintedAs` (EFA) – `main_class()`.
 - Subklassen: jeweils die NEUESTE Fassung für die 2024-Klasse (classSource XPHB):
   Subklasse ohne reprintedAs; Alt-Subklassen in der 5e.tools-Anpassung an die 2024-Klasse
   (_copy mit angepassten Stufen). Key = Dropdown-Name ohne Quellen-Kürzel (B3).
@@ -31,6 +31,7 @@ def tag_repl(m):
     if tag == 'recharge': return f'(Recharge {p[0]}–6)' if p[0] else '(Recharge 6)'
     if tag == 'classFeature': return p[5] if len(p) > 5 and p[5] else p[0]
     if tag == 'subclassFeature': return p[7] if len(p) > 7 and p[7] else p[0]
+    if tag == 'subclass': return p[4] if len(p) > 4 and p[4] else p[0]  # {@subclass Kurz|Klasse|KQ|SQ|Anzeige} (Artificer EFA)
     if tag == 'quickref': return p[4] if len(p) > 4 and p[4] else p[0]
     if tag == 'deity': return p[3] if len(p) > 3 and p[3] else p[0]
     if tag in ('b', 'i', 'u', 's', 'note', 'bold', 'italic', 'b', 'strike', 'book', 'adventure', '5etools', 'filter', 'link', 'footnote', 'help'):
@@ -98,7 +99,14 @@ def render(e, ctx, lines=None):
     if isinstance(e, str):
         out.append(clean(e)); return out
     if isinstance(e, list):
-        for x in e: render(x, ctx, out)
+        bullet = False  # lose `item`s nach „…features:“ = Liste ohne list-Hülle (5e.tools Artificer Guardian, Paket M)
+        for x in e:
+            if isinstance(x, dict) and x.get('type') == 'item' and x.get('name') and bullet:
+                sub = render(x, ctx, [])
+                if sub: out.append('• ' + sub[0]); out.extend(sub[1:])
+                continue
+            bullet = isinstance(x, str) and x.rstrip().endswith(':')
+            render(x, ctx, out)
         return out
     t = e.get('type', 'entries')
     if t in ('entries', 'inset', 'section', 'variant', 'variantSub', 'item', 'optfeature'):
@@ -206,18 +214,27 @@ def feature(name, lvl, desc):
     return {'lvl': lvl, 'name': clean(name), 'desc': desc, 'tag': feat_tag(desc)}
 
 
+def main_class(data):
+    """Maßgebliche Klassen-Fassung: XPHB, sonst die einzige ohne `reprintedAs` (Artificer: EFA ersetzt TCE)."""
+    x = [c for c in data['class'] if c['source'] == 'XPHB']
+    if x: return x[0]
+    x = [c for c in data['class'] if not c.get('reprintedAs')]
+    assert len(x) == 1, [(c['name'], c['source']) for c in data['class']]
+    return x[0]
+
+
 def extract(data, dropdown, optf=None, feats=None, items=None):
     ctx = Ctx(data, optf, feats, items)
-    cls = next(c for c in data['class'] if c['source'] == 'XPHB')
+    cls = main_class(data)
     # --- base
     base = []
     for ref in cls['classFeatures']:
         r = ref['classFeature'] if isinstance(ref, dict) else ref
+        if r.split('|')[0].lower() == 'subclass feature': continue  # Artificer (EFA): Verweis „Subclass Feature“, Eintrag „Subclass feature“
         f = ctx.cf_ref(r)
-        if f['name'] == 'Subclass Feature': continue
         base.append(feature(f['name'], f['level'], text(f['entries'], ctx)))
     # --- subclasses
-    subs = [s for s in data['subclass'] if s['className'] == cls['name'] and s.get('classSource') == 'XPHB']
+    subs = [s for s in data['subclass'] if s['className'] == cls['name'] and s.get('classSource') == cls['source']]
     def resolved(s):
         if '_copy' in s:
             c = s['_copy']

@@ -2,7 +2,7 @@
 """subclass_spells.py – erzeugt SUBCLASS_SPELLS und CLASS_SPELL_EXTRA aus 5e.tools (additionalSpells).
 
 Aufruf:  python3 subclass_spells.py DnD_Character_App.html src [--write]
-  src/ enthält class-<k>.json aller 12 Klassen und feats.json (5e.tools).
+  src/ enthält class-<k>.json aller 13 Klassen und feats.json (5e.tools).
   Ohne --write: nur Bericht. Mit --write: Block zwischen den Ankern
   '// SUBCLASS_SPELLS-START' und '// SUBCLASS_SPELLS-END' in der HTML ersetzen
   (vorher `cd.json` mit dump.js erzeugen: ZB_SPELLS-Namen und Subklassen-Keys).
@@ -14,10 +14,12 @@ additionalSpells: prepared / known / expanded / innate → feste Zauber (Name) u
 Zauber, die nicht in ZB_SPELLS stehen (andere Quellen, B5), werden gemeldet, nicht erfunden.
 """
 import json, re, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from class_extract import main_class   # XPHB-Klasse bzw. Artificer EFA (Paket M)
 
 HTML, SRC = sys.argv[1], sys.argv[2]
 WRITE = '--write' in sys.argv
-CLASSES = ['Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard']
+CLASSES = ['Artificer', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard']
 SCHOOL = {'A': 'Abjuration', 'C': 'Conjuration', 'D': 'Divination', 'E': 'Enchantment', 'V': 'Evocation', 'I': 'Illusion', 'N': 'Necromancy', 'T': 'Transmutation'}
 # Fighting-Style-Feats, die Cantrips einer anderen Klasse geben (zählen als Klassenzauber)
 FEAT_EXTRA = {'Paladin': 'Blessed Warrior', 'Ranger': 'Druidic Warrior'}
@@ -93,7 +95,7 @@ def find_sub(subs, key, src):
     name = re.sub(r'\s*\([A-Za-z]+\)\s*$', '', key)
     def pick(n, s):
         c = [x for x in subs if x['name'] == n and x['source'] == s]
-        c.sort(key=lambda x: x.get('classSource') != 'XPHB')   # 2024-Anpassung zuerst
+        c.sort(key=lambda x: x.get('classSource') not in ('XPHB', 'EFA'))   # 2024-Anpassung zuerst (Artificer: EFA)
         return c[0] if c else None
     sc = pick(name, src)
     if sc: return sc
@@ -164,8 +166,8 @@ for cls, feat in FEAT_EXTRA.items():
     extra.setdefault(cls, []).extend({'via': feat, 'lvl': feat_level(cls, feat), **f} for f in filters)
 for cls in CLASSES:
     data = json.load(open(os.path.join(SRC, f'class-{cls.lower()}.json')))
-    c = [x for x in data['class'] if x['source'] == 'XPHB'][0]
-    feats_x = [f for f in data.get('classFeature', []) if f.get('source') == 'XPHB' and f.get('className') == cls]
+    c = main_class(data)
+    feats_x = [f for f in data.get('classFeature', []) if f.get('source') == c['source'] and f.get('className') == cls]
     for a in c.get('additionalSpells') or []:
         for cat in ('prepared', 'known', 'expanded', 'innate'):
             blk = a.get(cat) or {}
@@ -234,7 +236,7 @@ def ap_group(cls, a_list, lst, label, pick_prefix):
 
 for cls in CLASSES:
     data = json.load(open(os.path.join(SRC, f'class-{cls.lower()}.json')))
-    c = [x for x in data['class'] if x['source'] == 'XPHB'][0]
+    c = main_class(data)
     lst = []
     ap_group(cls, c.get('additionalSpells'), lst, cls, None)
     if lst: ap.setdefault(cls, {})['base'] = {'v': cls, 's': lst}

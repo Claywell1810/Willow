@@ -250,6 +250,7 @@ Hold Person
 Holy Aura
 Holy Star of Mystra
 Holy Weapon
+Homunculus Servant
 Hunger of Hadar
 Hunter's Mark
 Hypnotic Pattern

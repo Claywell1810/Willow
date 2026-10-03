@@ -2,7 +2,7 @@
 """feature_picks.py – erzeugt FEATURE_PICKS (Paket C2, 29.09.2026): Feature-Auswahl, Bonus-Skills, Expertise, Saves.
 
 Aufruf:  python3 feature_picks.py DnD_Character_App.html src [--write]
-  src/ enthält class-<k>.json aller 12 Klassen (5e.tools, setup.sh klassen).
+  src/ enthält class-<k>.json aller 13 Klassen (5e.tools, setup.sh klassen).
   Ohne --write: nur Bericht. Mit --write: Zeile zwischen '// FEATURE_PICKS-START' und
   '// FEATURE_PICKS-END' in der HTML ersetzen.
 
@@ -49,6 +49,8 @@ SPEC = {
     'Sorcerer|Draconic Sorcery|Elemental Affinity': {'t': 'opt', 'o': ['Acid', 'Cold', 'Fire', 'Lightning', 'Poison'], 'nt': 1},
     'Sorcerer|Divine Soul|Divine Magic': {'t': 'opt'},
     'Bard|College of Swords|Fighting Style': {'t': 'opt'},
+    # Artificer (Paket M): „You can change the armor's model whenever you finish a Short or Long Rest"
+    'Artificer|Armorer|Armor Model': {'t': 'opt', 'o': ['Dreadnaught', 'Guardian', 'Infiltrator'], 'sw': 'Short or Long Rest', 'lk': ['Perfected Armor']},
     # Genie-Art: Tabelle „Genie Kind“ (5e.tools, Einleitung der Subklasse) steht nicht im App-Text → nt
     'Warlock|The Genie|Expanded Spell List': {'t': 'opt', 'o': ['Dao', 'Djinni', 'Efreeti', 'Marid'], 'nt': 1,
                                               'lk': ["Genie's Vessel", 'Elemental Gift']},

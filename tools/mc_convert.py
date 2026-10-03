@@ -13,6 +13,8 @@ steht in `SKILLS`, keine unbekannten Felder/Werte.
 Aufruf: python3 willow/tools/mc_convert.py DnD_Character_App.html src [--write]
 """
 import json, re, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from class_extract import main_class   # XPHB-Klasse bzw. Artificer EFA (Paket M)
 
 WEAPON = {'martial': 'Martial weapons', 'simple': 'Simple weapons'}
 ARMOR = {'light': 'Light armor', 'medium': 'Medium armor', 'heavy': 'Heavy armor', 'shield': 'Shields'}
@@ -43,14 +45,14 @@ def main():
             continue
         d = json.load(open(os.path.join(src, f), encoding='utf-8'))
         for c in d.get('class', []):
-            if c.get('source') != 'XPHB':
+            if c is not main_class(d):
                 continue
             name = c['name']
             pg = (c.get('multiclassing') or {}).get('proficienciesGained') or {}
             for k in pg:
                 if k not in KNOWN:
                     errors.append(f'{name}: unbekanntes Feld {k}')
-            e = {'w': [], 'a': [], 't': [], 'sk': None, 'src': 'XPHB'}
+            e = {'w': [], 'a': [], 't': [], 'sk': None, 'src': c['source']}
             for w in pg.get('weapons', []):
                 if w not in WEAPON: errors.append(f'{name}: Waffe {w}'); continue
                 e['w'].append(WEAPON[w])

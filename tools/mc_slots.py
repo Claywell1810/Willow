@@ -18,6 +18,8 @@ Bedeutung in der App (`mcSlotLvl`): full = Klassenstufe, artificer = halbe Stufe
 Aufruf: python3 willow/tools/mc_slots.py DnD_Character_App.html src [--write]   (--write nur bei 0 Fehlern)
 """
 import json, re, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from class_extract import main_class   # XPHB-Klasse bzw. Artificer EFA (Paket M)
 
 AB = {'str': 'STR', 'dex': 'DEX', 'con': 'CON', 'int': 'INT', 'wis': 'WIS', 'cha': 'CHA'}
 PROGS = {'full', 'artificer', '1/2', '1/3', 'pact'}
@@ -72,7 +74,7 @@ def main():
             continue
         d = json.load(open(os.path.join(src, f), encoding='utf-8'))
         for c in d.get('class', []):
-            if c.get('source') != 'XPHB':
+            if c is not main_class(d):
                 continue
             p = c.get('casterProgression')
             if p:

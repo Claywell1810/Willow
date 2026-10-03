@@ -11,7 +11,7 @@ Configs: <k>_config.py in tools/ (neben diesem Skript, seit 28.09.2026) (optiona
   (abilities: id, name, tag, icon, uses, restore, desc, minLvl, conc; seit 27.09.2026 auch pool, sub, pick – alle Felder)
   mit der App verglichen. Pflicht seit 27.09.2026 für
   barbarian, rogue, warlock, wizard, bard (feature_tags) – fehlt eine davon, meldet die Probe deren Tag-Abweichungen.
-Seit 27.09.2026 (Neubau Bard/Druid/Wizard) sind alle 12 Klassen in der Vollprobe; Subklassen-Keys mit Kürzel
+Seit 27.09.2026 (Neubau Bard/Druid/Wizard) sind alle 12 Klassen in der Vollprobe, seit 03.10.2026 auch Artificer (13); Subklassen-Keys mit Kürzel
   (Druid "Circle of Dreams (XGE)" …) werden wie beim Einbau über keep_keys zugeordnet.
 """
 import json,re,math,sys,os,runpy
@@ -30,7 +30,7 @@ def table(cls):
             l=clean(lab); k=re.sub(r'[^a-z]','',l.split()[0].lower()); extra.append({'k':k,'l':l}); cols.append((k,[r[i] for r in g['rows']]))
     fl={}
     for ref in cls['classFeatures']:
-        r=ref['classFeature'] if isinstance(ref,dict) else ref; p=r.split('|'); fl.setdefault(int(p[3]),[]).append(p[0])
+        r=ref['classFeature'] if isinstance(ref,dict) else ref; p=r.split('|'); fl.setdefault(int(p[3]),[]).append('Subclass Feature' if p[0].lower()=='subclass feature' else p[0])
     rows=[]
     for lvl in range(1,21):
         row={'lvl':lvl,'pb':math.ceil(lvl/4)+1,'f':', '.join(fl.get(lvl,[])) or '—'}
@@ -53,7 +53,7 @@ def table_diffs(C,cls):
         if t['extra']!=ct['extra']: d.append(f'table extra {t["extra"]} vs {ct["extra"]}')
     return d
 tot=0
-for C in ['Cleric','Fighter','Paladin','Ranger','Sorcerer','Rogue','Monk','Barbarian','Warlock','Wizard','Bard','Druid']:
+for C in ['Cleric','Fighter','Paladin','Ranger','Sorcerer','Rogue','Monk','Barbarian','Warlock','Wizard','Bard','Druid','Artificer']:
     cd=A['cd'][C]; data=json.load(open(f'src/class-{C.lower()}.json'))
     cls,base,subs,srcs=extract(data,cd['subclassList'],optf,feats,items)
     cp=os.path.join(T,f'{C.lower()}_config.py')
