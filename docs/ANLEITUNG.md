@@ -8,7 +8,7 @@ Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuers
 |---|---|---|
 | `index.html` | die App – **einzige maßgebliche Version** (B1a) | nie mit Read, nur Ausschnitte per grep/sed |
 | `docs/ANLEITUNG.md` | diese Datei: A1, A4, A6 (Kurzform), A7–A12, B1a | jede Sitzung ganz |
-| `docs/REFERENZ.md` | Technik: A2, A3, A5, B1–B9, B11–B20 | gezielt, z. B. `grep -n "^## B9" -A60 willow/docs/REFERENZ.md` |
+| `docs/REFERENZ.md` | Technik: A2, A3, A5, B1–B9, B11–B24 | gezielt, z. B. `grep -n "^## B9" -A60 willow/docs/REFERENZ.md` |
 | `docs/ARCHIV.md` | Verlauf: A6 (Reihenfolge), Liste der Regressionstests, B10 (Änderungsprotokoll) | nur beim Nachforschen; B10 wird dort ergänzt |
 | `docs/FIXLISTE.md` | offene Arbeitspakete und Punkte | bei Paket-Arbeit ganz |
 | `docs/FIXLISTE_INFO.md` | Punkte „nur zur Info“/„nur auf Wunsch“, Verlauf, Erledigtes | nur bei Bedarf |
@@ -52,7 +52,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A6. Reihenfolge (Kurzform)
 
-Alle 13 Klassen sind eingepflegt (Artificer EFA seit Paket M, 03.10.2026); Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2, F, J, M, N sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, F1 + J ✔ 03.10.2026, F2 ✔ 03.10.2026, F3 ✔ 03.10.2026, F4 ✔ 03.10.2026, F5 ✔ 03.10.2026 = F fertig, Entscheidungen E1–E8 ✔) → M ✔ 03.10.2026 → N ✔ 03.10.2026 (Abläufe A12, `neu_check.py`) → **weiter O** (niedrige Prio; Planung ✔ 03.10.2026, O1 ✔ 03.10.2026, O2 ✔ 03.10.2026, als Nächstes O3, dann O4–O5) → R (Design, ganz am Ende); alle Opus Hoch.** Neue 5e.tools-Inhalte jederzeit nach A12 („Was ist neu in 5e.tools?“). Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
+Alle 13 Klassen sind eingepflegt (Artificer EFA seit Paket M, 03.10.2026); Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2, F, J, M, N sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, F1 + J ✔ 03.10.2026, F2 ✔ 03.10.2026, F3 ✔ 03.10.2026, F4 ✔ 03.10.2026, F5 ✔ 03.10.2026 = F fertig, Entscheidungen E1–E8 ✔) → M ✔ 03.10.2026 → N ✔ 03.10.2026 (Abläufe A12, `neu_check.py`) → **weiter O** (niedrige Prio; Planung ✔ 03.10.2026, O1 ✔ 03.10.2026, O2 ✔ 03.10.2026, O3 ✔ 03.10.2026, als Nächstes O4, dann O5) → R (Design, ganz am Ende); alle Opus Hoch.** Neue 5e.tools-Inhalte jederzeit nach A12 („Was ist neu in 5e.tools?“). Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
 
 ## A7. Arbeitsregeln
 

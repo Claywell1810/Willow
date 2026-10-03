@@ -914,12 +914,12 @@ const REGRESSION = [
       const body = d.getElementById('bgLoreBody');
       w.eval("st.bg='Quandrix Student'"); w.buildBgLore();
       const t = body.textContent, caps = [...body.querySelectorAll('.bg-cap')].map(x => x.textContent);
-      for (const x of ['Languages:', 'Equipment:', 'Vortex Warp', 'Personality Trait', 'Quandrix Trinkets']) if (!t.includes(x)) return 'Info-Tab ohne ' + x;
+      for (const x of ['Languages:', 'Starting Equipment', 'Vortex Warp', 'Personality Trait', 'Quandrix Trinkets']) if (!t.includes(x)) return 'Info-Tab ohne ' + x;
       if (!caps.includes('Building a Quandrix Character')) return 'Abschnitt „Building a Quandrix Character“ fehlt';
       const tb = [...body.querySelectorAll('table.fd-tbl')].find(x => x.textContent.includes('Entangle'));
       if (!tb || !tb.querySelector('th') || tb.querySelector('th').textContent !== 'Spell Level' || tb.querySelectorAll('tr').length !== 6) return 'Tabelle Quandrix Spells falsch';
       w.eval("st.bg='Sage'"); w.buildBgLore();
-      if (!body.textContent.includes('Equipment: Choose A or B') || body.textContent.includes('Researcher')) return 'XPHB-Sage: Equipment fehlt oder 2014-Feature';
+      if (!(body.querySelector('.se') || {textContent: ''}).textContent.includes('Choose A or B') || body.textContent.includes('Researcher')) return 'XPHB-Sage: Equipment fehlt oder 2014-Feature';
       w.eval("st.bg='Folk Hero'"); w.buildBgLore();
       if (!body.textContent.includes('Defining Event') || !body.textContent.includes('Rustic Hospitality')) return 'Folk Hero: Specialty-Tabelle oder Feature fehlt';
       // Background-Tab: Karte zeigt den Text
@@ -971,7 +971,7 @@ const REGRESSION = [
       w.eval("st.bg='Mist Wanderer'"); w.buildBgLore();
       if (!body.textContent.includes('Dark Gift feat of your choice')) return 'Mist Wanderer: Feat-Zeile (Dark Gift) fehlt';
       w.eval("st.bg='Familiar Trainer'"); w.buildBgLore();
-      if (!body.textContent.includes('Equipment:')) return 'Familiar Trainer ohne Text';
+      if (!body.textContent.includes('Starting Equipment')) return 'Familiar Trainer ohne Text';
       w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
@@ -2445,6 +2445,47 @@ const REGRESSION = [
       const gp=L=>(L||[]).reduce((a,e)=>a+(e.cp||0),0),mt=START_EQUIP.bg['Mulhorandi Tomb Raider'];
       if(gp(START_EQUIP.cls.Cleric?.[0]?.o.A)!==700)P.push('Cleric A: '+gp(START_EQUIP.cls.Cleric?.[0]?.o.A)+' cp statt 700 (Text 7 GP)');
       if(mt&&(gp(mt[0].o.A)!==2600||mt[0].o.A.some(e=>/GP/.test(e.dn||''))))P.push('Mulhorandi Tomb Raider A: 26 GP fehlt');`) },
+  { name: 'Paket O3: Startausrüstung – Wahl A/B (Klasse, Background) im Info-Tab, Wahl-Gegenstände, „Add to Items“ trägt Gegenstände (from/ref) und Geld ein, nur einmal (equipDone), gespeichert; Bard/Druid-Text XPHB', datum: '03.10.2026',
+    run: ({ w, d }) => {
+      if (typeof w.seHtml !== 'function') return 'seHtml fehlt (Startausrüstung)';
+      const ct = () => d.getElementById('coreTraitsList'), box = () => ct().querySelector('.se');
+      w.eval("st.items=[];st.equipDone={};st.picks={};['cur_gp','cur_sp','cur_cp'].forEach(i=>document.getElementById(i).value=0);document.getElementById('cls').value='Bard';onClsChange()");
+      if (!box()) return 'Bard: kein Startausrüstungs-Block';
+      if (!box().querySelector('.se-add').disabled) return 'Add ohne Wahl A/B nicht gesperrt';
+      box().querySelector('.se-opt[data-o="A"]').click();
+      if (!box().querySelector('.se-add').disabled) return 'Add ohne Musical Instrument nicht gesperrt';
+      const s = box().querySelector('.se-var select'); s.value = 'Lute|XPHB'; s.dispatchEvent(new w.Event('change'));
+      box().querySelector('.se-add').click();
+      const it = w.eval('JSON.stringify(st.items)'), I = JSON.parse(it);
+      if (I.length !== 4 || !I.every(x => x.from === 'Bard')) return 'Bard A: ' + it;
+      const dg = I.find(x => x.ref === 'Dagger|XPHB'), lu = I.find(x => x.ref === 'Lute|XPHB');
+      if (!dg || dg.qty !== 2 || dg.wt !== 1 || dg.cat !== 'Weapon' || !lu || lu.cat !== 'Tool') return 'Bard A: Dagger×2/Lute falsch';
+      if (d.getElementById('cur_gp').value !== '19') return 'Bard A: 19 GP nicht in den Münzfeldern (' + d.getElementById('cur_gp').value + ')';
+      if (w.eval("st.equipDone['cls:Bard']") !== 'A' || !box().querySelector('.se-done')) return 'Merker equipDone fehlt';
+      w.eval("seAdd('cls','Bard')");
+      if (w.eval('st.items.length') !== 4 || d.getElementById('cur_gp').value !== '19') return 'zweites Eintragen nicht gesperrt';
+      if (!w.eval("_diffSnaps({},collectState())").some(x => /Starting equipment added: Bard \(option A\)/.test(x.m || x))) return 'Log-Eintrag fehlt';
+      // Monk: Wahl aus zwei Gruppen (Musical Instrument oder Artisan's Tools)
+      w.eval("document.getElementById('cls').value='Monk';onClsChange()"); box().querySelector('.se-opt[data-o="A"]').click();
+      const n = box().querySelectorAll('.se-var select option').length;
+      if (n !== 1 + w.eval("ITEM_MAP['Musical Instrument|XPHB'].gv.length+ITEM_MAP[\"Artisan's Tools|XPHB\"].gv.length")) return 'Monk: Auswahl Instrument/Werkzeug unvollständig (' + n + ')';
+      // Background mit zwei Wahl-Zeilen (alt a/b) und Beutel mit Geld; Textzeile „Equipment:“ ersetzt
+      const bb = d.getElementById('bgLoreBody');
+      w.eval("st.bg='Athlete';buildBgLore()");
+      if (bb.textContent.includes('Equipment:')) return 'Athlete: Textzeile Equipment noch da';
+      const o = bb.querySelectorAll('.se-opt'); if (o.length !== 4) return 'Athlete: 2×2 Optionen erwartet, ' + o.length;
+      o[1].click(); bb.querySelectorAll('.se-opt')[2].click(); bb.querySelector('.se-add').click();
+      if (d.getElementById('cur_gp').value !== '29' || !w.eval("st.items.some(i=>i.name==='Leather ball'&&i.from==='Athlete')") || w.eval("st.equipDone['bg:Athlete']") !== 'B, A') return 'Athlete: Eintragen falsch (' + d.getElementById('cur_gp').value + ' GP, ' + w.eval("st.equipDone['bg:Athlete']") + ')';
+      // Speichern + Default-Block (B7)
+      w.eval("document.getElementById('charName').textContent='Regressionstest';autoSave()");
+      const sv = JSON.parse(w.localStorage.getItem('dnd5e_chars')).Regressionstest;
+      if (!sv.equipDone || sv.equipDone['cls:Bard'] !== 'A' || !sv.items.some(i => i.ref === 'Lute|XPHB')) return 'equipDone/ref nicht gespeichert';
+      if (d.documentElement.outerHTML.split('effects:[],mc:[],equipDone:{}').length !== 4) return 'equipDone nicht in allen drei Default-Blöcken';
+      w.eval("seUnlock('cls','Bard')"); if (w.eval("!!st.equipDone['cls:Bard']")) return '„Allow again“ löscht den Merker nicht';
+      const tx = w.eval('CLASS_CORE_TRAITS.Bard.startingEquipment.join(" ")+" | "+CLASS_CORE_TRAITS.Druid.startingEquipment.join(" ")');
+      if (!tx.includes('19 GP') || !tx.includes('(B) 90 GP') || !tx.includes('9 GP') || !tx.includes('(B) 50 GP') || /Rapier|2d4/.test(tx)) return 'Bard/Druid-Text nicht XPHB: ' + tx;
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

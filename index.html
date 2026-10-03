@@ -126,6 +126,22 @@ input[type=number]{-moz-appearance:textfield}
 .pk-chip.dim{opacity:.45}
 .pk-chip small{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--purple);margin-left:5px}
 .pk-note{font-size:var(--fs-sm);color:var(--text3);margin-top:4px;line-height:1.4}
+/* Paket O3: Startausrüstung (Info-Tab) */
+.se-lbl{display:block;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text3);margin-bottom:6px;text-transform:uppercase}
+.se .pk-h{margin-top:2px}
+.se-opt{display:block;width:100%;text-align:left;font-family:inherit;font-size:var(--fs-txt);line-height:1.35;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:7px 10px;margin:0 0 6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.se-opt b{font-family:'Cinzel',serif;color:var(--gold);margin-right:7px}
+.se-opt.on{background:color-mix(in srgb, var(--gold) 16%, var(--bg3));border-color:var(--gold);color:var(--text)}
+.se-opt.dim{opacity:.55}.se-opt:disabled{cursor:default}
+.se-fix{font-size:var(--fs-txt);color:var(--text2);line-height:1.4;margin:0 0 6px}
+.se-var{display:flex;align-items:center;gap:8px;margin:0 0 6px;min-width:0}
+.se-var span{font-size:var(--fs-sm);color:var(--text3);flex:0 1 auto;max-width:42%;line-height:1.25}
+.se-var.open span{color:var(--gold)}
+.se-var select{flex:1 1 0;min-width:0}
+.se-add{display:block;width:100%;margin:4px 0 0;font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:.5px;background:var(--bg3);border:1px solid var(--gold);border-radius:8px;color:var(--gold);padding:8px 10px;min-height:38px;cursor:pointer}
+.se-add:disabled{opacity:.45;cursor:default;border-color:var(--border);color:var(--text3)}
+.se-done{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:var(--fs-txt);color:var(--green);margin-top:4px}
+.se-again{font-size:var(--fs-sm);background:none;border:1px solid var(--border);border-radius:12px;color:var(--text3);padding:4px 10px;cursor:pointer}
 /* Paket F1 + J (03.10.2026): Charakterkarte im Info-Tab + Multiclass-Zeilen */
 .ci-card{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 9%,var(--bg2)),var(--bg2) 70%);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:10px}
 .ci-top{display:flex;gap:12px;align-items:flex-start}
@@ -5959,10 +5975,8 @@ const CLASS_CORE_TRAITS = {
     skillProficiencies: {count:2, from:["Arcana","Animal Handling","Insight","Medicine","Nature","Perception","Religion","Survival"]},
     spellcastingAbility: "Wisdom",
     startingEquipment: [
-      "(A) a Shield or any Simple weapon",
-      "(A) a Scimitar or any Simple Melee weapon",
-      "Leather Armor, Explorer's Pack, and a Druidic Focus",
-      "— or — 2d4 × 10 GP"
+      "(A) Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer's Pack, Herbalism Kit, and 9 GP",
+      "— or — (B) 50 GP"
     ],
     multiclassingReq: "Wisdom 13",
     multiclassingGains: "Light armor, Medium armor, Shields (non-metal)",
@@ -5980,9 +5994,8 @@ const CLASS_CORE_TRAITS = {
     skillProficiencies: {count:3, from:["Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight","Intimidation","Investigation","Medicine","Nature","Perception","Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"]},
     spellcastingAbility: "Charisma",
     startingEquipment: [
-      "(A) a Rapier, (B) a Longsword, or (C) any Simple weapon",
-      "(A) a Diplomat's Pack or (B) an Entertainer's Pack",
-      "Leather Armor, a Dagger, and a Musical Instrument"
+      "(A) Leather Armor, 2 Daggers, Musical Instrument of your choice, Entertainer's Pack, and 19 GP",
+      "— or — (B) 90 GP"
     ],
     multiclassingReq: "Charisma 13",
     multiclassingGains: "Light armor, one skill, one musical instrument",
@@ -6034,7 +6047,8 @@ function buildCoreTraits(){
   rows.push(div('Armor Training', t.armorTraining));
   if(isMulti()) rows.push(div('From Other Classes', mcGainRows()));
   if(t.spellcastingAbility) rows.push(div('Spellcasting Ability', t.spellcastingAbility));
-  if(t.startingEquipment?.length){
+  if(seGroups('cls',cls).length) rows.push(div('Starting Equipment', seHtml('cls',cls)));   // Paket O3
+  else if(t.startingEquipment?.length){
     const eqLines = t.startingEquipment.map(l=>`<div style="margin:1px 0">${l}</div>`).join('');
     rows.push(div('Starting Equipment', eqLines));
   }
@@ -6487,14 +6501,120 @@ function buildBgLore(){
   spec.wahl.forEach((w,i)=>{pk+=pickUI(pkKeyBg(data.n,i),w.from,w.n,{head:`Skills: choose ${w.n}`,marks});});
   pk+=bgAbilityUI(data);
   if(pk) html+=`<div style="padding-bottom:10px;border-bottom:1px solid var(--border2);margin-bottom:10px">${pk}</div>`;
+  const seH=seHtml('bg',bgName);   // Paket O3: Startausrüstung
+  if(seH) html+=`<div style="padding-bottom:10px;border-bottom:1px solid var(--border2);margin-bottom:10px"><label class="se-lbl">Starting Equipment</label>${seH}</div>`;
 
   // Feature text
   if(extra&&extra.f){
-    html+=`<div style="line-height:1.6;color:var(--desc)">${renderBgText(extra.f)}</div>`;
+    const ft=seH?extra.f.split('\n').filter(l=>!/^Equipment:/.test(l)).join('\n'):extra.f;
+    html+=`<div style="line-height:1.6;color:var(--desc)">${renderBgText(ft)}</div>`;
   }
 
   html+='</div>';
   body.innerHTML=html;
+}
+
+// ── Paket O3 (03.10.2026): Startausrüstung aus START_EQUIP (REFERENZ B24) ──────────────────────────
+// Wahl je Gruppe in st.picks: Klasse 'cls:<K>:equip' (nur Startklasse, Multiclass-Regel), Background
+// 'bg:<B>:equip:<Zeile>'; Wahl eines Gegenstands (Eintrag `ch` oder Gegenstand mit Varianten `gv`, z. B.
+// Holy Symbol) unter '<Gruppen-Key>:v:<Option>:<Eintrag>'. „Add to Items“ trägt nur auf Knopfdruck ein
+// (Entscheidung Paket C): Gegenstände mit Feld `from` (Quelle) und `ref` ("Name|Quelle"), Geld in die Münzfelder.
+// Merker st.equipDone['cls:<K>'|'bg:<B>'] = gewählte Optionen → kein zweites Eintragen („Allow again“ löscht nur den Merker).
+function seGroups(src,name){const d=typeof START_EQUIP!=='undefined'&&START_EQUIP[src];return (d&&name&&d[name])||[];}
+function seGKey(src,name,gi){return src==='cls'?'cls:'+name+':equip':'bg:'+name+':equip:'+gi;}
+function seOptOf(src,name,g,gi){return g.k==='_'?'_':(pkValid(seGKey(src,name,gi),Object.keys(g.o),1)[0]||'');}
+function seVarOpts(e){
+  if(e.ch)return [].concat(...e.ch.map(r=>(ITEM_MAP[r]&&ITEM_MAP[r].gv)||[]));
+  const it=e.i&&ITEM_MAP[e.i];return it&&it.gv?it.gv:null;
+}
+function seVar(k,e){const o=seVarOpts(e);return o?(pkValid(k,o,1)[0]||''):'';}
+function seMoney(cp){
+  cp=Math.round(cp||0);const g=Math.floor(cp/100),s=Math.floor(cp%100/10),c=cp%10,r=[];
+  if(g)r.push(g+' GP');if(s)r.push(s+' SP');if(c)r.push(c+' CP');return r.join(' ')||'0 GP';
+}
+function seItemN(ref){const it=ITEM_MAP[ref];return it?it.n:String(ref).split('|')[0];}
+function seTxt(e){
+  const q=e.q>1?e.q+'× ':'';
+  if(e.cp!=null)return seMoney(e.cp);
+  if(e.sp!=null){const t=e.sp.charAt(0).toUpperCase()+e.sp.slice(1);return q+t+(e.wv?' (worth '+seMoney(e.wv)+')':'')+(e.cv?' (with '+seMoney(e.cv)+')':'');}
+  if(e.ch)return q+(e.dn||e.ch.map(seItemN).join(' or ')+' of your choice');
+  return q+(e.dn||seItemN(e.i))+(e.cv?' (with '+seMoney(e.cv)+')':'');
+}
+function seVarUI(k,e,lock){
+  const o=seVarOpts(e);if(!o||!o.length)return '';
+  const v=seVar(k,e),lbl=e.ch?(e.dn||e.ch.map(seItemN).join(' / ')):(e.dn||seItemN(e.i));
+  const first=e.ch?'Choose…':seItemN(e.i)+' (any)';
+  return `<div class="se-var${e.ch&&!v?' open':''}"><span>${pkEsc(lbl)}</span><select class="cr-in" data-k="${pkEsc(k)}"${lock?' disabled':''} onchange="seSetVar(this)"><option value="">${pkEsc(first)}</option>`+
+    o.map(r=>`<option value="${pkEsc(r)}"${r===v?' selected':''}>${pkEsc(seItemN(r))}</option>`).join('')+'</select></div>';
+}
+function seHtml(src,name){
+  const gs=seGroups(src,name);if(!gs.length)return '';
+  const key=src+':'+name,done=(st.equipDone||{})[key],r=seCollect(src,name);
+  let h='<div class="se">';
+  gs.forEach((g,gi)=>{
+    const gk=seGKey(src,name,gi),opt=seOptOf(src,name,g,gi);
+    const vars=o=>(g.o[o]||[]).map((e,ei)=>seVarUI(gk+':v:'+o+':'+ei,e,!!done)).join('');
+    if(g.k==='_'){h+=`<div class="se-fix">${g.o._.map(seTxt).join(', ')}</div>`+vars('_');return;}
+    const ks=Object.keys(g.o),L=ks.map(x=>x.toUpperCase());
+    h+=`<div class="pk-h${opt?'':' open'}">Choose ${L.slice(0,-1).join(', ')} or ${L[L.length-1]} (${opt?1:0}/1)</div>`;
+    ks.forEach((o,i)=>{h+=`<button type="button" class="se-opt${o===opt?' on':''}${opt&&o!==opt?' dim':''}" data-k="${pkEsc(gk)}" data-o="${pkEsc(o)}" data-src="${src}"${done?' disabled':''} onclick="seSetOpt(this)"><b>${L[i]}</b>${pkEsc(g.o[o].map(seTxt).join(', '))}</button>`;});
+    if(opt)h+=vars(opt);
+  });
+  const n=src==='cls'?'class':'background';
+  if(done)h+=`<div class="se-done"><span>✓ Added to Items${done&&done!=='_'?' (option '+pkEsc(done)+')':''}</span><button type="button" class="se-again" onclick="seUnlock('${src}',this.dataset.n)" data-n="${pkEsc(name)}">Allow again</button></div>`;
+  else h+=`<button type="button" class="se-add" data-n="${pkEsc(name)}"${r.miss.length?' disabled':''} onclick="seAdd('${src}',this.dataset.n)">＋ Add to Items</button>`+
+    `<div class="pk-note">${r.miss.length?pkEsc(r.miss.join(' · '))+' first. ':''}Adds the items (Items tab) and the money (Currency) of this ${n} once.</div>`;
+  return h+'</div>';
+}
+// Was „Add to Items“ eintragen würde: {items:[{name,qty,wt,cat,note,from,ref}], cp, opt:"A"|"a, b", miss:[…]}
+function seCollect(src,name){
+  const out={items:[],cp:0,opt:[],miss:[]},gs=seGroups(src,name);
+  const push=(x)=>{const d=out.items.find(y=>y.ref===x.ref&&y.name===x.name);if(d)d.qty+=x.qty;else out.items.push(x);};
+  gs.forEach((g,gi)=>{
+    const gk=seGKey(src,name,gi),opt=seOptOf(src,name,g,gi);
+    if(!opt){out.miss.push('Choose '+Object.keys(g.o).map(x=>x.toUpperCase()).join(' or '));return;}
+    if(opt!=='_')out.opt.push(opt.toUpperCase());
+    (g.o[opt]||[]).forEach((e,ei)=>{
+      const q=e.q||1,vk=gk+':v:'+opt+':'+ei,v=seVar(vk,e);
+      if(e.cp!=null){out.cp+=e.cp;return;}
+      if(e.cv)out.cp+=e.cv;
+      if(e.sp!=null){push({name:e.sp.charAt(0).toUpperCase()+e.sp.slice(1),qty:q,wt:0,cat:'Misc',note:'',from:name,ref:''});return;}
+      if(e.ch){
+        if(!v){out.miss.push('Choose '+(e.dn||e.ch.map(seItemN).join(' / ')));return;}
+        const it=ITEM_MAP[v]||{};push({name:it.n||seItemN(v),qty:q,wt:it.w||0,cat:it.c||'Misc',note:'',from:name,ref:v});return;
+      }
+      const b=ITEM_MAP[e.i]||{},it=v?(ITEM_MAP[v]||{}):b;
+      push({name:v?(e.dn||b.n||seItemN(e.i))+' ('+(it.n||seItemN(v))+')':(e.dn||b.n||seItemN(e.i)),qty:q,wt:it.w!=null?it.w:(b.w||0),cat:b.c||it.c||'Misc',note:'',from:name,ref:v||e.i});
+    });
+  });
+  out.opt=out.opt.join(', ');return out;
+}
+function seRefresh(src){autoSave();if(src==='cls')buildCoreTraits();else buildBgLore();}
+function seSetOpt(el){
+  if(!st.picks)st.picks={};const k=el.dataset.k,o=el.dataset.o;
+  if(pkGet(k)[0]===o)delete st.picks[k];else st.picks[k]=[o];
+  seRefresh(el.dataset.src);
+}
+function seSetVar(el){
+  if(!st.picks)st.picks={};const k=el.dataset.k;
+  if(el.value)st.picks[k]=[el.value];else delete st.picks[k];
+  seRefresh(/^cls:/.test(k)?'cls':'bg');
+}
+function seAdd(src,name){
+  const key=src+':'+name;st.equipDone=st.equipDone||{};
+  if(st.equipDone[key]){showToast('Starting equipment already added');return;}
+  const r=seCollect(src,name);if(r.miss.length){showToast(r.miss.join(' · ')+' first');return;}
+  st.items=st.items||[];let id=Date.now();
+  r.items.forEach(x=>st.items.push(Object.assign({id:id++},x)));
+  const cur=(cid,n)=>{const el=document.getElementById(cid);if(el&&n)el.value=(parseInt(el.value)||0)+n;};
+  cur('cur_gp',Math.floor(r.cp/100));cur('cur_sp',Math.floor(r.cp%100/10));cur('cur_cp',Math.round(r.cp%10));
+  st.equipDone[key]=r.opt||'_';
+  renderItems();seRefresh(src);
+  showToast(`Added ${r.items.length} item${r.items.length===1?'':'s'}${r.cp?' and '+seMoney(r.cp):''} to Items`);
+}
+function seUnlock(src,name){
+  if(!st.equipDone)return;delete st.equipDone[src+':'+name];
+  seRefresh(src);showToast('Can be added again – items already added stay in the Items tab');
 }
 
 function buildFeatsInfo(){
@@ -8148,7 +8268,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{}
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -8259,7 +8379,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{}
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -8290,7 +8410,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{}
   });
   st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
   document.getElementById('charName').textContent=_name;
@@ -8399,6 +8519,9 @@ function _abLabel(id){
 }
 function _pickLabel(k){
   let m;
+  if((m=/^(cls|bg):(.+?):equip(?::\d+)?:v:/.exec(k)))return 'Starting equipment item '+m[2];   // Paket O3
+  if((m=/^cls:(.+):equip$/.exec(k)))return 'Starting equipment '+m[1];
+  if((m=/^bg:(.+):equip:\d+$/.exec(k)))return 'Starting equipment Background '+m[1];
   if((m=/^cls:(.+):skills$/.exec(k)))return 'Skill choice '+m[1];
   if((m=/^bg:(.+):skills(?::\d+)?$/.exec(k)))return 'Skill choice Background '+m[1];
   if((m=/^bg:(.+):ability$/.exec(k)))return 'Ability bonus Background '+m[1];
@@ -8598,7 +8721,9 @@ function _diffSnaps(a,b){
       if((y.freeUsed??0)!==(x.freeUsed??0)) out.push(`Spell "${x.name}" Free Casts used: ${y.freeUsed??0} → ${x.freeUsed??0}`);
     }});
   done.add('feats');_logList(out,a.feats,b.feats,'Feat',x=>x&&x.name,{txt:['desc','notes','note']});
-  done.add('items');_logList(out,a.items,b.items,'Item',x=>x&&x.id!=null?x.id:x&&x.name,{txt:['note'],fl:{qty:'Quantity',wt:'Weight',cat:'Category',note:'Note',name:'Name'},skip:['id'],
+  done.add('equipDone');{const ea=a.equipDone||{},eb=b.equipDone||{};new Set([...Object.keys(ea),...Object.keys(eb)]).forEach(k=>{const n=k.replace(/^(cls|bg):/,''),w=k.startsWith('bg:')?'Background '+n:n;   // Paket O3
+    if(eb[k]&&!ea[k])out.push(`Starting equipment added: ${w}${eb[k]!=='_'?' (option '+eb[k]+')':''}`);else if(ea[k]&&!eb[k])out.push(`Starting equipment can be added again: ${w}`);});}
+  done.add('items');_logList(out,a.items,b.items,'Item',x=>x&&x.id!=null?x.id:x&&x.name,{txt:['note'],fl:{qty:'Quantity',wt:'Weight',cat:'Category',note:'Note',name:'Name',from:'From',ref:'Reference'},skip:['id'],
     lblF:(f,x,i,lbl)=>f==='name'?`Item ${i+1}`:lbl});
   done.add('weapons');_logList(out,a.weapons,b.weapons,'Weapon',null,{fl:{name:'Name',atk:'Attack',dmg:'Damage',type:'Damage Type'},
     name:(x,i)=>(x&&x.name)||('#'+(i+1)),lblF:(f,x,i,lbl)=>f==='name'?`Weapon ${i+1}`:lbl});
@@ -8973,7 +9098,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03l';
+const APP_VERSION = 'willow-app-2026-10-03m';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
