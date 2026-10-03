@@ -2074,8 +2074,44 @@ const REGRESSION = [
       if (!cl.includes('Pact of the Chain') || !cl.includes('Sphinx of Wonder') || !cl.includes('Find Familiar (spell)')) return 'Pact of the Chain ohne Stat-Blöcke';
       return true;
     } },
-];
-// ────────────────────────────────────────────────────────────────────────────
+  { name: 'Paket F1: Multiclass – alter Save ohne mc unverändert, st.mc speichern/laden, Gesamtstufe, Karte, Log, kein Übertrag', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      const all = () => JSON.parse(w.localStorage.getItem('dnd5e_chars') || '{}');
+      // 1) alter Save ohne mc
+      sel('Druid', 'Circle of the Stars (XPHB)', 5);
+      d.getElementById('charName').textContent = 'TestF1alt'; w.saveChar();
+      w.loadChar('TestF1alt'); w.autoSave(); const ref = w.collectState();   // Vergleich: derselbe Save mit mc (Always Prepared u. a. schon synchron)
+      const ch = all(); delete ch.TestF1alt.mc; w.localStorage.setItem('dnd5e_chars', JSON.stringify(ch));
+      w.loadChar('TestF1alt');
+      if (JSON.stringify(w.eval('st.mc')) !== '[]') return 'alter Save: st.mc ≠ []';
+      if (w.eval('charClasses().length') !== 1 || w.eval('totLvl()') !== 5) return 'alter Save: Klassen/Stufe falsch';
+      const strip = o => { const x = JSON.parse(JSON.stringify(o)); delete x.mc; delete x.log; return JSON.stringify(x); };
+      if (strip(w.collectState()) !== strip(ref)) return 'alter Save: Zustand nach Laden verändert';
+      if (!/Druid\s*5/.test(d.getElementById('ciCard').textContent)) return 'Karte zeigt nicht „Druid 5“';
+      // 2) weitere Klasse
+      w.eval("st.attrSrc=null; Object.assign(st.attrs,{STR:10,DEX:12,WIS:16})");
+      w.mcAdd(); w.mcSet(0, 'cls', 'Fighter'); w.mcLv(0, 1); w.mcSet(0, 'sub', 'Champion (PHB)');
+      if (w.eval('totLvl()') !== 7 || w.eval("clsLvlOf('Fighter')") !== 2) return 'Gesamt-/Klassenstufe falsch';
+      const card = d.getElementById('ciCard').textContent;
+      if (!/Druid\s*5\s*\/\s*Fighter\s*2/.test(card) || !/PB\s*\+3/.test(card)) return 'Karte falsch: ' + card.slice(0, 120);
+      if (!/needs Fighter/.test(card)) return 'Hinweis Voraussetzung STR/DEX 13 fehlt';
+      w.eval('st.attrs.DEX=13'); w.buildCharCard();
+      if (/needs Fighter/.test(d.getElementById('ciCard').textContent)) return 'Hinweis trotz DEX 13';
+      if (!/Class: Fighter 2/.test(d.getElementById('mcLoreWrap').textContent)) return 'Lore der weiteren Klasse fehlt';
+      w.chLvl(20); if (d.getElementById('lvl').value !== '18') return 'Gesamtstufe nicht auf 20 begrenzt: ' + d.getElementById('lvl').value;
+      w.mcLv(0, 5); if (w.eval('st.mc[0].lvl') !== 2) return 'weitere Klasse über Gesamtstufe 20';
+      const lg = JSON.stringify(all().TestF1alt.log || []);
+      if (!lg.includes('+ Class: Fighter') || !lg.includes('Fighter subclass')) return 'Log-Einträge fehlen';
+      // 3) Laden, Undo-Grundlage, kein Übertrag
+      w.loadChar('TestF1alt');
+      if (w.eval("JSON.stringify(st.mc)") !== JSON.stringify([{cls:'Fighter',sub:'Champion (PHB)',lvl:2}])) return 'st.mc nach Laden falsch: ' + w.eval('JSON.stringify(st.mc)');
+      w._doNewChar('TestF1neu');
+      if (w.eval('st.mc.length') !== 0 || d.getElementById('mcLoreWrap').innerHTML !== '') return 'neuer Charakter übernimmt Multiclass';
+      w.mcDel && w.loadChar('TestF1alt'); w.mcDel(0); if (w.eval('st.mc.length') !== 1) return 'Entfernen ohne Rückfrage';
+      w.mcDel(0); if (w.eval('st.mc.length') !== 0) return 'Entfernen nach Rückfrage geht nicht';
+      return true;
+    } },
+];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
 async function load(p) {

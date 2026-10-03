@@ -126,6 +126,38 @@ input[type=number]{-moz-appearance:textfield}
 .pk-chip.dim{opacity:.45}
 .pk-chip small{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--purple);margin-left:5px}
 .pk-note{font-size:var(--fs-sm);color:var(--text3);margin-top:4px;line-height:1.4}
+/* Paket F1 + J (03.10.2026): Charakterkarte im Info-Tab + Multiclass-Zeilen */
+.ci-card{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 9%,var(--bg2)),var(--bg2) 70%);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:10px}
+.ci-top{display:flex;gap:12px;align-items:flex-start}
+.ci-rune{flex:0 0 48px;height:48px;border-radius:50%;border:1px solid var(--gold2);display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg3);box-shadow:0 0 12px color-mix(in srgb,var(--gold) 18%,transparent)}
+.ci-main{flex:1;min-width:0}
+.ci-cls{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);line-height:1.25;overflow-wrap:anywhere}
+.ci-cls b{color:var(--text);font-weight:700;margin-left:2px}
+.ci-cls.ci-none{font-size:var(--fs-md);color:var(--text3)}
+.ci-sl{color:var(--text3);margin:0 6px;font-weight:400}
+.ci-lv{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-top:3px}
+.ci-lv b{color:var(--gold);font-weight:600}
+.ci-sub{font-size:var(--fs-txt);color:var(--desc);margin-top:5px;line-height:1.35}
+.ci-sc{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-right:6px}
+.ci-src{display:inline-block;font-family:'Cinzel',serif;font-size:var(--fs-2xs);line-height:1.3;color:var(--text3);border:1px solid var(--border2);border-radius:3px;padding:0 4px;margin-left:6px;vertical-align:1px}
+.ci-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.ci-chip{font-family:'Crimson Text',serif;font-size:var(--fs-txt);line-height:1.2;background:var(--bg3);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:4px 11px;min-height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ci-chip small{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);letter-spacing:.5px;margin-right:5px;text-transform:uppercase}
+.ci-chip.dim{color:var(--text3);border-style:dashed}
+.ci-warn{font-size:var(--fs-sm);color:var(--gold);margin-top:7px;line-height:1.4}
+.mc-box{margin-top:12px;border-top:1px solid var(--border2);padding-top:10px}
+.mc-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:6px}
+.mc-head .mc-tot{color:var(--text3);letter-spacing:.5px}
+.mc-row{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px;margin-bottom:6px}
+.mc-r1{display:flex;align-items:center;gap:5px}
+.mc-r1 select{flex:1;min-width:0}
+.mc-row select+select,.mc-r1+select{margin-top:6px}
+.mc-lv{min-width:24px;text-align:center;font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text)}
+.mc-del{flex-shrink:0;height:30px;min-width:30px;border-radius:15px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);font-size:var(--fs-sm);cursor:pointer;padding:0 8px}
+.mc-del.ask{border-color:var(--red);color:var(--red);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px}
+.mc-add{width:100%;min-height:36px;border:1px dashed var(--border);border-radius:8px;background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;cursor:pointer}
+.mc-add:disabled{color:var(--text3);opacity:.6}
+.mc-row .pk-note.warn,.ci-form .pk-note.warn{color:var(--gold)}
 .pk-dup{border:1px solid color-mix(in srgb, var(--gold) 45%, transparent);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--bg2)}
 .pk-pend{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);letter-spacing:.5px;margin-left:6px}
 .sk-bdg{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.3px;color:var(--purple);border:1px solid color-mix(in srgb, var(--purple) 45%, transparent);border-radius:8px;padding:0 5px;margin-left:5px;white-space:nowrap;vertical-align:middle}
@@ -919,11 +951,13 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div class="act-panel" id="charInfoPanel">
       <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
         <span>Character Info</span>
-        <button onclick="togCharInfo()" id="charInfoBtn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
+        <span style="display:flex;gap:6px"><button onclick="ciTogEdit()" id="ciEditBtn" class="filter-toggle" style="padding:3px 10px">✎ Edit</button><button onclick="togCharInfo()" id="charInfoBtn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button></span>
       </div>
       <div id="charInfoBody">
+      <div id="ciCard"></div>
+      <div id="ciForm" class="ci-form">
       <div class="igrid">
-        <div class="ifield"><label>Class</label>
+        <div class="ifield"><label id="clsLbl">Class</label>
           <select id="cls" onchange="onClsChange()"><option value="">—</option><option>Barbarian</option><option>Bard</option><option>Druid</option><option>Warlock</option><option>Ranger</option><option>Cleric</option><option>Fighter</option><option>Wizard</option><option>Monk</option><option>Paladin</option><option>Rogue</option><option>Sorcerer</option></select></div>
         <div class="ifield"><label>Race</label>
           <select id="race" onchange="onRaceChange()">
@@ -936,10 +970,10 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           </select>
           <input id="raceCustom" placeholder="Custom race name..." style="display:none;margin-top:4px;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;padding:7px 9px;outline:none">
         </div>
-        <div class="ifield"><label>Level</label>
+        <div class="ifield"><label id="lvlLbl">Level</label>
           <div style="display:flex;align-items:center;gap:4px">
             <button class="hbtn" onclick="chLvl(-1)" style="width:28px;height:32px">−</button>
-            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();autoSave()" style="text-align:center;flex:1">
+            <input type="number" id="lvl" onchange="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();buildCharCard();autoSave()" value="1" min="1" max="20" oninput="buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();buildCharCard();autoSave()" style="text-align:center;flex:1">
             <button class="hbtn" onclick="chLvl(1)" style="width:28px;height:32px">+</button>
           </div></div>
         <div class="ifield"><label>Background</label><input id="bg" readonly placeholder="— select on Backgrounds tab —" onclick="switchTab('hintergrund')" style="cursor:pointer;caret-color:transparent" title="Go to Backgrounds tab"></div>
@@ -947,7 +981,9 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <select id="subcls" onchange="onSubclsChange()"><option value="">—</option></select></div>
         <div class="ifield"><label>Alignment</label>
           <select id="align"><option value="">—</option><option>Lawful Good</option><option>Neutral Good</option><option>Chaotic Good</option><option>Lawful Neutral</option><option>Neutral</option><option>Chaotic Neutral</option><option>Lawful Evil</option><option>Neutral Evil</option><option>Chaotic Evil</option></select></div>
-        <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"></div>
+        <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"><div class="pk-note" id="profHint"></div></div>
+      </div>
+      <div id="mcBox" class="mc-box"></div>
       </div>
       </div>
       </div>
@@ -988,6 +1024,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         </div>
         <div id="subclsLoreBody" style="display:none"></div>
       </div>
+      <div id="mcLoreWrap"></div>
       <div class="act-div"></div>
       <div id="raceLoreSection" class="act-panel" style="display:none">
         <div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center">
@@ -1671,7 +1708,7 @@ function statIn(row,txt){
 // Fenster „Strength 12 = 10 Base + 2 Background …“ (Paket E, 02.10.2026)
 function openAttr(k){_atK=k;renderAttr();document.getElementById('attrModal').classList.add('on');}
 function closeAttr(){document.getElementById('attrModal').classList.remove('on');_atK=null;_stK=null;_stDraft=null;}
-function attrRefresh(){buildAttrs();buildSaves();buildSkills();calcSpell();buildRaceLore();buildRaceStats();buildAbilities();buildWeapons();}
+function attrRefresh(){buildAttrs();buildSaves();buildSkills();calcSpell();buildRaceLore();buildRaceStats();buildAbilities();buildWeapons();if(typeof buildCharCard==='function')buildCharCard();}
 function renderAttr(){
   const box=document.getElementById('attrBox');if(!box||!_atK)return;
   const k=_atK,a=ATTRS.find(x=>x.k===k),G=calcGrants();
@@ -1748,8 +1785,8 @@ function attrIn(row,txt){
 
 function chLvl(d){
   const el=document.getElementById('lvl');
-  const v=Math.max(1,Math.min(20,(parseInt(el.value)||1)+d));
-  el.value=v;buildAbilities();buildClassTable();buildRaceLore();buildSaves();buildSkills();
+  const v=Math.max(1,Math.min(20-(totLvl()-curLvl()),(parseInt(el.value)||1)+d)); // Paket F1: Gesamtstufe höchstens 20
+  el.value=v;buildAbilities();buildClassTable();buildRaceLore();buildSaves();buildSkills();buildCharCard();
 }
 function chAttr(k,d){ // seit Paket E ohne Knopf auf der Karte; ändert bei Charakteren mit Grundwerten den Grundwert
   if(attrOn()){const s=st.attrSrc[k]||(st.attrSrc[k]={base:10});s.base=Math.max(1,Math.min(30,(+s.base||10)+d));}
@@ -5858,11 +5895,15 @@ function buildClsLore(){
   all.sort((a,b)=>a.lvl-b.lvl);
   const byLvl={};
   all.forEach(f=>{(byLvl[f.lvl]=byLvl[f.lvl]||[]).push(f);});
-  body.innerHTML=Object.entries(byLvl).map(([lvl,feats])=>`
+  body.innerHTML=loreFeatHtml(cls,'base',byLvl,parseInt(document.getElementById('lvl')?.value)||1,false);
+}
+// Paket F1: Feature-Liste je Stufe für Klasse/Subklasse (Startklasse und weitere Klassen; lvl = Klassenstufe)
+function loreFeatHtml(cls,grp,byLvl,clvl,isSub){
+  return Object.entries(byLvl).map(([lvl,feats])=>`
     <div style="margin-bottom:8px">
       <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">LEVEL ${lvl}</div>
-      ${feats.map(f=>{const fp=fpHtml(cls,'base',f,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1});return `
-        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
+      ${feats.map(f=>{const fp=fpHtml(cls,grp,f,{cls,lvl:clvl});return `
+        <div style="background:var(--bg2);border:1px solid var(--border2);${isSub?'border-left:2px solid var(--purple2);':''}border-radius:6px;padding:8px 10px;margin-bottom:4px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
             <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}<span class="fp-suf">${fp.suf}</span></span>
             <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
@@ -5883,6 +5924,7 @@ function onRaceChange(){
 document.addEventListener('input', e=>{
   if(e.target.id==='raceCustom'){buildRaceLore();if(rcRace()==='custom'){buildSkills();buildAbilities();buildWeapons();}}
   if(e.target.id==='spd'||e.target.id==='ac') buildRaceStats();
+  if(['raceCustom','align','prof','race'].includes(e.target.id)) buildCharCard();   // Paket J: Charakterkarte
 });
 
 function buildRaceLore(){
@@ -5965,18 +6007,7 @@ function buildSubclsLore(){
   const feats=clsData.subclass[subclsKey];
   const byLvl={};
   feats.forEach(f=>{(byLvl[f.lvl]=byLvl[f.lvl]||[]).push(f);});
-  body.innerHTML=Object.entries(byLvl).map(([lvl,fs])=>`
-    <div style="margin-bottom:8px">
-      <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">LEVEL ${lvl}</div>
-      ${fs.map(f=>{const fp=fpHtml(cls,subclsKey,f,{cls,lvl:parseInt(document.getElementById('lvl')?.value)||1});return `
-        <div style="background:var(--bg2);border:1px solid var(--border2);border-left:2px solid var(--purple2);border-radius:6px;padding:8px 10px;margin-bottom:4px">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <span style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold)">${f.name}<span class="fp-suf">${fp.suf}</span></span>
-            <span style="font-size:var(--fs-2xs);color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 5px">${f.tag||''}</span>
-          </div>
-          <div style="font-size:var(--fs-txt);color:var(--desc);line-height:1.6">${fp.body}</div>
-        </div>`;}).join('')}
-    </div>`).join('');
+  body.innerHTML=loreFeatHtml(cls,subclsKey,byLvl,parseInt(document.getElementById('lvl')?.value)||1,true);
 }
 
 // Character Info zuklappbar, Zustand pro Charakter (st.charInfoClosed, Standard offen; Paket B 28.09.2026)
@@ -5985,6 +6016,7 @@ function syncCharInfo(){
   const c=!!st.charInfoClosed;
   if(b) b.style.display=c?'none':'';
   if(btn) btn.textContent=c?'▾ Expand':'▴ Collapse';
+  const eb=document.getElementById('ciEditBtn');if(eb) eb.style.display=c?'none':'';
 }
 function togCharInfo(){st.charInfoClosed=!st.charInfoClosed;syncCharInfo();autoSave();}
 
@@ -6004,6 +6036,160 @@ function toggleClsLore(){
   const open=body.style.display!=='none';
   body.style.display=open?'none':'';
   btn.textContent=open?'▾ Expand':'▴ Collapse';
+}
+
+// ===== Paket F1 + J (03.10.2026): Multiclass-Grundlage + Charakterkarte =====
+// Startklasse = Felder cls/subcls/lvl (E1/E2, unverändert, curCls/curSub/curLvl); weitere Klassen in st.mc=[{cls,sub,lvl}].
+// Regeln XPHB „Multiclassing“: Voraussetzung 13 im Primärattribut (nur Hinweis, E3), Übungsbonus aus der Gesamtstufe (Hinweis, E5).
+const MC_AB={Strength:'STR',Dexterity:'DEX',Constitution:'CON',Intelligence:'INT',Wisdom:'WIS',Charisma:'CHA'};
+let _ciEdit=null, _mcDelAsk=-1, _mcOpen={};
+const mcQ=t=>fdEsc(t==null?'':t).replace(/"/g,'&quot;');
+function mcList(){return Array.isArray(st.mc)?st.mc:[];}
+function mcLvClamp(v){return Math.max(1,Math.min(20,parseInt(v)||1));}
+function charClasses(){
+  const r=[],c=curCls();
+  if(c) r.push({cls:c,sub:curSub(),lvl:curLvl(),start:true});
+  mcList().forEach(m=>{if(m&&m.cls&&m.cls!==c) r.push({cls:m.cls,sub:m.sub||'',lvl:mcLvClamp(m.lvl),start:false});});
+  return r;
+}
+function totLvl(){const C=charClasses();return C.length?C.reduce((a,x)=>a+x.lvl,0):curLvl();}
+function clsLvlOf(cls){const x=charClasses().find(c=>c.cls===cls);return x?x.lvl:0;}
+function isMulti(){return charClasses().length>1;}
+function pbOfLvl(l){return 2+Math.floor((Math.max(1,Math.min(20,l))-1)/4);}
+function mcAllCls(){return [...(document.getElementById('cls')?.options||[])].map(o=>o.value).filter(Boolean);}
+function mcAttrVal(k,G){if(attrOn()){try{return attrCalc(k,G).total;}catch(e){}}return +((st.attrs||{})[k])||10;}
+function mcReq(cls,G){ // XPHB: 13 im Primärattribut („or“ = eines genügt, sonst alle)
+  const p=(CLASS_CORE_TRAITS[cls]||{}).primaryAbility||'';
+  const any=/\bor\b/i.test(p), ks=p.split(/,|\band\b|\bor\b/i).map(s=>MC_AB[s.trim()]).filter(Boolean);
+  if(!ks.length) return null;
+  const v=ks.map(k=>({k,v:mcAttrVal(k,G)}));
+  return {ok:any?v.some(x=>x.v>=13):v.every(x=>x.v>=13),txt:ks.join(any?' or ':' and ')+' 13',have:v.map(x=>x.k+' '+x.v).join(', ')};
+}
+function mcSubParts(cls,sub){const l=subclsLabel(cls,sub)||'',m=l.match(/^(.*?)\s*\(([^)]+)\)\s*$/);return m?{n:m[1],src:m[2]}:{n:l,src:''};}
+function mcRaceName(){const r=document.getElementById('race')?.value||'';return r==='custom'?((document.getElementById('raceCustom')?.value||'').trim()||'Custom'):r;}
+function ciEditOn(){return _ciEdit===null?!curCls():_ciEdit;}
+function ciTogEdit(){_ciEdit=!ciEditOn();_mcDelAsk=-1;buildCharCard();}
+function ciOpenEdit(){_ciEdit=true;buildCharCard();}
+function mcRefresh(){buildCharCard();buildMcLore();}
+function buildCharCard(){
+  const card=document.getElementById('ciCard'),form=document.getElementById('ciForm'),eb=document.getElementById('ciEditBtn');
+  if(!card) return;
+  const C=charClasses(),T=totLvl(),pb=pbOfLvl(T),multi=C.length>1,ed=ciEditOn();
+  if(form) form.style.display=ed?'':'none';
+  if(eb){eb.textContent=ed?'✓ Done':'✎ Edit';eb.style.display=st.charInfoClosed?'none':'';}
+  const start=C[0]&&C[0].cls;
+  let h='<div class="ci-card"><div class="ci-top"><div class="ci-rune">'+(start?(CLASS_RUNES[start]||'⚔'):'✦')+'</div><div class="ci-main">';
+  h+=C.length?'<div class="ci-cls">'+C.map(c=>fdEsc(c.cls)+' <b>'+c.lvl+'</b>').join('<span class="ci-sl">/</span>')+'</div>'
+    :'<div class="ci-cls ci-none">No class chosen</div>';
+  h+='<div class="ci-lv">'+(multi?'Character Level <b>'+T+'</b>':'Level <b>'+T+'</b>')+' · PB <b>+'+pb+'</b></div>';
+  C.filter(c=>c.sub).forEach(c=>{const s=mcSubParts(c.cls,c.sub);h+='<div class="ci-sub">'+(multi?'<span class="ci-sc">'+fdEsc(c.cls)+'</span>':'')+fdEsc(s.n)+(s.src?'<span class="ci-src">'+fdEsc(s.src)+'</span>':'')+'</div>';});
+  h+='</div></div>';   // ci-main, ci-top; Chips und Hinweise über die ganze Breite
+  const rn=mcRaceName(),bg=(document.getElementById('bg')?.value||'').trim(),al=document.getElementById('align')?.value||'';
+  h+='<div class="ci-chips">'
+    +(rn?'<button class="ci-chip" onclick="ciOpenEdit()"><small>Race</small>'+fdEsc(rn)+'</button>':'<button class="ci-chip dim" onclick="ciOpenEdit()">+ Race</button>')
+    +(bg?'<button class="ci-chip" onclick="switchTab(\'hintergrund\')"><small>Background</small>'+fdEsc(bg)+'</button>':'<button class="ci-chip dim" onclick="switchTab(\'hintergrund\')">+ Background</button>')
+    +(al?'<button class="ci-chip" onclick="ciOpenEdit()">'+fdEsc(al)+'</button>':'<button class="ci-chip dim" onclick="ciOpenEdit()">+ Alignment</button>')
+    +'</div>';
+  const w=[];
+  const pf=parseInt(document.getElementById('prof')?.value);
+  if(C.length&&!isNaN(pf)&&pf!==pb) w.push('Proficiency Bonus field is +'+pf+' – level '+T+' gives +'+pb+'.');
+  if(T>20) w.push('Total level '+T+' is above 20.');
+  if(multi){const G=calcGrants(),bad=C.map(c=>({c,r:mcReq(c.cls,G)})).filter(x=>x.r&&!x.r.ok);
+    if(bad.length) w.push('Multiclassing needs '+bad.map(x=>x.c.cls+': '+x.r.txt+' (you have '+x.r.have+')').join('; ')+'.');}
+  h+=w.map(x=>'<div class="ci-warn">⚠ '+fdEsc(x)+'</div>').join('');
+  card.innerHTML=h+'</div>';
+  // Formular: Beschriftungen, PB-Hinweis, Zeilen der weiteren Klassen
+  const cl=document.getElementById('clsLbl'),ll=document.getElementById('lvlLbl');
+  if(cl) cl.textContent=multi?'First Class':'Class';
+  if(ll) ll.textContent=multi?(start+' Level'):'Level';
+  const ph=document.getElementById('profHint');
+  if(ph){ph.textContent=C.length?(multi?'Character level '+T:'Level '+T)+': +'+pb:'';ph.classList.toggle('warn',C.length&&!isNaN(pf)&&pf!==pb);}
+  buildMcBox();
+}
+function buildMcBox(){
+  const box=document.getElementById('mcBox');if(!box) return;
+  const start=curCls(),M=mcList(),T=totLvl(),all=mcAllCls(),G=M.length?calcGrants():null;
+  if(!start&&!M.length){box.innerHTML='';box.style.display='none';return;}
+  box.style.display='';
+  let h='<div class="mc-head"><span>Multiclass</span>'+(M.length?'<span class="mc-tot">Total level '+T+' / 20</span>':'')+'</div>';
+  M.forEach((m,i)=>{
+    const used=new Set([start].concat(M.filter((x,j)=>j!==i).map(x=>x.cls)));
+    const opts='<option value="">— Class —</option>'+all.filter(c=>!used.has(c)||c===m.cls).map(c=>'<option value="'+mcQ(c)+'"'+(c===m.cls?' selected':'')+'>'+fdEsc(c)+'</option>').join('');
+    const sl=(m.cls&&CLASS_DATA[m.cls]&&CLASS_DATA[m.cls].subclassList)||[];
+    const dup=m.cls&&m.cls===start;
+    const r=m.cls&&!dup?mcReq(m.cls,G):null;
+    h+='<div class="mc-row ifield"><div class="mc-r1"><select onchange="mcSet('+i+',\'cls\',this.value)">'+opts+'</select>'
+      +'<button class="hbtn" onclick="mcLv('+i+',-1)">−</button><span class="mc-lv">'+mcLvClamp(m.lvl)+'</span><button class="hbtn" onclick="mcLv('+i+',1)">+</button>'
+      +'<button class="mc-del'+(_mcDelAsk===i?' ask':'')+'" onclick="mcDel('+i+')">'+(_mcDelAsk===i?'Remove?':'✕')+'</button></div>'
+      +(sl.length?'<select onchange="mcSet('+i+',\'sub\',this.value)"><option value="">— Subclass —</option>'+sl.map(o=>'<option value="'+mcQ(o)+'"'+(o===m.sub?' selected':'')+'>'+fdEsc(subclsLabel(m.cls,o))+'</option>').join('')+'</select>':'')
+      +(dup?'<div class="pk-note warn">Same as the first class.</div>':'')
+      +(r?'<div class="pk-note'+(r.ok?'':' warn')+'">'+(r.ok?'✓ ':'⚠ ')+'Requires '+fdEsc(r.txt)+(r.ok?'':' – you have '+fdEsc(r.have))+'</div>':'')
+      +'</div>';
+  });
+  const full=T>=20||!start||M.length>=all.length-1;
+  h+='<button class="mc-add" onclick="mcAdd()"'+(full?' disabled':'')+'>+ Add class</button>';
+  if(M.length) h+='<div class="pk-note">Saving throws come from the first class only (PHB 2024).</div>';
+  box.innerHTML=h;
+}
+function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();autoSave();}
+function mcAdd(){
+  if(!curCls()||totLvl()>=20) return;
+  if(!Array.isArray(st.mc)) st.mc=[];
+  st.mc.push({cls:'',sub:'',lvl:1});mcChanged();
+}
+function mcSet(i,k,v){
+  const m=mcList()[i];if(!m) return;
+  m[k]=v;if(k==='cls') m.sub='';
+  mcChanged();
+}
+function mcLv(i,dl){
+  const m=mcList()[i];if(!m) return;
+  const rest=totLvl()-(m.cls&&m.cls!==curCls()?mcLvClamp(m.lvl):0);
+  m.lvl=Math.max(1,Math.min(20-rest,mcLvClamp(m.lvl)+dl,20));
+  mcChanged();
+}
+function mcDel(i){
+  if(_mcDelAsk!==i){_mcDelAsk=i;buildMcBox();return;}
+  st.mc.splice(i,1);mcChanged();
+}
+// Lore der weiteren Klassen (Klasse + Subklasse, je aufklappbar; Startklasse bleibt in clsLore/subclsLore)
+function mcTogLore(k){_mcOpen[k]=!_mcOpen[k];buildMcLore();}
+function buildMcLore(){
+  const wrap=document.getElementById('mcLoreWrap');if(!wrap) return;
+  const sec=(k,title,body)=>{const o=!!_mcOpen[k];return '<div class="act-div"></div><div class="act-panel"><div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center"><span>'+title+'</span>'
+    +'<button onclick="mcTogLore(\''+mcQ(k).replace(/'/g,"\\'")+'\')" class="filter-toggle" style="padding:3px 10px">'+(o?'▴ Collapse':'▾ Expand')+'</button></div>'+(o?'<div>'+body()+'</div>':'')+'</div>';};
+  let h='';
+  charClasses().filter(c=>!c.start).forEach(c=>{
+    const D=CLASS_DATA[c.cls],t=CLASS_CORE_TRAITS[c.cls]||{};
+    if(!D) return;
+    h+=sec(c.cls+'|base','Class: '+fdEsc(c.cls)+' '+c.lvl,()=>{
+      const lb=s=>'<span style="color:var(--gold);font-family:\'Cinzel\',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:2px">'+s+'</span>';
+      const rows=[];
+      if(t.primaryAbility) rows.push('<div>'+lb('Primary Ability')+fdEsc(t.primaryAbility)+'</div>');
+      if(t.hpPerLevel) rows.push('<div>'+lb('Hit Points per Level')+fdEsc(t.hpPerLevel)+'</div>');
+      if(t.multiclassingReq) rows.push('<div>'+lb('Multiclassing – Requires')+fdEsc(t.multiclassingReq)+'</div>');
+      if(t.multiclassingGains) rows.push('<div>'+lb('Multiclassing – Gains')+fdEsc(t.multiclassingGains)+'</div>');
+      if(t.spellcastingAbility) rows.push('<div>'+lb('Spellcasting Ability')+fdEsc(t.spellcastingAbility)+'</div>');
+      const by={};[...(D.base||[])].sort((a,b)=>a.lvl-b.lvl).forEach(f=>{(by[f.lvl]=by[f.lvl]||[]).push(f);});
+      return (rows.length?'<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:var(--fs-txt);line-height:1.8;color:var(--desc);margin-bottom:8px">'+rows.join('<hr style="border:none;border-top:1px solid var(--border2);margin:6px 0">')+'</div>':'')
+        +loreFeatHtml(c.cls,'base',by,c.lvl,false);
+    });
+    if(c.sub&&D.subclass){
+      const sk=D.subclass[c.sub]?c.sub:c.sub.replace(/\s*\([^)]+\)\s*$/,'').trim();
+      if(D.subclass[sk]) h+=sec(c.cls+'|sub','Subclass: '+fdEsc(subclsLabel(c.cls,c.sub)),()=>{const by={};D.subclass[sk].forEach(f=>{(by[f.lvl]=by[f.lvl]||[]).push(f);});return loreFeatHtml(c.cls,sk,by,c.lvl,true);});
+    }
+  });
+  wrap.innerHTML=h;
+}
+function _mcLog(out,a,b){
+  const A={},B={};(a||[]).forEach(m=>{if(m&&m.cls)A[m.cls]=m;});(b||[]).forEach(m=>{if(m&&m.cls)B[m.cls]=m;});
+  const sl=(c,s)=>s?subclsLabel(c,s):'—';
+  Object.keys(B).forEach(k=>{const x=A[k],y=B[k];
+    if(!x){out.push(`+ Class: ${k} ${mcLvClamp(y.lvl)}${y.sub?' ('+sl(k,y.sub)+')':''}`);return;}
+    if(mcLvClamp(x.lvl)!==mcLvClamp(y.lvl)) out.push(`${k} level: ${mcLvClamp(x.lvl)} → ${mcLvClamp(y.lvl)}`);
+    if((x.sub||'')!==(y.sub||'')) out.push(`${k} subclass: "${sl(k,x.sub)}" → "${sl(k,y.sub)}"`);
+  });
+  Object.keys(A).forEach(k=>{if(!B[k]) out.push(`− Class removed: ${k} ${mcLvClamp(A[k].lvl)}`);});
 }
 
 function onClsChange(){
@@ -6029,6 +6215,7 @@ function onClsChange(){
   buildClsLore();buildClassTable();
   buildSubclsLore();
   buildSaves();buildSkills();
+  mcRefresh();
 }
 function onSubclsChange(){
   buildAbilities();
@@ -6036,6 +6223,7 @@ function onSubclsChange(){
   buildClsLore();buildClassTable();
   buildSubclsLore();
   buildSaves();buildSkills();
+  buildCharCard();
 }
 
 function renderBgText(raw){
@@ -7151,6 +7339,7 @@ function bgRenderMy(){
   const el=document.getElementById('bgMyCard');
   const bgInput=document.getElementById('bg');
   if(bgInput) bgInput.value=st.bg||'';
+  if(typeof buildCharCard==='function') buildCharCard(); // Paket J: Background-Chip
   if(!el)return;
   if(!st.bg){
     el.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);font-family:\'Cinzel\',serif;text-align:center;padding:8px 0 12px">No background selected yet</div>';
@@ -7561,7 +7750,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -7581,7 +7770,7 @@ function applyState(snap){
   // Trigger dependent UI (skip onClsChange - already called)
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxVal();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();
+  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();mcRefresh();
   const raceNotesEl=document.getElementById('n_race_custom');
   if(raceNotesEl) raceNotesEl.value=st.raceNotes||'';
   const skillNotesEl=document.getElementById('skillNotes');
@@ -7624,6 +7813,7 @@ function loadChar(name){
   const chars = getAllChars();
   if(!chars[name]) return;
   _saving = true;
+  _ciEdit = null; _mcDelAsk = -1; // Paket J: Ansicht je Charakter neu (ohne Klasse → Bearbeiten offen)
   _crEdit = null; // Paket K: Maske je Charakter neu entscheiden (leer → offen)
   applyState(chars[name]);
   st.log = chars[name].log || [];
@@ -7670,7 +7860,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -7684,14 +7874,14 @@ function resetUI(){
   onClsChange();
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxVal();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();
+  calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();_ciEdit=null;_mcDelAsk=-1;mcRefresh();
   const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
   _undoClear();
 }
 
 function _doNewChar(name){
   const _name=name;
-  _crEdit=null;
+  _crEdit=null;_ciEdit=null;_mcDelAsk=-1;
   {
   _saving = true;
   // Reset state
@@ -7701,7 +7891,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
   });
   st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
   document.getElementById('charName').textContent=_name;
@@ -7972,6 +8162,7 @@ function _diffSnaps(a,b){
     else out.push(`Concentration ended (was ${_abLabel(a.concActiveFeature)})`);
   }
   done.add('attrs');{const xa=a.attrs||{},xb=b.attrs||{};new Set([...Object.keys(xa),...Object.keys(xb)]).forEach(k=>{ if(xa[k]!==xb[k]) out.push(`${k}${b.attrSrc?' (score)':''}: ${xa[k]??'?'} → ${xb[k]??'?'}`); });}
+  done.add('mc');_mcLog(out,a.mc,b.mc);   // Paket F1
   done.add('attrSrc');_attrLog(out,a.attrSrc,b.attrSrc);
   done.add('statSrc');_statLog(out,a.statSrc,b.statSrc);
   done.add('slotMax');const smA=a.slotMax||[], smB=b.slotMax||[];
@@ -8376,7 +8567,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03c';
+const APP_VERSION = 'willow-app-2026-10-03d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
