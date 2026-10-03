@@ -1226,7 +1226,7 @@ const REGRESSION = [
       w.doShortRest(); if (w.eval('st.abUses.wl_pactslots')) return 'Pakt-Plätze nicht zurück';
       // Long Rest
       sel('Wizard', '', 5);
-      w.eval("st.hpC=3;st.hdUsed=4;st.slotUsed=[3,1,2,0,0,0,0,0,0];st.abUses={wz_arcanerecovery:1};st.dsS=[1,0,0];st.dsF=[1,1,0];st.mySpells=[{name:'Shield',grad:1,school:'Abjuration',prep:true,freeMax:1,freeUsed:1}];document.getElementById('hpT').value=5");
+      w.eval("st.hpC=3;st.hdUsed=4;st.hdUsedBy={6:4};st.slotUsed=[3,1,2,0,0,0,0,0,0];st.abUses={wz_arcanerecovery:1};st.dsS=[1,0,0];st.dsF=[1,1,0];st.mySpells=[{name:'Shield',grad:1,school:'Abjuration',prep:true,freeMax:1,freeUsed:1}];document.getElementById('hpT').value=5");
       w.openRest('long'); if (!box.textContent.includes('Hit Points3 → 40') || !box.textContent.includes('Hit Dice1 → 5')) return 'Long-Rest-Dialog: ' + box.textContent;
       w.doLongRest();
       if (w.eval('st.hpC') !== 40 || d.getElementById('hpT').value !== '0' || w.eval('st.hdUsed') !== 0 || w.eval('st.slotUsed.join()') !== '0,0,0,0,0,0,0,0,0' || Object.keys(w.eval('st.abUses')).length || w.eval('st.mySpells[0].freeUsed') || w.eval('st.dsS.join()+st.dsF.join()') !== '0,0,00,0,0') return 'Long Rest unvollständig';
@@ -2238,6 +2238,41 @@ const REGRESSION = [
       if (ev("mcSlotLvl()") !== 3 || ev("JSON.stringify(slotTableRow())") !== '[4,2,0,0,0,0,0,0,0]') return 'Eldritch Knight 3 / Wizard 2 ≠ Stufe 3';
       w.mcDel(0); w.mcDel(0);
       return true;
+    } },
+  { name: 'Paket F5: Multiclass – Hit Dice je Würfelgröße (st.hdUsedBy, alter Save hdUsed → Würfel der Startklasse), Short Rest mit Würfelwahl, Long Rest alle zurück, Log, gleiche Größe zusammen', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      const ev = s => w.eval(s);
+      w.resetUI(); ev("document.getElementById('charName').textContent='Regressionstest F5'");
+      w.applyState({ attrs: { STR: 10, DEX: 14, CON: 14, INT: 10, WIS: 16, CHA: 10 }, _f_cls: 'Druid', _f_lvl: '5', _f_hpM: '50', hpC: 10, hdUsed: 2 });
+      if (ev("JSON.stringify(st.hdUsedBy)") !== '{"8":2}' || ev("st.hdUsed") !== 2) return 'alter Save: hdUsed nicht auf d8 übernommen: ' + ev("JSON.stringify(st.hdUsedBy)");
+      if (d.getElementById('hdLbl').textContent !== 'Hit Dice · d8' || d.querySelectorAll('#hdPips .hdpip.av').length !== 3 || d.querySelector('#hdPips .hd-pool')) return 'Einzelklasse-Anzeige verändert';
+      w.autoSave();
+      w.mcAdd(); w.mcSet(0, 'cls', 'Fighter'); w.mcLv(0, 1);
+      const pools = [...d.querySelectorAll('#hdPips .hd-pool')].map(p => p.textContent);
+      if (d.getElementById('hdLbl').textContent !== 'Hit Dice' || pools.join('|') !== 'd102/2|d83/5') return 'Pools Druid 5 / Fighter 2: ' + pools.join('|');
+      w.openRest('short');
+      const box = d.getElementById('restBox');
+      if (!d.getElementById('hdOwn10') || !d.getElementById('hdOwn8') || !/Hit Dice 5 \/ 7/.test(box.textContent)) return 'Short Rest ohne Würfelwahl: ' + box.textContent.slice(0, 200);
+      w.hdSpend('11', 10); if (ev("JSON.stringify(st.hdUsedBy)") !== '{"8":2}') return 'd10: Wurf 11 angenommen';
+      w.hdSpend('7', 10); if (ev("st.hpC") !== 19 || ev("st.hdUsedBy[10]") !== 1 || ev("st.hdUsed") !== 2) return 'd10 7 + 2 CON: HP ' + ev("st.hpC") + ' ' + ev("JSON.stringify(st.hdUsedBy)");
+      w.hdSpend('3', 8); if (ev("st.hpC") !== 24 || ev("st.hdUsedBy[8]") !== 3 || ev("st.hdUsed") !== 3) return 'd8 3 + 2 CON / hdUsed-Spiegel';
+      w.hdSpend('9', 8); if (ev("st.hdUsedBy[8]") !== 3) return 'd8: Wurf 9 angenommen';
+      w.hdSpend('1', 10); if (!/d10 <small>0\/2<\/small>/.test(box.innerHTML) || !box.textContent.includes('none left')) return 'd10 aufgebraucht nicht angezeigt';
+      w.hdSpend('5', 10); if (ev("st.hdUsedBy[10]") !== 2) return 'd10 über Maximum';
+      const log = ev('st.log').map(e => e.m).join(' / ');
+      if (!/Hit Die spent: d10 7 \+ 2 CON → \+9 HP/.test(log) || !/Hit Dice d10 used: 0 → 1/.test(log) || !/Hit Dice d8 used: 2 → 3/.test(log)) return 'Log: ' + log.slice(-300);
+      w.closeRest();
+      w.togHD(0, 10); if (ev("st.hdUsedBy[10]") !== 1) return 'Pip d10 gibt keinen Würfel zurück';
+      w.openRest('long');
+      if (!box.textContent.includes('Hit Dice d101 → 2') || !box.textContent.includes('Hit Dice d82 → 5')) return 'Long-Rest-Dialog: ' + box.textContent;
+      w.doLongRest();
+      if (ev("JSON.stringify(st.hdUsedBy)") !== '{}' || ev("st.hdUsed") !== 0 || d.querySelectorAll('#hdPips .hdpip.av').length !== 7) return 'Long Rest: Hit Dice nicht alle zurück';
+      // gleiche Größe zusammen: Druid 5 / Cleric 2 = 7d8
+      w.mcSet(0, 'cls', 'Cleric'); w.buildAbilities();
+      if (d.getElementById('hdLbl').textContent !== 'Hit Dice · d8' || d.querySelectorAll('#hdPips .hdpip').length !== 7) return 'Druid 5 / Cleric 2 nicht 7d8';
+      w.mcDel(0); w.mcDel(0);
+      if (d.querySelectorAll('#hdPips .hdpip').length !== 5) return 'nach Entfernen nicht 5d8';
+      w.resetUI(); return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
 

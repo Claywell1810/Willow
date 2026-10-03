@@ -51,7 +51,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A6. Reihenfolge (Kurzform)
 
-Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2 sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, F1 + J ✔ 03.10.2026, F2 ✔ 03.10.2026, F3 ✔ 03.10.2026, F4 ✔ 03.10.2026, weiter F5, Entscheidungen E1–E8 ✔) → M → N → O (O niedrige Prio); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
+Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2 sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, F1 + J ✔ 03.10.2026, F2 ✔ 03.10.2026, F3 ✔ 03.10.2026, F4 ✔ 03.10.2026, F5 ✔ 03.10.2026 = F fertig, Entscheidungen E1–E8 ✔) → **weiter M** → N → O (O niedrige Prio); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
 
 ## A7. Arbeitsregeln
 

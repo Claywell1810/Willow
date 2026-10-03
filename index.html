@@ -431,6 +431,13 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .ds-groups{justify-content:center;column-gap:28px}
 .hd-pips{justify-content:center}
 .hd-n{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text3);margin-left:6px}
+/* Paket F5 (03.10.2026): Hit Dice je Würfelgröße (Multiclass) */
+.hd-pool{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:2px}
+.hd-d{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--green);margin-right:6px;min-width:28px;text-align:right}
+.rest-hdp{margin-bottom:6px}
+.rest-hdp .ws-go{min-width:7.2em}
+.rest-hdd{font-family:'Cinzel',serif;font-size:var(--fs-sm);color:var(--green);min-width:58px}
+.rest-hdd small{font-size:var(--fs-2xs);color:var(--text3)}
 .rest-btns{display:flex;flex-direction:column;gap:6px;flex:1 0 auto;justify-content:center}
 .rest-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;padding:8px 12px;cursor:pointer;white-space:nowrap;min-height:38px}
 .rest-btn.long{border-color:var(--gold2);color:var(--gold)}
@@ -1482,7 +1489,7 @@ let st={
   attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
   saveP:{},skillP:{},skillMisc:{},skillNotes:'',
   hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
-  slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,
+  slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},
   mySpells:[],feats:[],bg:'',weapons:[],
   zbAdded:new Set(),
   concActive:null, concActiveFeature:null, customRace:{}, attrSrc:null, statSrc:null, conditions:[], exhaustion:0, effects:[]
@@ -7119,34 +7126,55 @@ function shortRestPlan(){
   });
   return {full,one,manual};
 }
-function hdInfo(){
-  const t=typeof CLASS_CORE_TRAITS!=='undefined'&&CLASS_CORE_TRAITS[curCls()],m=t&&/d(\d+)/.exec(t.hd||'');
-  if(!m)return null;
-  const max=curLvl(),used=Math.max(0,Math.min(+st.hdUsed||0,max));
-  return {die:+m[1],max,used,left:max-used};
+// ── Paket F5 (03.10.2026): Hit Dice je Würfelgröße (XPHB Multiclassing: gleiche Größe zusammen, verschiedene getrennt) ──
+// st.hdUsedBy={"8":n,"10":m} = verbrauchte Würfel je Größe; st.hdUsed bleibt (ältere App-Versionen) = verbraucht beim Würfel der Startklasse.
+// Alte Saves ohne hdUsedBy: hdUsed gilt für den Würfel der Startklasse (hdByObj), beim Laden übernommen (hdMig in applyState).
+function hdDieOf(cls){const t=cls&&typeof CLASS_CORE_TRAITS!=='undefined'&&CLASS_CORE_TRAITS[cls],m=t&&/d(\d+)/.exec(t.hd||'');return m?+m[1]:0;}
+function hdByObj(){
+  const b=st.hdUsedBy;if(b&&typeof b==='object'&&!Array.isArray(b))return b;
+  const o={},d=hdDieOf(curCls()),n=Math.max(0,parseInt(st.hdUsed)||0);if(d&&n)o[d]=n;return o;
 }
+function hdMig(){const b=st.hdUsedBy;if(b&&typeof b==='object'&&!Array.isArray(b))return;if(hdDieOf(curCls())||!(parseInt(st.hdUsed)>0))st.hdUsedBy=hdByObj();}
+function hdSetUsed(die,n){
+  hdMig();if(!st.hdUsedBy||typeof st.hdUsedBy!=='object')st.hdUsedBy={};
+  n=Math.max(0,parseInt(n)||0);if(n)st.hdUsedBy[die]=n;else delete st.hdUsedBy[die];
+  const d=hdDieOf(curCls());st.hdUsed=d?(+st.hdUsedBy[d]||0):0;
+}
+function hdInfo(){
+  const by=hdByObj(),P={};
+  charClasses().forEach(c=>{const d=hdDieOf(c.cls);if(!d)return;const p=P[d]||(P[d]={die:d,max:0,cls:[]});p.max+=c.lvl;p.cls.push(c.cls);});
+  const pools=Object.values(P).sort((a,b)=>b.die-a.die);
+  if(!pools.length)return null;
+  pools.forEach(p=>{p.used=Math.max(0,Math.min(+by[p.die]||0,p.max));p.left=p.max-p.used;});
+  const sum=k=>pools.reduce((a,p)=>a+p[k],0);
+  return {pools,multi:pools.length>1,die:pools[0].die,max:sum('max'),used:sum('used'),left:sum('left')};
+}
+function hdPipsHtml(p,multi){return Array.from({length:p.max},(_,i)=>`<div class="slpip hdpip${i<p.left?' av':' u'}" onclick="togHD(${i}${multi?','+p.die:''})"></div>`).join('')+`<span class="hd-n">${p.left}/${p.max}</span>`;}
 function buildHitDice(){
   const box=document.getElementById('hdBox');if(!box)return;
   const h=hdInfo();
   if(!h){box.style.display='none';return;}
   box.style.display='';
-  document.getElementById('hdLbl').textContent='Hit Dice · d'+h.die;
-  document.getElementById('hdPips').innerHTML=Array.from({length:h.max},(_,i)=>`<div class="slpip hdpip${i<h.left?' av':' u'}" onclick="togHD(${i})"></div>`).join('')+`<span class="hd-n">${h.left}/${h.max}</span>`;
+  document.getElementById('hdLbl').textContent=h.multi?'Hit Dice':'Hit Dice · d'+h.die;
+  document.getElementById('hdPips').innerHTML=h.multi
+    ?h.pools.map(p=>`<div class="hd-pool"><span class="hd-d" title="${mcQ(p.cls.join(', '))}">d${p.die}</span>${hdPipsHtml(p,true)}</div>`).join('')
+    :hdPipsHtml(h.pools[0],false);
 }
-function togHD(i){const h=hdInfo();if(!h)return;st.hdUsed=i<h.left?h.used+1:Math.max(0,h.used-1);buildHitDice();autoSave();}
+function hdPool(h,die){return die?h.pools.find(x=>x.die===+die):(h.pools.find(x=>x.left>0)||h.pools[0]);}
+function togHD(i,die){const h=hdInfo();if(!h)return;const p=hdPool(h,die||h.die);if(!p)return;hdSetUsed(p.die,i<p.left?p.used+1:Math.max(0,p.used-1));buildHitDice();autoSave();}
 function hpMaxVal(){return parseInt(document.getElementById('hpM')?.value)||10;}
 function restLog(m){const n=document.getElementById('charName')?.textContent.trim();if(n)_pushLog(n,[m]);}
 function resetDeathSaves(){st.dsS=[0,0,0];st.dsF=[0,0,0];['dsS','dsF'].forEach(id=>document.getElementById(id)?.querySelectorAll('.dspip').forEach(p=>p.classList.remove('f')));}
 let _restMode=null,_restLast='',_castIdx=null;
 function openRest(mode){_restMode=mode;_restLast='';_restFx={};renderRest();document.getElementById('restModal').classList.add('on');}
 function closeRest(){document.getElementById('restModal').classList.remove('on');_restMode=null;_castIdx=null;_spr=null;}
-function hdSpend(own){
-  const h=hdInfo();if(!h||h.left<=0){showToast('No Hit Dice left');return;}
+function hdSpend(own,die){ // Paket F5: die = Würfelgröße (Short Rest mit mehreren Größen), sonst die erste mit freien Würfeln
+  const H=hdInfo(),h=H&&hdPool(H,die);if(!h||h.left<=0){showToast('No Hit Dice left');return;}
   let r;
   if(own===null||own===undefined)r=1+Math.floor(Math.random()*h.die);
   else{r=parseInt(own);if(!(r>=1&&r<=h.die)){showToast('Enter a roll from 1 to '+h.die);return;}}
   const con=getAbilityMod('CON'),gain=Math.max(1,r+con),m=hpMaxVal(),before=st.hpC;
-  st.hpC=Math.min(m,st.hpC+gain);st.hdUsed=h.used+1;
+  st.hpC=Math.min(m,st.hpC+gain);hdSetUsed(h.die,h.used+1);
   document.getElementById('hpC').textContent=st.hpC;updBar();buildHitDice();
   const cs=con?(con>0?' + ':' − ')+Math.abs(con)+' CON':'';
   if(own===null||own===undefined){diceHistory.unshift({spec:'1d'+h.die+(con?(con>0?'+':'')+con:''),label:'Hit Die',total:r+con});if(diceHistory.length>DICE_HISTORY_MAX)diceHistory.length=DICE_HISTORY_MAX;renderDiceHistory();}
@@ -7163,7 +7191,16 @@ function renderRest(){
   let body='';
   if(_restMode==='short'){
     const p=shortRestPlan(),con=getAbilityMod('CON');
-    if(h){
+    if(h&&h.multi){ // Paket F5: Würfelwahl je Größe (d10 Fighter, d8 Druid …)
+      const cs=con?(con>0?'+':'')+con:'';
+      const act=h.left>0&&st.hpC<m
+        ?h.pools.map(p=>`<div class="rest-act rest-hdp"><span class="rest-hdd" title="${mcQ(p.cls.join(', '))}">d${p.die} <small>${p.left}/${p.max}</small></span>`+(p.left>0
+          ?`<button class="ws-btn ws-go" onclick="hdSpend(null,${p.die})">🎲 1d${p.die}${cs}</button><input id="hdOwn${p.die}" type="number" min="1" max="${p.die}" inputmode="numeric" placeholder="own roll"><button class="ws-btn" onclick="hdSpend(document.getElementById('hdOwn${p.die}').value,${p.die})">Add</button>`
+          :`<span class="rest-note">none left</span>`)+`</div>`).join('')
+        :`<div class="rest-note">${h.left>0?'Hit Points are full.':'No Hit Dice left.'}</div>`;
+      body+=`<div class="rest-sec"><div class="rest-h">Spend Hit Dice${con?' · '+(con>0?'+ ':'− ')+Math.abs(con)+' CON each':''}</div>
+        <div class="rest-hp">HP <b>${st.hpC}</b> / ${m} · Hit Dice <b>${h.left}</b> / ${h.max}</div>${act}${_restLast?`<div class="rest-last">${_restLast}</div>`:''}</div>`;
+    }else if(h){
       const act=h.left>0&&st.hpC<m
         ?`<div class="rest-act"><button class="ws-btn ws-go" onclick="hdSpend(null)">🎲 Roll 1d${h.die}${con?(con>0?'+':'')+con:''}</button><input id="hdOwn" type="number" min="1" max="${h.die}" inputmode="numeric" placeholder="own roll"><button class="ws-btn" onclick="hdSpend(document.getElementById('hdOwn').value)">Add</button></div>`
         :`<div class="rest-note">${h.left>0?'Hit Points are full.':'No Hit Dice left.'}</div>`;
@@ -7178,7 +7215,7 @@ function renderRest(){
     const li=[];
     if(st.hpC<m)li.push(`<li>Hit Points<span>${st.hpC} → ${m}</span></li>`);
     if((parseInt(document.getElementById('hpT')?.value)||0)>0)li.push(`<li>Temporary Hit Points end<span>→ 0</span></li>`);
-    if(h&&h.used)li.push(`<li>Hit Dice<span>${h.left} → ${h.max}</span></li>`);
+    if(h&&h.used){if(h.multi)h.pools.forEach(p=>{if(p.used)li.push(`<li>Hit Dice d${p.die}<span>${p.left} → ${p.max}</span></li>`);});else li.push(`<li>Hit Dice<span>${h.left} → ${h.max}</span></li>`);}
     syncSlotMax();
     const su=st.slotMax.reduce((a,_,i)=>a+slotUsedEff(i),0);if(su)li.push(`<li>Spell slots<span>+${su}</span></li>`);
     restTrackers().forEach(({ab,lvl})=>{if(restIds(ab,lvl).some(id=>getAbUses(id)>0))li.push(`<li>${ab.name}<span>full</span></li>`);});
@@ -7198,7 +7235,7 @@ function doShortRest(){
 function doLongRest(){
   st.hpC=hpMaxVal();document.getElementById('hpC').textContent=st.hpC;
   const t=document.getElementById('hpT');if(t)t.value=0;
-  st.hdUsed=0;st.slotUsed=[0,0,0,0,0,0,0,0,0];st.abUses={};
+  st.hdUsed=0;st.hdUsedBy={};st.slotUsed=[0,0,0,0,0,0,0,0,0];st.abUses={};
   (st.mySpells||[]).forEach(x=>{if(x.freeUsed)x.freeUsed=0;});
   resetDeathSaves();const fxn=fxRestDo('long');updBar();
   closeRest();buildAbilities();buildMySpells();autoSave();
@@ -7896,7 +7933,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -7909,6 +7946,7 @@ function applyState(snap){
     if(el && fields[id]!==undefined) el.value=fields[id];
   });
   if(fields.hpT===undefined){const t=document.getElementById('hpT');if(t)t.value='0';} // Paket E2: alte Saves ohne Temp HP
+  if(!(restored.hdUsedBy&&typeof restored.hdUsedBy==='object')){st.hdUsedBy=null;hdMig();} // Paket F5: alt hdUsed → Würfel der Startklasse (hdUsed bleibt)
   // Sync custom race input visibility
   const raceVal=document.getElementById('race')?.value;
   const raceCustom=document.getElementById('raceCustom');
@@ -8006,7 +8044,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -8037,7 +8075,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[]
   });
   st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
   document.getElementById('charName').textContent=_name;
@@ -8317,7 +8355,12 @@ function _diffSnaps(a,b){
   for(let i=0;i<9;i++){ if((smA[i]??0)!==(smB[i]??0)) out.push(`Spell slots level ${i+1} (max): ${smA[i]??0} → ${smB[i]??0}`); }
   done.add('slotAdj');const saA=a.slotAdj||[], saB=b.slotAdj||[];
   for(let i=0;i<9;i++){ if((saA[i]??0)!==(saB[i]??0)) out.push(`Spell slots level ${i+1} adjustment: ${fmt(saA[i]??0)} → ${fmt(saB[i]??0)}`); }
-  done.add('hdUsed');if((a.hdUsed||0)!==(b.hdUsed||0)) out.push(`Hit Dice used: ${a.hdUsed||0} → ${b.hdUsed||0}`);
+  done.add('hdUsed');done.add('hdUsedBy');{ // Paket F5: je Würfelgröße; alte Schnappschüsse ohne hdUsedBy über den Würfel der Startklasse
+    const hb=s=>{const o=s.hdUsedBy;if(o&&typeof o==='object')return o;const d=hdDieOf(s._f_cls),n=parseInt(s.hdUsed)||0;return d&&n?{[d]:n}:null;};
+    const xa=hb(a),xb=hb(b);
+    if(xa||xb){const A=xa||{},B=xb||{};[...new Set([...Object.keys(A),...Object.keys(B)])].sort((p,q)=>q-p).forEach(k=>{if((+A[k]||0)!==(+B[k]||0)) out.push(`Hit Dice d${k} used: ${+A[k]||0} → ${+B[k]||0}`);});}
+    else if((a.hdUsed||0)!==(b.hdUsed||0)) out.push(`Hit Dice used: ${a.hdUsed||0} → ${b.hdUsed||0}`);
+  }
   done.add('slotUsed');const suA=a.slotUsed||[], suB=b.slotUsed||[];
   for(let i=0;i<9;i++){ if((suA[i]??0)!==(suB[i]??0)) out.push(`Spell slots level ${i+1} used: ${suA[i]??0} → ${suB[i]??0}`); }
   done.add('skillMisc');const kmA=a.skillMisc||{}, kmB=b.skillMisc||{};
@@ -8715,7 +8758,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03g';
+const APP_VERSION = 'willow-app-2026-10-03h';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
