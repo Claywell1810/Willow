@@ -2111,6 +2111,48 @@ const REGRESSION = [
       w.mcDel(0); if (w.eval('st.mc.length') !== 0) return 'Entfernen nach Rückfrage geht nicht';
       return true;
     } },
+  { name: 'Paket F2: Multiclass – Tracker/Features je Klasse mit Klassenstufe, getrennte Zähler, Extra Attack, Class Table, Rast', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      const ev = s => w.eval(s);
+      sel('Cleric', 'Life Domain (PHB)', 6);
+      if (ev("allTrackers().filter(x=>x.ab.name==='Channel Divinity').length") !== 1) return 'Einzelklasse: Channel Divinity nicht genau einmal';
+      w.mcAdd(); w.mcSet(0, 'cls', 'Paladin'); w.mcLv(0, 4); w.mcSet(0, 'sub', 'Oath of Devotion (PHB)');
+      if (ev('totLvl()') !== 11) return 'Gesamtstufe ≠ 11';
+      const cd = ev("allTrackers().filter(x=>x.ab.name==='Channel Divinity').map(x=>x.ab.id+':'+abMaxUses(x.ab.uses,x.lvl)).join()");
+      if (cd !== 'channeldivinity:3,channeldivinity@paladin:2') return 'Channel Divinity je Klasse falsch: ' + cd;
+      if (!d.getElementById('ab_channeldivinity@paladin')) return 'Karte Channel Divinity (Paladin) fehlt';
+      const loh = ev("(t=>t&&abMaxUses(t.ab.uses,t.lvl))(allTrackers().find(x=>x.ab.id==='layonhands'))");
+      if (loh !== 25) return 'Lay on Hands nicht nach Paladin-Stufe 5: ' + loh;
+      if (ev("abMaxUses('pb',5)") !== 4) return 'PB-Zähler nicht aus Gesamtstufe';
+      w.togAbUse('channeldivinity@paladin', 0, 2);
+      if (ev("getAbUses('channeldivinity@paladin')") !== 1 || ev("getAbUses('channeldivinity')") !== 0) return 'Zähler nicht getrennt';
+      if (ev("shortRestPlan().one.map(x=>x.ab.id).join()") !== 'channeldivinity@paladin') return 'Short Rest +1 fehlt für Paladin-Zähler';
+      if (!/Channel Divinity \(Paladin\)/.test(ev("_abLabel('channeldivinity@paladin')"))) return 'Log-Name des zweiten Zählers';
+      if (![...d.querySelectorAll('#abList .ab-cb')].some(x => x.textContent === 'Paladin')) return 'Klassen-Abzeichen fehlt';
+      if (!/Sacred Weapon/.test(d.getElementById('abList').textContent)) return 'Subklassen-Feature der weiteren Klasse fehlt';
+      const cs = d.getElementById('combatStats').textContent;
+      if (!/Level 11/.test(cs) || !/Paladin 5/.test(cs) || !/\+4/.test(cs)) return 'Combat Stats nicht je Klasse: ' + cs.slice(0, 80);
+      if (d.querySelectorAll('#clsTableBody .ct-sw .fbtn').length !== 2) return 'Umschalter Class Table fehlt';
+      w.ctPick('Paladin');
+      if (!/^Paladin Table/.test(d.getElementById('clsTableTitle').textContent) || !/5th/.test((d.querySelector('#clsTableBody .ct-cur') || {}).textContent || '')) return 'Class Table Paladin/Stufe 5 falsch';
+      w.ctPick('Cleric');
+      const ap = ev("[...apGrants().values()].map(x=>x.info).join('|')");
+      if (!/Paladin level 3/.test(ap)) return 'Always Prepared der weiteren Klasse fehlt: ' + ap.slice(0, 80);
+      w.mcDel(0); w.mcDel(0);
+      if (d.getElementById('ab_channeldivinity@paladin') || ev('isMulti()')) return 'nach Entfernen noch Paladin-Karte';
+      // Extra Attack stapelt nicht; Unarmored Defense zweimal wählbar
+      sel('Fighter', 'Champion (PHB)', 5);
+      w.mcAdd(); w.mcSet(0, 'cls', 'Barbarian'); w.mcLv(0, 4);
+      const ea = [...d.querySelectorAll('#abList .ab-card')].filter(c => /^Extra Attack/.test(c.querySelector('.ab-name').textContent));
+      if (ea.length !== 1 || !/doesn't stack/.test(ea[0].textContent)) return 'Extra Attack: ' + ea.length + ' Karten bzw. Hinweis fehlt';
+      if (ev("(t=>t&&abMaxUses(t.ab.uses,t.lvl))(allTrackers().find(x=>x.ab.id==='bb_rage'))") !== 3) return 'Rage nicht nach Barbarian-Stufe 5';
+      w.mcDel(0); w.mcDel(0);
+      sel('Monk', '', 2); w.mcAdd(); w.mcSet(0, 'cls', 'Barbarian');
+      const ud = ev("stUnarmored().map(u=>u.n).join('|')");
+      if (ud !== 'Unarmored Defense|Unarmored Defense (Barbarian)') return 'Unarmored Defense je Klasse: ' + ud;
+      w.mcDel(0); w.mcDel(0);
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

@@ -597,6 +597,10 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .cst-head.closed{margin-bottom:0}
 .cst-chev{font-size:var(--fs-sm);letter-spacing:0}
 .cst-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cst-cls{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:9px 0 5px}
+.ab-cb{display:inline-block;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--gold);border:1px solid color-mix(in srgb, var(--gold) 45%, transparent);border-radius:9px;padding:0 6px;margin-right:5px;line-height:1.5;vertical-align:1px}
+.ab-note{font-size:var(--fs-txt);color:var(--text3);font-style:italic;margin:0 0 6px}
+.ct-sw{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
 .cst-chip{flex:1 1 92px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 8px;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
 .cst-l{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--text3);line-height:1.25}
 .cst-v{font-size:17px;color:var(--gold);white-space:nowrap}
@@ -1565,10 +1569,12 @@ const STAT_ROWS={
 let _stK=null,_stDraft=null;
 function statSrcNew(){return {ac:{arm:''},ini:{},spd:{base:30}};}
 function statOn(k){return !!(st.statSrc&&typeof st.statSrc==='object'&&st.statSrc[k]);}
-function stFeatures(){
-  const cls=document.getElementById('cls')?.value||'',cd=CLASS_DATA[cls],lvl=curLvl();if(!cd)return [];
-  const sk=clsSubKey(cd.subclass||{},document.getElementById('subcls')?.value||'');
-  return (cd.base||[]).concat(sk?(cd.subclass[sk]||[]):[]).filter(f=>f&&f.lvl<=lvl);
+function stFeatures(){ // Paket F2: Features aller Klassen bis zur jeweiligen Klassenstufe (_c = Klasse, _cl = Klassenstufe)
+  const out=[];
+  charClasses().forEach(c=>{const cd=CLASS_DATA[c.cls];if(!cd)return;
+    const sk=clsSubKey(cd.subclass||{},c.sub);
+    (cd.base||[]).concat(sk?(cd.subclass[sk]||[]):[]).forEach(f=>{if(f&&f.lvl<=c.lvl)out.push(Object.assign({},f,{_c:c.cls,_cl:c.lvl}));});});
+  return out;
 }
 function stUnarmored(){
   const out=[];
@@ -1576,7 +1582,8 @@ function stUnarmored(){
     if(m&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];if(m[3]&&AB_FULL[m[3]])ab.push(AB_FULL[m[3]]);}
     else if((m=/your AC equals (\d+) \+ your (\w+) modifier/i.exec(t))&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];}
     else return;
-    if(!out.some(o=>o.n===f.name))out.push({n:f.name,b,ab,noSh:/armor or wielding a Shield/i.test(t)});});
+    const o=out.find(o=>o.n===f.name);if(o&&o.c===f._c)return;
+    out.push({n:o?f.name+' ('+f._c+')':f.name,c:f._c,b,ab,noSh:/armor or wielding a Shield/i.test(t)});});
   return out;
 }
 function stArmorOf(s){const a=(s&&s.arm)||'';return ARMOR_DATA.find(x=>x.n===a&&x.c!=='S')||null;}
@@ -1610,11 +1617,11 @@ function stSpdCalc(s){
   const r={parts:[],warn:[],t:0},add=(v,l,auto)=>{if(!v)return;r.t+=v;r.parts.push({v,l,auto});};
   const race=rcRace(),v=race&&rcVals(race);
   if(v&&v.speed){r.t=v.speed;r.base=`${v.speed} ${rcName(race)}`;r.race=1;}else{r.t=+s.base||0;r.base=`${r.t} Base`;}
-  const ac=(st.statSrc&&st.statSrc.ac)||null,ar=ac?stArmorOf(ac):null,sh=!!(ac&&ac.sh),cls=document.getElementById('cls')?.value||'';
+  const ac=(st.statSrc&&st.statSrc.ac)||null,ar=ac?stArmorOf(ac):null,sh=!!(ac&&ac.sh);
   stFeatures().forEach(f=>{const m=/^(?:At \d+\w* level, )?Your (?:walking )?speed increases by (\d+) feet(?: while you aren't wearing (Heavy armor|armor)( or wielding a Shield)?)?\./i.exec(f.desc||'');if(!m)return;
     if(r.parts.some(p=>p.l===f.name))return;
     let n=+m[1];
-    if(/as shown on the/i.test(f.desc)){const row=(CLASS_TABLES[cls]&&CLASS_TABLES[cls].rows||[])[curLvl()-1],c=row&&/(\d+)/.exec(row.unarmored||'');if(c)n=+c[1];}
+    if(/as shown on the/i.test(f.desc)){const row=(CLASS_TABLES[f._c]&&CLASS_TABLES[f._c].rows||[])[f._cl-1],c=row&&/(\d+)/.exec(row.unarmored||'');if(c)n=+c[1];}
     if(m[2]){const heavyOnly=/heavy/i.test(m[2]);if(ac&&((heavyOnly&&ar&&ar.c==='H')||(!heavyOnly&&(ar||(m[3]&&sh))))){r.warn.push(`${f.name}: no bonus while wearing ${heavyOnly?'Heavy armor':'armor'+(m[3]?' or a Shield':'')}.`);return;}}
     add(n,f.name,1);});
   if(ar&&ar.str&&(st.attrs.STR||10)<ar.str)add(-10,`${ar.n} (Strength ${ar.str})`,1);
@@ -2307,11 +2314,11 @@ const FEATURE_PICKS={"Druid|base|Primal Order":{"t":"opt","fx":{"Magician":{"b":
 // FEATURE_PICKS-END
 function fpKey(k){return 'feat:'+k;}
 function fpName(k){return k.split('|')[2].replace(/@\d+$/,'');}
-function fpLvl(){return parseInt(document.getElementById('lvl')?.value)||1;}
-function fpSubKey(cls){const cd=CLASS_DATA[cls];return cd?clsSubKey(cd.subclass,document.getElementById('subcls')?.value||''):null;}
+function fpLvl(cls){if(!cls)return totLvl();const x=charClasses().find(c=>c.cls===cls);return x?x.lvl:(parseInt(document.getElementById('lvl')?.value)||1);} // Paket F2: ohne Klasse = Charakterstufe (Rasse)
+function fpSubKey(cls){const cd=CLASS_DATA[cls],x=charClasses().find(c=>c.cls===cls);return cd?clsSubKey(cd.subclass,x?x.sub:(document.getElementById('subcls')?.value||'')):null;}
 // aktive Einträge: Klasse, Basis oder aktuelle Subklasse, Feature-Stufe erreicht
 function fpActive(cls){
-  const sk=fpSubKey(cls),lvl=fpLvl(),r=[];
+  const sk=fpSubKey(cls),lvl=fpLvl(cls),r=[];
   Object.keys(FEATURE_PICKS).forEach(k=>{const [c,g]=k.split('|'),e=FEATURE_PICKS[k];
     if(c===cls&&(g==='base'||g===sk)&&e.l<=lvl)r.push({k,e});});
   return r;
@@ -2953,19 +2960,22 @@ const CLASS_TABLES={
   }
 };
 
+let _ctCls=null;
+function ctPick(c){_ctCls=c;buildClassTable();}
 function buildClassTable(){
   const sec=document.getElementById('clsTableSection');
   const body=document.getElementById('clsTableBody');
   const title=document.getElementById('clsTableTitle');
   if(!sec||!body)return;
-  const cls=(document.getElementById('cls')?.value||'').trim();
+  const CC=charClasses(),C0=CC.find(c=>c.cls===_ctCls)||CC[0]; // Paket F2: Umschalter je Klasse (E7, nur Sitzung)
+  const cls=C0?C0.cls:'';
   const tbl=CLASS_TABLES[cls];
   if(!tbl){sec.style.display='none';body.innerHTML='';return;}
   sec.style.display='';
-  const sub=document.getElementById('subcls')?.value||'';
+  const sub=C0.sub;
   const sx=scTable(cls,sub); // Paket D: Zauber-Spalten der Subklasse (Eldritch Knight, Arcane Trickster) aus SUBCLASS_TABLES
   if(title) title.textContent=cls+' Table'+(sx?' · '+sub.replace(/\s*\([^)]+\)\s*$/,''):'');
-  const curLvl=parseInt(document.getElementById('lvl')?.value)||1;
+  const curLvl=C0.lvl;
   const ex=tbl.extra.concat(sx?sx.extra.map(e=>({k:e.k,l:e.l,sc:1})):[]);
   const scRow=r=>sx&&sx.rows.find(x=>+x.lvl===+r.lvl);
   const rowSlots=r=>{const a=r.slots||[];if(a.some(x=>x>0)||!sx)return a;const q=scRow(r);return q?q.slots:a;};
@@ -2974,7 +2984,7 @@ function buildClassTable(){
   const hasSlots=tbl.rows.some(r=>rowSlots(r).some(x=>x>0));
   // Subklassen-Plätze (EK/AT): nur Spalten bis zum höchsten Grad (1st–4th); Klassen-Tabellen unverändert 9
   const nSl=sx&&!tbl.rows.some(r=>(r.slots||[]).some(x=>x>0))?Math.max(...tbl.rows.map(r=>rowSlots(r).reduce((m,x,i)=>x>0?i+1:m,0))):9;
-  let html='<div class="ct-wrap"><table class="ct-tbl">';
+  let html=(CC.length>1?'<div class="ct-sw">'+CC.map(c=>'<button class="fbtn'+(c===C0?' on':'')+'" onclick="ctPick(\''+mcQ(c.cls).replace(/'/g,"\\'")+'\')">'+fdEsc(c.cls)+' '+c.lvl+'</button>').join('')+'</div>':'')+'<div class="ct-wrap"><table class="ct-tbl">';
   if(hasSlots) html+='<tr><th colspan="'+(3+ex.length)+'"></th><th class="ct-grp" colspan="'+nSl+'">Spell Slots per Spell Level</th></tr>';
   html+='<tr><th>Level</th><th>Prof.<br>Bonus</th><th>Features</th>'
       + ex.map(e=>'<th>'+e.l.replace(' ','<br>')+'</th>').join('')
@@ -3005,8 +3015,9 @@ function ctShort(z){
 // bzw. autoPrev (prep-Wert eines schon vorhandenen Eintrags, kommt beim Wegfall zurück). Wegfall: angelegte Einträge
 // verschwinden, außer mit Notiz/Free Casts (bleiben als normaler Zauber). Landtyp/Affinität über FEATURE_PICKS (pick).
 function apGrants(){
-  const cls=document.getElementById('cls')?.value||'', sub=document.getElementById('subcls')?.value||'';
-  const lvl=parseInt(document.getElementById('lvl')?.value)||1, d=(typeof ALWAYS_PREP!=='undefined'&&ALWAYS_PREP[cls])||{}, out=new Map();
+  const out=new Map();
+  charClasses().forEach(C=>{ // Paket F2: jede Klasse mit ihrer Klassenstufe
+  const cls=C.cls, sub=C.sub, lvl=C.lvl, d=(typeof ALWAYS_PREP!=='undefined'&&ALWAYS_PREP[cls])||{};
   const sk=sub?clsSubKey(d,sub):null, grp=[['base',d.base]];
   if(sk&&sk!=='base') grp.push([sk,d[sk]]);
   grp.forEach(([g,e])=>{
@@ -3019,6 +3030,8 @@ function apGrants(){
       out.set(n.toLowerCase(),{n,v:e.v,info:(g==='base'?cls:e.v+(o?' · '+o:'')+' · '+cls)+' level '+l});
     });
   });
+  });
+  const lvl=totLvl(); // Feats: Charakterstufe
   // Paket H2: Zauber aus Feats (feste ab Charakterstufe + gewählte), Abzeichen = Feat-Name
   (st.feats||[]).forEach(f=>{
     if(f.tag!=='Feat') return;
@@ -3054,7 +3067,7 @@ function fsSel(name,v,c){return pkValid(fsKey(name,v,c),fsOpts(c.f),c.n);}
 function fsPending(name){
   const V=(typeof FEAT_SPELLS!=='undefined'&&FEAT_SPELLS[name])||null; if(!V) return false;
   const v=fsVar(name); if(!v) return true;
-  const lvl=parseInt(document.getElementById('lvl')?.value)||1;
+  const lvl=totLvl(); // Paket F2: Charakterstufe
   return (v.c||[]).some(c=>c.l<=lvl&&fsOpts(c.f).length&&fsSel(name,v,c).length<Math.min(c.n,fsOpts(c.f).length));
 }
 function fsChips(key,opts,n,head,open){
@@ -3067,7 +3080,7 @@ function fsChips(key,opts,n,head,open){
 const _fsOpenKeys=new Set();
 function fsHtml(name){
   const V=(typeof FEAT_SPELLS!=='undefined'&&FEAT_SPELLS[name])||null; if(!V) return '';
-  const lvl=parseInt(document.getElementById('lvl')?.value)||1;
+  const lvl=totLvl(); // Paket F2: Charakterstufe
   let h='';
   if(V.length>1) h+=fsChips('fs:'+name+':v',V.map(x=>x.o),1,'Choose option',_fsOpenKeys.has('fs:'+name+':v'));
   const v=fsVar(name);
@@ -6056,6 +6069,27 @@ function totLvl(){const C=charClasses();return C.length?C.reduce((a,x)=>a+x.lvl,
 function clsLvlOf(cls){const x=charClasses().find(c=>c.cls===cls);return x?x.lvl:0;}
 function isMulti(){return charClasses().length>1;}
 function pbOfLvl(l){return 2+Math.floor((Math.max(1,Math.min(20,l))-1)/4);}
+// ── Paket F2 (03.10.2026): Features/Tracker aller Klassen mit ihrer Klassenstufe ──
+// Tracker-ids bleiben (Daten heilig); hat eine weitere Klasse dieselbe id wie eine frühere (Channel Divinity Cleric/Paladin),
+// zählt sie unter „id@klasse“ (eigene Nutzungen, XPHB: jede Klasse hat ihr Feature), oid = Daten-id (Rast-Regeln).
+function mcSlug(c){return String(c||'').toLowerCase().replace(/[^a-z0-9]+/g,'');}
+function clsTrackers(c,seen){
+  const ab=(CLASS_DATA[c.cls]&&CLASS_DATA[c.cls].abilities)||{},ok=a=>!a.minLvl||c.lvl>=a.minLvl;
+  const fix=a=>{if(!seen)return a;if(!c.start&&seen.has(a.id))a=Object.assign({},a,{id:a.id+'@'+mcSlug(c.cls),oid:a.id});seen.add(a.id);return a;};
+  const b=(ab.base||[]).filter(ok).map(fix),k=clsSubKey(ab,c.sub);
+  const s=(k&&k!=='base'?(ab[k]||[]):[]).filter(ok).map(fix);
+  return {b,s};
+}
+// alle Tracker: [{ab,lvl,c,ci,grp:'b'|'s'|'r'}] – Klassen nach Klassenstufe, Rasse nach Gesamtstufe
+function allTrackers(){
+  const out=[],seen=new Set();
+  charClasses().forEach((c,ci)=>{const t=clsTrackers(c,seen);
+    t.b.forEach(ab=>out.push({ab,lvl:c.lvl,c,ci,grp:'b'}));t.s.forEach(ab=>out.push({ab,lvl:c.lvl,c,ci,grp:'s'}));});
+  const race=rcRace(),tl=totLvl();
+  if(race)rcTrackers(race,tl).forEach(ab=>out.push({ab,lvl:tl,c:null,ci:-1,grp:'r'}));
+  return out;
+}
+function clsBadge(cls){return isMulti()?`<span class="ab-cb">${pkEsc(cls)}</span>`:'';}
 function mcAllCls(){return [...(document.getElementById('cls')?.options||[])].map(o=>o.value).filter(Boolean);}
 function mcAttrVal(k,G){if(attrOn()){try{return attrCalc(k,G).total;}catch(e){}}return +((st.attrs||{})[k])||10;}
 function mcReq(cls,G){ // XPHB: 13 im Primärattribut („or“ = eines genügt, sonst alle)
@@ -6131,7 +6165,7 @@ function buildMcBox(){
   if(M.length) h+='<div class="pk-note">Saving throws come from the first class only (PHB 2024).</div>';
   box.innerHTML=h;
 }
-function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();autoSave();}
+function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();buildClassTable();buildAbilities();autoSave();} // Paket F2: Actions/Class Table
 function mcAdd(){
   if(!curCls()||totLvl()>=20) return;
   if(!Array.isArray(st.mc)) st.mc=[];
@@ -6654,7 +6688,7 @@ function abMaxUses(u,lvl){
   if(['str','dex','con','int','wis','cha'].includes(u))return Math.max(1,getAbilityMod(u.toUpperCase()));
   if(u==='level')return lvl;
   if(typeof u==='string'&&/^level\*\d+$/.test(u))return lvl*parseInt(u.split('*')[1]);
-  if(u==='pb')return Math.ceil(lvl/4)+1;
+  if(u==='pb')return pbOfLvl(totLvl()); // Paket F2: Übungsbonus = Gesamtstufe (Einzelklasse unverändert)
   if(u&&typeof u==='object'){let m=0;Object.keys(u).forEach(k=>{if(lvl>=+k)m=u[k];});return m;}
   return u;
 }
@@ -6725,6 +6759,7 @@ function combatUnarmoredAC(cls,subcls,lvl){
 // Kampfwerte-Karte: Werte der aktuellen Stufe aus CLASS_TABLES (extra-Spalten, Übungsbonus, Zauberplätze)
 function buildCombatStats(cls,subcls,lvl){
   const el=document.getElementById('combatStats');if(!el)return;
+  if(isMulti()){buildCombatStatsMc(el);return;} // Paket F2
   const t=cls&&CLASS_TABLES[cls];
   const row=t&&(t.rows||[]).find(r=>+r.lvl===lvl);
   if(!row){el.style.display='none';el.innerHTML='';return;}
@@ -6750,6 +6785,30 @@ function buildCombatStats(cls,subcls,lvl){
     (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'')+`</div>`;
   el.style.display='';
 }
+// Paket F2: Multiclass – PB aus der Gesamtstufe, beste Unarmored AC aller Klassen, Spalten je Klasse mit Klassenstufe;
+// Zauberplätze bis F4 wie bisher aus der Startklasse
+function buildCombatStatsMc(el){
+  const C=charClasses(),T=totLvl(),pb=pbOfLvl(T);
+  const chip=(l,v,c,tt)=>`<div class="cst-chip${c?' '+c:''}"${tt?` title="${tt}"`:''}><div class="cst-l">${l}</div><div class="cst-v">${v}</div></div>`;
+  const ok=v=>!(v===undefined||v===null||v===''||v==='—'||v===0||v==='0');
+  let h=chip('Prof. Bonus','+'+pb,'','Proficiency Bonus · Character level '+T),best=null,per='';
+  C.forEach(c=>{
+    const t=CLASS_TABLES[c.cls],row=t&&(t.rows||[]).find(r=>+r.lvl===c.lvl);let g='';
+    if(row)(t.extra||[]).forEach(x=>{if(ok(row[x.k]))g+=chip(x.l,row[x.k]);});
+    const sx=scTable(c.cls,c.sub),sxr=sx&&sx.rows.find(r=>+r.lvl===c.lvl);
+    (sx?sx.extra:[]).forEach(x=>{const v=sxr&&sxr[x.k];if(ok(v))g+=chip(x.l,v);});
+    const a=combatUnarmoredAC(c.cls,c.sub,c.lvl);if(a&&(!best||a.ac>best.ac))best=a;
+    if(g)per+=`<div class="cst-cls">${fdEsc(c.cls)} ${c.lvl}</div><div class="cst-grid">${g}</div>`;
+  });
+  if(best)h+=chip('Unarmored AC',best.ac,'cst-ac',best.name);
+  const t0=CLASS_TABLES[C[0].cls],r0=t0&&(t0.rows||[]).find(r=>+r.lvl===C[0].lvl),sx0=scTable(C[0].cls,C[0].sub),sr0=sx0&&sx0.rows.find(r=>+r.lvl===C[0].lvl);
+  const sl=(r0?((r0.slots||[]).some(n=>n>0)||!sr0?(r0.slots||[]):sr0.slots):[]).map((n,i)=>n>0?`<span class="cst-slot" title="${n} slots of level ${i+1}"><b>${['1st','2nd','3rd'][i]||(i+1)+'th'}</b>${n}</span>`:'').join('');
+  const closed=abGrpIsClosed('stats');
+  el.innerHTML=`<div class="cst-head${closed?' closed':''}" onclick="togAbGrp('stats')"><span>Combat Stats · Level ${T}</span><span class="cst-chev">${closed?'▸':'▾'}</span></div>`+
+    `<div class="cst-body"${closed?' style="display:none"':''}><div class="cst-grid">${h}</div>${per}`+
+    (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'')+`</div>`;
+  el.style.display='';
+}
 // Zugeklappte Gruppen pro Charakter (st.abGrpClosed, seit 27.09.2026); „Weitere“ startet zugeklappt
 function abGrpIsClosed(k){const g=st.abGrpClosed||{};return k in g?!!g[k]:(k==='weitere'||k==='stats');}
 function togAbGrp(k){st.abGrpClosed=st.abGrpClosed||{};st.abGrpClosed[k]=!abGrpIsClosed(k);buildAbilities();autoSave();}
@@ -6772,21 +6831,15 @@ function buildAbilities(){
   const bsec=document.getElementById('savedBeastsSection');
   if(!clsData){sec.style.display='none';if(bsec)bsec.style.display='none';return;}
   sec.style.display='';
-  if(bsec) bsec.style.display=(clsSpecial(cls,'beasts')||(st.savedBeasts&&st.savedBeasts.length))?'':'none';
+  const CC=charClasses(); // Paket F2: alle Klassen (Startklasse zuerst), je mit Klassenstufe
+  if(bsec) bsec.style.display=(CC.some(c=>clsSpecial(c.cls,'beasts'))||clsSpecial(cls,'beasts')||(st.savedBeasts&&st.savedBeasts.length))?'':'none';
 
-  let abilities=[];
-  const trB=[],trS=[];
-  (clsData.base||[]).forEach(a=>{if(!a.minLvl||lvl>=a.minLvl){abilities.push(a);trB.push(a);}});
-  const abKey=subcls&&(clsData[subcls]?subcls:subcls.replace(/\s*\([^)]+\)\s*$/,'').trim());
-  if(abKey&&clsData[abKey]){
-    clsData[abKey].forEach(a=>{if(!a.minLvl||lvl>=a.minLvl){abilities.push(a);trS.push(a);}});
-  }
-  const trR=race?rcTrackers(race,lvl):[];
-  abilities.push(...trR);
+  const TR=allTrackers();
+  const trR=TR.filter(x=>x.grp==='r').map(x=>x.ab);
   const items=[]; // {tag, lvl, ord, el} – wird unten nach Aktionsart gruppiert
-  const skA=clsSubKey(CLASS_DATA[cls]&&CLASS_DATA[cls].subclass,subcls); // Gruppe für FEATURE_PICKS (Paket C2)
+  const skOf=c=>clsSubKey(CLASS_DATA[c.cls]&&CLASS_DATA[c.cls].subclass,c.sub); // Gruppe für FEATURE_PICKS (Paket C2)
 
-  abilities.forEach((ab,abIdx)=>{
+  TR.forEach((x,abIdx)=>{const ab=x.ab,lvl=x.lvl,c=x.c;
     const iconClass=ab.tag==='aktion'?'aktion':ab.tag==='bonus'?'bonus':ab.tag==='reaktion'?'reaktion':'passiv';
     const tagLabel=ab.tag==='aktion'?'Aktion':ab.tag==='bonus'?'Bonusaktion':ab.tag==='reaktion'?'Reaktion':'Passiv';
     const maxUses=abMaxUses(ab.uses,lvl);
@@ -6819,7 +6872,7 @@ function buildAbilities(){
     const concFeatActive=isConc&&st.concActiveFeature===ab.id; // alte Saves: Markierung ohne conc:true ignorieren
     const card=document.createElement('div');
     const isOpen=openIds.includes('ab_'+ab.id);
-    const fpT=ab.rc?(x=>({suf:x.suf,body:rcCalc(ab.desc)+x.body}))(rcCard(ab.rc,{name:ab.name,desc:ab.desc})):fpHtml(cls,trS.includes(ab)?skA:'base',{name:ab.name,lvl:ab.minLvl||1,desc:ab.desc},{cls,lvl},lvl);
+    const fpT=ab.rc?(x=>({suf:x.suf,body:rcCalc(ab.desc)+x.body}))(rcCard(ab.rc,{name:ab.name,desc:ab.desc})):fpHtml(c.cls,x.grp==='s'?skOf(c):'base',{name:ab.name,lvl:ab.minLvl||1,desc:ab.desc},{cls:c.cls,lvl},lvl);
     card.className='ab-card'+(concFeatActive?' conc-active-card':'')+(picked?' ab-picked':'')+(isOpen?' open':'');
     card.innerHTML=`
       <div class="ab-top" onclick="togAb('${ab.id}')">
@@ -6827,24 +6880,34 @@ function buildAbilities(){
         <div class="ab-title">
           <div class="ab-name">${ab.name}<span class="fp-suf">${fpT.suf}</span>${isConc?`<span class="sp-badge sp-conc${concFeatActive?' active':''}" onclick="event.stopPropagation();togConcFeature('${ab.id}')" title="Concentration" style="margin-left:6px">C</span>`:''}
           </div>
-          <div class="ab-tag">${tagLabel}${ab.rc?' · '+pkEsc(rcName(ab.rc)):''}</div>
+          <div class="ab-tag">${c?clsBadge(c.cls):''}${tagLabel}${ab.rc?' · '+pkEsc(rcName(ab.rc)):''}</div>
         </div>
         ${usesHtml}
       </div>${subsHtml}
       <div class="ab-body${isOpen?' on':''}" id="ab_${ab.id}">
         <div class="ab-desc">${fpT.body}</div>
       </div>`;
-    items.push({tag:iconClass,lvl:ab.minLvl||1,ord:(ab.rc?20000:trS.includes(ab)?10000:0)+abIdx,el:card});
+    items.push({tag:iconClass,lvl:ab.minLvl||1,ord:(ab.rc?900000:x.ci*100000+(x.grp==='s'?10000:0))+abIdx,el:card});
   });
 
   // Features ohne Tracker (Aktion/Bonusaktion/Reaktion + kampfrelevante Passive)
   const FTAG={Aktion:'aktion',Bonusaktion:'bonus',Reaktion:'reaktion'};
   const FICON={aktion:'⚔️',bonus:'⚡',reaktion:'🛡️',passiv:'✧',weitere:'📜'};
-  combatFeatures(cls,subcls,lvl,trB,trS).forEach(x=>{
+  // Paket F2: je Klasse mit Klassenstufe; Extra Attack aus mehreren Klassen stapelt nicht (XPHB) → eine Karte mit Hinweis
+  const FE=[];
+  CC.forEach((c,ci)=>{
+    const trB=TR.filter(t=>t.ci===ci&&t.grp==='b').map(t=>t.ab),trS=TR.filter(t=>t.ci===ci&&t.grp==='s').map(t=>t.ab);
+    combatFeatures(c.cls,c.sub,c.lvl,trB,trS).forEach(x=>FE.push(Object.assign(x,{c,ci})));
+  });
+  const EA=FE.filter(x=>x.f.name==='Extra Attack');
+  FE.forEach(x=>{
+    if(x.f.name==='Extra Attack'&&x!==EA[0])return;
+    const c=x.c,lvl=c.lvl,cls=c.cls,subcls=c.sub;
     const k=x.more?'weitere':(FTAG[x.f.tag]||'passiv');
-    const fid='f_'+x.grp+'_'+x.f.name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    const fid='f_'+x.grp+'_'+(c.start?'':mcSlug(cls)+'_')+x.f.name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
     const isOpen=openIds.includes('ab_'+fid);
-    const fpF=fpHtml(cls,x.grp==='s'?skA:'base',x.f,{cls,lvl},lvl);
+    const fpF=fpHtml(cls,x.grp==='s'?skOf(c):'base',x.f,{cls,lvl},lvl);
+    if(EA.length>1&&x===EA[0])fpF.body=`<div class="ab-note">Extra Attack from ${EA.map(y=>pkEsc(y.c.cls)).join(' and ')} doesn't stack: two attacks with the Attack action (PHB 2024 multiclassing).</div>`+fpF.body;
     const card=document.createElement('div');
     card.className='ab-card ab-feat'+(isOpen?' open':'');
     card.innerHTML=`
@@ -6852,13 +6915,13 @@ function buildAbilities(){
         <div class="ab-icon ${k}">${FICON[k]}</div>
         <div class="ab-title">
           <div class="ab-name">${x.f.name}<span class="fp-suf">${fpF.suf}</span></div>
-          <div class="ab-tag">Level ${x.lvl}${x.grp==='s'?' · '+(typeof subclsLabel==='function'?subclsLabel(cls,subcls):subcls).replace(/\s*\([^)]+\)\s*$/,''):''}</div>
+          <div class="ab-tag">${clsBadge(EA.length>1&&x===EA[0]?EA.map(y=>y.c.cls).join(' / '):cls)}Level ${x.lvl}${x.grp==='s'?' · '+(typeof subclsLabel==='function'?subclsLabel(cls,subcls):subcls).replace(/\s*\([^)]+\)\s*$/,''):''}</div>
         </div>
       </div>
       <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
         <div class="ab-desc">${fpF.body}</div>
       </div>`;
-    items.push({tag:k,lvl:x.lvl,ord:(x.grp==='s'?15000:5000)+x.i,el:card});
+    items.push({tag:k,lvl:x.lvl,ord:x.ci*100000+(x.grp==='s'?15000:5000)+x.i,el:card});
   });
   // Rassen-Traits ohne Tracker (Paket C4): Passiv bzw. Weitere, Text wie im Info-Tab (rcCard: Wahl-Chips, Schadensart, Skill-Wahl)
   if(race)rcFeatures(race,trR).forEach(x=>{
@@ -6877,7 +6940,7 @@ function buildAbilities(){
       <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
         <div class="ab-desc">${rcCalc(x.g.desc)+rc.body}</div>
       </div>`;
-    items.push({tag:k,lvl:1,ord:25000+x.i,el:card});
+    items.push({tag:k,lvl:1,ord:925000+x.i,el:card});
   });
 
   [['aktion','Aktion'],['bonus','Bonusaktion'],['reaktion','Reaktion'],['passiv','Passiv'],['weitere','Weitere']].forEach(([k,l])=>{
@@ -6949,25 +7012,20 @@ const REST_SHORT_FROM={bardicinspiration:5,lt_wardingflare:6};
 const REST_SHORT_ONE=new Set(['wildshape','bb_rage','channeldivinity','secondwind','pw_psionicdice','sn_psionicdice']);
 const REST_MANUAL=new Set(['wz_arcanerecovery','sorcerousrestoration','wl_magicalcunning','naturalrecovery']);
 function restKind(ab,lvl){
-  if(ab.id in REST_SHORT_FROM)return lvl>=REST_SHORT_FROM[ab.id]?'short':'long';
-  if(REST_SHORT_ONE.has(ab.id))return 'one';
+  const id=ab.oid||ab.id; // Paket F2: Zähler „id@klasse“ folgt den Regeln der Daten-id
+  if(id in REST_SHORT_FROM)return lvl>=REST_SHORT_FROM[id]?'short':'long';
+  if(REST_SHORT_ONE.has(id))return 'one';
   return ab.restore||null;
 }
-function restTrackers(){
-  const cls=curCls(),lvl=curLvl(),ab=(CLASS_DATA[cls]&&CLASS_DATA[cls].abilities)||{},out=[];
-  const ok=a=>!a.minLvl||lvl>=a.minLvl;
-  (ab.base||[]).forEach(a=>{if(ok(a))out.push(a);});
-  const k=clsSubKey(ab,curSub());
-  if(k&&k!=='base')(ab[k]||[]).forEach(a=>{if(ok(a))out.push(a);});
-  const race=rcRace();if(race)out.push(...rcTrackers(race,lvl));
-  return out.filter(a=>a.sub||(a.uses!==null&&a.uses!==undefined));
+function restTrackers(){ // Paket F2: [{ab,lvl}] aller Klassen (Klassenstufe) und der Rasse (Gesamtstufe)
+  return allTrackers().filter(x=>x.ab.sub||(x.ab.uses!==null&&x.ab.uses!==undefined));
 }
 function restIds(ab,lvl){return ab.sub?ab.sub.filter(x=>!x.minLvl||lvl>=x.minLvl).map(x=>ab.id+'.'+x.k):[ab.id];}
 function shortRestPlan(){
-  const lvl=curLvl(),full=[],one=[],manual=[];
-  restTrackers().forEach(ab=>{
+  const full=[],one=[],manual=[];
+  restTrackers().forEach(({ab,lvl})=>{
     const ids=restIds(ab,lvl),used=ids.reduce((n,id)=>n+getAbUses(id),0),k=restKind(ab,lvl);
-    if(REST_MANUAL.has(ab.id)){if(used<abMaxUses(ab.uses,lvl))manual.push(ab);return;}
+    if(REST_MANUAL.has(ab.oid||ab.id)){if(used<abMaxUses(ab.uses,lvl))manual.push(ab);return;}
     if(!used)return;
     if(k==='short')full.push({ab,ids});else if(k==='one')one.push({ab,ids});
   });
@@ -7035,7 +7093,7 @@ function renderRest(){
     if(h&&h.used)li.push(`<li>Hit Dice<span>${h.left} → ${h.max}</span></li>`);
     syncSlotMax();
     const su=st.slotMax.reduce((a,_,i)=>a+slotUsedEff(i),0);if(su)li.push(`<li>Spell slots<span>+${su}</span></li>`);
-    restTrackers().forEach(ab=>{if(restIds(ab,lvl).some(id=>getAbUses(id)>0))li.push(`<li>${ab.name}<span>full</span></li>`);});
+    restTrackers().forEach(({ab,lvl})=>{if(restIds(ab,lvl).some(id=>getAbUses(id)>0))li.push(`<li>${ab.name}<span>full</span></li>`);});
     const fc=(st.mySpells||[]).filter(x=>(x.freeUsed||0)>0);if(fc.length)li.push(`<li>Free casts<span>${fc.map(x=>x.name).join(', ')}</span></li>`);
     if((st.dsS||[]).some(Boolean)||(st.dsF||[]).some(Boolean))li.push(`<li>Death Saves<span>reset</span></li>`);
     box.innerHTML=`<div class="ws-head">☀ Long Rest · 8 hours</div>${warn}<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Everything is already full.</div>`}</div>${fxRestHtml('long')}<div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doLongRest()">Finish Long Rest</button></div>`;
@@ -7991,6 +8049,8 @@ function _abLabel(id){
     try{if(typeof RACE_PICKS!=='undefined')Object.keys(RACE_PICKS).forEach(r=>(rcTrackers(r,20)||[]).forEach(add));}catch(e){}
   }
   if(_abNames[id])return _abNames[id];
+  const mc=/^([^@.]+)@([a-z0-9]+)(\..*)?$/.exec(id); // Paket F2: zweiter Zähler einer weiteren Klasse
+  if(mc){const C=charClasses().find(c=>mcSlug(c.cls)===mc[2]);return _abLabel(mc[1]+(mc[3]||''))+' ('+(C?C.cls:mc[2])+')';}
   const cu=/^rc_cu_\d+/.exec(id),t=cu&&((st.customRace||{}).tr||[]).find(x=>x.id===cu[0]);   // Paket K: Custom-Traits
   if(id==='rc_cu_sp')return 'Innate Spellcasting';
   if(/^rc_cu_sp\./.test(id)){const s=((st.customRace||{}).sp||[]).find(x=>crSlug((x.n||'').trim())===id.slice(9));return 'Innate Spellcasting · '+(s?s.n.trim():id.slice(9));}
@@ -8567,7 +8627,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03d';
+const APP_VERSION = 'willow-app-2026-10-03e';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
