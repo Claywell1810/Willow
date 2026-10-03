@@ -2196,6 +2196,49 @@ const REGRESSION = [
       w.mcDel(0); w.mcDel(0);
       return true;
     } },
+  { name: 'Paket F4: Multiclass – Zauberplätze (MC_SLOTS ab zwei Zauberklassen, sonst eine Tabelle), Pakt nach Warlock-Stufe, Klasse je Zauber mit eigenem Attribut, ★-Liste aller Klassen, Cantrips nach Gesamtstufe, Einzelklasse unverändert', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      const ev = s => w.eval(s);
+      if (ev("typeof MC_SLOTS") !== 'object' || ev("MC_SLOTS.rows.length") !== 20 || ev("MC_SLOTS.prog.Paladin") !== 'artificer') return 'MC_SLOTS fehlt/falsch';
+      ev("st.attrs={STR:10,DEX:14,CON:12,INT:16,WIS:13,CHA:15};st.mySpells=[]");
+      sel('Cleric', 'Life Domain (PHB)', 5); d.getElementById('spAttr').value = 'WIS'; w.calcSpell();
+      const one = ev("JSON.stringify(slotTableRow())");
+      if (one !== '[4,3,2,0,0,0,0,0,0]') return 'Einzelklasse Cleric 5: ' + one;
+      if (d.getElementById('spMcBox').style.display !== 'none') return 'Einzelklasse zeigt Zeilen je Klasse';
+      w.mcAdd(); w.mcSet(0, 'cls', 'Paladin'); w.mcLv(0, 2);
+      if (ev("mcSlotLvl()") !== 7 || ev("JSON.stringify(slotTableRow())") !== '[4,3,3,1,0,0,0,0,0]') return 'Cleric 5 / Paladin 3 ≠ Stufe 7: ' + ev("JSON.stringify(slotTableRow())");
+      if (!/Multiclass spellcaster · level 7/.test(d.getElementById('spSlots').textContent)) return 'Hinweis Multiclass-Plätze fehlt';
+      if (!/4th1/.test(d.getElementById('combatStats').textContent)) return 'Combat Stats ohne Multiclass-Plätze';
+      const box = d.getElementById('spMcBox').textContent;
+      if (!/Cleric 5WIS/.test(box) || !/Paladin 3CHA/.test(box) || !/Prepared 0\/4/.test(box)) return 'Zeilen je Klasse: ' + box;
+      ev("st.mySpells.push({name:'Divine Smite',grad:1,school:'Evocation',prep:true},{name:'Shield of Faith',grad:1,school:'Abjuration',prep:true},{name:'Sacred Flame',grad:0,school:'Evocation',prep:false})"); w.buildMySpells();
+      const ix = n => ev(`st.mySpells.findIndex(s=>s.name==='${n}')`);
+      if (ev(`spClsOf(st.mySpells[${ix('Divine Smite')}])`) !== 'Paladin' || ev(`spClsOf(st.mySpells[${ix('Shield of Faith')}])`) !== 'Cleric') return 'Zuordnung Klassenliste/Startklasse falsch';
+      if (ev(`spCalc(st.mySpells[${ix('Divine Smite')}]).ab`) !== 'CHA') return 'Paladin-Zauber nicht mit CHA';
+      const cw = ix('Shield of Faith');
+      if (!d.querySelector(`#msn_${cw} .ms-cls`)) return 'Klassenwahl bei Überschneidung fehlt';
+      if (d.querySelector(`#msn_${ix('Divine Smite')} .ms-cls`)) return 'Klassenwahl ohne Überschneidung';
+      w.setSpCls(cw, 'Paladin');
+      if (ev(`st.mySpells[${cw}].cls`) !== 'Paladin' || ev(`spCalc(st.mySpells[${cw}]).ab`) !== 'CHA') return 'Wahl Paladin wirkt nicht';
+      if (!/Prepared 2\/4/.test(d.getElementById('spMcBox').textContent)) return 'Prepared-Zahl Paladin nicht 2/4';
+      // Cantrips nach Gesamtstufe (Cleric 5 + Paladin 3 = 8 → Sacred Flame 2d8)
+      if (ev(`spOpts(st.mySpells[${ix('Sacred Flame')}],0)[0].spec`) !== '2d8') return 'Cantrip nicht nach Gesamtstufe';
+      w.mcDel(0); w.mcDel(0);
+      if (ev("JSON.stringify(slotTableRow())") !== one || ev(`spCalc(st.mySpells[${cw}]).ab`) !== 'WIS') return 'nach Entfernen nicht wie Einzelklasse';
+      // Warlock als weitere Klasse: Pakt nach Warlock-Stufe, Wizard-Tabelle allein (Pact Magic zählt nicht)
+      ev("st.mySpells=[]"); sel('Wizard', '', 3); d.getElementById('spAttr').value = 'INT';
+      w.mcAdd(); w.mcSet(0, 'cls', 'Warlock'); w.mcLv(0, 1);
+      if (ev("JSON.stringify(slotTableRow())") !== '[4,2,0,0,0,0,0,0,0]') return 'Wizard 3 / Warlock 2: Plätze nicht aus der Wizard-Tabelle';
+      const pk = ev("JSON.stringify(pactInfo())");
+      if (pk !== '{"id":"wl_pactslots","max":2,"used":0,"lv":1}') return 'Pakt nicht nach Warlock-Stufe 2: ' + pk;
+      if (ev("slMyVia(slMySpellCtx(),ZB_SPELLS.find(s=>s.name==='Hex'))") !== 'Warlock') return '★-Liste ohne Warlock-Zauber';
+      w.mcDel(0); w.mcDel(0);
+      // Eldritch Knight: ein Drittel abgerundet
+      sel('Fighter', 'Eldritch Knight (PHB)', 3); w.mcAdd(); w.mcSet(0, 'cls', 'Wizard'); w.mcLv(0, 1);
+      if (ev("mcSlotLvl()") !== 3 || ev("JSON.stringify(slotTableRow())") !== '[4,2,0,0,0,0,0,0,0]') return 'Eldritch Knight 3 / Wizard 2 ≠ Stufe 3';
+      w.mcDel(0); w.mcDel(0);
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
@@ -2253,7 +2296,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'FEATURE_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'FEATURE_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'MC_SLOTS', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;

@@ -406,6 +406,21 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .slvl.sl-adj{border-color:var(--gold2)}
 .slvl.sl-pact{border-color:var(--purple2)}
 .sl-none{grid-column:1/-1;font-size:var(--fs-sm);color:var(--text3);padding:6px 2px}
+/* Paket F4: Multiclass – Hinweis über den Plätzen, Spellcasting je Klasse, Klasse am Zauber */
+.sl-mc{grid-column:1/-1;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;color:var(--gold);padding:0 2px 2px}
+.sl-mc span{display:block;font-family:'Crimson Pro',serif;letter-spacing:0;color:var(--text3);font-size:var(--fs-sm)}
+.spmc-h{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin:0 2px 5px}
+.spmc-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;margin-bottom:6px}
+.spmc-n{min-width:0}
+.spmc-n b{font-family:'Cinzel',serif;font-weight:normal;color:var(--gold);font-size:var(--fs-sm)}
+.spmc-n .spmc-ab{margin-left:6px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2)}
+.spmc-c{font-size:var(--fs-sm);color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
+.spmc-over{color:var(--red)}
+.spmc-dc{text-align:center;color:var(--purple);font-family:'Cinzel',serif;font-size:var(--fs-md);line-height:1.1}
+.spmc-dc label{display:block;font-size:var(--fs-2xs);color:var(--text3);letter-spacing:1px}
+.spmc-atk{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-md);padding:6px 10px;min-height:40px;cursor:pointer;white-space:nowrap}
+.spmc-atk span{font-size:var(--fs-sm)}
+.sp-cls{color:var(--gold)}
 .rest-row{display:flex;gap:8px;align-items:stretch;margin-bottom:10px;flex-wrap:wrap}
 .hd-box{flex:1 1 150px;min-width:0}
 .hd-pips{display:flex;flex-wrap:wrap;align-items:center}
@@ -1274,6 +1289,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
             <div class="ifield"><label>Save DC</label><input id="spDC" type="number" value="8" readonly style="color:var(--purple)"></div>
             <div class="ifield"><label>Attack</label><button class="rl-spatk" onclick="rollSpellAtk()" aria-label="Roll spell attack"><input id="spAtk" value="+0" readonly tabindex="-1" style="color:var(--gold)"><span class="rl-dz">🎲</span></button></div>
           </div>
+          <div id="spMcBox" style="display:none"></div>
 
         <div class="sec sec-sub" style="display:flex;justify-content:space-between;align-items:center">
           <span>Spell Slots</span>
@@ -2511,7 +2527,8 @@ function buildWeapons(){
   });
 }
 
-function calcSpell(){
+function calcSpell(){calcSpell0();buildSpMc();} // Paket F4: Zeilen je Zauberklasse mitziehen
+function calcSpell0(){
   const a=document.getElementById('spAttr')?.value;if(!a)return;attrSync();
   const m=md(st.attrs[a]||10),p=prof();
   const dc=document.getElementById('spDC'),atk=document.getElementById('spAtk');
@@ -2529,13 +2546,29 @@ function curCls(){return (document.getElementById('cls')?.value||'').trim();}
 function curSub(){return document.getElementById('subcls')?.value||'';}
 function curLvl(){return Math.max(1,Math.min(20,parseInt(document.getElementById('lvl')?.value)||1));}
 function scTable(cls,sub){const t=typeof SUBCLASS_TABLES!=='undefined'&&SUBCLASS_TABLES[cls];const k=t&&clsSubKey(t,sub);return k?t[k]:null;}
-function slotTableRow(){
-  const cls=curCls(),lvl=curLvl();
+// Paket F4 (03.10.2026, REFERENZ B22): Zauberklasse = Plätze in der eigenen Tabelle bei ihrer Klassenstufe (Class Table, sonst
+// SUBCLASS_TABLES wie Eldritch Knight/Arcane Trickster) bzw. Pact Magic (MC_SLOTS.prog 'pact', eigene Plätze). Ab zwei Klassen mit
+// Spellcasting gilt MC_SLOTS (XPHB „Multiclass Spellcaster“) bei mcSlotLvl(), sonst die Tabelle der einen Zauberklasse (Einzelklasse wie bisher).
+function clsSlotRow(cls,sub,lvl){
   const r=((CLASS_TABLES[cls]||{}).rows||[]).find(x=>+x.lvl===lvl);
   let a=r&&r.slots?r.slots.slice(0,9):[];
-  if(!a.some(n=>n>0)){const t=scTable(cls,curSub()),q=t&&t.rows.find(x=>+x.lvl===lvl);if(q)a=q.slots.slice(0,9);}
+  if(!a.some(n=>n>0)){const t=scTable(cls,sub),q=t&&t.rows.find(x=>+x.lvl===lvl);if(q)a=q.slots.slice(0,9);}
   while(a.length<9)a.push(0);
   return a;
+}
+function mcProgOf(cls,sub){const M=typeof MC_SLOTS!=='undefined'?MC_SLOTS:null;if(!M)return '';
+  if(M.prog[cls])return M.prog[cls];const S=M.sub[cls],k=S&&clsSubKey(S,sub);return k?S[k].p:'';}
+// casterProgression (5e.tools) → Stufe für die Multiclass-Tabelle; artificer = XPHB Paladin/Ranger „half, round up“
+const MC_PROG_LVL={full:l=>l,artificer:l=>Math.ceil(l/2),'1/2':l=>Math.floor(l/2),'1/3':l=>Math.floor(l/3)};
+function spCasters(){ // [{cls,sub,lvl,start,p,row,sc,pact}] – sc = Spellcasting mit Plätzen, pact = Pact Magic
+  return charClasses().map(c=>{const p=mcProgOf(c.cls,c.sub),row=clsSlotRow(c.cls,c.sub,c.lvl);
+    return Object.assign({},c,{p,row,sc:p!=='pact'&&row.some(n=>n>0),pact:p==='pact'});}).filter(c=>c.sc||c.pact);
+}
+function mcSlotLvl(S){return (S||spCasters()).filter(c=>c.sc).reduce((a,c)=>a+(MC_PROG_LVL[c.p]?MC_PROG_LVL[c.p](c.lvl):0),0);}
+function slotTableRow(){
+  const S=spCasters().filter(c=>c.sc);
+  if(S.length>=2){const L=Math.min(20,mcSlotLvl(S)),r=L>0&&MC_SLOTS.rows[L-1];return r?r.slice(0,9):[0,0,0,0,0,0,0,0,0];}
+  return S.length?S[0].row:[0,0,0,0,0,0,0,0,0];
 }
 function slotAdjArr(){if(!Array.isArray(st.slotAdj)||st.slotAdj.length!==9)st.slotAdj=[0,0,0,0,0,0,0,0,0];return st.slotAdj;}
 function syncSlotMax(){
@@ -2546,8 +2579,8 @@ function syncSlotMax(){
 }
 function slotUsedEff(i){return Math.max(0,Math.min(+st.slotUsed[i]||0,st.slotMax[i]||0));}
 function pactInfo(){
-  if(curCls()!=='Warlock')return null;
-  const lvl=curLvl(),ab=(((CLASS_DATA.Warlock||{}).abilities||{}).base||[]).find(a=>a.id==='wl_pactslots');
+  const lvl=clsLvlOf('Warlock');if(!lvl)return null; // Paket F4: Warlock-Klassenstufe, auch als weitere Klasse
+  const ab=(((CLASS_DATA.Warlock||{}).abilities||{}).base||[]).find(a=>a.id==='wl_pactslots');
   if(!ab)return null;
   const max=abMaxUses(ab.uses,lvl),r=((CLASS_TABLES.Warlock||{}).rows||[]).find(x=>+x.lvl===lvl);
   return max>0?{id:ab.id,max,used:Math.min(getAbUses(ab.id),max),lv:Math.max(1,Math.min(9,parseInt(r&&r.slot)||1))}:null;
@@ -2570,7 +2603,10 @@ function buildSlots(){
       `<div class="sl-pips">${pips}</div>`+(a?`<div class="sl-hint">Table ${tb[i]} · ${a>0?'+':'−'}${Math.abs(a)}</div>`:'')+`</div>`;
   }
   if(!h)h=`<div class="sl-none">No spell slots at this level. Tap ✎ Adjust to add slots by hand.</div>`;
+  const SC=spCasters().filter(c=>c.sc); // Paket F4
+  if(SC.length>=2)h=`<div class="sl-mc">Multiclass spellcaster · level ${Math.min(20,mcSlotLvl(SC))}<span>${SC.map(c=>`${pkEsc(c.cls)} ${c.lvl}${c.p==='full'||!MC_PROG_LVL[c.p]?'':' → '+MC_PROG_LVL[c.p](c.lvl)}`).join(' + ')}</span></div>`+h;
   g.innerHTML=h;
+  buildSpMc();
 }
 // −/+ ändert nur die Korrektur st.slotAdj (Tabelle bleibt Basis)
 function chSlot(i,d){const a=slotAdjArr(),t=slotTableRow()[i],m=Math.max(0,Math.min(9,t+(+a[i]||0)+d));a[i]=m-t;syncSlotMax();buildSlots();autoSave()}
@@ -3038,7 +3074,7 @@ function apGrants(){
       if(!fp||lvl<(fp.l||1)||!(fp.o||[]).includes(v)) return; opt=v;}
     e.s.forEach(([l,n,o])=>{
       if(l>lvl||(o&&o!==opt)||out.has(n.toLowerCase())) return;
-      out.set(n.toLowerCase(),{n,v:e.v,info:(g==='base'?cls:e.v+(o?' · '+o:'')+' · '+cls)+' level '+l});
+      out.set(n.toLowerCase(),{n,v:e.v,info:(g==='base'?cls:e.v+(o?' · '+o:'')+' · '+cls)+' level '+l,c:cls});
     });
   });
   });
@@ -3241,7 +3277,7 @@ function apSync(){
   return JSON.stringify(L)!==before;
 }
 function buildMySpells(){
-  apSync();
+  apSync();buildSpMc(); // Paket F4: Prepared-Zahlen je Klasse
   const list=document.getElementById('mySpells');if(!list)return;list.innerHTML='';
   // 01.10.2026: Always Prepared nicht mehr eigener Block – mit Prepared nach Grad, je Grad zuerst, dann alphabetisch
   const prepRank=p=>p?0:1;
@@ -3272,7 +3308,7 @@ function buildMySpells(){
   }
   let lastPrep=null;let lastGrad=null;
   // Herkunft (01.10.2026): Zauber, die nur über Subklasse/Rasse/Background/Feature auf der eigenen Liste stehen, zeigen die Quelle (berechnet, nicht gespeichert)
-  const vctx=slMySpellCtx();
+  const vctx=slMySpellCtx(),mx=spMcX(); // Paket F4: Klasse je Zauber (mx.on = zwei oder mehr Zauberklassen)
   const gradLabel=g=>g===0?'Cantrips':g===1?'1st Level':g===2?'2nd Level':g===3?'3rd Level':g+'th Level';
   visible.forEach(sp=>{
     const i=sp._i;
@@ -3318,8 +3354,9 @@ function buildMySpells(){
     <div class="spell-main" onclick="togMySpellDetail(${i},this)" style="cursor:pointer">
       ${spellIconHtml(sp.name,dbSpell?dbSpell.zeit:'')}
       <div class="spell-l"><span class="spell-name">${sp.name}</span><div class="spell-tags">${[
+        mx.on?(c=>sp.auto===c?'':`<span class="sp-cls" title="Cast as ${pkEsc(c)} (${spAbOf(c,(mx.S.find(x=>x.cls===c)||{}).sub||'')||'—'})">${pkEsc(c)}</span>`)(spClsOf(sp,mx)):'',
         sp.auto?`<span>✦ <span class="ap-bdg" title="${pkEsc(sp.autoInfo||sp.auto)}">${pkEsc(sp.auto)}</span></span>`:sp.prep==='free'?`<span>✦ <span class="ap-bdg ap-man" title="Set by hand">Always prepared</span></span>`:'',
-        (()=>{if(sp.auto||!dbSpell||!vctx.avail)return'';const v=slMyVia(vctx,dbSpell);return v?`<span class="sp-via" title="On your spell list from ${pkEsc(v)}">✦ ${pkEsc(v)}</span>`:'';})(),
+        (()=>{if(sp.auto||!dbSpell||!vctx.avail)return'';const v=slMyVia(vctx,dbSpell);return v&&!(mx.on&&mx.S.some(c=>c.cls===v))?`<span class="sp-via" title="On your spell list from ${pkEsc(v)}">✦ ${pkEsc(v)}</span>`:'';})(),
         `<span class="sp-badge sp-info">${ctShort(dbSpell?dbSpell.zeit:'')}</span>`,
         /ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<span class="sp-badge sp-warn">Ritual</span>`:'',
         isConc?(concIsActive?`<span class="sp-conc-txt active" onclick="event.stopPropagation();togConc(${i})" title="End concentration">Concentrating ✕</span>`:`<span class="sp-conc-txt" title="Concentration">Concentration</span>`):''
@@ -3329,6 +3366,7 @@ function buildMySpells(){
     </div>
     <div class="spell-notes" id="msn_${i}" style="display:none">
       ${metaHtml}${descHtml}${higherHtml}${dbSpell?spellStatBlocks(dbSpell.name):''}
+      ${mx.on&&!sp.auto?(C=>C.length>1?`<div class="ms-prep ms-cls"><span class="ms-prep-l">Class</span>${C.map(c=>`<button class="${spClsOf(sp,mx)===c?'on':''}" onclick="event.stopPropagation();setSpCls(${i},'${c}')">${c}</button>`).join('')}</div>`:'')(spCands(sp,mx)):''}
       ${sp.auto?'':`<div class="ms-prep"><span class="ms-prep-l">Prepared</span>${[[true,'Prepared'],['free','Always'],[false,'Not prepared']].map(([v,l])=>`<button class="${(sp.prep||false)===v?'on':''}" onclick="event.stopPropagation();setPrep(${i},${JSON.stringify(v)})">${l}</button>`).join('')}${!sp.prep&&/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<button class="ms-rit" onclick="event.stopPropagation();openCast(${i})">Cast as Ritual</button>`:''}</div>`}
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px">
         <span style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--green);text-transform:uppercase">Free casts</span>
@@ -3345,6 +3383,9 @@ function buildMySpells(){
   });
 }
 function msUnprepClosed(){return !!(st.abGrpClosed||{}).ms_unprep;}
+// Paket F4: Klasse eines Zaubers wählen (nur bei Überschneidung der Listen, E4); gespeichert in st.mySpells[i].cls
+function setSpCls(i,c){const sp=st.mySpells[i];if(!sp)return;sp.cls=c;buildMySpells();autoSave();
+  const n=document.getElementById('msn_'+i);if(n)n.style.display='block';}
 function togMsUnprep(){st.abGrpClosed=st.abGrpClosed||{};st.abGrpClosed.ms_unprep=!msUnprepClosed();buildMySpells();autoSave();}
 function togMySpellDetail(i,el){
   const n=document.getElementById('msn_'+i);
@@ -3774,11 +3815,8 @@ const FEAT_SPELLS={"Aberrant Dragonmark":[{"o":null,"s":[],"c":[{"k":"c0","l":1,
 // SUBCLASS_SPELLS-END
 
 // „Meine Klasse“: eigene Liste (CLASS_SPELL_MAP) + Zusatzzauber (CLASS_SPELL_EXTRA ab Stufe, SUBCLASS_SPELLS der gewählten Subklasse)
-function slMySpellCtx(){
-  const cls=document.getElementById('cls')?.value||'';
-  const sub=document.getElementById('subcls')?.value||'';
-  const lvl=parseInt(document.getElementById('lvl')?.value)||1;
-  const base=CLASS_SPELL_MAP[cls]||[];
+// Paket F4: Zusätze einer Klasse mit ihrer Klassenstufe (Startklasse und weitere Klassen)
+function slClsCtx(cls,sub,lvl){
   const fixed=[],filt=[];
   (CLASS_SPELL_EXTRA[cls]||[]).forEach(e=>{if(lvl>=(e.lvl||1))(e.spells?fixed:filt).push(e);});
   const sd=SUBCLASS_SPELLS[cls]||{};
@@ -3788,11 +3826,26 @@ function slMySpellCtx(){
     if(e.spells)fixed.push({via,spells:e.spells});
     (e.filters||[]).forEach(f=>filt.push(Object.assign({via},f)));
   }
-  if(typeof rcSpells==='function')fixed.push(...rcSpells(lvl)); // Paket C4: Rassen-Zauber (Light Bearer, Lineage/Legacy ab Stufe)
+  return {base:CLASS_SPELL_MAP[cls]||[],fixed,filt};
+}
+function slMySpellCtx(){
+  const cls=document.getElementById('cls')?.value||'';
+  const sub=document.getElementById('subcls')?.value||'';
+  const lvl=parseInt(document.getElementById('lvl')?.value)||1;
+  const c0=slClsCtx(cls,sub,lvl),base=c0.base,fixed=c0.fixed,filt=c0.filt;
+  // Paket F4: weitere Klassen – Liste nur mit Spellcasting/Pact Magic (Fighter ohne Eldritch Knight nicht), Herkunft = Klassenname
+  const more=[];let lbl=cls;
+  if(isMulti()){const S=spCasters(),nm=base.length||fixed.length||filt.length?[cls]:[];
+    charClasses().filter(c=>!c.start).forEach(c=>{const x=slClsCtx(c.cls,c.sub,c.lvl),sc=S.some(y=>y.cls===c.cls);
+      fixed.push(...x.fixed);filt.push(...x.filt);
+      if(sc&&x.base.length)more.push({via:c.cls,base:x.base});
+      if((sc&&x.base.length)||x.fixed.length||x.filt.length)nm.push(c.cls);});
+    if(nm.length)lbl=nm.join(' / ');}
+  if(typeof rcSpells==='function')fixed.push(...rcSpells(totLvl())); // Paket C4: Rassen-Zauber (Light Bearer, Lineage/Legacy ab Stufe); F4: Gesamtstufe
   // Background mit Zauber-Tabelle (SCC/GGR, 5e.tools additionalSpells.expanded): nur mit eigener Zauberliste (Spellcasting/Pact Magic);
   // late = erst nach der eigenen Klassenliste geprüft (Entangle bleibt beim Druid „eigene Liste“, Vortex Warp → „Quandrix Student“)
-  const late=base.length&&st.bg&&typeof BG_SPELLS!=='undefined'&&BG_SPELLS[st.bg]?[{via:st.bg,spells:BG_SPELLS[st.bg]}]:[];
-  return {cls,base,fixed,filt,late,avail:!!(base.length||fixed.length||filt.length)};
+  const late=(base.length||more.length)&&st.bg&&typeof BG_SPELLS!=='undefined'&&BG_SPELLS[st.bg]?[{via:st.bg,spells:BG_SPELLS[st.bg]}]:[];
+  return {cls:lbl,base,more,fixed,filt,late,avail:!!(base.length||more.length||fixed.length||filt.length)};
 }
 function slFilterHit(f,s){
   return (!f.grad||f.grad.includes(s.grad))&&(!f.cls||(s.classes||[]).some(c=>f.cls.includes(c)))
@@ -3802,6 +3855,7 @@ function slFilterHit(f,s){
 function slMyVia(ctx,s){
   for(const e of ctx.fixed)if(e.spells.includes(s.name))return e.via;
   if((s.classes||[]).some(c=>ctx.base.includes(c)))return '';
+  for(const m of ctx.more||[])if((s.classes||[]).some(c=>m.base.includes(c)))return m.via; // Paket F4
   for(const e of ctx.late||[])if(e.spells.includes(s.name))return e.via;
   for(const e of ctx.filt)if(slFilterHit(e,s))return e.via;
   return null;
@@ -5514,6 +5568,9 @@ const SUBCLASS_TABLES={"Fighter":{"Eldritch Knight":{"src":"XPHB","extra":[{"k":
 // CLASS_MC_GAINS-START (tools/mc_convert.py, 5e.tools multiclassing.proficienciesGained XPHB; Paket F3 03.10.2026)
 const CLASS_MC_GAINS={"Barbarian":{"w":["Martial weapons"],"a":["Shields"],"t":[],"sk":null,"src":"XPHB"},"Bard":{"w":[],"a":["Light armor"],"t":["Choose one Musical Instrument"],"sk":{"n":1,"f":["Athletics","Acrobatics","Sleight of Hand","Stealth","Arcana","History","Investigation","Nature","Religion","Animal Handling","Insight","Medicine","Perception","Survival","Deception","Intimidation","Performance","Persuasion"]},"src":"XPHB"},"Cleric":{"w":[],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Druid":{"w":[],"a":["Light armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Fighter":{"w":["Martial weapons"],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Monk":{"w":[],"a":[],"t":[],"sk":null,"src":"XPHB"},"Paladin":{"w":["Martial weapons"],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Ranger":{"w":["Martial weapons"],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":{"n":1,"f":["Animal Handling","Athletics","Insight","Investigation","Nature","Perception","Stealth","Survival"]},"src":"XPHB"},"Rogue":{"w":[],"a":["Light armor"],"t":["Thieves' Tools"],"sk":{"n":1,"f":["Acrobatics","Athletics","Deception","Insight","Intimidation","Investigation","Perception","Persuasion","Sleight of Hand","Stealth"]},"src":"XPHB"},"Sorcerer":{"w":[],"a":[],"t":[],"sk":null,"src":"XPHB"},"Warlock":{"w":[],"a":["Light armor"],"t":[],"sk":null,"src":"XPHB"},"Wizard":{"w":[],"a":[],"t":[],"sk":null,"src":"XPHB"}};
 // CLASS_MC_GAINS-END
+// MC_SLOTS-START (tools/mc_slots.py, 5e.tools book-xphb „Multiclass Spellcaster“ + casterProgression; Paket F4 03.10.2026)
+const MC_SLOTS={"rows":[[2,0,0,0,0,0,0,0,0],[3,0,0,0,0,0,0,0,0],[4,2,0,0,0,0,0,0,0],[4,3,0,0,0,0,0,0,0],[4,3,2,0,0,0,0,0,0],[4,3,3,0,0,0,0,0,0],[4,3,3,1,0,0,0,0,0],[4,3,3,2,0,0,0,0,0],[4,3,3,3,1,0,0,0,0],[4,3,3,3,2,0,0,0,0],[4,3,3,3,2,1,0,0,0],[4,3,3,3,2,1,0,0,0],[4,3,3,3,2,1,1,0,0],[4,3,3,3,2,1,1,0,0],[4,3,3,3,2,1,1,1,0],[4,3,3,3,2,1,1,1,0],[4,3,3,3,2,1,1,1,1],[4,3,3,3,3,1,1,1,1],[4,3,3,3,3,2,1,1,1],[4,3,3,3,3,2,2,1,1]],"prog":{"Bard":"full","Cleric":"full","Druid":"full","Paladin":"artificer","Ranger":"artificer","Sorcerer":"full","Warlock":"pact","Wizard":"full"},"sub":{"Fighter":{"Eldritch Knight":{"p":"1/3","ab":"INT"}},"Monk":{"Warrior of the Mystic Arts":{"p":"1/3","ab":"WIS"}},"Rogue":{"Arcane Trickster":{"p":"1/3","ab":"INT"}}},"src":"XPHB"};
+// MC_SLOTS-END
 
 const CLASS_CORE_TRAITS = {
   "Warlock": {
@@ -6180,7 +6237,7 @@ function buildMcBox(){
   if(M.length) h+='<div class="pk-note">Saving throws come from the first class only (PHB 2024).</div>';
   box.innerHTML=h;
 }
-function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();buildClassTable();buildAbilities();buildCoreTraits();buildSaves();buildSkills();autoSave();} // Paket F3: Skills/Saves/Core Traits // Paket F2: Actions/Class Table
+function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();buildClassTable();buildAbilities();buildCoreTraits();buildSaves();buildSkills();buildMySpells();autoSave();} // Paket F4: My Spells (Klasse je Zauber) // Paket F3: Skills/Saves/Core Traits // Paket F2: Actions/Class Table
 function mcAdd(){
   if(!curCls()||totLvl()>=20) return;
   if(!Array.isArray(st.mc)) st.mc=[];
@@ -6818,7 +6875,7 @@ function buildCombatStats(cls,subcls,lvl){
   el.style.display='';
 }
 // Paket F2: Multiclass – PB aus der Gesamtstufe, beste Unarmored AC aller Klassen, Spalten je Klasse mit Klassenstufe;
-// Zauberplätze bis F4 wie bisher aus der Startklasse
+// Zauberplätze seit F4 aus slotTableRow() (Multiclass-Tabelle bzw. die eine Zauberklasse)
 function buildCombatStatsMc(el){
   const C=charClasses(),T=totLvl(),pb=pbOfLvl(T);
   const chip=(l,v,c,tt)=>`<div class="cst-chip${c?' '+c:''}"${tt?` title="${tt}"`:''}><div class="cst-l">${l}</div><div class="cst-v">${v}</div></div>`;
@@ -6833,8 +6890,7 @@ function buildCombatStatsMc(el){
     if(g)per+=`<div class="cst-cls">${fdEsc(c.cls)} ${c.lvl}</div><div class="cst-grid">${g}</div>`;
   });
   if(best)h+=chip('Unarmored AC',best.ac,'cst-ac',best.name);
-  const t0=CLASS_TABLES[C[0].cls],r0=t0&&(t0.rows||[]).find(r=>+r.lvl===C[0].lvl),sx0=scTable(C[0].cls,C[0].sub),sr0=sx0&&sx0.rows.find(r=>+r.lvl===C[0].lvl);
-  const sl=(r0?((r0.slots||[]).some(n=>n>0)||!sr0?(r0.slots||[]):sr0.slots):[]).map((n,i)=>n>0?`<span class="cst-slot" title="${n} slots of level ${i+1}"><b>${['1st','2nd','3rd'][i]||(i+1)+'th'}</b>${n}</span>`:'').join('');
+  const sl=slotTableRow().map((n,i)=>n>0?`<span class="cst-slot" title="${n} slots of level ${i+1}"><b>${['1st','2nd','3rd'][i]||(i+1)+'th'}</b>${n}</span>`:'').join('');
   const closed=abGrpIsClosed('stats');
   el.innerHTML=`<div class="cst-head${closed?' closed':''}" onclick="togAbGrp('stats')"><span>Combat Stats · Level ${T}</span><span class="cst-chev">${closed?'▸':'▾'}</span></div>`+
     `<div class="cst-body"${closed?' style="display:none"':''}><div class="cst-grid">${h}</div>${per}`+
@@ -7155,12 +7211,12 @@ function doLongRest(){
 // Konzentrations-Zauber setzen die Markierung (st.concActive); Log-Eintrag.
 function castOptions(i){
   const sp=st.mySpells[i];if(!sp)return [];
-  const db=ZB_SPELLS.find(x=>x.name===sp.name),g=+sp.grad||0,lvl=curLvl(),out=[];
+  const db=ZB_SPELLS.find(x=>x.name===sp.name),g=+sp.grad||0,lvl=clsLvlOf('Warlock'),out=[]; // Paket F4: Warlock-Klassenstufe
   if(g===0)return [{k:'cantrip',l:'Cast cantrip · no slot'}];
   syncSlotMax();
   for(let j=g-1;j<9;j++){const tot=st.slotMax[j];if(!tot)continue;const n=tot-slotUsedEff(j);out.push({k:'s'+j,l:`${SLOT_ORD[j]}-level slot`,n,dis:n<=0});}
   const pk=pactInfo();if(pk&&g<=pk.lv){const n=pk.max-pk.used;out.push({k:'pact',l:`Pact slot (${SLOT_ORD[pk.lv-1]} level)`,n,dis:n<=0});}
-  if(curCls()==='Warlock'&&g>=6){
+  if(lvl&&g>=6&&spClsOf(sp)==='Warlock'){ // Paket F4: Mystic Arcanum nur für Warlock-Zauber
     const ab=(((CLASS_DATA.Warlock||{}).abilities||{}).base||[]).find(a=>a.id==='wl_mysticarcanum');
     const x=ab&&(!ab.minLvl||lvl>=ab.minLvl)&&(ab.sub||[]).find(y=>y.k===String(g)&&(!y.minLvl||lvl>=y.minLvl));
     if(x){const id=ab.id+'.'+x.k,max=abMaxUses(x.uses!==undefined?x.uses:ab.uses,lvl),n=max-Math.min(getAbUses(id),max);out.push({k:'arc',id,l:`Mystic Arcanum (${SLOT_ORD[g-1]} level)`,n,dis:n<=0});}
@@ -8277,7 +8333,7 @@ function _diffSnaps(a,b){
   done.add('raceNotes');_logTxtOut(out,'raceNotes',LOG_TEXTS.raceNotes,a.raceNotes,b.raceNotes);
   done.add('mySpells');
   const prepS=v=>(v.prep==='free'||v.prep2)?'Always Prepared':(v.prep?'Prepared':'Unprepared');
-  _logList(out,a.mySpells,b.mySpells,'Spell',x=>x&&x.name,{skip:['prep','prep2','freeMax','freeUsed','auto','autoInfo','autoNew','autoPrev'],name:x=>x&&(x.name+(x.auto?' (✦ '+x.auto+')':'')),txt:['notes'],fl:{notes:'Note',grad:'Level',school:'School'},
+  _logList(out,a.mySpells,b.mySpells,'Spell',x=>x&&x.name,{skip:['prep','prep2','freeMax','freeUsed','auto','autoInfo','autoNew','autoPrev'],name:x=>x&&(x.name+(x.auto?' (✦ '+x.auto+')':'')),txt:['notes'],fl:{notes:'Note',grad:'Level',school:'School',cls:'Class'},
     extra:(y,x)=>{
       if(prepS(y)!==prepS(x)) out.push(`Spell "${x.name}": ${prepS(y)} → ${prepS(x)}`);
       if((y.freeMax??0)!==(x.freeMax??0)) out.push(`Spell "${x.name}" Free Casts max: ${y.freeMax??0} → ${x.freeMax??0}`);
@@ -8659,7 +8715,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03f';
+const APP_VERSION = 'willow-app-2026-10-03g';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -9065,7 +9121,51 @@ function rlWpnBtns(fn,i,atk,dmg){const P=rlParse(dmg);
 // (Vorgabe: zuletzt gewirkter Grad sp.castLv). Angriff/DC aus Spellcasting (calcSpell), Charakterstufe = curLvl().
 let _spr=null;
 function spRoll(n){return (typeof SPELL_ROLLS!=='undefined'&&SPELL_ROLLS[n])||null;}
-function spCalc(){calcSpell();attrSync();const ab=document.getElementById('spAttr')?.value||'';
+// ── Paket F4 (03.10.2026, REFERENZ B22): Zauber je Klasse ──────────────────────────────────────────────────────────
+// Zauberklassen = spCasters() (Spellcasting mit Plätzen oder Pact Magic). Klasse eines Zaubers (spClsOf, E4): gewählt
+// (sp.cls, nur bei Überschneidung) > Always Prepared (apGrants c) > Klassenliste (Startklasse zuerst) > Startklasse.
+// Attribut: Startklasse = Feld „Ability“ (spAttr), sonst aus den Daten (CLASS_CORE_TRAITS, Eldritch Knight/Arcane Trickster MC_SLOTS.sub).
+function spAbOf(cls,sub){
+  const t=CLASS_CORE_TRAITS[cls],n=t&&String(t.spellcastingAbility||'').trim(),a=n&&ATTRS.find(x=>x.l===n);if(a)return a.k;
+  const S=typeof MC_SLOTS!=='undefined'&&MC_SLOTS.sub[cls],k=S&&clsSubKey(S,sub);return k?S[k].ab:'';}
+function spMcX(){const S=spCasters();return {S,on:S.length>=2,ap:null,cx:{}};}
+function spCands(sp,X){const db=ZB_SPELLS.find(x=>x.name===sp.name);if(!db)return [];
+  return X.S.filter(c=>{const x=X.cx[c.cls]||(X.cx[c.cls]=slClsCtx(c.cls,c.sub,c.lvl));
+    return x.fixed.some(e=>e.spells.includes(db.name))||(db.classes||[]).some(k=>x.base.includes(k))||x.filt.some(e=>slFilterHit(e,db));}).map(c=>c.cls);}
+function spClsOf(sp,X){
+  X=X||spMcX();const start=curCls();
+  if(!X.on)return X.S.length===1&&!X.S[0].start?X.S[0].cls:start;
+  const has=c=>X.S.some(x=>x.cls===c);
+  if(sp.cls&&has(sp.cls))return sp.cls;
+  if(sp.auto){X.ap=X.ap||apGrants();const g=X.ap.get(String(sp.name||'').toLowerCase());if(g&&g.c&&has(g.c))return g.c;}
+  const C=spCands(sp,X);
+  if(C.length)return C.includes(start)?start:C[0];
+  return has(start)?start:X.S[0].cls;
+}
+function spCalcCls(cls){const c=charClasses().find(x=>x.cls===cls);
+  if(c&&c.start&&document.getElementById('spAttr')?.value)return spCalc();
+  attrSync();const ab=c?spAbOf(c.cls,c.sub):'',mod=ab?md(st.attrs[ab]||10):0,p=prof();
+  return {ab,mod,atk:p+mod,dc:8+p+mod};}
+function rollSpellAtkCls(cls){const C=spCalcCls(cls);rollD20({k:'atk',ab:C.ab,l:'Spell Attack ('+cls+')',mod:C.atk});}
+function spClsCounts(c,X){ // Class Table der Klasse (Prepared/Cantrips) und eigene Zauber dieser Klasse (ohne Always Prepared)
+  const t=CLASS_TABLES[c.cls],r=t&&(t.rows||[]).find(x=>+x.lvl===c.lvl),sx=scTable(c.cls,c.sub),sr=sx&&sx.rows.find(x=>+x.lvl===c.lvl);
+  const tv=re=>{for(const [T,R] of [[t,r],[sx,sr]]){if(!T||!R)continue;const e=(T.extra||[]).find(x=>re.test(String(x.l)));if(e){const v=parseInt(R[e.k]);if(!isNaN(v))return v;}}return null;};
+  let pc=0,cc=0;(st.mySpells||[]).forEach(sp=>{if(sp.auto||spClsOf(sp,X)!==c.cls)return;if(+sp.grad>0){if(sp.prep===true)pc++;}else cc++;});
+  return {prep:tv(/prepared/i),cant:tv(/^cantrips/i),pc,cc};
+}
+function buildSpMc(){const el=document.getElementById('spMcBox');if(!el)return;
+  const X=spMcX();
+  if(!isMulti()||!X.S.length||(X.S.length===1&&X.S[0].start)){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='';
+  const n2=(a,b)=>`<span class="${a>b?'spmc-over':''}">${a}/${b}</span>`;
+  el.innerHTML=`<div class="spmc-h">By class</div>`+X.S.map(c=>{const C=spCalcCls(c.cls),n=spClsCounts(c,X);
+    const cnt=[n.cant!==null?'Cantrips '+n2(n.cc,n.cant):'',n.prep!==null?'Prepared '+n2(n.pc,n.prep):'',c.pact?'Pact Magic':''].filter(Boolean).join(' · ');
+    return `<div class="spmc-row"><div class="spmc-n"><b>${pkEsc(c.cls)} ${c.lvl}</b><span class="spmc-ab">${C.ab||'—'}</span>${cnt?`<div class="spmc-c">${cnt}</div>`:''}</div>`+
+      `<div class="spmc-dc"><label>DC</label>${C.dc}</div><button class="spmc-atk" onclick="rollSpellAtkCls('${c.cls}')" aria-label="Roll spell attack ${pkEsc(c.cls)}">${fmt(C.atk)} <span>🎲</span></button></div>`;}).join('');
+}
+function spCalc(sp){ // Paket F4: mit Zauber → Attribut seiner Klasse (Multiclass), sonst Feld „Ability“ (Startklasse)
+  if(sp&&isMulti()){const c=spClsOf(sp);if(c&&c!==curCls())return spCalcCls(c);}
+  calcSpell0();attrSync();const ab=document.getElementById('spAttr')?.value||'';
   return {ab,mod:ab?md(st.attrs[ab]||10):0,atk:parseInt(document.getElementById('spAtk')?.value)||0,dc:parseInt(document.getElementById('spDC')?.value)||0};}
 function spDice(o,lv,cl,mod){ // Würfel der Option bei Platz-Grad lv bzw. Charakterstufe cl (Cantrips) → Text oder null
   let d=String(o.d||'');
@@ -9078,7 +9178,7 @@ function spDice(o,lv,cl,mod){ // Würfel der Option bei Platz-Grad lv bzw. Chara
   if(!P.d.length&&!P.k)return null;
   return rlSpecTxt(P).replace(/^\+/,'');
 }
-function spOpts(sp,lv){const R=spRoll(sp.name),C=spCalc(),cl=curLvl();
+function spOpts(sp,lv){const R=spRoll(sp.name),C=spCalc(sp),cl=totLvl(); // Paket F4: Cantrips nach Gesamtstufe
   return ((R&&R.o)||[]).map((o,j)=>({o,j,spec:spDice(o,lv,cl,C.mod),from:o.cs?Math.min(...Object.keys(o.cs).map(Number)):0}));}
 function spSaveTxt(R,dc,short){return R&&R.s?`${short?'':'Target: '}${R.s.join(' or ')} save · DC ${dc}${R.h?' · half on success':''}`:'';}
 function spAfterCast(i,lv,how){
@@ -9093,7 +9193,7 @@ function openSpellRoll(i,lv,how){const sp=st.mySpells[i];if(!sp)return;
 function spSetLv(lv){if(!_spr)return;_spr.lv=lv;const sp=st.mySpells[_spr.i];if(sp)sp.castLv=lv;renderRest();}
 function renderSpellRoll(box){
   const S=_spr,sp=S&&st.mySpells[S.i];if(!sp){closeRest();return;}
-  const R=spRoll(sp.name)||{},g=+sp.grad||0,C=spCalc(),opts=spOpts(sp,S.lv),i=S.i;
+  const R=spRoll(sp.name)||{},g=+sp.grad||0,C=spCalc(sp),opts=spOpts(sp,S.lv),i=S.i;
   const scales=(R.o||[]).some(o=>o.up||o.upk);
   const lvRow=!S.cast&&g>0&&scales?`<div class="spr-lv">${Array.from({length:10-g},(_,k)=>g+k).map(l=>`<button class="pk-chip${l===S.lv?' on':''}" onclick="spSetLv(${l})">${SLOT_ORD[l-1]}</button>`).join('')}</div>`:'';
   const info=[R.a?`Spell attack <b>${fmt(C.atk)}</b> (${R.a==='M'?'melee':'ranged'})`:'',R.s?pkEsc(spSaveTxt(R,C.dc)).replace(/DC (\d+)/,'DC <b>$1</b>'):''].filter(Boolean);
@@ -9108,7 +9208,7 @@ function renderSpellRoll(box){
 function spGo(j,i,lv){ // j = 'a' (Angriff, verknüpft mit der ersten Schadens-Option) oder Index der Option
   if(i===undefined){if(!_spr)return;i=_spr.i;lv=_spr.lv;}
   const sp=st.mySpells[i],R=sp&&spRoll(sp.name);if(!R)return;
-  const C=spCalc(),opts=spOpts(sp,lv),n=sp.name+(+sp.grad>0&&lv>+sp.grad?` (${SLOT_ORD[lv-1]})`:'');
+  const C=spCalc(sp),opts=spOpts(sp,lv),n=sp.name+(+sp.grad>0&&lv>+sp.grad?` (${SLOT_ORD[lv-1]})`:'');
   const multi=opts.filter(y=>y.spec).length>1,lb=o=>multi?`${n} · ${o.l}`:n,ty=o=>multi&&o.l.includes(o.t)?'':o.t||''; // Titel ohne Doppelung
   closeRest();
   if(j==='a'){const d=opts.find(x=>x.spec&&x.o.k==='dmg');

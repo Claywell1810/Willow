@@ -2,7 +2,7 @@
 # setup.sh – Sitzungsstart für Willow in einem Aufruf (seit 28.09.2026, Anleitung A4/B1a)
 # Aufruf (aus dem Ordner ÜBER dem Klon, meist /home/claude):
 #   bash willow/tools/setup.sh              # nur Arbeitskopie + jsdom (UI-/Code-Arbeit)
-#   bash willow/tools/setup.sh klassen      # + 12 class-*.json, optionalfeatures/feats/items.json nach src/
+#   bash willow/tools/setup.sh klassen      # + 12 class-*.json, optionalfeatures/feats/items.json, book-xphb.json nach src/
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium für BST_DATA und SPELL_STATBLOCKS (+ spells)
 #   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
@@ -36,8 +36,8 @@ if has klassen zauber bestien rassen effekte; then
 fi
 if has klassen; then
   for k in barbarian bard cleric druid fighter monk paladin ranger rogue sorcerer warlock wizard; do get "class/class-$k.json"; done
-  get optionalfeatures.json; get feats.json; get items.json
-  echo "   Klassen-Quellen in src/ (12 Klassen + optionalfeatures/feats/items)"
+  get optionalfeatures.json; get feats.json; get items.json; get book/book-xphb.json
+  echo "   Klassen-Quellen in src/ (12 Klassen + optionalfeatures/feats/items + book-xphb für mc_slots.py)"
 fi
 if has zauber bestien; then
   get spells/index.json; get generated/gendata-spell-source-lookup.json
