@@ -1829,6 +1829,13 @@ const pkEsc=x=>String(x).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/<
 function pkGet(k){const v=st.picks&&st.picks[k];return Array.isArray(v)?v:[];}
 function pkValid(k,opts,n){const r=[];pkGet(k).forEach(x=>{if(opts.includes(x)&&!r.includes(x)&&r.length<n)r.push(x);});return r;}
 function pkKeyCls(cls){return 'cls:'+cls+':skills';}
+// Paket F3 (03.10.2026): weitere Klassen geben nur CLASS_MC_GAINS (XPHB multiclassing.proficienciesGained), Saves nur die Startklasse
+function pkKeyMc(cls){return 'cls:'+cls+':mc';}
+function mcGainOf(cls){return (typeof CLASS_MC_GAINS!=='undefined'&&CLASS_MC_GAINS[cls])||null;}
+function mcGainSkTxt(cls,m){return m.sk.n+(m.sk.f.length>=SKILLS.length?' skill of your choice':` skill from the ${cls} list`);}
+function mcGainText(cls){const m=mcGainOf(cls);if(!m)return '';const r=[...m.w,...m.a,...m.t];if(m.sk)r.push(mcGainSkTxt(cls,m));return r.length?r.join(', '):'None';}
+function mcGrants(g){charClasses().filter(c=>!c.start).forEach(c=>{const m=mcGainOf(c.cls);
+  if(m&&m.sk)pkValid(pkKeyMc(c.cls),m.sk.f,m.sk.n).forEach(x=>g.push({art:'skill',ziel:x,stufe:'p',quelle:c.cls,mc:1}));});}
 function pkKeyBg(bg,i){return 'bg:'+bg+':skills'+(i?':'+i:'');}
 function pkKeyBgAb(bg){return 'bg:'+bg+':ability';}
 // BG_DATA[].s: feste Skills + „Wähle N: a, b, …“ („beliebig“ = alle 18, 5e.tools any)
@@ -1868,6 +1875,7 @@ function calcGrants(){
   }
   rcGrants(g);
   faGrants(g);
+  mcGrants(g);
   // Doppelte Skills: PHB 2014 erlaubt statt doppelter Proficiency eine andere derselben Art → Ersatzwahl dup:<Skill>,
   // aber nur bei 2014-Backgrounds (ohne Attributswahl). PHB 2024 kennt die Regel nicht → nur Hinweis (Entscheidung Simon 28.09.2026)
   const legacy=(!!bg&&bgAbOpts(bg).length!==3)||rcLegacy();
@@ -1879,7 +1887,7 @@ function calcGrants(){
     r.forEach(x=>{add('skill',x,'p','Replacement');have.add(x);});
     g.dups.push({skill:k,quellen:src[k],opts,key:'dup:'+k,legacy});
   });
-  fpGrants(g,cls);
+  fpGrants(g,charClasses().map(c=>c.cls)); // Paket F3: Feature-Wahlen aller Klassen nach Klassenstufe
   return g;
 }
 function grantLvl(G,art,ziel){let r='';G.forEach(x=>{if(x.art===art&&x.ziel===ziel&&PK_RANK[x.stufe]>PK_RANK[r])r=x.stufe;});return r;}
@@ -1914,7 +1922,7 @@ function pkAb(el){
   }
   st.picks[k]=a;pkRefresh();
 }
-function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildRaceLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildAbilities();}
+function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildRaceLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildMcLore();buildAbilities();}
 function bgAbilityUI(bg){
   const opts=bgAbOpts(bg);if(opts.length!==3)return '';
   const k=pkEsc(pkKeyBgAb(bg.n)),{mode,list}=bgAbility(bg),done=mode==='+1/+1/+1'||list.length===2;
@@ -1935,7 +1943,10 @@ function pkOpen(){
     bgSkillSpec(bg).wahl.forEach((w,i)=>{const c=pkValid(pkKeyBg(bg.n,i),w.from,w.n).length;if(c<w.n)r.push({wo:'bg',txt:`Background skills ${c}/${w.n}`});});
     const ab=bgAbility(bg);if(bgAbOpts(bg).length===3&&!(ab.mode==='+1/+1/+1'||ab.list.length===2))r.push({wo:'bg',txt:'Background ability scores'});
   }
-  fpOpen(cls).forEach(x=>r.push(x));
+  charClasses().forEach(c=>{
+    if(!c.start){const m=mcGainOf(c.cls);if(m&&m.sk){const n=pkValid(pkKeyMc(c.cls),m.sk.f,m.sk.n).length;if(n<m.sk.n)r.push({wo:'mc',c:c.cls,txt:`${c.cls} skill ${n}/${m.sk.n}`});}}
+    fpOpen(c.cls).forEach(x=>r.push(c.start?x:Object.assign({},x,{c:c.cls,txt:x.txt+' ('+c.cls+')'})));
+  });
   rcOpen().forEach(x=>r.push(x));
   return r;
 }
@@ -2333,11 +2344,11 @@ function fpFrom(e,cls){
 function fpExpOpts(e,prof){return SKILLS.map(x=>x.n).filter(n=>prof.has(n)&&(!e.f||e.f.includes(n)));}
 function fpGrants(g,cls){
   const add=(art,ziel,stufe,quelle)=>g.push({art,ziel,stufe,quelle,fp:1});
-  const act=fpActive(cls);
-  act.forEach(({k,e})=>{
+  const act=[];(Array.isArray(cls)?cls:[cls]).forEach(c=>fpActive(c).forEach(x=>act.push({k:x.k,e:x.e,c})));
+  act.forEach(({k,e,c})=>{
     const q=fpName(k),key=fpKey(k);
     if(e.t==='skill'){
-      const sel=(e.fix||[]).concat(e.n?pkValid(key,fpFrom(e,cls),e.n):[]);
+      const sel=(e.fix||[]).concat(e.n?pkValid(key,fpFrom(e,c),e.n):[]);
       sel.forEach(x=>{add('skill',x,'p',q);if(e.e)add('skill',x,'e',q);});
     }else if(e.t==='save')(e.fix||[]).forEach(a=>add('save',a,'p',q));
     else if(e.t==='half')SKILLS.forEach(x=>add('skill',x.n,'half',q));
@@ -5500,6 +5511,9 @@ const RACE_PICKS={"Aasimar":{"src":"XPHB","size":["S","M"],"speed":30,"dv":60,"r
 // SUBCLASS_TABLES-START (tools/subclass_tables.py, 5e.tools subclassTableGroups; Paket D 29.09.2026)
 const SUBCLASS_TABLES={"Fighter":{"Eldritch Knight":{"src":"XPHB","extra":[{"k":"spells","l":"Spells Prepared"}],"rows":[{"lvl":1,"slots":[0,0,0,0,0,0,0,0,0],"spells":"—"},{"lvl":2,"slots":[0,0,0,0,0,0,0,0,0],"spells":"—"},{"lvl":3,"slots":[2,0,0,0,0,0,0,0,0],"spells":3},{"lvl":4,"slots":[3,0,0,0,0,0,0,0,0],"spells":4},{"lvl":5,"slots":[3,0,0,0,0,0,0,0,0],"spells":4},{"lvl":6,"slots":[3,0,0,0,0,0,0,0,0],"spells":4},{"lvl":7,"slots":[4,2,0,0,0,0,0,0,0],"spells":5},{"lvl":8,"slots":[4,2,0,0,0,0,0,0,0],"spells":6},{"lvl":9,"slots":[4,2,0,0,0,0,0,0,0],"spells":6},{"lvl":10,"slots":[4,3,0,0,0,0,0,0,0],"spells":7},{"lvl":11,"slots":[4,3,0,0,0,0,0,0,0],"spells":8},{"lvl":12,"slots":[4,3,0,0,0,0,0,0,0],"spells":8},{"lvl":13,"slots":[4,3,2,0,0,0,0,0,0],"spells":9},{"lvl":14,"slots":[4,3,2,0,0,0,0,0,0],"spells":10},{"lvl":15,"slots":[4,3,2,0,0,0,0,0,0],"spells":10},{"lvl":16,"slots":[4,3,3,0,0,0,0,0,0],"spells":11},{"lvl":17,"slots":[4,3,3,0,0,0,0,0,0],"spells":11},{"lvl":18,"slots":[4,3,3,0,0,0,0,0,0],"spells":11},{"lvl":19,"slots":[4,3,3,1,0,0,0,0,0],"spells":12},{"lvl":20,"slots":[4,3,3,1,0,0,0,0,0],"spells":13}]}},"Rogue":{"Arcane Trickster":{"src":"XPHB","extra":[{"k":"prepared","l":"Prepared Spells"}],"rows":[{"lvl":1,"slots":[0,0,0,0,0,0,0,0,0],"prepared":"—"},{"lvl":2,"slots":[0,0,0,0,0,0,0,0,0],"prepared":"—"},{"lvl":3,"slots":[2,0,0,0,0,0,0,0,0],"prepared":3},{"lvl":4,"slots":[3,0,0,0,0,0,0,0,0],"prepared":4},{"lvl":5,"slots":[3,0,0,0,0,0,0,0,0],"prepared":4},{"lvl":6,"slots":[3,0,0,0,0,0,0,0,0],"prepared":4},{"lvl":7,"slots":[4,2,0,0,0,0,0,0,0],"prepared":5},{"lvl":8,"slots":[4,2,0,0,0,0,0,0,0],"prepared":6},{"lvl":9,"slots":[4,2,0,0,0,0,0,0,0],"prepared":6},{"lvl":10,"slots":[4,3,0,0,0,0,0,0,0],"prepared":7},{"lvl":11,"slots":[4,3,0,0,0,0,0,0,0],"prepared":8},{"lvl":12,"slots":[4,3,0,0,0,0,0,0,0],"prepared":8},{"lvl":13,"slots":[4,3,2,0,0,0,0,0,0],"prepared":9},{"lvl":14,"slots":[4,3,2,0,0,0,0,0,0],"prepared":10},{"lvl":15,"slots":[4,3,2,0,0,0,0,0,0],"prepared":10},{"lvl":16,"slots":[4,3,3,0,0,0,0,0,0],"prepared":11},{"lvl":17,"slots":[4,3,3,0,0,0,0,0,0],"prepared":11},{"lvl":18,"slots":[4,3,3,0,0,0,0,0,0],"prepared":11},{"lvl":19,"slots":[4,3,3,1,0,0,0,0,0],"prepared":12},{"lvl":20,"slots":[4,3,3,1,0,0,0,0,0],"prepared":13}]}}};
 // SUBCLASS_TABLES-END
+// CLASS_MC_GAINS-START (tools/mc_convert.py, 5e.tools multiclassing.proficienciesGained XPHB; Paket F3 03.10.2026)
+const CLASS_MC_GAINS={"Barbarian":{"w":["Martial weapons"],"a":["Shields"],"t":[],"sk":null,"src":"XPHB"},"Bard":{"w":[],"a":["Light armor"],"t":["Choose one Musical Instrument"],"sk":{"n":1,"f":["Athletics","Acrobatics","Sleight of Hand","Stealth","Arcana","History","Investigation","Nature","Religion","Animal Handling","Insight","Medicine","Perception","Survival","Deception","Intimidation","Performance","Persuasion"]},"src":"XPHB"},"Cleric":{"w":[],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Druid":{"w":[],"a":["Light armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Fighter":{"w":["Martial weapons"],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Monk":{"w":[],"a":[],"t":[],"sk":null,"src":"XPHB"},"Paladin":{"w":["Martial weapons"],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":null,"src":"XPHB"},"Ranger":{"w":["Martial weapons"],"a":["Light armor","Medium armor","Shields"],"t":[],"sk":{"n":1,"f":["Animal Handling","Athletics","Insight","Investigation","Nature","Perception","Stealth","Survival"]},"src":"XPHB"},"Rogue":{"w":[],"a":["Light armor"],"t":["Thieves' Tools"],"sk":{"n":1,"f":["Acrobatics","Athletics","Deception","Insight","Intimidation","Investigation","Perception","Persuasion","Sleight of Hand","Stealth"]},"src":"XPHB"},"Sorcerer":{"w":[],"a":[],"t":[],"sk":null,"src":"XPHB"},"Warlock":{"w":[],"a":["Light armor"],"t":[],"sk":null,"src":"XPHB"},"Wizard":{"w":[],"a":[],"t":[],"sk":null,"src":"XPHB"}};
+// CLASS_MC_GAINS-END
 
 const CLASS_CORE_TRAITS = {
   "Warlock": {
@@ -5878,6 +5892,7 @@ function buildCoreTraits(){
   rows.push(div('Weapon Proficiencies', t.weaponProficiencies));
   if(t.toolProficiencies) rows.push(div('Tool Proficiencies', t.toolProficiencies));
   rows.push(div('Armor Training', t.armorTraining));
+  if(isMulti()) rows.push(div('From Other Classes', mcGainRows()));
   if(t.spellcastingAbility) rows.push(div('Spellcasting Ability', t.spellcastingAbility));
   if(t.startingEquipment?.length){
     const eqLines = t.startingEquipment.map(l=>`<div style="margin:1px 0">${l}</div>`).join('');
@@ -5886,7 +5901,7 @@ function buildCoreTraits(){
   if(t.multiclassingReq||t.multiclassingGains){
     let mc = '';
     if(t.multiclassingReq) mc += `<div>Requires: ${t.multiclassingReq}</div>`;
-    if(t.multiclassingGains) mc += `<div>Gains: ${t.multiclassingGains}</div>`;
+    if(mcGainOf(cls)) mc += `<div>Gains: ${mcGainText(cls)}</div>`; else if(t.multiclassingGains) mc += `<div>Gains: ${t.multiclassingGains}</div>`;
     rows.push(div('Multiclassing', mc));
   }
   if(t.source) rows.push(`<div style="color:var(--text3);font-size:var(--fs-xs);margin-top:2px">Source: ${t.source}</div>`);
@@ -6165,7 +6180,7 @@ function buildMcBox(){
   if(M.length) h+='<div class="pk-note">Saving throws come from the first class only (PHB 2024).</div>';
   box.innerHTML=h;
 }
-function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();buildClassTable();buildAbilities();autoSave();} // Paket F2: Actions/Class Table
+function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();buildClassTable();buildAbilities();buildCoreTraits();buildSaves();buildSkills();autoSave();} // Paket F3: Skills/Saves/Core Traits // Paket F2: Actions/Class Table
 function mcAdd(){
   if(!curCls()||totLvl()>=20) return;
   if(!Array.isArray(st.mc)) st.mc=[];
@@ -6188,21 +6203,38 @@ function mcDel(i){
 }
 // Lore der weiteren Klassen (Klasse + Subklasse, je aufklappbar; Startklasse bleibt in clsLore/subclsLore)
 function mcTogLore(k){_mcOpen[k]=!_mcOpen[k];buildMcLore();}
+// Paket F3: Anzeige der Multiclass-Proficiencies (Lore der weiteren Klasse mit Skill-Wahl, Zeile in den Core Traits der Startklasse)
+function mcGainHtml(cls){
+  const m=mcGainOf(cls);if(!m)return '';const L=[];
+  if(m.w.length)L.push(['Weapons',m.w.join(', ')]);if(m.a.length)L.push(['Armor',m.a.join(', ')]);if(m.t.length)L.push(['Tools',m.t.join(', ')]);
+  let h=L.map(x=>`<div>${x[0]}: ${fdEsc(x[1])}</div>`).join('')+(!L.length&&!m.sk?'<div>No proficiencies</div>':'')+'<div style="color:var(--text3)">Saving throws: only from your first class</div>';
+  if(m.sk){const G=calcGrants(),marks={},own=new Set(pkGet(pkKeyMc(cls)));
+    G.filter(x=>x.art==='skill'&&x.stufe!=='half'&&!(x.mc&&x.quelle===cls)).forEach(x=>{if(!own.has(x.ziel))marks[x.ziel]='✓';});
+    Object.keys(st.skillP||{}).forEach(k=>{if(st.skillP[k]&&!own.has(k))marks[k]='✓';});
+    h+=pickUI(pkKeyMc(cls),m.sk.f,m.sk.n,{head:`Skill: choose ${m.sk.n}`,marks,note:'✓ = already proficient'});}
+  return h;
+}
+function mcGainRows(){
+  return charClasses().filter(c=>!c.start).map(c=>{const m=mcGainOf(c.cls);if(!m)return '';
+    const p=[...m.w,...m.a,...m.t];
+    if(m.sk){const s=pkValid(pkKeyMc(c.cls),m.sk.f,m.sk.n);p.push(s.length?'Skill: '+s.join(', '):`<span style="color:var(--gold)">${mcGainSkTxt(c.cls,m)} – choose under “Class: ${fdEsc(c.cls)}”</span>`);}
+    return `<div><b style="color:var(--text2)">${fdEsc(c.cls)}:</b> ${p.length?p.map(x=>x.startsWith('<')?x:fdEsc(x)).join(' · '):'none'}</div>`;}).join('');
+}
 function buildMcLore(){
   const wrap=document.getElementById('mcLoreWrap');if(!wrap) return;
   const sec=(k,title,body)=>{const o=!!_mcOpen[k];return '<div class="act-div"></div><div class="act-panel"><div class="sec sec-top" style="display:flex;justify-content:space-between;align-items:center"><span>'+title+'</span>'
     +'<button onclick="mcTogLore(\''+mcQ(k).replace(/'/g,"\\'")+'\')" class="filter-toggle" style="padding:3px 10px">'+(o?'▴ Collapse':'▾ Expand')+'</button></div>'+(o?'<div>'+body()+'</div>':'')+'</div>';};
-  let h='';
+  let h='';const op=pkOpen();
   charClasses().filter(c=>!c.start).forEach(c=>{
     const D=CLASS_DATA[c.cls],t=CLASS_CORE_TRAITS[c.cls]||{};
     if(!D) return;
-    h+=sec(c.cls+'|base','Class: '+fdEsc(c.cls)+' '+c.lvl,()=>{
+    h+=sec(c.cls+'|base','Class: '+fdEsc(c.cls)+' '+c.lvl+(op.some(x=>x.c===c.cls)?'<span class="pk-pend">● Choose</span>':''),()=>{
       const lb=s=>'<span style="color:var(--gold);font-family:\'Cinzel\',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:2px">'+s+'</span>';
       const rows=[];
       if(t.primaryAbility) rows.push('<div>'+lb('Primary Ability')+fdEsc(t.primaryAbility)+'</div>');
       if(t.hpPerLevel) rows.push('<div>'+lb('Hit Points per Level')+fdEsc(t.hpPerLevel)+'</div>');
       if(t.multiclassingReq) rows.push('<div>'+lb('Multiclassing – Requires')+fdEsc(t.multiclassingReq)+'</div>');
-      if(t.multiclassingGains) rows.push('<div>'+lb('Multiclassing – Gains')+fdEsc(t.multiclassingGains)+'</div>');
+      if(mcGainOf(c.cls)) rows.push('<div>'+lb('Multiclassing – Gains')+mcGainHtml(c.cls)+'</div>'); else if(t.multiclassingGains) rows.push('<div>'+lb('Multiclassing – Gains')+fdEsc(t.multiclassingGains)+'</div>');
       if(t.spellcastingAbility) rows.push('<div>'+lb('Spellcasting Ability')+fdEsc(t.spellcastingAbility)+'</div>');
       const by={};[...(D.base||[])].sort((a,b)=>a.lvl-b.lvl).forEach(f=>{(by[f.lvl]=by[f.lvl]||[]).push(f);});
       return (rows.length?'<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:var(--fs-txt);line-height:1.8;color:var(--desc);margin-bottom:8px">'+rows.join('<hr style="border:none;border-top:1px solid var(--border2);margin:6px 0">')+'</div>':'')
@@ -8627,7 +8659,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03e';
+const APP_VERSION = 'willow-app-2026-10-03f';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

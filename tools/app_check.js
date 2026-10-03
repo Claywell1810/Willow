@@ -2153,6 +2153,49 @@ const REGRESSION = [
       w.mcDel(0); w.mcDel(0);
       return true;
     } },
+  { name: 'Paket F3: Multiclass – Saves nur Startklasse, Skill-Wahl der weiteren Klasse (CLASS_MC_GAINS), Expertise/Jack of All Trades nach Klassenstufe, Proficiencies in Core Traits', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      const ev = s => w.eval(s);
+      if (ev("typeof CLASS_MC_GAINS") !== 'object' || ev("Object.keys(CLASS_MC_GAINS).length") !== 12) return 'CLASS_MC_GAINS fehlt';
+      if (ev("CLASS_MC_GAINS.Druid.a.join()") !== 'Light armor,Shields') return 'Druid-Gains nicht nach XPHB';
+      sel('Wizard', '', 3);
+      const g1 = ev("JSON.stringify(calcGrants().filter(x=>x.art!=='attr'))");
+      w.mcAdd(); w.mcSet(0, 'cls', 'Rogue');
+      const sv = ev("calcGrants().filter(x=>x.art==='save').map(x=>x.ziel).sort().join()");
+      if (sv !== 'INT,WIS') return 'Saves nicht nur von der Startklasse: ' + sv;
+      if (!ev("pkOpen().some(x=>x.wo==='mc'&&x.c==='Rogue')")) return 'offene Rogue-Skill-Wahl fehlt';
+      if (!/Rogue skill 0\/1/.test(d.getElementById('pkHints').textContent)) return 'Hinweis im Skills-Tab fehlt';
+      if (!/Class: Rogue 1● Choose/.test(d.getElementById('mcLoreWrap').textContent)) return 'Marker in der Rogue-Lore fehlt';
+      w.mcTogLore('Rogue|base');
+      const chip = [...d.querySelectorAll('#mcLoreWrap .pk-chip')].find(b => b.dataset.k === 'cls:Rogue:mc' && b.dataset.o === 'Stealth');
+      if (!chip) return 'Skill-Chips der Rogue-Liste fehlen';
+      if ([...d.querySelectorAll('#mcLoreWrap .pk-chip')].some(b => b.dataset.k === 'cls:Rogue:mc' && b.dataset.o === 'Arcana')) return 'Skill außerhalb der Rogue-Liste wählbar';
+      w.pkTog(chip);
+      if (ev("JSON.stringify(st.picks['cls:Rogue:mc'])") !== '["Stealth"]') return 'Wahl nicht gespeichert';
+      if (ev("grantLvl(calcGrants(),'skill','Stealth')") !== 'p') return 'Stealth nicht geübt';
+      if (!/Rogue/.test([...d.querySelectorAll('#skillsGrid .sk-row')].find(r => /Stealth/.test(r.textContent)).textContent)) return 'Abzeichen „Rogue“ fehlt';
+      if (ev("pkOpen().some(x=>x.wo==='mc')")) return 'Skill-Wahl trotz Wahl offen';
+      if (!ev("pkOpen().some(x=>x.c==='Rogue'&&/Expertise/.test(x.txt))")) return 'offene Rogue-Expertise fehlt in den Hinweisen';
+      // Expertise (Rogue L1) aus geübten Skills inkl. Multiclass-Skill
+      ev("st.picks['feat:Rogue|base|Expertise@1']=['Stealth','Arcana']"); w.pkRefresh();
+      if (ev("grantLvl(calcGrants(),'skill','Stealth')") !== 'e') return 'Expertise der weiteren Klasse wirkt nicht';
+      const ct = d.getElementById('coreTraitsList').textContent;
+      if (!/From Other Classes/.test(ct) || !/Thieves' Tools/.test(ct) || !/Skill: Stealth/.test(ct)) return 'Core Traits zeigen Rogue-Proficiencies nicht';
+      if (!/Saving throws: only from your first class/.test(d.getElementById('mcLoreWrap').textContent)) return 'Hinweis Saves fehlt';
+      // Ranger: nur Ranger-Liste; Bard: Jack of All Trades erst ab Bard-Stufe 2
+      w.mcDel(0); w.mcDel(0);
+      if (ev("grantLvl(calcGrants(),'skill','Stealth')") !== '') return 'nach Entfernen noch Rogue-Skill';
+      if (ev("JSON.stringify(calcGrants().filter(x=>x.art!=='attr'))") !== g1) return 'Einzelklasse nach Entfernen verändert';
+      w.mcAdd(); w.mcSet(0, 'cls', 'Ranger'); ev("st.picks['cls:Ranger:mc']=['Arcana']"); w.pkRefresh();
+      if (ev("calcGrants().some(x=>x.quelle==='Ranger')")) return 'Ranger-Wahl außerhalb der Liste wirkt';
+      w.mcDel(0); w.mcDel(0);
+      w.mcAdd(); w.mcSet(0, 'cls', 'Bard');
+      if (ev("calcGrants().some(x=>x.stufe==='half')")) return 'Jack of All Trades schon bei Bard 1';
+      w.mcLv(0, 1);
+      if (ev("grantLvl(calcGrants(),'skill','Athletics')") !== 'half') return 'Jack of All Trades bei Bard 2 fehlt';
+      w.mcDel(0); w.mcDel(0);
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
