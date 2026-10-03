@@ -575,6 +575,27 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .item-detail-row input{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:16px;padding:5px 7px;outline:none;flex:1;min-width:0}
 .item-del{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--red);font-size:var(--fs-sm);padding:5px 10px;cursor:pointer;font-family:'Cinzel',serif}
 .item-del:hover{background:color-mix(in srgb, var(--red) 15%, transparent)}
+/* Paket O4 (03.10.2026): Item-Suche + Katalog-Infos auf der Karte */
+.it-sugg{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin:-2px 0 8px;overflow:hidden}
+.it-sg{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--border2);color:var(--text);font-family:inherit;padding:7px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.it-sg:last-of-type{border-bottom:0}
+.it-sg:active{background:var(--bg3)}
+.it-sg-n{flex:1;min-width:0;font-size:var(--fs-txt);line-height:1.3}
+.it-sg-n small,.item-sub{display:block;font-size:var(--fs-xs);color:var(--text3);font-family:'Crimson Pro',Georgia,serif;letter-spacing:0;text-transform:none;font-variant:normal;line-height:1.3;margin-top:1px}
+.it-src{flex-shrink:0;font-size:var(--fs-xs);color:var(--text3);border:1px solid var(--border2);border-radius:10px;padding:1px 6px}
+.it-sg-foot{font-size:var(--fs-xs);color:var(--text3);padding:6px 10px;border-top:1px solid var(--border2)}
+.it-picked{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--gold);margin:-2px 0 8px;padding:5px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3)}
+.it-picked span{flex:1;min-width:0}
+.it-picked button{background:none;border:0;color:var(--text3);font-size:var(--fs-txt);cursor:pointer;padding:0 2px}
+.item-name{min-width:0;overflow-wrap:anywhere}
+.it-info{display:flex;flex-direction:column;gap:3px;font-size:var(--fs-txt);line-height:1.4;color:var(--text2)}
+.it-info b{color:var(--text);font-weight:600}
+.it-txt{white-space:pre-line;color:var(--desc);font-size:var(--fs-txt);line-height:1.5;margin-top:3px}
+.it-rules summary{cursor:pointer;color:var(--gold);font-size:var(--fs-sm);font-family:'Cinzel',serif;margin-top:3px}
+.it-rules div{margin-top:4px;color:var(--desc)}
+.it-pk{margin:2px 0 0 0;padding-left:18px}
+.it-btns{display:flex;gap:6px;flex-wrap:wrap}
+.it-btn{background:none;border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-size:var(--fs-sm);padding:5px 10px;cursor:pointer;font-family:'Cinzel',serif}
 
 
 .bg-desc{font-size:var(--fs-txt);color:var(--desc);line-height:1.6;font-style:italic;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;margin-bottom:10px}
@@ -1154,7 +1175,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
 
       <!-- Add Item -->
       <div class="item-add-row">
-        <input id="itemName" placeholder="Name..." style="flex:2">
+        <input id="itemName" placeholder="Search or name…" autocomplete="off" style="flex:2" oninput="itOnInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();itEnter()}">
         <input id="itemQty" type="number" min="1" value="1" placeholder="Qty" style="flex:0.6;text-align:center">
         <input id="itemWeight" type="number" min="0" step="0.1" placeholder="lb" style="flex:0.6;text-align:center">
         <select id="itemCat" style="flex:1">
@@ -1166,6 +1187,8 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         </select>
         <button class="add-btn" style="margin:0;flex:0.8" onclick="addItem()">+ Add</button>
       </div>
+      <div id="itemPicked" class="it-picked" style="display:none"></div>
+      <div id="itemSugg" class="it-sugg" style="display:none"></div>
       <div id="itemList"></div>
       <div class="sec" style="margin-top:12px">Notes</div>
       <div class="nta-wrap"><textarea class="nta" id="n_equip_notes" placeholder="Notes on equipment, carrying capacity, special items..." style="min-height:80px"></textarea><button class="nta-expand" onclick="openNoteModal('n_equip_notes','Equipment Notes')">⛶</button></div>
@@ -7693,11 +7716,150 @@ function addItem(){
   const wt=parseFloat(document.getElementById('itemWeight').value)||0;
   const cat=document.getElementById('itemCat').value;
   st.items=st.items||[];
-  st.items.push({id:Date.now(),name,qty,wt,cat,note:''});
+  // Paket O4: Katalog-Eintrag (ref) aus der Suche; gleicher Eintrag ohne Herkunft → Menge addieren
+  const ref=_itemRef&&ITEM_MAP[_itemRef]?_itemRef:'';
+  const dup=ref&&st.items.find(i=>i.ref===ref&&i.name===name&&!i.from);
+  if(dup){dup.qty=(dup.qty||1)+qty;showToast(name+' ×'+dup.qty);}
+  else{const o={id:itNewId(),name,qty,wt,cat,note:''};if(ref)o.ref=ref;st.items.push(o);}
   document.getElementById('itemName').value='';
   document.getElementById('itemQty').value='1';
   document.getElementById('itemWeight').value='';
+  _itemRef='';itPickedHint();itSuggest();
   renderItems();autoSave();
+}
+
+// ── Paket O4 (03.10.2026): Items-Tab mit Suche aus ITEM_DATA (REFERENZ B25) ──────────────────────
+// Suche im Namensfeld (ab 2 Zeichen): Treffer aus ITEM_DATA (nur nicht-magisch, O-E4); Rang: gleich > Anfang >
+// irgendwo im Namen > Typname, je Rang XPHB vor PHB vor anderen Quellen, max. 12.
+// Antippen füllt Name/Gewicht/Kategorie und merkt ref "Name|Quelle" (_itemRef); „+ Add“ trägt ein. Freie Items
+// ohne ref wie bisher (Tippen löscht die Auswahl). Karte: Kurzzeile (Schaden, AC, Pack), aufgeklappt Typ, Preis,
+// Eigenschaften (ITEM_RULES, XPHB-Schreibweise), Mastery, Rüstung, Pack-Inhalt + „Unpack“ (O-E2), Text, Herkunft
+// `from` (O3). Items ohne ref mit gleichnamigem Katalog-Eintrag: Knopf „Link“ (nur auf Knopfdruck).
+let _itemRef='';const _itemOpen=new Set();
+const itNorm=x=>String(x||'').toLowerCase().replace(/[\u2018\u2019]/g,"'");
+const itCap=x=>{x=String(x||'');return x.charAt(0).toUpperCase()+x.slice(1);};
+function itNewId(){return Math.max(Date.now(),...(st.items||[]).map(i=>(+i.id||0)+1));}
+function itSearch(q){
+  q=itNorm(q).trim();if(q.length<2)return [];
+  const re=new RegExp('(^|[\\s(/-])'+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),sp=s=>s==='XPHB'?0:s==='PHB'?1:2,out=[];
+  ITEM_DATA.forEach(i=>{
+    const n=itNorm(i.n);let r=n===q?0:n.startsWith(q)?1:(re.test(n)||n.includes(q))?2:itNorm(i.t).includes(q)?3:-1;
+    if(r>=0)out.push([r,i]);
+  });
+  out.sort((a,b)=>a[0]-b[0]||sp(a[1].s)-sp(b[1].s)||a[1].n.localeCompare(b[1].n));
+  return out.slice(0,12).map(x=>x[1]);
+}
+function itCost(v){if(v==null)return '';return v<1?(Math.round(v*100)/100)+' CP':seMoney(v);}
+function itAC(it){return it.at==='S'?'AC +'+it.ac:'AC '+it.ac+(it.at==='L'?' + DEX':it.at==='M'?' + DEX (max 2)':'');}
+function itProps(it){
+  return (it.p||[]).map(k=>{
+    const c=k.split('|')[0],r=(ITEM_RULES.p||{})[k]||{},x=[];
+    if(c==='V'&&it.d2)x.push(it.d2);
+    if((c==='T'||c==='A')&&it.r)x.push('Range '+it.r);
+    if(c==='A'&&it.am)x.push(it.am);
+    if(it.pn&&it.pn[k])x.push(it.pn[k]);
+    return (r.n||c)+(x.length?' ('+x.join('; ')+')':'');
+  });
+}
+function itPkTxt(e){
+  const q=(e.q||1)>1?e.q+'× ':'';
+  return q+(e.sp!=null?itCap(e.sp):seItemN(e.i));
+}
+function itSum(it){
+  if(!it)return '';
+  if(it.d)return it.d+(it.d2?'/'+it.d2:'')+' '+(it.dt||'')+(it.m&&it.m.length?' · '+it.m.join(', '):'');
+  if(it.at)return itAC(it)+(it.st?' · Stealth Dis.':'');
+  if(it.pk)return it.pk.length===1?'Contains '+itPkTxt(it.pk[0]):'Pack · '+it.pk.length+' items';
+  return it.t||'';
+}
+function itOnInput(){
+  const had=_itemRef;_itemRef='';
+  // Auswahl verworfen und Feld leer → Gewicht/Kategorie aus dem Katalog zurücksetzen
+  if(had&&!document.getElementById('itemName').value.trim()){document.getElementById('itemWeight').value='';document.getElementById('itemCat').value='Misc';}
+  itPickedHint();itSuggest();
+}
+function itSuggest(){
+  const box=document.getElementById('itemSugg'),inp=document.getElementById('itemName');if(!box||!inp)return;
+  const r=itSearch(inp.value);
+  if(!r.length){box.innerHTML='';box.style.display='none';return;}
+  box.innerHTML=r.map(i=>`<button type="button" class="it-sg" data-r="${pkEsc(i.n+'|'+i.s)}" onclick="itPick(this.dataset.r)"><span class="item-cat">${ITEM_CATS[i.c]||'📦'}</span><span class="it-sg-n">${pkEsc(i.n)}<small>${pkEsc([itSum(i),i.w!=null?i.w+' lb':'',itCost(i.v)].filter(Boolean).join(' · '))}</small></span><span class="it-src">${pkEsc(i.s)}</span></button>`).join('')+
+    '<div class="it-sg-foot">Tap to fill in · or “+ Add” as a free item</div>';
+  box.style.display='';
+}
+function itPick(ref){
+  const i=ITEM_MAP[ref];if(!i)return;
+  _itemRef=ref;
+  document.getElementById('itemName').value=i.n;
+  document.getElementById('itemWeight').value=i.w!=null?i.w:'';
+  document.getElementById('itemCat').value=ITEM_CATS[i.c]?i.c:'Misc';
+  const box=document.getElementById('itemSugg');box.innerHTML='';box.style.display='none';
+  itPickedHint();
+}
+function itPickedHint(){
+  const h=document.getElementById('itemPicked');if(!h)return;
+  const i=_itemRef&&ITEM_MAP[_itemRef];
+  if(!i){h.innerHTML='';h.style.display='none';return;}
+  const s=[itSum(i),itCost(i.v)].filter(Boolean).join(' · ');
+  h.innerHTML=`<span>🔗 ${pkEsc(i.n)} (${pkEsc(i.s)})${s?' · '+pkEsc(s):''}</span><button type="button" title="Free item instead" onclick="itUnpick()">✕</button>`;
+  h.style.display='';
+}
+function itUnpick(){_itemRef='';itPickedHint();}
+function itEnter(){
+  const box=document.getElementById('itemSugg'),b=box&&box.style.display!=='none'&&box.querySelector('.it-sg');
+  if(!_itemRef&&b){itPick(b.dataset.r);return;}
+  addItem();
+}
+// Gleichnamiger Katalog-Eintrag für Items ohne ref (XPHB bevorzugt)
+function itLinkCand(item){
+  if(!item||item.ref)return null;const n=itNorm(item.name).trim();
+  const c=ITEM_DATA.filter(i=>itNorm(i.n)===n);
+  return c.find(i=>i.s==='XPHB')||c.find(i=>i.s==='PHB')||c[0]||null;
+}
+function itLink(id){
+  const item=(st.items||[]).find(i=>i.id===id),c=itLinkCand(item);if(!c)return;
+  item.ref=c.n+'|'+c.s;if(!item.wt&&c.w)item.wt=c.w;if(ITEM_CATS[c.c])item.cat=c.c;
+  _itemOpen.add(id);renderItems();autoSave();showToast('Linked to '+c.n+' ('+c.s+')');
+}
+function itInfo(item){
+  const it=item.ref&&ITEM_MAP[item.ref],R=(l,v)=>v?`<div><b>${l}</b> ${v}</div>`:'';
+  let h='';
+  if(it){
+    const typ=(it.wc?itCap(it.wc)+' ':'')+(it.t||item.cat||'');
+    h+=R('Type',pkEsc(typ)+' · '+pkEsc(it.s));
+    h+=R('Cost',pkEsc(itCost(it.v)))+R('Weight',it.w!=null?pkEsc(it.w+' lb'):'');
+    if(it.d)h+=R('Damage',pkEsc(it.d+' '+(it.dt||'')));
+    const pr=itProps(it);if(pr.length)h+=R('Properties',pkEsc(pr.join(', ')));
+    if(it.m&&it.m.length)h+=R('Mastery',pkEsc(it.m.map(m=>m+(it.mn&&it.mn[m]?' ('+it.mn[m]+')':'')).join(', ')));
+    if(it.at)h+=R('Armor',pkEsc(itAC(it))+(it.str?' · Strength '+it.str:'')+(it.st?' · Stealth Disadvantage':''));
+    if(it.gv)h+=R('Options',pkEsc(it.gv.map(seItemN).join(', ')));
+    if(it.pk)h+=`<div><b>Contains</b><ul class="it-pk">${it.pk.map(e=>'<li>'+pkEsc(itPkTxt(e))+'</li>').join('')}</ul></div>`;
+    if(it.x&&!it.pk)h+=`<div class="it-txt">${pkEsc(it.x)}</div>`;   // Pack: Text = Inhaltsliste, schon oben
+    const ru=(it.p||[]).map(k=>(ITEM_RULES.p||{})[k]).filter(r=>r&&r.t).map(r=>`<div><b>${pkEsc(r.n)}.</b> ${pkEsc(r.t)}</div>`)
+      .concat((it.m||[]).filter(m=>(ITEM_RULES.m||{})[m]).map(m=>`<div><b>Mastery: ${pkEsc(m)}.</b> ${pkEsc(ITEM_RULES.m[m])}</div>`));
+    if(ru.length)h+=`<details class="it-rules"><summary>Rules</summary>${ru.join('')}</details>`;
+  }
+  if(item.from)h+=R('From',pkEsc(item.from)+' (starting equipment)');
+  return h?`<div class="it-info">${h}</div>`:'';
+}
+function itUnpack(id){
+  st.items=st.items||[];
+  const idx=st.items.findIndex(i=>i.id===id),item=st.items[idx],it=item&&item.ref&&ITEM_MAP[item.ref];
+  if(!it||!it.pk)return;
+  let nid=itNewId();const neu=[];
+  const add=x=>{
+    const d=st.items.find(y=>y!==item&&(y.ref||'')===(x.ref||'')&&y.name===x.name&&(y.from||'')===(item.from||''))||neu.find(y=>y.ref===x.ref&&y.name===x.name);
+    if(d){d.qty=(d.qty||1)+x.qty;return;}
+    const o=Object.assign({id:nid++},x);if(item.from)o.from=item.from;neu.push(o);
+  };
+  it.pk.forEach(e=>{
+    const q=e.q||1;
+    if(e.sp!=null){add({name:itCap(e.sp),qty:q,wt:0,cat:'Misc',note:'',ref:''});return;}
+    const c=ITEM_MAP[e.i]||{};add({name:c.n||seItemN(e.i),qty:q,wt:c.w||0,cat:ITEM_CATS[c.c]?c.c:'Misc',note:'',ref:e.i});
+  });
+  if((item.qty||1)>1){item.qty--;st.items.splice(idx+1,0,...neu);}
+  else{_itemOpen.delete(id);st.items.splice(idx,1,...neu);}
+  renderItems();autoSave();
+  showToast('Unpacked '+item.name+': '+it.pk.length+' item'+(it.pk.length===1?'':'s'));
 }
 
 // ── Paket O1 (03.10.2026): Traglast (XPHB „Carrying Capacity“, 5e.tools variantrules.json) ──
@@ -7736,14 +7898,21 @@ function renderItems(){
   filtered.forEach(item=>{
     const card=document.createElement('div');card.className='item-card';
     const top=document.createElement('div');top.className='item-top';
-    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${item.name}</span><span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt} lb</span>`:''}`;
-    const detail=document.createElement('div');detail.className='item-detail';
+    const itRef=item.ref&&ITEM_MAP[item.ref],sub=itSum(itRef);
+    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${pkEsc(item.name)}${sub?`<small class="item-sub">${pkEsc(sub)}</small>`:''}</span><span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt} lb</span>`:''}`;
+    const detail=document.createElement('div');detail.className='item-detail'+(_itemOpen.has(item.id)?' on':'');
+    const info=itInfo(item);if(info)detail.insertAdjacentHTML('beforeend',info);
     const row=document.createElement('div');row.className='item-detail-row';
     row.innerHTML=`<input type="number" min="1" value="${item.qty}" placeholder="Qty" oninput="updItem(${item.id},'qty',+this.value);renderItems()"><input type="number" min="0" step="0.1" value="${item.wt||''}" placeholder="Weight lb" oninput="updItem(${item.id},'wt',+this.value);itemWeightHead()">`;
     const ta=document.createElement('textarea');ta.placeholder='Note...';ta.value=item.note||'';ta.oninput=()=>{updItem(item.id,'note',ta.value);};
-    const del=document.createElement('button');del.className='item-del';del.textContent='✕ Remove';del.onclick=()=>{st.items=st.items.filter(i=>i.id!==item.id);renderItems();autoSave();};
-    detail.appendChild(row);detail.appendChild(ta);detail.appendChild(del);
-    top.onclick=()=>detail.classList.toggle('on');
+    const del=document.createElement('button');del.className='item-del';del.textContent='✕ Remove';del.onclick=()=>{_itemOpen.delete(item.id);st.items=st.items.filter(i=>i.id!==item.id);renderItems();autoSave();};
+    const btns=document.createElement('div');btns.className='it-btns';
+    if(itRef&&itRef.pk){const u=document.createElement('button');u.className='it-btn';u.textContent='📦 Unpack';u.title='Replace this pack with its contents';u.onclick=()=>itUnpack(item.id);btns.appendChild(u);}
+    const lc=itLinkCand(item);
+    if(lc){const l=document.createElement('button');l.className='it-btn';l.textContent='🔗 Link: '+lc.n+' ('+lc.s+')';l.title='Show the 5e.tools details for this item';l.onclick=()=>itLink(item.id);btns.appendChild(l);}
+    btns.appendChild(del);
+    detail.appendChild(row);detail.appendChild(ta);detail.appendChild(btns);
+    top.onclick=()=>{detail.classList.toggle('on');if(detail.classList.contains('on'))_itemOpen.add(item.id);else _itemOpen.delete(item.id);};
     card.appendChild(top);card.appendChild(detail);
     list.appendChild(card);
   });
@@ -9098,7 +9267,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03m';
+const APP_VERSION = 'willow-app-2026-10-03n';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

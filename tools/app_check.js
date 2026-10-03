@@ -2486,6 +2486,64 @@ const REGRESSION = [
       if (!tx.includes('19 GP') || !tx.includes('(B) 90 GP') || !tx.includes('9 GP') || !tx.includes('(B) 50 GP') || /Rapier|2d4/.test(tx)) return 'Bard/Druid-Text nicht XPHB: ' + tx;
       return true;
     } },
+  { name: 'Paket O4: Items-Tab – Suche aus ITEM_DATA füllt Name/Gewicht/Kategorie + ref, freie Items bleiben, Karte mit Schaden/AC/Eigenschaften/Herkunft, Pack „Unpack“, „Link“ für alte Items, offene Karte bleibt offen', datum: '03.10.2026',
+    run: ({ w, d }) => {
+      if (typeof w.itSearch !== 'function') return 'itSearch fehlt (Item-Suche)';
+      w.eval("st.items=[];itemFilter='all';renderItems()");
+      const nm = d.getElementById('itemName'), sg = d.getElementById('itemSugg'), typ = v => { nm.value = v; nm.dispatchEvent(new w.Event('input', { bubbles: true })); };
+      typ('longsw');
+      const first = sg.querySelector('.it-sg');
+      if (!first || first.dataset.r !== 'Longsword|XPHB') return 'Suche „longsw“: erster Treffer ' + (first && first.dataset.r);
+      if (w.eval("itSearch('dagger')[0].n+'|'+itSearch('dagger')[0].s") !== 'Dagger|XPHB') return 'XPHB nicht vor PHB';
+      if (w.eval("itSearch('x').length") !== 0) return 'Suche ab 1 Zeichen';
+      if (w.eval("itSearch('potion of healing').length") !== 0) return 'magisches Item in der Suche (O-E4)';
+      first.click();
+      if (nm.value !== 'Longsword' || d.getElementById('itemWeight').value !== '3' || d.getElementById('itemCat').value !== 'Weapon') return 'Antippen füllt Felder nicht: ' + nm.value + '/' + d.getElementById('itemWeight').value + '/' + d.getElementById('itemCat').value;
+      if (d.getElementById('itemPicked').style.display === 'none') return 'Auswahl-Hinweis fehlt';
+      w.addItem();
+      let I = JSON.parse(w.eval('JSON.stringify(st.items)'));
+      if (I.length !== 1 || I[0].ref !== 'Longsword|XPHB' || I[0].wt !== 3 || I[0].cat !== 'Weapon') return 'Longsword: ' + JSON.stringify(I);
+      // erneut → Menge addiert; Tippen nach Auswahl löscht ref (freies Item)
+      typ('Longsword'); w.itPick('Longsword|XPHB'); w.addItem();
+      if (w.eval('st.items.length') !== 1 || w.eval('st.items[0].qty') !== 2) return 'gleicher Eintrag nicht zusammengefasst';
+      typ('Rope'); w.itPick('Rope|XPHB'); typ('Rope of my own'); w.addItem();
+      if (w.eval("st.items.find(i=>i.name==='Rope of my own').ref") !== undefined) return 'freies Item hat ref';
+      // Karte: Kurzzeile + Infos
+      const card = () => [...d.querySelectorAll('#itemList .item-card')].find(c => c.querySelector('.item-name').textContent.startsWith('Longsword'));
+      if (!/1d8\/1d10 Slashing · Sap/.test(card().querySelector('.item-sub').textContent)) return 'Kurzzeile Longsword: ' + card().querySelector('.item-sub').textContent;
+      card().querySelector('.item-top').click();
+      const inf = card().querySelector('.it-info').textContent;
+      if (!/Martial Melee Weapon · XPHB/.test(inf) || !/15 GP/.test(inf) || !/Versatile \(1d10\)/.test(inf) || !/Mastery Sap/.test(inf)) return 'Infos Longsword: ' + inf;
+      w.eval("updItem(st.items[0].id,'qty',3);renderItems()");
+      if (!card().querySelector('.item-detail.on')) return 'Karte klappt beim Neuaufbau zu';
+      // Rüstung, Fernwaffe
+      if (w.eval("itSum(ITEM_MAP['Chain Mail|XPHB'])") !== 'AC 16 · Stealth Dis.' || w.eval("itAC(ITEM_MAP['Breastplate|XPHB'])") !== 'AC 14 + DEX (max 2)') return 'Rüstung: ' + w.eval("itSum(ITEM_MAP['Chain Mail|XPHB'])");
+      if (w.eval("itProps(ITEM_MAP['Longbow|XPHB']).join(', ')") !== 'Ammunition (Range 150/600; Arrow), Heavy, Two-Handed') return 'Longbow: ' + w.eval("itProps(ITEM_MAP['Longbow|XPHB']).join(', ')");
+      // Pack (mit Herkunft) → Unpack
+      w.eval("st.items=[{id:5,name:\"Explorer's Pack\",qty:1,wt:55,cat:'Misc',note:'',from:'Fighter',ref:\"Explorer's Pack|XPHB\"},{id:6,name:'Torch',qty:2,wt:1,cat:'Misc',note:'',from:'Fighter',ref:'Torch|XPHB'}];renderItems()");
+      const pc = d.querySelector('#itemList .item-card');
+      if (!/From Fighter/.test(pc.textContent) || !/10× Torch/.test(pc.textContent)) return 'Pack-Karte ohne Herkunft/Inhalt';
+      const ub = [...pc.querySelectorAll('.it-btn')].find(b => /Unpack/.test(b.textContent)); if (!ub) return 'Knopf Unpack fehlt';
+      ub.click();
+      I = JSON.parse(w.eval('JSON.stringify(st.items)'));
+      const tor = I.filter(i => i.ref === 'Torch|XPHB'), ox = I.find(i => i.ref === 'Oil|XPHB');
+      if (I.some(i => i.ref === "Explorer's Pack|XPHB") || I.length !== 8 || tor.length !== 1 || tor[0].qty !== 12 || !ox || ox.qty !== 2 || !I.every(i => i.from === 'Fighter') || new Set(I.map(i => i.id)).size !== 8) return 'Unpack: ' + JSON.stringify(I.map(i => i.name + '×' + i.qty));
+      if (I[0].ref !== 'Backpack|XPHB') return 'Inhalt nicht an der Stelle des Packs';
+      // Sonderinhalt (sp) im Pack
+      w.eval("st.items=[{id:9,name:'Monster Hunter Pack',qty:2,wt:0,cat:'Misc',note:'',ref:\"Monster Hunter's Pack|VRGR\"}];itUnpack(9)");
+      if (w.eval("st.items[0].qty") !== 1 || !w.eval("st.items.some(i=>i.name==='Wooden stake'&&i.qty===3&&!i.ref)")) return 'Unpack bei Menge 2 / Freitext-Inhalt falsch';
+      // altes Item ohne ref → Link
+      w.eval("st.items=[{id:20,name:'dagger',qty:1,wt:0,cat:'Misc',note:''}];renderItems()");
+      const lb = [...d.querySelectorAll('#itemList .it-btn')].find(b => /Link/.test(b.textContent)); if (!lb) return 'Knopf Link fehlt';
+      if (w.eval("st.items[0].ref") !== undefined) return 'ref ohne Knopfdruck gesetzt';
+      lb.click();
+      if (w.eval("st.items[0].ref") !== 'Dagger|XPHB' || w.eval("st.items[0].wt") !== 1 || w.eval("st.items[0].cat") !== 'Weapon') return 'Link setzt ref/Gewicht/Kategorie nicht';
+      if (d.querySelector('#itemList .item-name').innerHTML.includes('<b')) return 'Name nicht escaped';
+      w.eval("st.items=[{id:21,name:'<b>x</b>',qty:1,wt:0,cat:'Misc',note:''}];renderItems()");
+      if (d.querySelector('#itemList .item-name b')) return 'Item-Name als HTML eingefügt';
+      w.eval("st.items=[];renderItems()");
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
