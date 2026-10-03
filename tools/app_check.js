@@ -2544,6 +2544,85 @@ const REGRESSION = [
       w.eval("st.items=[];renderItems()");
       return true;
     } },
+  { name: 'Paket O5: Rüstung/Schild „Equip“ setzt den AC-Rechner (eq, arm/sh, beide Richtungen, Hand-AC nur Entwurf), Waffe „→ Weapons“ mit Angriff/Schaden live (STR/DEX, Finesse, PB abschaltbar, Two-handed, Eingabe überschreibt), alte Text-Waffen unverändert, Log', datum: '03.10.2026',
+    run: ({ w, d }) => {
+      if (typeof w.itEquip !== 'function' || typeof w.wpnVals !== 'function') return 'itEquip/wpnVals fehlen (Paket O5)';
+      const bak = w.eval('JSON.stringify({a:st.attrs,as:st.attrSrc,ss:st.statSrc,we:st.weapons,it:st.items})'), pf = d.getElementById('prof').value;
+      d.getElementById('prof').value = '2';
+      w.eval("st.attrSrc=null;st.attrs=Object.assign({},st.attrs,{STR:16,DEX:14});st.statSrc=statSrcNew();itemFilter='all'");
+      w.eval(`st.weapons=[{name:'Old Club',atk:'+4',dmg:'1d4+2',type:'Bludgeoning'}];st.items=[
+        {id:1,name:'Chain Mail',qty:1,wt:55,cat:'Armor',note:'',ref:'Chain Mail|XPHB'},{id:2,name:'Breastplate',qty:1,wt:20,cat:'Armor',note:'',ref:'Breastplate|XPHB'},
+        {id:3,name:'Shield',qty:1,wt:6,cat:'Armor',note:'',ref:'Shield|XPHB'},{id:4,name:'Dagger',qty:2,wt:1,cat:'Weapon',note:'',ref:'Dagger|XPHB'},
+        {id:5,name:'Longsword',qty:1,wt:3,cat:'Weapon',note:'',ref:'Longsword|XPHB'},{id:6,name:'Longbow',qty:1,wt:2,cat:'Weapon',note:'',ref:'Longbow|XPHB'},
+        {id:7,name:'Rope',qty:1,wt:5,cat:'Misc',note:'',ref:'Rope|XPHB'}];renderItems()`);
+      const card = n => [...d.querySelectorAll('#itemList .item-card')].find(c => c.querySelector('.item-name').textContent.startsWith(n));
+      const btn = (n, re) => [...card(n).querySelectorAll('.it-btn')].find(b => re.test(b.textContent));
+      const ac = () => w.eval("statCalc('ac').t"), S = () => JSON.parse(w.eval('JSON.stringify(st.statSrc.ac)')), eq = id => !!w.eval(`st.items.find(i=>i.id===${id}).eq`);
+      if (!btn('Chain Mail', /Equip/) || !btn('Shield', /Equip/) || btn('Rope', /Equip|Weapons/) || btn('Chain Mail', /Weapons/)) return 'Knöpfe Equip/→ Weapons an falschen Karten';
+      const A0 = w.eval('JSON.parse(JSON.stringify(collectState()))');
+      btn('Chain Mail', /Equip/).click();
+      if (S().arm !== 'Chain Mail' || !eq(1) || ac() !== 16 || d.getElementById('ac').value !== '16') return 'Equip Chain Mail: ' + JSON.stringify(S()) + ' AC ' + ac();
+      if (!card('Chain Mail').querySelector('.it-eq') || !/Equipped/.test(btn('Chain Mail', /Equipped/)?.textContent || '')) return 'Abzeichen/Knopf „Equipped“ fehlt';
+      const lg = w.eval('_diffSnaps(' + JSON.stringify(A0) + ',JSON.parse(JSON.stringify(collectState())))').join('|');
+      if (!/Equipped: Chain Mail/.test(lg) || !/Armor: Unarmored → Chain Mail/.test(lg)) return 'Log Equip: ' + lg;
+      btn('Breastplate', /Equip/).click();
+      if (S().arm !== 'Breastplate' || eq(1) || !eq(2) || ac() !== 16) return 'Breastplate ersetzt Chain Mail nicht: ' + JSON.stringify(S()) + ' AC ' + ac();
+      btn('Shield', /Equip/).click();
+      if (S().sh !== 1 || !eq(3) || ac() !== 18) return 'Shield: ' + JSON.stringify(S()) + ' AC ' + ac();
+      btn('Breastplate', /Equipped/).click();
+      if (S().arm !== '' || eq(2) || ac() !== 14) return 'Unequip Breastplate: ' + JSON.stringify(S()) + ' AC ' + ac();
+      // AC-Fenster → Items angleichen
+      w.eval("openStat('ac');statArm('Chain Mail')");
+      if (!eq(1) || eq(2)) return 'AC-Fenster Chain Mail → Item nicht „Equipped“';
+      w.eval("statPut('sh',0);renderStat()");
+      if (eq(3) || S().sh) return 'AC-Fenster ohne Schild → Item noch „Equipped“';
+      w.eval("statArm('Plate Armor');closeAttr()");
+      if (eq(1) || eq(2)) return 'Plate Armor (kein Item) → Chain Mail noch „Equipped“';
+      // getragenes Item entfernen → AC ohne Rüstung
+      w.eval("openStat('ac');statArm('Chain Mail');closeAttr()"); if (!eq(1)) return 'Chain Mail nicht wieder getragen';
+      w.eval('itDel(1)');
+      if (S().arm !== '' || w.eval('st.items.some(i=>i.id===1)')) return 'Entfernen: ' + JSON.stringify(S());
+      // Hand-AC: nur eq + Entwurf, Wert bleibt
+      w.eval("delete st.statSrc.ac;document.getElementById('ac').value='13'");
+      btn('Breastplate', /Equip/).click();
+      if (!eq(2) || w.eval("statOn('ac')") || d.getElementById('ac').value !== '13') return 'Hand-AC still geändert';
+      if (!d.getElementById('attrModal').classList.contains('on') || !/still set by hand/.test(d.getElementById('attrBox').textContent) || !/Use calculated 16/.test(d.getElementById('attrBox').textContent)) return 'Hand-AC: Fenster mit Entwurf fehlt';
+      w.eval('statSetup();closeAttr()');
+      if (S().arm !== 'Breastplate' || ac() !== 16) return '„Use calculated“ übernimmt Rüstung nicht';
+      // Waffen
+      const W = () => JSON.parse(w.eval('JSON.stringify(st.weapons)')), V = i => JSON.parse(w.eval(`JSON.stringify((({atk,dmg,type,ab})=>({atk,dmg,type,ab}))(wpnVals(st.weapons[${i}])))`));
+      btn('Dagger', /→ Weapons/).click();
+      let L = W(); if (L.length !== 2 || L[1].ref !== 'Dagger|XPHB' || L[1].iid !== 4 || L[1].atk !== '' || L[1].type !== 'Piercing') return 'Dagger → Weapons: ' + JSON.stringify(L);
+      if (!btn('Dagger', /In Weapons/)?.disabled) return 'Knopf „✓ In Weapons“ fehlt';
+      w.eval('itToWpn(4)'); if (W().length !== 2) return 'Dagger doppelt eingetragen';
+      let v = V(1); if (v.atk !== '+5' || v.dmg !== '1d4+3' || v.ab !== 'STR') return 'Dagger STR: ' + JSON.stringify(v);
+      w.eval("st.attrs.DEX=18"); v = V(1); if (v.atk !== '+6' || v.dmg !== '1d4+4' || v.ab !== 'DEX') return 'Finesse nimmt nicht das bessere: ' + JSON.stringify(v);
+      d.getElementById('prof').value = '3'; if (V(1).atk !== '+7') return 'PB nicht live';
+      w.eval('wpnTog(1,"np")'); if (V(1).atk !== '+4' || V(1).dmg !== '1d4+4') return 'PB abschalten: ' + JSON.stringify(V(1));
+      w.eval('wpnTog(1,"np")');
+      w.eval("wpnSet(1,'atk','+9')"); if (V(1).atk !== '+9' || W()[1].atk !== '+9') return 'Eingabe überschreibt nicht';
+      w.eval("wpnSet(1,'atk','+7')"); if (W()[1].atk !== '') return 'Eingabe = Auto-Wert bleibt nicht automatisch';
+      w.eval("wpnSet(1,'dmg','2d4')"); w.eval('wpnAutoReset(1)'); if (W()[1].dmg !== '') return '↺ Auto setzt nicht zurück';
+      w.eval('itToWpn(5);itToWpn(6)');
+      if (V(2).dmg !== '1d8+3' || V(2).ab !== 'STR') return 'Longsword: ' + JSON.stringify(V(2));
+      w.eval('wpnTog(2,"th")'); if (V(2).dmg !== '1d10+3') return 'Two-handed: ' + JSON.stringify(V(2));
+      if (V(3).ab !== 'DEX' || V(3).atk !== '+7' || V(3).dmg !== '1d8+4') return 'Longbow DEX: ' + JSON.stringify(V(3));
+      v = V(0); if (v.atk !== '+4' || v.dmg !== '1d4+2' || v.type !== 'Bludgeoning' || v.ab !== '') return 'alte Text-Waffe verändert: ' + JSON.stringify(v);
+      // Karte im Actions-Tab und Würfeln
+      w.eval('buildWeapons()');
+      const wl = d.getElementById('weaponList').textContent;
+      if (!/Auto: STR \+3 · PB \+3 · 1d10\+3/.test(wl) || !/Two-handed \(1d10\)/.test(wl) || !/DEX \(Finesse\) \+4/.test(wl) || !/Mastery: Nick/.test(wl)) return 'Waffen-Karte: ' + wl.slice(0, 400);
+      if (d.getElementById('rollWpnA1').querySelector('b').textContent !== '+7' || d.getElementById('rollWpnD2').querySelector('b').textContent !== '1d10+3') return 'Würfel-Knöpfe ohne Live-Werte';
+      w.eval("var _rc=[];var _o1=rollD20,_o2=rollDmg;rollD20=o=>_rc.push(o);rollDmg=o=>_rc.push(o);rollWpn(1,0);rollWpn(2,1);rollWpn(0,0);rollD20=_o1;rollDmg=_o2");
+      const rc = JSON.parse(w.eval('JSON.stringify(_rc)'));
+      if (rc[0].mod !== 7 || rc[0].ab !== 'DEX' || rc[0].dmg !== '1d4+4' || rc[1].spec !== '1d10+3' || rc[1].ab !== 'STR' || rc[2].mod !== 4 || 'ab' in rc[2]) return 'rollWpn: ' + JSON.stringify(rc);
+      const lg2 = w.eval("_diffSnaps({weapons:[{name:'Dagger',ref:'Dagger|XPHB',iid:4,atk:'',dmg:''}]},{weapons:[{name:'Dagger',ref:'Dagger|XPHB',iid:4,atk:'',dmg:'',np:1}]})").join('|');
+      if (!/proficiency bonus: off/.test(lg2) || /iid/.test(lg2)) return 'Log Waffe: ' + lg2;
+      // aufräumen
+      w.eval(`(()=>{const b=${bak};st.attrs=b.a;st.attrSrc=b.as;st.statSrc=b.ss;st.weapons=b.we;st.items=b.it;})();renderItems();buildWeapons()`);
+      d.getElementById('prof').value = pf;
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

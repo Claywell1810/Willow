@@ -254,6 +254,12 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .cr-nw-v b{font-weight:normal;font-family:'Crimson Pro',serif;font-size:var(--fs-txt);color:var(--text)}
 .cr-nw-v b.g{color:var(--gold)}
 .cr-nw-s{font-size:var(--fs-2xs);color:var(--text3);font-family:'Cinzel',serif}
+.wp-sub{font-size:var(--fs-xs);color:var(--text3);line-height:1.35;margin-top:-2px}
+.wp-chips{display:flex;gap:6px;flex-wrap:wrap}.wp-chips .pk-chip{min-height:30px;padding:3px 10px;font-size:var(--fs-sm)}.wp-chips .pk-chip.on{border-color:var(--gold);color:var(--gold)}
+.wp-calc{line-height:1.5;font-family:'Crimson Pro',Georgia,serif;font-size:var(--fs-xs);letter-spacing:0}.wp-calc b.g{color:var(--gold);font-weight:600}
+.wp-auto{background:none;border:1px solid var(--border2);border-radius:10px;color:var(--gold);font-size:var(--fs-2xs);font-family:'Cinzel',serif;padding:1px 7px;cursor:pointer}
+.it-eq{flex-shrink:0;font-size:var(--fs-2xs);font-family:'Cinzel',serif;color:var(--gold);border:1px solid var(--gold);border-radius:10px;padding:1px 6px;white-space:nowrap}
+.it-btn.on{background:var(--gold);color:var(--bg0)}.it-btn:disabled{border-color:var(--border2);color:var(--text3);cursor:default}
 .rc-hint{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--gold);margin-top:3px}
 #raceStats:empty,#saveAdv:empty,#hpMHint:empty{display:none}
 #saveAdv{font-size:var(--fs-sm);color:var(--text3);margin:6px 2px 0;line-height:1.5}
@@ -1710,7 +1716,7 @@ function statRender(){
     const v=el&&el.value!==''?parseInt(el.value):NaN;b.textContent=isNaN(v)?'—':statFmt(k,v);});
 }
 function openStat(k){_stK=k;_stDraft=null;renderStat();document.getElementById('attrModal').classList.add('on');}
-function stSrcObj(k){if(statOn(k))return st.statSrc[k];if(!_stDraft||_stDraft.k!==k)_stDraft={k,s:k==='ac'?{arm:''}:k==='spd'?{base:parseInt(document.getElementById('spd')?.value)||30}:{}};return _stDraft.s;}
+function stSrcObj(k){if(statOn(k))return st.statSrc[k];if(!_stDraft||_stDraft.k!==k)_stDraft={k,s:k==='ac'?itEqDraft():k==='spd'?{base:parseInt(document.getElementById('spd')?.value)||30}:{}};return _stDraft.s;}
 function renderStat(){
   const box=document.getElementById('attrBox');if(!box||!_stK)return;
   const k=_stK,on=statOn(k),s=stSrcObj(k),r=statCalc(k,s),D=STAT_DEF[k];
@@ -1754,13 +1760,13 @@ function statRefresh(){statRender();buildRaceStats();}
 function statSetup(){
   const k=_stK;if(!k||statOn(k))return;
   if(!st.statSrc||typeof st.statSrc!=='object')st.statSrc={};
-  st.statSrc[k]=stSrcObj(k);_stDraft=null;statRefresh();renderStat();autoSave();showToast(STAT_DEF[k].l+': calculated');
+  st.statSrc[k]=stSrcObj(k);_stDraft=null;if(k==='ac')itEqSync();statRefresh();renderStat();autoSave();showToast(STAT_DEF[k].l+': calculated');
 }
 function statPut(row,v){
   const k=_stK,s=stSrcObj(k),x=STAT_ROWS[k].find(y=>y.k===row);
   if(x)v=Math.max(x.min,Math.min(x.max,v));
   if(v||row==='base'||row==='arm')s[row]=v;else delete s[row];
-  if(statOn(k)){statRefresh();autoSave();}
+  if(statOn(k)){if(k==='ac'&&(row==='arm'||row==='sh'))itEqSync();statRefresh();autoSave();}
 }
 function statArm(v){statPut('arm',v);if(_stK!=='ac'||!statOn('ac'))renderStat();else{statRefresh();renderStat();}}
 function statStep(row,dl){const s=stSrcObj(_stK),x=STAT_ROWS[_stK].find(y=>y.k===row);statPut(row,(+s[row]||0)+dl*((x&&x.st)||1));renderStat();}
@@ -2544,6 +2550,8 @@ function buildWeapons(){
   if(!st.weapons||!st.weapons.length){g.innerHTML=nwH||'<div style="font-size:var(--fs-md);color:var(--muted);padding:6px 2px">No weapons added.</div>';return;}
   g.innerHTML=nwH;
   st.weapons.forEach((w,i)=>{
+    const V=wpnVals(w),R=!!V.A; // Paket O5: verknüpfte Waffe (ref) – Werte live, Eingabe überschreibt
+    const fIn=k=>R?`wpnSet(${i},'${k}',this.value)" onchange="buildWeapons()`:`st.weapons[${i}].${k}=this.value;autoSave();rlWpnUpd(${i})`;
     const d=document.createElement('div');
     d.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px';
     d.innerHTML=`
@@ -2554,17 +2562,17 @@ function buildWeapons(){
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
         <div>
           <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">ATK BONUS</div>
-          <input value="${w.atk||''}" placeholder="+5" oninput="st.weapons[${i}].atk=this.value;autoSave();rlWpnUpd(${i})" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gold);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
+          <input value="${pkEsc(V.atk||'')}" placeholder="+5" oninput="${fIn('atk')}" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gold);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
         </div>
         <div>
           <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">DAMAGE</div>
-          <input value="${w.dmg||''}" placeholder="1d8+3" oninput="st.weapons[${i}].dmg=this.value;autoSave();rlWpnUpd(${i})" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
+          <input value="${pkEsc(V.dmg||'')}" placeholder="1d8+3" oninput="${fIn('dmg')}" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
         </div>
         <div>
           <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">TYPE</div>
-          <input value="${w.type||''}" placeholder="Slashing" oninput="st.weapons[${i}].type=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;padding:5px 8px;outline:none;text-align:center">
+          <input value="${pkEsc(V.type||'')}" placeholder="Slashing" oninput="st.weapons[${i}].type=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;padding:5px 8px;outline:none;text-align:center">
         </div>
-      </div>${rlWpnBtns('rollWpn',i,w.atk,w.dmg)}`;
+      </div>${R?wpnRefHtml(w,i,V):''}${rlWpnBtns('rollWpn',i,V.atk,V.dmg)}`;
     g.appendChild(d);
   });
 }
@@ -7862,6 +7870,88 @@ function itUnpack(id){
   showToast('Unpacked '+item.name+': '+it.pk.length+' item'+(it.pk.length===1?'':'s'));
 }
 
+// ── Paket O5 (03.10.2026): Verknüpfung Items ↔ AC-Rechner und Weapons (REFERENZ B26) ─────────────────
+// Rüstung/Schild mit ref: „Equip“ setzt Feld eq (je Art nur ein Item) und den AC-Rechner st.statSrc.ac (arm = Name aus
+// ARMOR_DATA, sh). AC noch von Hand → nur eq + Fenster AC öffnen (Entwurf mit der Rüstung; „Use calculated“ bleibt
+// Simons Knopfdruck, Paket C). Umgekehrt: Rüstung/Schild im AC-Fenster gewechselt → eq der Items angeglichen
+// (itEqSync). Getragenes Item entfernen → AC ohne diese Rüstung.
+function itArmor(item){const it=item&&item.ref&&ITEM_MAP[item.ref];if(!it||!it.at)return null;return ARMOR_DATA.find(a=>a.n===it.n&&(a.c==='S')===(it.at==='S'))||null;}
+function itEqDraft(){const s={arm:''};(st.items||[]).forEach(i=>{if(!i.eq)return;const a=itArmor(i);if(!a)return;if(a.c==='S')s.sh=1;else if(!s.arm)s.arm=a.n;});return s;}
+function itEqSync(){
+  if(!statOn('ac'))return;const s=st.statSrc.ac,L=st.items||[];let ch=0;
+  const fix=(isSh,want)=>{ // want = getragener ARMOR_DATA-Name laut AC-Rechner bzw. '' (nichts)
+    let hit=null;
+    L.forEach(i=>{const a=itArmor(i);if(!a||(a.c==='S')!==isSh)return;
+      if(i.eq&&!hit&&want&&a.n===want){hit=i;return;}
+      if(i.eq){delete i.eq;ch=1;}});
+    if(want&&!hit){const i=L.find(x=>{const a=itArmor(x);return a&&(a.c==='S')===isSh&&a.n===want;});if(i){i.eq=1;ch=1;}}
+  };
+  const sh=ARMOR_DATA.find(x=>x.c==='S');
+  fix(false,stArmorOf(s)?s.arm:'');fix(true,s.sh&&sh?sh.n:'');
+  if(ch)renderItems();
+}
+function itEquip(id){
+  const L=st.items||[],item=L.find(i=>i.id===id),a=itArmor(item);if(!a)return;
+  const isSh=a.c==='S',on=!item.eq;
+  L.forEach(i=>{if(i!==item&&i.eq){const b=itArmor(i);if(b&&(b.c==='S')===isSh)delete i.eq;}});
+  if(on)item.eq=1;else delete item.eq;
+  _itemOpen.add(id);
+  const calc=statOn('ac');
+  if(calc){const s=st.statSrc.ac;
+    if(isSh){if(on)s.sh=1;else delete s.sh;}else if(on)s.arm=a.n;else if(s.arm===a.n)s.arm='';
+    statRefresh();}
+  renderItems();autoSave();
+  if(calc)showToast((on?'Equipped ':'Unequipped ')+item.name+' · AC '+(document.getElementById('ac')?.value||''));
+  else if(on){showToast('AC is still set by hand');openStat('ac');}
+}
+function itDel(id){
+  const item=(st.items||[]).find(i=>i.id===id),a=item&&item.eq&&itArmor(item);
+  _itemOpen.delete(id);st.items=(st.items||[]).filter(i=>i.id!==id);
+  if(a&&statOn('ac')){const s=st.statSrc.ac;if(a.c==='S')delete s.sh;else if(s.arm===a.n)s.arm='';statRefresh();
+    showToast(item.name+' removed · AC '+(document.getElementById('ac')?.value||''));}
+  renderItems();autoSave();
+}
+// Waffe mit ref: „→ Weapons“ legt {name,atk:'',dmg:'',type,ref,iid} in st.weapons an (O-E3). Angriff/Schaden live
+// (wpnAuto): STR bei Nahkampf, DEX bei Fernkampf (Typ „Ranged Weapon“), Finesse = das bessere (XPHB); + PB, abschaltbar
+// (np:1); Versatile beidhändig (th:1, Würfel d2). atk/dmg leer = automatisch, Eingabe = von Hand (überschreibt,
+// „↺ Auto“ zurück). Alte Text-Waffen (ohne ref) unverändert.
+function wpnIt(w){return (w&&w.ref&&ITEM_MAP[w.ref])||null;}
+function wpnAuto(w){
+  const it=wpnIt(w);if(!it)return null;
+  const fin=(it.p||[]).some(k=>k.split('|')[0]==='F'),rng=/ranged/i.test(it.t||''),s=getAbilityMod('STR'),d=getAbilityMod('DEX');
+  const ab=fin?(d>s?'DEX':'STR'):rng?'DEX':'STR',m=ab==='DEX'?d:s,pb=w.np?0:prof(),die=(w.th&&it.d2)?it.d2:(it.d||'');
+  return {it,ab,fin,m,pb,atk:fmt(m+pb),dmg:die?die+(m?(m>0?'+':'')+m:''):'',type:it.dt||''};
+}
+function wpnVals(w){
+  const A=wpnAuto(w);if(!A)return {atk:w.atk,dmg:w.dmg,type:w.type,ab:''};
+  const ha=!!String(w.atk||'').trim(),hd=!!String(w.dmg||'').trim();
+  return {atk:ha?w.atk:A.atk,dmg:hd?w.dmg:A.dmg,type:w.type||A.type,ab:A.ab,A,ha,hd};
+}
+function itToWpn(id){
+  const item=(st.items||[]).find(i=>i.id===id),it=item&&item.ref&&ITEM_MAP[item.ref];if(!it||!it.d)return;
+  st.weapons=st.weapons||[];if(st.weapons.some(w=>w.iid===id))return;
+  const w={name:item.name,atk:'',dmg:'',type:it.dt||'',ref:item.ref,iid:id};st.weapons.push(w);
+  _itemOpen.add(id);renderItems();buildWeapons();autoSave();
+  const v=wpnVals(w);showToast(item.name+' → Weapons · '+v.atk+(v.dmg?' · '+v.dmg:''));
+}
+function wpnSet(i,k,v){
+  const w=(st.weapons||[])[i];if(!w)return;const A=wpnAuto(w);
+  if(A&&String(v).trim()===A[k])v='';   // gleich dem automatischen Wert = automatisch
+  w[k]=v;autoSave();rlWpnUpd(i);
+}
+function wpnTog(i,k){const w=(st.weapons||[])[i];if(!w)return;if(w[k])delete w[k];else w[k]=1;autoSave();buildWeapons();}
+function wpnAutoReset(i){const w=(st.weapons||[])[i];if(!w)return;w.atk='';w.dmg='';autoSave();buildWeapons();}
+function wpnRefHtml(w,i,V){ // Zusatz unter den Feldern einer verknüpften Waffe
+  const A=V.A,it=A.it,pr=itProps(it),typ=[itCap(it.wc||''),it.t||''].filter(Boolean).join(' ');
+  const sub=[typ].concat(pr.length?[pr.join(', ')]:[]).concat(it.m&&it.m.length?['Mastery: '+it.m.join(', ')]:[]).join(' · ');
+  const calc=`${A.ab}${A.fin?' (Finesse)':''} ${fmt(A.m)}`+(A.pb?` · PB ${fmt(A.pb)}`:'')+(A.dmg?` · ${A.dmg}`:'');
+  const man=V.ha||V.hd?` · <b class="g">${V.ha&&V.hd?'attack & damage':V.ha?'attack':'damage'} set by hand</b> <button class="wp-auto" onclick="wpnAutoReset(${i})">↺ Auto</button>`:'';
+  return `<div class="wp-sub">${pkEsc(sub)}</div>`
+    +`<div class="wp-chips"><button class="pk-chip${w.np?'':' on'}" onclick="wpnTog(${i},'np')">${w.np?'Not proficient':'✓ Proficient'}</button>`
+    +(it.d2?`<button class="pk-chip${w.th?' on':''}" onclick="wpnTog(${i},'th')">${w.th?'✓ ':''}Two-handed (${pkEsc(it.d2)})</button>`:'')+`</div>`
+    +`<div class="cr-nw-s wp-calc">Auto: ${pkEsc(calc)}${man}</div>`;
+}
+
 // ── Paket O1 (03.10.2026): Traglast (XPHB „Carrying Capacity“, 5e.tools variantrules.json) ──
 // Carry = STR-Wert × 7.5 (Tiny) / 15 (Small, Medium) / 30 (Large) / 60 (Huge) / 120 (Gargantuan) lb.
 // Powerful Build (z. B. Goliath XPHB): „count as one size larger when determining your carrying capacity“ –
@@ -7899,14 +7989,17 @@ function renderItems(){
     const card=document.createElement('div');card.className='item-card';
     const top=document.createElement('div');top.className='item-top';
     const itRef=item.ref&&ITEM_MAP[item.ref],sub=itSum(itRef);
-    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${pkEsc(item.name)}${sub?`<small class="item-sub">${pkEsc(sub)}</small>`:''}</span><span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt} lb</span>`:''}`;
+    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${pkEsc(item.name)}${sub?`<small class="item-sub">${pkEsc(sub)}</small>`:''}</span>${item.eq&&itArmor(item)?'<span class="it-eq">Equipped</span>':''}<span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt} lb</span>`:''}`;
     const detail=document.createElement('div');detail.className='item-detail'+(_itemOpen.has(item.id)?' on':'');
     const info=itInfo(item);if(info)detail.insertAdjacentHTML('beforeend',info);
     const row=document.createElement('div');row.className='item-detail-row';
     row.innerHTML=`<input type="number" min="1" value="${item.qty}" placeholder="Qty" oninput="updItem(${item.id},'qty',+this.value);renderItems()"><input type="number" min="0" step="0.1" value="${item.wt||''}" placeholder="Weight lb" oninput="updItem(${item.id},'wt',+this.value);itemWeightHead()">`;
     const ta=document.createElement('textarea');ta.placeholder='Note...';ta.value=item.note||'';ta.oninput=()=>{updItem(item.id,'note',ta.value);};
-    const del=document.createElement('button');del.className='item-del';del.textContent='✕ Remove';del.onclick=()=>{_itemOpen.delete(item.id);st.items=st.items.filter(i=>i.id!==item.id);renderItems();autoSave();};
+    const del=document.createElement('button');del.className='item-del';del.textContent='✕ Remove';del.onclick=()=>itDel(item.id);
     const btns=document.createElement('div');btns.className='it-btns';
+    // Paket O5: Rüstung/Schild „Equip“ → AC-Rechner, Waffe „→ Weapons“
+    if(itArmor(item)){const e=document.createElement('button');e.className='it-btn'+(item.eq?' on':'');e.textContent=item.eq?'✓ Equipped':'🛡 Equip';e.title=item.eq?'Take off (AC without it)':'Wear it: sets Armor Class';e.onclick=()=>itEquip(item.id);btns.appendChild(e);}
+    if(itRef&&itRef.d){const has=(st.weapons||[]).some(w=>w.iid===item.id),b=document.createElement('button');b.className='it-btn';b.textContent=has?'✓ In Weapons':'⚔ → Weapons';b.disabled=has;b.title='Add to Weapons (Actions) with attack and damage';b.onclick=()=>itToWpn(item.id);btns.appendChild(b);}
     if(itRef&&itRef.pk){const u=document.createElement('button');u.className='it-btn';u.textContent='📦 Unpack';u.title='Replace this pack with its contents';u.onclick=()=>itUnpack(item.id);btns.appendChild(u);}
     const lc=itLinkCand(item);
     if(lc){const l=document.createElement('button');l.className='it-btn';l.textContent='🔗 Link: '+lc.n+' ('+lc.s+')';l.title='Show the 5e.tools details for this item';l.onclick=()=>itLink(item.id);btns.appendChild(l);}
@@ -8892,9 +8985,11 @@ function _diffSnaps(a,b){
   done.add('feats');_logList(out,a.feats,b.feats,'Feat',x=>x&&x.name,{txt:['desc','notes','note']});
   done.add('equipDone');{const ea=a.equipDone||{},eb=b.equipDone||{};new Set([...Object.keys(ea),...Object.keys(eb)]).forEach(k=>{const n=k.replace(/^(cls|bg):/,''),w=k.startsWith('bg:')?'Background '+n:n;   // Paket O3
     if(eb[k]&&!ea[k])out.push(`Starting equipment added: ${w}${eb[k]!=='_'?' (option '+eb[k]+')':''}`);else if(ea[k]&&!eb[k])out.push(`Starting equipment can be added again: ${w}`);});}
-  done.add('items');_logList(out,a.items,b.items,'Item',x=>x&&x.id!=null?x.id:x&&x.name,{txt:['note'],fl:{qty:'Quantity',wt:'Weight',cat:'Category',note:'Note',name:'Name',from:'From',ref:'Reference'},skip:['id'],
+  done.add('items');_logList(out,a.items,b.items,'Item',x=>x&&x.id!=null?x.id:x&&x.name,{txt:['note'],fl:{qty:'Quantity',wt:'Weight',cat:'Category',note:'Note',name:'Name',from:'From',ref:'Reference'},skip:['id','eq'],
+    extra:(y,x)=>{if(y&&x&&!!y.eq!==!!x.eq)out.push((x.eq?'Equipped: ':'Unequipped: ')+(x.name||''));},
     lblF:(f,x,i,lbl)=>f==='name'?`Item ${i+1}`:lbl});
-  done.add('weapons');_logList(out,a.weapons,b.weapons,'Weapon',null,{fl:{name:'Name',atk:'Attack',dmg:'Damage',type:'Damage Type'},
+  done.add('weapons');_logList(out,a.weapons,b.weapons,'Weapon',null,{fl:{name:'Name',atk:'Attack',dmg:'Damage',type:'Damage Type',ref:'Reference'},skip:['iid','np','th'],
+    extra:(y,x,lbl)=>{if(!y||!x)return;if(!!y.np!==!!x.np)out.push(`${lbl} proficiency bonus: ${x.np?'off':'on'}`);if(!!y.th!==!!x.th)out.push(`${lbl} two-handed: ${x.th?'on':'off'}`);},
     name:(x,i)=>(x&&x.name)||('#'+(i+1)),lblF:(f,x,i,lbl)=>f==='name'?`Weapon ${i+1}`:lbl});
   done.add('savedBeasts');_logList(out,a.savedBeasts,b.savedBeasts,'Beast',x=>x&&(x.n||x.name),{name:x=>x&&(x.n||x.name)});
   function profDiff(oa,ob,tag,lblFn){
@@ -9267,7 +9362,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03n';
+const APP_VERSION = 'willow-app-2026-10-03o';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -9657,9 +9752,9 @@ function rollAttr(k){attrSync();const a=ATTRS.find(x=>x.k===k);if(!a)return;roll
 function rollInit(){statSync();rollD20({k:'check',ab:'DEX',init:1,l:'Initiative',mod:parseInt(document.getElementById('ini')?.value)||0});}
 function rollSpellAtk(){const a=document.getElementById('spAttr')?.value||'';calcSpell();rollD20({k:'atk',ab:a,l:'Spell Attack',mod:parseInt(document.getElementById('spAtk')?.value)||0});}
 function rlAtkNum(s){const m=/[+-]?\s*\d+/.exec(String(s||'').replace(/[−–]/g,'-'));return m?parseInt(m[0].replace(/\s/g,'')):0;}
-function rollWpn(i,dmg){const w=(st.weapons||[])[i];if(!w)return;const n=(w.name||'').trim()||'Weapon';
-  if(dmg)rollDmg({l:n+' Damage',spec:w.dmg,wpn:1,dt:w.type});
-  else rollD20({k:'atk',wpn:1,l:n+' Attack',mod:rlAtkNum(w.atk),dmg:w.dmg,dt:w.type,dl:n+' Damage'});}
+function rollWpn(i,dmg){const w=(st.weapons||[])[i];if(!w)return;const n=(w.name||'').trim()||'Weapon',V=wpnVals(w),ab=V.ab?{ab:V.ab}:{};
+  if(dmg)rollDmg(Object.assign({l:n+' Damage',spec:V.dmg,wpn:1,dt:V.type},ab));
+  else rollD20(Object.assign({k:'atk',wpn:1,l:n+' Attack',mod:rlAtkNum(V.atk),dmg:V.dmg,dt:V.type,dl:n+' Damage'},ab));}
 function rollNw(i,dmg){const w=crWeapons()[i];if(!w)return;
   if(dmg)rollDmg({l:w.n+' Damage',spec:w.dmg,wpn:1,dt:w.type,ab:w.ab});
   else rollD20({k:'atk',wpn:1,ab:w.ab,l:w.n+' Attack',mod:rlAtkNum(w.atk),dmg:w.dmg,dt:w.type,dl:w.n+' Damage'});}
@@ -9783,9 +9878,9 @@ function rlFreeSeg(){return `<div class="rl-chips rl-free">${[['n','Normal'],['a
 function rlHealMe(){const R=_rl;if(!R||R.k!=='heal'||R.applied)return;const el=document.getElementById('dmgAmt');if(!el)return;
   el.value=R.total;hpApply(R.hk==='temp'?'temp':'heal');el.value='';R.applied=1;rlShow(false);}
 function rlWpnUpd(i){ // Beschriftung nach Eingabe aktualisieren (ohne Neuaufbau, damit die Tastatur offen bleibt)
-  const w=(st.weapons||[])[i];if(!w)return;const a=document.getElementById('rollWpnA'+i),d=document.getElementById('rollWpnD'+i),P=rlParse(w.dmg);
-  if(a)a.querySelector('b').textContent=fmt(rlAtkNum(w.atk));
-  if(d){d.disabled=!P;d.querySelector('b').textContent=P?String(w.dmg).trim():'—';}}
+  const w=(st.weapons||[])[i];if(!w)return;const V=wpnVals(w),a=document.getElementById('rollWpnA'+i),d=document.getElementById('rollWpnD'+i),P=rlParse(V.dmg);
+  if(a)a.querySelector('b').textContent=fmt(rlAtkNum(V.atk));
+  if(d){d.disabled=!P;d.querySelector('b').textContent=P?String(V.dmg).trim():'—';}}
 // Fenster „Effects & Conditions“: wo ein Effekt mitrechnet (feste Regeln als Text, eigene als Auswahl e.ap)
 function fxApChips(ap,pre){return `<div class="pk-chips">${RL_AP.map(([k,l])=>`<button class="pk-chip${(ap||[]).includes(k)?' on':''}" onclick="${pre}'${k}')">${l}</button>`).join('')}</div>`;}
 function fxApHtml(e,own){
