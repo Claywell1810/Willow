@@ -2,7 +2,7 @@
 # setup.sh – Sitzungsstart für Willow in einem Aufruf (seit 28.09.2026, Anleitung A4/B1a)
 # Aufruf (aus dem Ordner ÜBER dem Klon, meist /home/claude):
 #   bash willow/tools/setup.sh              # nur Arbeitskopie + jsdom (UI-/Code-Arbeit)
-#   bash willow/tools/setup.sh klassen      # + class-*.json aller Klassen der App (klassen.py), optionalfeatures/feats/items.json, book-xphb.json nach src/
+#   bash willow/tools/setup.sh klassen      # + class-*.json aller Klassen der App (klassen.py), optionalfeatures/feats/items/items-base.json, book-xphb.json nach src/
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium (+ objects.json) für BST_DATA, SPELL_STATBLOCKS, FEATURE_STATBLOCKS (+ spells)
 #   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
@@ -39,7 +39,7 @@ if has klassen; then
   # Paket N (03.10.2026): Klassen aus der App (CLASS_DATA-Zeilen, tools/klassen.py) statt fester Liste; neue Klasse: erst Stub (A4)
   KL="$(python3 "$W/tools/klassen.py" DnD_Character_App.html --lower)"
   for k in $KL; do get "class/class-$k.json"; done
-  get optionalfeatures.json; get feats.json; get items.json; get book/book-xphb.json
+  get optionalfeatures.json; get feats.json; get items.json; get items-base.json; get book/book-xphb.json
   echo "   Klassen-Quellen in src/ ($(echo $KL | wc -w) Klassen + optionalfeatures/feats/items + book-xphb für mc_slots.py)"
 fi
 if has zauber bestien; then
