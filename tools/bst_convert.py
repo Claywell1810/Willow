@@ -2,6 +2,7 @@
 # Aufruf:
 #   python3 bst_convert.py bst DnD_Character_App.html src [--write]   # BST_DATA neu aus bestiary-xmm.json (Namen/Reihenfolge/type bleiben)
 #   python3 bst_convert.py spells DnD_Character_App.html src [--write] # SPELL_STATBLOCKS aus {@creature}-Verweisen der Zauber
+#   python3 bst_convert.py features DnD_Character_App.html src [--write] # FEATURE_STATBLOCKS aus der Liste FEATURES (Paket A2)
 # Braucht in src/: bestiary-xmm.json, fluff-bestiary-xmm.json (bst); zusätzlich spells-*.json + bestiary-<quelle>.json (spells)
 # Unbekannte Tags/Formen -> Fehler (Konverter erweitern, nicht raten).
 import json, re, sys, os
@@ -339,7 +340,90 @@ def cmd_spells(html_p, src, write):
         open(html_p, 'w', encoding='utf-8').write(html); print('geschrieben')
     return out
 
+# ── Klassen-Features mit Kreatur (Paket A2, 03.10.2026) ──
+# Kuratierte Liste: Schlüssel "Klasse|Gruppe|Feature" (Gruppe = 'base' oder Subklassen-Key, B3, wie FEATURE_PICKS).
+# Einträge: "Name|Quelle" = Kreatur aus dem Bestiarium; "@Zauber" = Stat-Blöcke dieses Zaubers aus SPELL_STATBLOCKS (zur Laufzeit).
+# Optional "via": Beschriftung der Gruppe (z. B. Invocation-Name). Beleg: der Kreatur-/Zaubername muss im Feature-Text der App stehen.
+FEATURES = {
+    'Ranger|Beast Master|Primal Companion': ['Beast of the Land|XPHB', 'Beast of the Sea|XPHB', 'Beast of the Sky|XPHB'],
+    'Ranger|Drakewarden|Drake Companion': ['Drake Companion|FTD'],
+    'Ranger|Fey Wanderer|Fey Reinforcements': ['@Summon Fey'],
+    'Druid|Circle of Wildfire (TCE)|Summon Wildfire Spirit': ['Wildfire Spirit|TCE'],
+    'Druid|Circle of Spores (TCE)|Fungal Infestation': ['Zombie|MM'],
+    'Druid|base|Wild Companion': ['@Find Familiar'],
+    'Bard|College of Creation|Animating Performance': ['Dancing Item|TCE'],
+    'Paladin|base|Faithful Steed': ['@Find Steed'],
+    'Sorcerer|Shadow Magic|Beasts of Ill Omen': ['@Summon Beast'],
+    'Sorcerer|Draconic Sorcery|Dragon Companion': ['@Summon Dragon'],
+    'Warlock|The Hexblade|Accursed Specter': ['Specter|MM'],
+    'Warlock|Great Old One Patron|Create Thrall': ['@Summon Aberration'],
+    'Warlock|base|Eldritch Invocation Options': [('Pact of the Chain', ['Imp|XMM', 'Pseudodragon|XMM', 'Quasit|XMM', 'Skeleton|XMM', 'Slaad Tadpole|XMM',
+                                                                         'Sphinx of Wonder|XMM', 'Sprite|XMM', 'Venomous Snake|XMM']), '@Find Familiar'],
+    'Wizard|School of Necromancy|Necromancy Spellbook': [('Undead Familiar', ['Skeleton|XMM', 'Zombie|XMM']), '@Find Familiar'],
+    'Wizard|School of Necromancy|Undead Thralls': ['@Animate Dead'],
+    'Wizard|Illusionist|Phantasmal Creatures': ['@Summon Beast', '@Summon Fey'],
+}
+# Bewusst nicht (Prüfliste unten meldet sie als "nicht übernommen"): Beispiele/Erscheinungsbild statt Stat-Block
+# (Wild Shape-Beispielformen, Wild Surge/Wild Magic Surge flumph/pixie/unicorn, Genie-Arten, Favored Enemy, Winter Walker),
+# Fassungen, die die App nicht nutzt (Beast Master TCE, Hound of Ill Omen XGE, Vestige AU).
+
+
+def cmd_features(html_p, src, write):
+    import glob
+    D = dump(html_p, '{cd:Object.fromEntries(Object.entries(CLASS_DATA).map(([c,v])=>[c,{base:v.base.map(f=>[f.name,f.desc]),'
+                     'sub:Object.fromEntries(Object.entries(v.subclass).map(([k,l])=>[k,l.map(f=>[f.name,f.desc])]))}])),ss:Object.keys(SPELL_STATBLOCKS)}')
+    M = load(src, *[os.path.basename(p) for p in glob.glob(os.path.join(src, 'bestiary-*.json'))])
+    out, err = {}, []
+    for key, items in FEATURES.items():
+        c, g, n = key.split('|')
+        cd = D['cd'].get(c)
+        fl = cd and (cd['base'] if g == 'base' else cd['sub'].get(g))
+        desc = next((d for nm, d in (fl or []) if nm == n), None)
+        if desc is None: err.append('Feature fehlt in der App: ' + key); continue
+        low = desc.lower(); res = []
+        for it in items:
+            via, L = it if isinstance(it, tuple) else (None, [it])
+            if via and via.lower() not in low: err.append(f'{key}: "{via}" nicht im Text')
+            for x in L:
+                if x.startswith('@'):
+                    if x[1:] not in D['ss']: err.append(f'{key}: Zauber ohne Stat-Block {x}')
+                    elif x[1:].lower() not in low: err.append(f'{key}: Zauber nicht im Text {x}')
+                    else: res.append({'sp': x[1:]})
+                    continue
+                nm, q = x.split('|'); k = (nm.lower(), q)
+                if k not in M: err.append(f'{key}: FEHLT im Bestiarium {x}'); continue
+                if nm.lower() not in low: err.append(f'{key}: Kreatur nicht im Text {x}')
+                e = dict(convert(resolve_copy(M[k], M)), src=q)
+                if via: e['via'] = via
+                res.append(e)
+        out[key] = res
+    # Prüfliste: {@creature}-Verweise in Klassen-Features/Invocations, die nicht übernommen sind (Hinweis, kein Fehler)
+    have = {(b['n'].lower()) for v in out.values() for b in v if 'n' in b}
+    for p in sorted(glob.glob(os.path.join(src, 'class-*.json'))) + [os.path.join(src, 'optionalfeatures.json')]:
+        if not os.path.exists(p): continue
+        J = json.load(open(p, encoding='utf-8'))
+        for ft in J.get('classFeature', []) + J.get('subclassFeature', []) + J.get('optionalfeature', []):
+            for r in set(re.findall(r'\{@creature ([^}|]*)', json.dumps(ft.get('entries', [])))):
+                if r.lower() not in have:
+                    print(f"  nicht übernommen: {ft.get('className', '')} {ft.get('subclassShortName', '')} {ft['source']} {ft['name']} -> {r}")
+    if err:
+        for e in err: print('FEHLER', e)
+        sys.exit(1)
+    print(f'FEATURE_STATBLOCKS: {len(out)} Features, {sum(1 for v in out.values() for b in v if "n" in b)} Stat-Blöcke, '
+          f'{sum(1 for v in out.values() for b in v if "sp" in b)} Zauber-Verweise')
+    for k, v in out.items(): print('  ', k, '->', ', '.join(b['n'] + ' (' + b['src'] + ')' if 'n' in b else '@' + b['sp'] for b in v))
+    if '{@' in json.dumps(out): print('FEHLER Tag-Rest'); sys.exit(1)
+    if write:
+        html = open(html_p, encoding='utf-8').read()
+        line = js_line('FEATURE_STATBLOCKS', out)
+        if 'const FEATURE_STATBLOCKS=' in html: html = replace_line(html, 'const FEATURE_STATBLOCKS=', line)
+        else:   # erstes Mal: neue Zeile direkt nach SPELL_STATBLOCKS
+            i = html.index('const SPELL_STATBLOCKS='); assert html.count('const SPELL_STATBLOCKS=') == 1
+            j = html.index('\n', i); html = html[:j + 1] + line + '\n' + html[j + 1:]
+        open(html_p, 'w', encoding='utf-8').write(html); print('geschrieben')
+    return out
+
 
 if __name__ == '__main__':
     mode, html_p, src = sys.argv[1:4]
-    {'bst': cmd_bst, 'spells': cmd_spells}[mode](html_p, src, '--write' in sys.argv)
+    {'bst': cmd_bst, 'spells': cmd_spells, 'features': cmd_features}[mode](html_p, src, '--write' in sys.argv)

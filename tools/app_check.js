@@ -2052,6 +2052,28 @@ const REGRESSION = [
       w.closeDice(); w.eval('st.mySpells=[];st.slotUsed=[0,0,0,0,0,0,0,0,0]');
       return true;
     } },
+  { name: 'Paket A2: Begleiter-Stat-Blöcke unter Klassen-Features (Info-Tab + Actions), Werte mit Klassenstufe', datum: '03.10.2026',
+    run: ({ w, d, sel, set }) => {
+      if (!w.eval("typeof FEATURE_STATBLOCKS!=='undefined'")) return 'FEATURE_STATBLOCKS fehlt';
+      w.eval("st.attrs.WIS=16");
+      sel('Ranger', 'Beast Master (PHB)', 6); set('prof', '3'); set('spAttr', 'WIS'); w.buildSubclsLore(); w.buildAbilities();   // PB/Zauberattribut sind Handfelder
+      const inf = () => d.getElementById('subclsLoreBody')?.innerHTML || '', ab = () => d.getElementById('abList')?.innerHTML || '';
+      for (const n of ['Beast of the Land', 'Beast of the Sea', 'Beast of the Sky']) { if (!inf().includes(n)) return 'Info-Tab ohne ' + n; if (!ab().includes(n)) return 'Actions ohne ' + n; }
+      const you = [...d.querySelectorAll('#subclsLoreBody .sb-you')].map(x => x.textContent.replace(/\s+/g, ' '));
+      if (you.length !== 3) return 'Werte-Zeilen: ' + you.length + ' statt 3';
+      if (!you[0].includes('HP 35 (6d8)') || !you[0].includes('AC 16') || !you[0].includes('PB +3') || !you[0].includes('Spell attack +6')) return 'Beast of the Land: ' + you[0];
+      if (!you[2].includes('HP 28 (6d6)')) return 'Beast of the Sky: ' + you[2];
+      sel('Ranger', 'Drakewarden (FTD)', 7);
+      const dr = [...d.querySelectorAll('#subclsLoreBody .sb-you')].map(x => x.textContent).join('');
+      if (!dr.includes('HP 40 (7d10)') || !dr.includes('AC 17')) return 'Drake Companion L7: ' + dr;
+      sel('Ranger', 'Hunter (PHB)', 6); if (d.querySelector('#subclsLoreBody .sb-det')) return 'Hunter zeigt einen Stat-Block';
+      sel('Sorcerer', 'Shadow Magic (XGE)', 6);
+      if (!inf().includes('Bestial Spirit') || !inf().includes('Summon Beast (spell)')) return 'Beasts of Ill Omen ohne Summon-Beast-Stat-Block';
+      sel('Warlock', '', 2);
+      const cl = d.getElementById('clsLoreBody')?.innerHTML || '';
+      if (!cl.includes('Pact of the Chain') || !cl.includes('Sphinx of Wonder') || !cl.includes('Find Familiar (spell)')) return 'Pact of the Chain ohne Stat-Blöcke';
+      return true;
+    } },
 ];
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -2110,7 +2132,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'FEATURE_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;
