@@ -13,7 +13,7 @@ Gemeinsame Arbeitsgrundlage für Simon und Claude. **Jeder neue Chat liest zuers
 | `docs/FIXLISTE.md` | offene Arbeitspakete und Punkte | bei Paket-Arbeit ganz |
 | `docs/FIXLISTE_INFO.md` | Punkte „nur zur Info“/„nur auf Wunsch“, Verlauf, Erledigtes | nur bei Bedarf |
 | `docs/ZAUBER_KATEGORIEN.md` | Zauber-Kategorien/Bilder (seit 01.10.2026): Kategorien, Regeln, Ablauf für neue Zauber (`tools/spell_cats.py`) | bei neuen Zaubern oder Änderungen an Kategorien |
-| `tools/` | alle Skripte: `setup.sh`, `publish.sh`, `rep.py`, `app_check.js`, `dump.js`, Konverter, `feature_picks.py` (B12), `race_convert.py` (B13), `mc_convert.py` (B22), 12 Configs, Foto-Skripte | nie ganz lesen, nur ausführen oder gezielt greppen |
+| `tools/` | alle Skripte: `setup.sh`, `publish.sh`, `rep.py`, `app_check.js`, `dump.js`, Konverter, `feature_picks.py` (B12), `race_convert.py` (B13), `mc_convert.py`/`mc_slots.py` (B22), 12 Configs, Foto-Skripte | nie ganz lesen, nur ausführen oder gezielt greppen |
 
 Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Nummer in diese Datei, die Referenz oder das Archiv (Tabelle oben). Im Projekt (claude.ai) liegt nur noch der Wegweiser `claude/Workflow_Anleitung.md` (verweist hierher); Skripte und Doku werden **nicht** mehr per `project_read`/`project_write` übertragen.
 
@@ -51,7 +51,7 @@ Abschnitts-Nummern (A2, B9 …) sind unverändert; ein Verweis zeigt je nach Num
 
 ## A6. Reihenfolge (Kurzform)
 
-Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2 sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, F1 + J ✔ 03.10.2026, F2 ✔ 03.10.2026, F3 ✔ 03.10.2026, weiter F4 → F5, Entscheidungen E1–E8 ✔) → M → N → O (O niedrige Prio); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
+Alle 12 Klassen sind eingepflegt; Fixliste Sonnet/Opus-Teil, Combat-/Actions-Umbau, UI/Lesbarkeit und die Pakete A, B, C1–C4, D, I, G, H, L, K, E, P, Q, A2 sind erledigt (Verlauf: `docs/ARCHIV.md`, Abschnitte A6 und „Ausgelagert“). **Als Nächstes: die Arbeitspakete in `docs/FIXLISTE.md` in dieser Reihenfolge: F (Planung ✔ 03.10.2026, F1 + J ✔ 03.10.2026, F2 ✔ 03.10.2026, F3 ✔ 03.10.2026, F4 ✔ 03.10.2026, weiter F5, Entscheidungen E1–E8 ✔) → M → N → O (O niedrige Prio); alle Opus Hoch.** Prompt: „Arbeite die Fixliste ab: Paket X.“ Ausnahme: Stört ein Fehler im Spiel, wird er vorgezogen.
 
 ## A7. Arbeitsregeln
 
