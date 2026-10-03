@@ -2395,6 +2395,28 @@ const REGRESSION = [
         if(['str','dex','con','int','wis','cha'].some(k=>typeof b[k]!=='number'))P.push(n+': Attribute');
         if(!Array.isArray(b.actions)||!Array.isArray(b.traits))P.push(n+': actions/traits');});
       Object.entries(SPELL_STATBLOCKS).concat(Object.entries(FEATURE_STATBLOCKS)).forEach(([k,L])=>(Array.isArray(L)?L:[L]).forEach(b=>{if(b&&b.n&&!b.type&&!b.ref&&!b.via)P.push('Stat-Block '+k+'|'+b.n+': type fehlt')}));`) },
+  { name: 'Paket O1: Traglast – STR × 15 lb aus st.attrs, Größe, Powerful Build (Goliath, Custom), Anzeige lb statt kg', datum: '03.10.2026',
+    run: ({w, d, sel}) => {
+      sel('Fighter', '', 3);
+      d.getElementById('race').value = ''; w.onRaceChange();
+      w.eval("st.attrSrc=null; st.attrs.STR=16; st.items=[{id:1,name:'Testseil',qty:2,wt:5,cat:'Misc',note:''}]");
+      w.renderItems();
+      const t = () => d.getElementById('weightDisplay').textContent.trim();
+      if (t() !== '10 / 240 lb') return 'Ohne Rasse (Medium, STR 16) erwartet „10 / 240 lb“, ist „' + t() + '“';
+      if (/kg|Tragelast/.test(d.getElementById('itemList').innerHTML + t())) return 'Noch „kg“ oder „Tragelast“ im Items-Tab';
+      if (!/5 lb/.test(d.getElementById('itemList').textContent)) return 'Item-Karte zeigt Gewicht nicht in lb';
+      d.getElementById('race').value = 'Goliath'; w.onRaceChange(); w.renderItems();
+      if (t() !== '10 / 480 lb') return 'Goliath (Powerful Build) erwartet „10 / 480 lb“, ist „' + t() + '“';
+      d.getElementById('race').value = 'custom'; w.onRaceChange();
+      w.eval("st.customRace={size:'S'}"); w.renderItems();
+      if (t() !== '10 / 240 lb') return 'Custom Small erwartet 240 lb, ist „' + t() + '“';
+      w.eval("st.customRace={size:'L',tr:[{id:'rc_cu_1',n:'Powerful Build',d:'',tag:'passiv'}],nid:1}"); w.renderItems();
+      if (t() !== '10 / 960 lb') return 'Custom Large + Powerful Build erwartet 960 lb (Huge), ist „' + t() + '“';
+      w.eval("st.customRace={}; st.attrs.STR=1; st.items[0].qty=20"); d.getElementById('race').value = ''; w.onRaceChange(); w.renderItems();
+      if (t() !== '100 / 15 lb' || !d.getElementById('weightDisplay').style.color) return 'Überladung nicht markiert: ' + t();
+      w.eval("st.items=[]; st.attrs.STR=10"); w.renderItems();
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

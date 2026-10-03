@@ -1140,7 +1140,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
       <div class="item-add-row">
         <input id="itemName" placeholder="Name..." style="flex:2">
         <input id="itemQty" type="number" min="1" value="1" placeholder="Qty" style="flex:0.6;text-align:center">
-        <input id="itemWeight" type="number" min="0" step="0.1" placeholder="kg" style="flex:0.6;text-align:center">
+        <input id="itemWeight" type="number" min="0" step="0.1" placeholder="lb" style="flex:0.6;text-align:center">
         <select id="itemCat" style="flex:1">
           <option value="Weapon">⚔ Weapon</option>
           <option value="Armor">🛡 Armor</option>
@@ -7574,24 +7574,46 @@ function addItem(){
   renderItems();autoSave();
 }
 
+// ── Paket O1 (03.10.2026): Traglast (XPHB „Carrying Capacity“, 5e.tools variantrules.json) ──
+// Carry = STR-Wert × 7.5 (Tiny) / 15 (Small, Medium) / 30 (Large) / 60 (Huge) / 120 (Gargantuan) lb.
+// Powerful Build (z. B. Goliath XPHB): „count as one size larger when determining your carrying capacity“ –
+// erkannt am Rassentext (RACE_DATA[].traits) bzw. an einem Custom-Trait dieses Namens/Textes. Gewichte in lb (O-E1).
+const CARRY_SIZES=['Tiny','Small','Medium','Large','Huge','Gargantuan'],CARRY_MULT=[7.5,15,15,30,60,120];
+const CARRY_PB=/count as one size larger when determining your carrying capacity/i;
+function carryPB(){
+  const r=document.getElementById('race')?.value||'';
+  if(r==='custom')return ((st.customRace||{}).tr||[]).some(t=>t&&(/^\s*powerful build\s*$/i.test(t.n||'')||CARRY_PB.test(t.d||'')));
+  const d=typeof RACE_DATA!=='undefined'&&RACE_DATA[r];return !!(d&&CARRY_PB.test(d.traits||''));
+}
+function carryCap(){
+  const race=rcRace(),v=race&&rcVals(race);
+  let i=CARRY_SIZES.indexOf((v&&v.size)||'Medium');if(i<0)i=2;
+  const pb=carryPB();if(pb)i=Math.min(i+1,CARRY_SIZES.length-1);
+  return {lb:mcAttrVal('STR')*CARRY_MULT[i],size:CARRY_SIZES[i],pb};
+}
+function itemWeightHead(totalWt){
+  if(totalWt==null)totalWt=(st.items||[]).reduce((s,i)=>s+(i.wt||0)*(i.qty||1),0);
+  const wd=document.getElementById('weightDisplay');if(!wd)return;
+  const c=carryCap(),r=x=>Math.round(x*10)/10;
+  wd.textContent=r(totalWt)+' / '+r(c.lb)+' lb';
+  wd.title='Carrying capacity: Strength × '+CARRY_MULT[CARRY_SIZES.indexOf(c.size)]+' lb ('+c.size+(c.pb?', Powerful Build':'')+')';
+  wd.style.color=totalWt>c.lb?'var(--red)':'';
+}
 function renderItems(){
   buildItemCatFilter();
   const list=document.getElementById('itemList');if(!list)return;
   st.items=st.items||[];
   const filtered=itemFilter==='all'?st.items:st.items.filter(i=>i.cat===itemFilter);
   const totalWt=st.items.reduce((s,i)=>s+(i.wt||0)*(i.qty||1),0);
-  const strVal=parseInt(document.getElementById('a_str')?.value||10)||10;
-  const carry=strVal*15;
-  const wd=document.getElementById('weightDisplay');
-  if(wd)wd.textContent=totalWt.toFixed(1)+' kg · Tragelast '+carry+' lb';
+  itemWeightHead(totalWt);
   list.innerHTML='';
   filtered.forEach(item=>{
     const card=document.createElement('div');card.className='item-card';
     const top=document.createElement('div');top.className='item-top';
-    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${item.name}</span><span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt}kg</span>`:''}`;
+    top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${item.name}</span><span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt} lb</span>`:''}`;
     const detail=document.createElement('div');detail.className='item-detail';
     const row=document.createElement('div');row.className='item-detail-row';
-    row.innerHTML=`<input type="number" min="1" value="${item.qty}" placeholder="Qty" oninput="updItem(${item.id},'qty',+this.value);renderItems()"><input type="number" min="0" step="0.1" value="${item.wt||''}" placeholder="Weight kg" oninput="updItem(${item.id},'wt',+this.value)">`;
+    row.innerHTML=`<input type="number" min="1" value="${item.qty}" placeholder="Qty" oninput="updItem(${item.id},'qty',+this.value);renderItems()"><input type="number" min="0" step="0.1" value="${item.wt||''}" placeholder="Weight lb" oninput="updItem(${item.id},'wt',+this.value);itemWeightHead()">`;
     const ta=document.createElement('textarea');ta.placeholder='Note...';ta.value=item.note||'';ta.oninput=()=>{updItem(item.id,'note',ta.value);};
     const del=document.createElement('button');del.className='item-del';del.textContent='✕ Remove';del.onclick=()=>{st.items=st.items.filter(i=>i.id!==item.id);renderItems();autoSave();};
     detail.appendChild(row);detail.appendChild(ta);detail.appendChild(del);
@@ -8945,7 +8967,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03j';
+const APP_VERSION = 'willow-app-2026-10-03k';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
