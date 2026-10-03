@@ -23,8 +23,8 @@ Reihenfolge = Empfehlung. Je Paket ein eigener Chat, Prompt „Arbeite die Fixli
 | 4a | ~~**P – Schaden/Heilung**~~ ✔ 03.10.2026 (`willow-app-2026-10-03a`) | Eingabe „Damage / Heal“: Schaden zieht erst Temp HP, dann HP ab (XPHB); bei Konzentration Hinweis Rettungswurf CON mit DC und Würfel-Knopf; Heilung bis Max. Punkt „Schaden/Heilung mit Temp HP und Konzentration“ (Neue Funktionen) | Opus Hoch |
 | 4b | ~~**Q – Zauber würfeln**~~ ✔ 03.10.2026 (`willow-app-2026-10-03b`) | Nach Cast → Platz Würfel-Fenster je nach Zauber: Angriff + Schaden, Save-DC des Ziels + Schaden (½ bei Erfolg), Heilung; Würfel nach Platz und Cantrip-Stufe; 🎲 an der Zauberzeile ohne neuen Platz (Moonbeam …); freier Würfel-Dialog mit Adv/Dis und gemischten Würfeln | Opus Hoch |
 | 5 | ~~**A2 – Begleiter und Stat-Blöcke**~~ ✔ 03.10.2026 (`willow-app-2026-10-03c`) | Beast Master/Drakewarden, Wildfire Spirit, Dancing Item … (später) | Opus Hoch |
-| 6 | **F – Multiclass** | Planung ✔ 03.10.2026 (Regeln XPHB, Datenmodell `st.mc`, Teile F1–F5, Entscheidungen E1–E8 offen) → Bau F1 Grundlage/Info-Tab, F2 Features/Actions, F3 Proficiencies, F4 Zauber, F5 Hit Dice | Opus Hoch |
-| 7 | **J – Character Info neu gestalten** | Charakterkarte statt Formular; rein optisch, nicht eilig (Simon 01.10.2026) → nach F oder zusammen mit F; erst Entwurf mit Fotos | Opus Hoch |
+| 6 | **F – Multiclass** | Planung ✔ 03.10.2026 (Regeln XPHB, Datenmodell `st.mc`, Teile F1–F5, Entscheidungen E1–E8 ✔ 03.10.2026) → Bau F1 Grundlage/Info-Tab, F2 Features/Actions, F3 Proficiencies, F4 Zauber, F5 Hit Dice | Opus Hoch |
+| 7 | **J – Character Info neu gestalten** | Charakterkarte statt Formular; **wird mit F1 gebaut** (Entscheidung E8, 03.10.2026); erst Entwurf mit Fotos | Opus Hoch |
 | 8 | **M – Artificer einpflegen** (neu 02.10.2026) | 13. Klasse, Fassung EFA (2025er-Regeln, ersetzt TCE): 5 Subklassen EFA + Reanimator (RHW), INT-Halbzauberer mit eigener Liste; Begleiter (Steel Defender, Eldritch Cannon) mit A2 | Opus Mittel (A4), Vorarbeit Hoch |
 | 9 | **N – Prozesse für neue Inhalte** (neu 02.10.2026) | Zielbild Simon: neue D&D-Inhalte ohne Sonderarbeit einpflegen; je Inhaltsart ein fester Ablauf + ein Prüfskript „Was ist in 5e.tools neu?“; baut auf den Erfahrungen aus M auf | Opus Hoch |
 | 10 | **O – Items-Tab + Startausrüstung** (neu 02.10.2026, **niedrige Prio**, Simon) | Startausrüstung von Klasse und Background per Wahl A/B automatisch eintragen (Gegenstände mit Gewicht/Kategorie aus 5e.tools, Gold in die Münzfelder), Items-Tab überarbeiten (Traglast-Fehler, kg/lb) | Opus Hoch, erst Planung |
@@ -99,15 +99,15 @@ Die offenen Punkte sind zu Paketen gebündelt; **je Paket ein eigener Chat** (Mo
 - **F4 – Zauber:** neuer Block `MC_SLOTS` (Tabelle aus `book-xphb.json` per Skript); `slotTableRow` → Zauberstufe nach Regel oben, sonst Einzeltabelle (inkl. `SUBCLASS_TABLES` EK/AT ab L3); `slotAdj` bleibt; `pactInfo`/Mystic Arcanum mit **Warlock-Klassenstufe** (auch als weitere Klasse); Spellcasting-Block zeigt DC/Angriff **je Zauberklasse** (`spAttr` bleibt für die Startklasse bzw. als Handkorrektur); `st.mySpells[].cls` optional (Zuordnung, Vorgabe aus der Klassenliste, bei Überschneidung Wahl; alte Zauber = Startklasse) (E4), Würfeln (Paket Q, `SPELL_ROLLS`) und Cast mit dem Attribut der Zuordnung; Prepared-Zahl je Klasse aus der Class Table; Spell-List-Filter/★ (`slMySpellCtx`, `CLASS_SPELL_MAP`, `SUBCLASS_SPELLS`, `CLASS_SPELL_EXTRA`, `SL_CLASSES`) über alle Klassen mit Herkunft „via“; Cantrips nach Gesamtstufe.
 - **F5 – Hit Dice + Rast:** `hdInfo` → Liste je Würfelgröße; neues Feld `st.hdUsedBy={"8":n,"10":m}` (alt `hdUsed` beim Laden auf den Würfel der Startklasse, nicht löschen); Short Rest mit Würfelwahl (`shortRestPlan`/`renderRest`), Long Rest alle zurück (XPHB, wie D); Undo/Log.
 
-**Entscheidungen offen (Simon, Vorschläge = vorsichtige Variante wie Paket C):**
-- E1 „Level“ im Info-Tab = Stufe der Startklasse, Gesamtstufe wird angezeigt (Vorschlag) – oder Level = Gesamtstufe und Aufteilung darunter?
-- E2 Startklasse = erste Zeile (Saves, volle Proficiencies, Klassen-Theme); später tauschbar? Vorschlag: nicht tauschbar, nur über „Entfernen/neu“.
-- E3 Voraussetzung 13 im Primärattribut: nur Hinweis (Vorschlag) oder Klasse sperren?
-- E4 Zauber in „My Spells“ einer Klasse zuordnen: automatisch + Wahl bei Überschneidung (Vorschlag) oder immer von Hand?
-- E5 Proficiency Bonus: Feld bleibt Hand + Hinweis „Level 7: +3“ (Vorschlag) – oder ab jetzt automatisch aus der Gesamtstufe (mit Handkorrektur)?
-- E6 Actions-Tab: Gruppen Aktion/Bonusaktion/… gemischt mit Klassen-Abzeichen (Vorschlag) – oder je Klasse ein eigener Block?
-- E7 Class Table: Umschalter je Klasse (Vorschlag) – oder alle untereinander?
-- E8 Paket J (Charakterkarte) im F1-Chat mit erledigen oder getrennt danach?
+**Entscheidungen Simon (03.10.2026, alle wie empfohlen):**
+- E1 „Level“ im Info-Tab = Stufe der **Startklasse**; Gesamtstufe wird zusätzlich angezeigt.
+- E2 Startklasse = erste Zeile, **fest** (Saves, volle Proficiencies, Klassen-Theme); Tauschen nur über Entfernen/neu.
+- E3 Voraussetzung 13 im Primärattribut: **nur Hinweis**, Klasse bleibt wählbar.
+- E4 Zauber in „My Spells“: Klasse **automatisch** aus der Klassenliste, **Wahl nur bei Überschneidung**; alte Zauber = Startklasse.
+- E5 Proficiency Bonus: **Handfeld bleibt**, daneben Hinweis „Level 7: +3“ aus der Gesamtstufe.
+- E6 Actions-Tab: Gruppen bleiben, Karten **gemischt mit Klassen-Abzeichen**.
+- E7 Class Table: **Umschalter je Klasse** über der Tabelle.
+- E8 **Paket J im F1-Chat mit** (Charakterkarte inkl. Multiclass-Kopf; Entwurf mit Fotos vor dem Bau).
 
 ~~**G – Log vollständig + Rückgängig-Knopf (Opus Hoch).**~~ ✔ (01.10.2026, `willow-app-2026-10-01a`; Umsetzung REFERENZ B15, Punkte in `docs/FIXLISTE_INFO.md` unter „Erledigt“) Prompt: „Arbeite die Fixliste ab: Paket G.“ Punkte „9. Log bildet alles ab“ (zuerst) und „8. Rückgängig-Knopf (Undo)“ (Neue Funktionen), beide auf Basis des Schnappschuss-Diffs in `autoSave`; unabhängig von E/F, kann jederzeit vorgezogen werden.
 
