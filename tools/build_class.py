@@ -9,6 +9,11 @@ Optional in der Config (seit 27.09.2026):
   Tracker-Feld 'sub': [{'k','l','uses'?,'minLvl'?}]       → Einzel-Tracker je Objekt (eigene Pip-Zeile je Rune/Arcanum/Phase;
                                                             'uses' fehlt = uses des Trackers)
   Tracker-Feld 'pick': {Stufe:Anzahl}                     → nur mit 'sub': so viele Objekte wählt der Charakter (Runes Known)
+Neue Klasse, Schritt 0 (Paket N, 03.10.2026): Stub mit subclassList-Vorschlag (Subklassen der maßgeblichen Fassung ohne Nachdrucke)
+  python3 build_class.py DnD_Character_App.html src/class-x.json x_config.py --stub   (Config darf noch fehlen)
+Einzelne neue Subklasse einer befüllten Klasse (Paket N): an subclassList anhängen + Neubau in einem Aufruf
+  python3 build_class.py DnD_Character_App.html src/class-druid.json druid_config.py --rebuild --add-sub "Circle of the Moon (XPHB)"
+  (mehrfach möglich; Tracker der neuen Subklasse vorher in der Config ergänzen, sonst hat sie nur Features)
 Neubau einer bereits befüllten Klasse (seit 27.09.2026, Bard/Druid/Wizard):
   python3 build_class.py DnD_Character_App.html src/class-druid.json druid_config.py --rebuild
   ersetzt nur den CLASS_DATA-Block; erhält special (z. B. Druid "beasts"), subclassList und vorhandene
@@ -75,9 +80,35 @@ def keep_keys(d, old_keys):
 if __name__ == '__main__':
     HTML, SRC, CFG = sys.argv[1:4]
     REBUILD = '--rebuild' in sys.argv[4:]
-    cfg = runpy.run_path(CFG)['CONFIG']
+    STUB = '--stub' in sys.argv[4:]   # Paket N: Stub einer neuen Klasse anlegen (subclassList-Vorschlag aus 5e.tools)
+    ADD_SUB = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--add-sub']   # Paket N: neue Subklasse „Name (QUELLE)“
     data = json.load(open(SRC))
     s = open(HTML, encoding='utf-8').read()
+    if STUB:  # Paket N (03.10.2026): CLASS_DATA-Stub vor „// CLASS FEATURES DATA“; Config darf noch fehlen
+        from class_extract import main_class
+        from klassen import sub_proposal
+        mc = main_class(data)
+        name = runpy.run_path(CFG)['CONFIG']['class'] if os.path.exists(CFG) else mc['name']
+        if f'CLASS_DATA["{name}"]=' in s: print('Stub/Klasse', name, 'schon vorhanden – nichts geändert'); sys.exit(0)
+        lst = sub_proposal(data, mc)
+        anchor = '\n// CLASS FEATURES DATA\n'; assert s.count(anchor) == 1, 'Anker // CLASS FEATURES DATA'
+        s = s.replace(anchor, '\nCLASS_DATA[%s]={\nspecial:[],\nsubclassList:%s\n};' % (json.dumps(name), json.dumps(lst, ensure_ascii=False, separators=(',', ':'))) + anchor)
+        open(HTML, 'w', encoding='utf-8').write(s)
+        print(f'Stub {name} ({mc["source"]}) angelegt, subclassList ({len(lst)}):'); [print('  ', x) for x in lst]
+        print('Namen sind ab jetzt heilig – Liste prüfen (ggf. im Stub kürzen), dann Config + Build (A4).')
+        sys.exit(0)
+    cfg = runpy.run_path(CFG)['CONFIG']
+    if ADD_SUB:  # Paket N: neue Subklassen an subclassList anhängen (nur anhängen, nie umbenennen), dann Neubau
+        assert REBUILD, '--add-sub nur zusammen mit --rebuild'
+        i = s.index('CLASS_DATA["%s"]={\n' % cfg['class']); j = s.index('\n};', i)
+        m0 = re.search(r'\nsubclassList:(\[[^\n]*\]),\n', s[i:j]); assert m0, 'subclassList nicht gefunden'
+        lst = json.loads(m0.group(1)); keys = {re.sub(r'\s*\([^)]+\)\s*$', '', x).strip() for x in lst}
+        for a in ADD_SUB:
+            assert re.search(r' \([A-Za-z0-9\'-]+\)$', a), f'Form „Name (QUELLE)“ erwartet: {a}'
+            k = re.sub(r'\s*\([^)]+\)\s*$', '', a).strip()
+            if a in lst or k in keys: print('schon in subclassList:', a); continue
+            lst.append(a); keys.add(k); print('subclassList +', a)
+        s = s[:i] + s[i:j].replace(m0.group(0), '\nsubclassList:' + json.dumps(lst, ensure_ascii=False, separators=(',', ':')) + ',\n') + s[j:]
 
     def rep(alt, neu):
         global s

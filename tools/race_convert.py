@@ -22,6 +22,7 @@ import json, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from class_extract import clean, render  # {@…}-Tags und entries → Textzeilen (wie bei den Klassen)
 
+# Bestand 29.09.2026 (nur noch Gegenprobe, Paket N: maßgeblich ist RACE_DATA.src in der App)
 RACES = {'Aasimar': 'XPHB', 'Dragonborn': 'XPHB', 'Dwarf': 'XPHB', 'Elf': 'XPHB', 'Gnome': 'XPHB', 'Goliath': 'XPHB',
          'Half-Elf': 'PHB', 'Half-Orc': 'PHB', 'Halfling': 'XPHB', 'Human': 'XPHB', 'Orc': 'XPHB', 'Tiefling': 'XPHB'}
 SKILL_TRAIT = {'Elf': 'Keen Senses', 'Human': 'Skillful', 'Half-Elf': 'Skill Versatility', 'Half-Orc': 'Menacing'}
@@ -106,7 +107,9 @@ def main():
         for s in json.load(open(os.path.join(srcdir, f)))['spell']: names.setdefault(s['name'].lower(), s['name'])
     app = app_race_data(html)
     out = {}
-    for race, src in RACES.items():
+    races = {k: v.get('src') for k, v in app.items()}   # Paket N (03.10.2026): Rassen + Quelle aus RACE_DATA statt fester Liste
+    assert set(RACES) <= set(races), ('Rasse fehlt in RACE_DATA', set(RACES) - set(races))
+    for race, src in races.items():
         r = next((x for x in data if x['name'] == race and x['source'] == src), None)
         if not r: err(f'{race} ({src}) fehlt in races.json'); continue
         at = app.get(race)

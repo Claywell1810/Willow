@@ -14,6 +14,9 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={'width': 390, 'height': 844}, device_scale_factor=2)
     pg.goto('file://' + os.path.abspath(html)); pg.wait_for_timeout(700)
     shot_fonts.apply(pg)
+    # Paket N (03.10.2026): Klassen ohne festen Eintrag oben (neue Klasse) mit der ersten Subklasse aus CLASS_DATA ergänzen
+    have = {c for c, _ in CL}
+    CL += [tuple(x) for x in pg.evaluate("allClasses().map(c=>[c,(CLASS_DATA[c].subclassList||[])[0]||''])") if x[0] not in have]
     for c, sub in CL:
         pg.evaluate("""([c,sub])=>{const set=(i,v)=>{document.getElementById(i).value=v};set('lvl','6');set('cls',c);onClsChange();
           set('subcls',sub);onSubclsChange();if(typeof applyTheme==='function')applyTheme(c);switchTabAll('zauber');

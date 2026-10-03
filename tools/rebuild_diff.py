@@ -11,7 +11,7 @@ Configs: <k>_config.py in tools/ (neben diesem Skript, seit 28.09.2026) (optiona
   (abilities: id, name, tag, icon, uses, restore, desc, minLvl, conc; seit 27.09.2026 auch pool, sub, pick – alle Felder)
   mit der App verglichen. Pflicht seit 27.09.2026 für
   barbarian, rogue, warlock, wizard, bard (feature_tags) – fehlt eine davon, meldet die Probe deren Tag-Abweichungen.
-Seit 27.09.2026 (Neubau Bard/Druid/Wizard) sind alle 12 Klassen in der Vollprobe, seit 03.10.2026 auch Artificer (13); Subklassen-Keys mit Kürzel
+Seit 27.09.2026 (Neubau Bard/Druid/Wizard) sind alle 12 Klassen in der Vollprobe, seit 03.10.2026 auch Artificer (13); seit Paket N jede Klasse aus CLASS_DATA automatisch; Subklassen-Keys mit Kürzel
   (Druid "Circle of Dreams (XGE)" …) werden wie beim Einbau über keep_keys zugeordnet.
 """
 import json,re,math,sys,os,runpy
@@ -53,7 +53,7 @@ def table_diffs(C,cls):
         if t['extra']!=ct['extra']: d.append(f'table extra {t["extra"]} vs {ct["extra"]}')
     return d
 tot=0
-for C in ['Cleric','Fighter','Paladin','Ranger','Sorcerer','Rogue','Monk','Barbarian','Warlock','Wizard','Bard','Druid','Artificer']:
+for C in sorted(A['cd']):  # Paket N (03.10.2026): alle Klassen der App (CLASS_DATA in all.json) statt fester Liste
     cd=A['cd'][C]; data=json.load(open(f'src/class-{C.lower()}.json'))
     cls,base,subs,srcs=extract(data,cd['subclassList'],optf,feats,items)
     cp=os.path.join(T,f'{C.lower()}_config.py')

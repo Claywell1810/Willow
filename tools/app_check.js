@@ -23,6 +23,8 @@ catch (e) { console.log('1) Syntax: FEHLER – ' + e.message); process.exit(1); 
 //   w = window (Zugriff auf App-Funktionen), d = document, CD = CLASS_DATA
 // Anzeige-Menge eines Trackers: Pips, bei Pool-Zählern (pool:true, seit 27.09.2026) das Maximum aus „/ N"
 const abAmt = (d, n) => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); if (!c) return 0; const m = c.querySelector('.ab-pmax'); return m ? parseInt(m.textContent.replace(/\D/g, '')) : c.querySelectorAll('.ab-pip').length; };
+// Paket N (03.10.2026): Pflichtfeld-Prüfung – js läuft im App-Fenster und schreibt Fundstellen in P; true = alles da
+const pflicht = (w, js) => { const P = w.eval('(()=>{const P=[];' + js + '\nreturn P;})()'); return P.length ? `${P.length}: ` + P.slice(0, 8).join('; ') + (P.length > 8 ? ' …' : '') : true; };
 const REGRESSION = [
   { name: 'Subklassen-Tracker greifen auch bei Dropdown-Namen mit Quellen-Kürzel', datum: '26.09.2026',
     run: ({ d, sel, CD }) => {
@@ -2321,6 +2323,78 @@ const REGRESSION = [
       if (ev("mcSlotLvl()") !== 4 || ev("JSON.stringify(slotTableRow())") !== '[4,3,0,0,0,0,0,0,0]') return 'Multiclass Wizard 2 / Artificer 3: ' + ev("mcSlotLvl()");
       w.mcDel(0); w.resetUI(); return true;
     } },
+  // ── Paket N (03.10.2026): Pflichtfelder je Inhaltsart – jeder Eintrag muss die Felder haben, die App und Folgeskripte brauchen.
+  //    Schlägt einer an, fehlt meist ein Folgeskript aus dem Ablauf (Anleitung A12); die Meldung nennt es.
+  { name: 'Paket N: Klassen – Listen aus CLASS_DATA (Klassen-Feld, Multiclass, ⚙, Spell-List), Pflichtfelder, Folgeblöcke', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const C=allClasses(),own=new Set(ZB_SPELLS.flatMap(s=>s.classes||[])),opt=[...document.getElementById('cls').options].map(o=>o.value),
+      th=[...document.getElementById('copyThemeSel').options].map(o=>o.textContent);
+      if(C.length<13)P.push('nur '+C.length+' Klassen');
+      C.forEach(c=>{const d=CLASS_DATA[c],t=CLASS_TABLES[c],tr=CLASS_CORE_TRAITS[c];
+        if(!Array.isArray(d.special)||!Array.isArray(d.subclassList)||!d.subclassList.length)P.push(c+': special/subclassList');
+        if(!(d.base||[]).length||d.base.some(f=>!(f.lvl>=1&&f.lvl<=20)||!f.name||typeof f.desc!=='string'))P.push(c+': base-Features (build_class.py)');
+        if(!t||(t.rows||[]).length!==20||t.rows.some(r=>(r.slots||[]).length!==9))P.push(c+': CLASS_TABLES (20 Zeilen, 9 Slots)');
+        if(!tr||!/^d\\d+$/.test(tr.hd)||(tr.savingThrows||[]).length!==2||!tr.primaryAbility||!tr.skillProficiencies)P.push(c+': CLASS_CORE_TRAITS (Config traits)');
+        if(!CLASS_MC_GAINS[c])P.push(c+': CLASS_MC_GAINS (mc_convert.py --write)');
+        if(t&&t.rows.some(r=>r.slots.some(Number))&&!MC_SLOTS.prog[c])P.push(c+': MC_SLOTS.prog (mc_slots.py --write)');
+        if(!opt.includes(c)||!mcAllCls().includes(c)||!th.includes(c))P.push(c+': fehlt in Klassen-Feld/Multiclass/Copy Theme');
+        if(own.has(c)&&(!SL_CLASSES.includes(c)||!CLASS_SPELL_MAP[c]))P.push(c+': Spell-List-Filter/CLASS_SPELL_MAP');
+        const ab=Object.values(d.abilities||{}).flat(),ids=ab.map(a=>a.id);
+        if(ids.length!==new Set(ids).size)P.push(c+': Tracker-id doppelt');
+        ab.forEach(a=>{if(!a.id||!a.name||!['aktion','bonus','reaktion','passiv'].includes(a.tag)||!['short','long',null,undefined].includes(a.restore))P.push(c+': Tracker '+(a.id||a.name))});
+        d.subclassList.forEach(e=>{if(!/ \\([^)]+\\)$/.test(e))P.push(c+': Subklasse ohne Kürzel „'+e+'“')});
+      });
+      // neue Klasse nur als Stub: erscheint ohne weitere Einträge überall (Laufzeit-Probe, danach entfernt)
+      CLASS_DATA.Zzprobe={special:[],subclassList:[]};initContentLists();buildSettingsUI();
+      const ok=[...document.getElementById('cls').options].some(o=>o.value==='Zzprobe')&&mcAllCls().includes('Zzprobe')&&document.getElementById('settingsClassPicker').textContent.includes('Zzprobe');
+      delete CLASS_DATA.Zzprobe;initContentLists();buildSettingsUI();if(!ok)P.push('Stub-Klasse erscheint nicht automatisch');`) },
+  { name: 'Paket N: Subklassen – jede subclassList-Zeile hat Features, keine verwaisten Keys/Tracker/Zauber/Labels', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const strip=x=>x.replace(/\\s*\\([^)]+\\)\\s*$/,'').trim();
+      allClasses().forEach(c=>{const d=CLASS_DATA[c],keys=Object.keys(d.subclass||{}),has=k=>keys.includes(k)||keys.some(x=>strip(x)===k);
+        d.subclassList.forEach(e=>{const k=keys.find(k=>k===e||k===strip(e));
+          if(!k)P.push(c+'|'+e+': keine Features (build_class.py, einzelne Subklasse: --rebuild --add-sub)');
+          else if(!d.subclass[k].length||d.subclass[k].some(f=>!(f.lvl>=1&&f.lvl<=20)||!f.name||typeof f.desc!=='string'))P.push(c+'|'+k+': Features ohne lvl/name/desc');});
+        keys.forEach(k=>{if(!d.subclassList.some(e=>e===k||strip(e)===k))P.push(c+'|'+k+': nicht in subclassList')});
+        Object.keys(d.abilities||{}).forEach(g=>{if(g!=='base'&&!keys.includes(g))P.push(c+'|'+g+': Tracker ohne Subklasse')});
+        [['SUBCLASS_SPELLS',SUBCLASS_SPELLS],['ALWAYS_PREP',ALWAYS_PREP],['SUBCLASS_TABLES',SUBCLASS_TABLES]].forEach(([nm,B])=>Object.keys(B[c]||{}).forEach(k=>{if(k!=='base'&&!has(k))P.push(nm+' '+c+'|'+k+': Subklasse fehlt')}));});
+      Object.entries(SUBCLASS_LABELS).forEach(([c,m])=>Object.keys(m).forEach(k=>{if(!(CLASS_DATA[c]?.subclassList||[]).includes(k))P.push('SUBCLASS_LABELS '+c+'|'+k)}));
+      [['FEATURE_PICKS',FEATURE_PICKS],['FEATURE_STATBLOCKS',FEATURE_STATBLOCKS]].forEach(([nm,B])=>Object.keys(B).forEach(key=>{const [c,g,f]=key.replace(/@\\d+$/,'').split('|'),d=CLASS_DATA[c];
+        const L=!d?null:g==='base'?d.base:(d.subclass[g]||d.subclass[Object.keys(d.subclass).find(x=>strip(x)===g)]);if(!L||!L.some(x=>x.name===f))P.push(nm+' '+key+': Feature fehlt')}));`) },
+  { name: 'Paket N: Zauber – Pflichtfelder, Schule, Klassen der App, Kategorie (spell_cats.py), keine verwaisten Würfel/Stat-Blöcke', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const C=allClasses(),seen=new Set(),SCH=/^(Abjuration|Conjuration|Divination|Enchantment|Evocation|Illusion|Necromancy|Transmutation)( \\(ritual\\))?$/;
+      ZB_SPELLS.forEach(s=>{const n=s.name||'?';if(seen.has(n))P.push(n+': doppelt');seen.add(n);
+        if(!s.src||!(Number.isInteger(s.grad)&&s.grad>=0&&s.grad<=9)||!SCH.test(s.school))P.push(n+': src/grad/school');
+        if(['zeit','reichweite','dauer','komp','desc'].some(k=>typeof s[k]!=='string'||!s[k])||typeof s.higher!=='string')P.push(n+': zeit/reichweite/dauer/komp/desc/higher');
+        if(!Array.isArray(s.classes)||!s.classes.length||s.classes.some(c=>!C.includes(c)))P.push(n+': classes');
+        if(!SPELL_CATS[n])P.push(n+': keine Kategorie (spell_cats.py)');});
+      [['SPELL_ROLLS',SPELL_ROLLS],['SPELL_STATBLOCKS',SPELL_STATBLOCKS],['SPELL_CATS',SPELL_CATS]].forEach(([nm,B])=>Object.keys(B).forEach(n=>{if(!seen.has(n))P.push(nm+' ohne Zauber: '+n)}));
+      Object.values(SUBCLASS_SPELLS).forEach(m=>Object.values(m).forEach(v=>(v.spells||[]).forEach(n=>{if(!seen.has(n))P.push('SUBCLASS_SPELLS: '+n)})));`) },
+  { name: 'Paket N: Feats – Pflichtfelder, Kategorie aus FT_CATS, Text, keine verwaisten Feat-Zauber', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const K=new Set(Object.keys(FT_CATS)),seen=new Set();
+      FT_FEATS.forEach(f=>{const n=(f.n||'?')+'|'+f.src;if(seen.has(n))P.push(n+': doppelt');seen.add(n);
+        if(!f.n||!f.src||!K.has(f.cat)||typeof f.pre!=='string'||typeof f.d!=='string'||!f.d)P.push(n+': n/src/cat/pre/d');});
+      Object.keys(FEAT_SPELLS).forEach(n=>{if(!FT_FEATS.some(f=>f.n===n))P.push('FEAT_SPELLS ohne Feat: '+n)});`) },
+  { name: 'Paket N: Backgrounds – Pflichtfelder, Attribute, BG_EXTRA-Text, Origin Feat vorhanden', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const seen=new Set(),A=/^((STR|DEX|CON|INT|WIS|CHA)(, (STR|DEX|CON|INT|WIS|CHA)){2})?$/,F=FT_FEATS.map(f=>f.n.toLowerCase());
+      BG_DATA.forEach(b=>{const n=b.n||'?';if(seen.has(n))P.push(n+': doppelt');seen.add(n);
+        if(!b.src||!Array.isArray(b.s)||!Array.isArray(b.t)||typeof b.f!=='string'||typeof b.a!=='string')P.push(n+': n/s/t/f/a/src');
+        if(!A.test(b.a))P.push(n+': Attribute „'+b.a+'“');
+        if(!BG_EXTRA.some(x=>x.n===b.n&&x.s===b.src))P.push(n+': kein BG_EXTRA (bg_convert.py --add)');
+        const f=(b.f||'').toLowerCase();if(f&&!F.some(x=>f===x||f.startsWith(x+' ')))P.push(n+': Origin Feat „'+b.f+'“ fehlt in FT_FEATS');});`) },
+  { name: 'Paket N: Rassen – RACE_DATA ↔ RACE_PICKS, Pflichtfelder, Tracker rc_*, Rassen-Feld aus RACE_DATA', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const opt=[...document.getElementById('race').options].map(o=>o.value);
+      Object.entries(RACE_DATA).forEach(([k,r])=>{if(!r.src||!r.speed||!r.size||typeof r.traits!=='string'||!r.traits)P.push(k+': src/speed/size/traits');
+        if(!opt.includes(k))P.push(k+': fehlt im Rassen-Feld');
+        const p=RACE_PICKS[k];if(!p){P.push(k+': kein RACE_PICKS (race_convert.py)');return;}
+        if(!Array.isArray(p.size)||!p.speed)P.push(k+': RACE_PICKS size/speed');
+        (p.tr||[]).forEach(t=>{if(!/^rc_/.test(t.id)||!t.t||!['aktion','bonus','reaktion','passiv'].includes(t.tag)||!['short','long'].includes(t.restore))P.push(k+': Tracker '+(t.id||t.t))});});
+      Object.keys(RACE_PICKS).forEach(k=>{if(!RACE_DATA[k])P.push('RACE_PICKS ohne RACE_DATA: '+k)});`) },
+  { name: 'Paket N: Bestien – Pflichtfelder, Attribute als Zahl, eindeutige Namen', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const seen=new Set();
+      BST_DATA.forEach(b=>{const n=b.n||'?';if(seen.has(n))P.push(n+': doppelt');seen.add(n);
+        if(!b.type||!b.size||b.cr==null||b.cr===''||!b.ac||!b.hp||!b.spd)P.push(n+': type/size/cr/ac/hp/spd');
+        if(['str','dex','con','int','wis','cha'].some(k=>typeof b[k]!=='number'))P.push(n+': Attribute');
+        if(!Array.isArray(b.actions)||!Array.isArray(b.traits))P.push(n+': actions/traits');});
+      Object.entries(SPELL_STATBLOCKS).concat(Object.entries(FEATURE_STATBLOCKS)).forEach(([k,L])=>(Array.isArray(L)?L:[L]).forEach(b=>{if(b&&b.n&&!b.type&&!b.ref&&!b.via)P.push('Stat-Block '+k+'|'+b.n+': type fehlt')}));`) },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

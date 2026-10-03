@@ -2,7 +2,7 @@
 """subclass_spells.py – erzeugt SUBCLASS_SPELLS und CLASS_SPELL_EXTRA aus 5e.tools (additionalSpells).
 
 Aufruf:  python3 subclass_spells.py DnD_Character_App.html src [--write]
-  src/ enthält class-<k>.json aller 13 Klassen und feats.json (5e.tools).
+  src/ enthält class-<k>.json aller Klassen der App (setup.sh klassen) und feats.json (5e.tools).
   Ohne --write: nur Bericht. Mit --write: Block zwischen den Ankern
   '// SUBCLASS_SPELLS-START' und '// SUBCLASS_SPELLS-END' in der HTML ersetzen
   (vorher `cd.json` mit dump.js erzeugen: ZB_SPELLS-Namen und Subklassen-Keys).
@@ -16,10 +16,11 @@ Zauber, die nicht in ZB_SPELLS stehen (andere Quellen, B5), werden gemeldet, nic
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from class_extract import main_class   # XPHB-Klasse bzw. Artificer EFA (Paket M)
+from klassen import app_classes        # Paket N: Klassen aus der App
 
 HTML, SRC = sys.argv[1], sys.argv[2]
 WRITE = '--write' in sys.argv
-CLASSES = ['Artificer', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard']
+CLASSES = app_classes(HTML)   # Paket N (03.10.2026): alle CLASS_DATA-Klassen der HTML statt fester Liste
 SCHOOL = {'A': 'Abjuration', 'C': 'Conjuration', 'D': 'Divination', 'E': 'Enchantment', 'V': 'Evocation', 'I': 'Illusion', 'N': 'Necromancy', 'T': 'Transmutation'}
 # Fighting-Style-Feats, die Cantrips einer anderen Klasse geben (zählen als Klassenzauber)
 FEAT_EXTRA = {'Paladin': 'Blessed Warrior', 'Ranger': 'Druidic Warrior'}
