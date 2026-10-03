@@ -2417,6 +2417,34 @@ const REGRESSION = [
       w.eval("st.items=[]; st.attrs.STR=10"); w.renderItems();
       return true;
     } },
+  // ── Paket O2 (03.10.2026): Gegenstände + Startausrüstung als Daten (tools/item_convert.py); Pflichtfelder wie Paket N
+  { name: 'Paket O2: Items – ITEM_DATA Pflichtfelder (Kategorie aus ITEM_CATS, Waffe/Rüstung/Pack/Gruppe auflösbar), START_EQUIP je Klasse und Background, alle Verweise in ITEM_MAP', datum: '03.10.2026',
+    run: ({ w }) => pflicht(w, `const seen=new Set(),K=new Set(Object.keys(ITEM_CATS)),ok=r=>!!ITEM_MAP[r],D=/^\\d+d\\d+$|^1$/;
+      if(ITEM_DATA.length<500)P.push('nur '+ITEM_DATA.length+' Gegenstände (item_convert.py --write)');
+      ITEM_DATA.forEach(i=>{const k=(i.n||'?')+'|'+i.s;if(seen.has(k))P.push(k+': doppelt');seen.add(k);
+        if(!i.n||!i.s||!K.has(i.c))P.push(k+': n/s/c');
+        if(i.w!=null&&!(typeof i.w==='number'&&i.w>0)||i.v!=null&&!(typeof i.v==='number'&&i.v>0))P.push(k+': w/v');
+        if(i.c==='Weapon'&&!['simple','martial'].includes(i.wc)||!!i.d!==!!i.dt)P.push(k+': Waffe ohne wc/d/dt');
+        if(i.d&&!D.test(i.d)||i.d2&&!D.test(i.d2))P.push(k+': Schaden „'+i.d+'“');
+        (i.p||[]).forEach(p=>{if(!ITEM_RULES.p[p]||!ITEM_RULES.p[p].n)P.push(k+': Eigenschaft '+p)});
+        (i.m||[]).forEach(m=>{if(!ITEM_RULES.m[m])P.push(k+': Mastery '+m)});
+        if(i.at&&(!'LMHS'.includes(i.at)||typeof i.ac!=='number'))P.push(k+': Rüstung at/ac');
+        (i.pk||[]).forEach(x=>{if(x.i?!ok(x.i):!x.sp)P.push(k+': Pack-Inhalt '+(x.i||JSON.stringify(x)))});
+        (i.gv||[]).forEach(x=>{if(!ok(x))P.push(k+': Variante '+x)});});
+      ARMOR_DATA.forEach(a=>{const i=ITEM_MAP[a.n+'|XPHB'];if(!i||i.ac!==a.ac||i.at!==a.c)P.push('ARMOR_DATA '+a.n+' ≠ ITEM_DATA')});
+      const chk=(q,G)=>{if(!Array.isArray(G)){P.push(q+': fehlt (item_convert.py --write)');return;}
+        G.forEach((g,n)=>{const o=Object.keys(g.o||{});
+          if(!(g.k==='_'&&o.join()==='_'||g.k==='choice'&&o.length>=2&&!o.includes('_')))P.push(q+' Gruppe '+n+': k/o');
+          o.forEach(x=>g.o[x].forEach(e=>{const t=e.i?ok(e.i):e.ch?e.ch.length&&e.ch.every(c=>ok(c)&&(ITEM_MAP[c].gv||[]).length):e.sp?true:Number.isInteger(e.cp)&&e.cp>0;
+            if(!t||e.q!=null&&!(Number.isInteger(e.q)&&e.q>1))P.push(q+' '+x+': '+JSON.stringify(e))}))});};
+      allClasses().forEach(c=>{chk(c,START_EQUIP.cls[c]);if((START_EQUIP.cls[c]||[]).length!==1||START_EQUIP.cls[c][0].k!=='choice')P.push(c+': keine Wahl A/B')});
+      BG_DATA.forEach(b=>chk('BG '+b.n,START_EQUIP.bg[b.n]));
+      Object.keys(START_EQUIP.cls).forEach(c=>{if(!CLASS_DATA[c])P.push('START_EQUIP ohne Klasse: '+c)});
+      Object.keys(START_EQUIP.bg).forEach(b=>{if(!BG_DATA.some(x=>x.n===b))P.push('START_EQUIP ohne Background: '+b)});
+      // 5e.tools-Datenfehler, per Text korrigiert (item_convert.py fix_money): Cleric A „7 GP“ (defaultData 7000 cp), Mulhorandi Tomb Raider A „Waterskin 26 GP“
+      const gp=L=>(L||[]).reduce((a,e)=>a+(e.cp||0),0),mt=START_EQUIP.bg['Mulhorandi Tomb Raider'];
+      if(gp(START_EQUIP.cls.Cleric?.[0]?.o.A)!==700)P.push('Cleric A: '+gp(START_EQUIP.cls.Cleric?.[0]?.o.A)+' cp statt 700 (Text 7 GP)');
+      if(mt&&(gp(mt[0].o.A)!==2600||mt[0].o.A.some(e=>/GP/.test(e.dn||''))))P.push('Mulhorandi Tomb Raider A: 26 GP fehlt');`) },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
@@ -2474,7 +2502,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (OLD) {
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
-    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'FEATURE_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'MC_SLOTS', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'FEATURE_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'MC_SLOTS', 'ITEM_DATA', 'START_EQUIP', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;
