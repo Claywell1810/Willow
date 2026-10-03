@@ -2623,6 +2623,50 @@ const REGRESSION = [
       d.getElementById('prof').value = pf;
       return true;
     } },
+  { name: 'Paket S1: Playtest-Fehler – Level −/+ speichert, neuer Charakter (Info-Tab, Bearbeiten offen, Grundwerte, auch leeres Blatt), Toast versteckt, BG-Hinweis, Krit-Schwelle Champion, Short Rest Cancel, Cantrips vorbereitet', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      // Toast ohne Text unsichtbar
+      const tc = [...d.styleSheets].flatMap(s => [...s.cssRules]).find(r => r.selectorText === '.toast');
+      if (!tc || tc.style.visibility !== 'hidden') return 'leerer Toast sichtbar (.toast ohne visibility:hidden)';
+      // leeres Blatt (erster Start / alle gelöscht) = Grundwerte
+      E('resetUI();blankSheetNew()'); if (!E('attrOn()')) return 'leeres Blatt ohne Grundwerte (Umstellungs-Dialog)';
+      if (!/blankSheetNew\(\)/.test(E('initApp.toString()')) || !/resetUI\(\);\s*blankSheetNew\(\)/.test(E('confirmDelete.toString()'))) return 'erster Start / alle gelöscht: leeres Blatt ohne Grundwerte';
+      // neuer Charakter aus einem anderen Tab
+      E("switchTabAll('zauber');newChar();document.getElementById('newCharName').value='S1 Test';confirmNewChar()");
+      if (!d.getElementById('tab-info').classList.contains('on')) return 'neuer Charakter: Info-Tab nicht geöffnet';
+      if (!E('attrOn()')) return 'neuer Charakter ohne Grundwerte';
+      const c = d.getElementById('cls'); c.value = 'Fighter'; c.dispatchEvent(new w.Event('change'));
+      if (!E('ciEditOn()')) return 'Formular klappt nach der Klassenwahl zu';
+      // Level −/+ speichert sofort
+      E('chLvl(1);chLvl(1)'); if (String(E("getAllChars()['S1 Test']._f_lvl")) !== '3') return 'Level +: nicht gespeichert';
+      // BG-Hinweis
+      if (!/automatically/.test(E('bgAbilityUI(BG_DATA.find(b=>bgAbOpts(b).length===3))'))) return 'Background-Hinweis veraltet';
+      // Krit-Schwelle
+      const s = d.getElementById('subcls'); s.value = 'Champion (PHB)'; s.dispatchEvent(new w.Event('change'));
+      if (E('stCritMin()') !== 19) return 'Improved Critical: Schwelle ' + E('stCritMin()');
+      d.getElementById('lvl').value = 15; if (E('stCritMin()') !== 18) return 'Superior Critical: Schwelle ' + E('stCritMin()');
+      d.getElementById('lvl').value = 3;
+      E('var _mr=Math.random;Math.random=()=>0.92;rollD20({k:"atk",wpn:1,l:"T",mod:5,dmg:"1d8",dt:"slashing"});rlShow(false);Math.random=_mr');
+      if (E('_rl.nat') !== 19 || !E('rlCrit(_rl)') || !/Critical damage/.test(d.getElementById('diceMods').innerHTML)) return 'Champion 19 kein Krit';
+      E('var _mr=Math.random;Math.random=()=>0.92;rollD20({k:"atk",wpn:0,l:"T",mod:5,dmg:"1d8"});rlShow(false);Math.random=_mr');
+      if (E('rlCrit(_rl)')) return 'Zauberangriff 19 als Krit';
+      E('closeDice&&closeDice()');
+      // Short Rest Cancel
+      E("st.hpC=3;document.getElementById('hpM').value=30");
+      const by0 = E('JSON.stringify(st.hdUsedBy)');
+      E("openRest('short');hdSpend(5)"); if (E('st.hpC') === 3) return 'Hit Die nicht verbucht';
+      E('restBackdrop()'); if (E('_restMode') !== 'short') return 'Tippen daneben verwirft gewürfelte Hit Dice';
+      E('cancelRest()'); if (E('st.hpC') !== 3 || E('JSON.stringify(st.hdUsedBy)') !== by0) return 'Cancel setzt Hit Dice/HP nicht zurück';
+      // Cantrips
+      E("slAdd(ZB_SPELLS.findIndex(s=>s.name==='Sacred Flame'),{stopPropagation(){}})");
+      if (E("st.mySpells.find(s=>s.name==='Sacred Flame').prep") !== true) return 'Cantrip unter „Unprepared“';
+      E("const ch=getAllChars();ch['S1 Test'].mySpells=[{name:'Light',grad:0,school:'Evocation',prep:false}];localStorage.setItem(LS_KEY,JSON.stringify(ch));loadChar('S1 Test')");
+      if (E("st.mySpells[0].prep") !== true) return 'alter Save: Cantrip nicht vorbereitet';
+      // aufräumen
+      E("const ch2=getAllChars();delete ch2['S1 Test'];localStorage.setItem(LS_KEY,JSON.stringify(ch2));_ciEdit=null;switchTabAll('info')");
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
@@ -2664,6 +2708,9 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   // 2b) Regressionstests (frisch geladene App, damit kein Zustand aus Schritt 2 stört)
   console.log(`2b) Regressionstests (${REGRESSION.length})`);
   const R = await load(NEW);
+  // Paket S1 (04.10.2026): das leere Blatt startet jetzt mit Grundwerten (attrSrc/statSrc); die älteren Tests setzen st.attrs/AC direkt
+  // (Altmodus) → für sie zurückstellen. Das leere Blatt selbst prüft der Test „Paket S1“ (blankSheetNew).
+  try { R.w.eval('st.attrSrc=null;st.statSrc=null'); } catch (e) {}
   const rset = (id, v) => { const el = R.d.getElementById(id); if (el) el.value = v; };
   const rvis = id => { const el = R.d.getElementById(id); return !!el && el.style.display !== 'none'; };
   const sel = (cls, sub, lvl) => {

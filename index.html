@@ -775,8 +775,8 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .ws-chip{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:4px 10px;color:var(--text2);font-size:var(--fs-txt);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ws-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);padding:8px 14px;cursor:pointer}
 .ws-go{border-color:var(--gold2);color:var(--gold)}
-.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--purple3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text);letter-spacing:1px;transition:transform .3s;z-index:999;white-space:normal;width:max-content;max-width:calc(100vw / var(--zf,1) - 32px);box-sizing:border-box;text-align:center;overflow-wrap:anywhere;pointer-events:none}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--purple3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text);letter-spacing:1px;transition:transform .3s,opacity .3s,visibility .3s;opacity:0;visibility:hidden;z-index:999;white-space:normal;width:max-content;max-width:calc(100vw / var(--zf,1) - 32px);box-sizing:border-box;text-align:center;overflow-wrap:anywhere;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible}
 
 /* ── UI / Lesbarkeit (27.09.2026): Tipp-Flächen, enge Stellen, Textgröße ── */
 /* Kreise: sichtbare Größe fast gleich, unsichtbarer Tipp-Rand (::after) vergrößert die Fläche */
@@ -1640,6 +1640,10 @@ function stFeatures(){ // Paket F2: Features aller Klassen bis zur jeweiligen Kl
     (cd.base||[]).concat(sk?(cd.subclass[sk]||[]):[]).forEach(f=>{if(f&&f.lvl<=c.lvl)out.push(Object.assign({},f,{_c:c.cls,_cl:c.lvl}));});});
   return out;
 }
+// Paket S1 (04.10.2026): Krit-Schwelle für Waffenangriffe aus dem Feature-Text (Champion: Improved Critical 19, Superior Critical 18).
+// Nur der allgemeine Satz „Your attack rolls with weapons … Critical Hit on a roll of N“; bedingte Fälle (Hexblade's Curse, Invincible Conqueror) nicht.
+function stCritMin(){let m=20;stFeatures().forEach(f=>{const x=/^Your attack rolls with weapons and Unarmed Strikes can (?:now )?score a Critical Hit on a roll of (\d+)/i.exec(f.desc||'');if(x&&+x[1]<m&&+x[1]>1)m=+x[1];});return m;}
+function rlCrit(R){return !!R&&R.nat>=(R.cm||20);}
 function stUnarmored(){
   const out=[];
   stFeatures().forEach(f=>{const t=f.desc||'';let m=/base Armor Class equals (\d+) plus your (\w+)(?: and (\w+))? modifiers?/i.exec(t),b,ab=[];
@@ -1857,7 +1861,7 @@ function attrIn(row,txt){
 function chLvl(d){
   const el=document.getElementById('lvl');
   const v=Math.max(1,Math.min(20-(totLvl()-curLvl()),(parseInt(el.value)||1)+d)); // Paket F1: Gesamtstufe höchstens 20
-  el.value=v;buildAbilities();buildClassTable();buildRaceLore();buildSaves();buildSkills();buildCharCard();
+  el.value=v;buildAbilities();buildClassTable();buildClsLore();buildSubclsLore();buildRaceLore();buildSaves();buildSkills();buildCharCard();autoSave(); // Paket S1: wie oninput des Feldes, sonst ging die Stufe beim Schließen verloren
 }
 function chAttr(k,d){ // seit Paket E ohne Knopf auf der Karte; ändert bei Charakteren mit Grundwerten den Grundwert
   if(attrOn()){const s=st.attrSrc[k]||(st.attrSrc[k]={base:10});s.base=Math.max(1,Math.min(30,(+s.base||10)+d));}
@@ -1996,7 +2000,7 @@ function bgAbilityUI(bg){
     h+=`<div class="pk-chips" style="margin-top:6px;align-items:center"><span class="pk-h" style="margin:0;min-width:24px">${b}</span>`+
       opts.map(a=>{const on=list.some(e=>e.k===a&&e.v===+b),other=list.some(e=>e.k===a&&e.v!==+b);return other?'':chip(a+':'+b,a,on);}).join('')+'</div>';
   });
-  return h+`<div class="pk-note">Shown as a badge on the ability (e.g. “+2 BG”) – add it to the score yourself.</div></div>`;
+  return h+`<div class="pk-note">${attrOn()?'Added to the ability score automatically (tap an ability to see its sources).':'Shown as a badge on the ability (e.g. “+2 BG”) – add it to the score yourself.'}</div></div>`; // Paket S1: seit Paket E eingerechnet (alte Charaktere ohne Grundwerte: Abzeichen)
 }
 // Offene Wahlen (Info-Tab) → Marker in den Köpfen und Kasten im Skills-Tab
 function pkOpen(){
@@ -3442,7 +3446,7 @@ function buildMySpells(){
     <div class="spell-notes" id="msn_${i}" style="display:none">
       ${metaHtml}${descHtml}${higherHtml}${dbSpell?spellStatBlocks(dbSpell.name):''}
       ${mx.on&&!sp.auto?(C=>C.length>1?`<div class="ms-prep ms-cls"><span class="ms-prep-l">Class</span>${C.map(c=>`<button class="${spClsOf(sp,mx)===c?'on':''}" onclick="event.stopPropagation();setSpCls(${i},'${c}')">${c}</button>`).join('')}</div>`:'')(spCands(sp,mx)):''}
-      ${sp.auto?'':`<div class="ms-prep"><span class="ms-prep-l">Prepared</span>${[[true,'Prepared'],['free','Always'],[false,'Not prepared']].map(([v,l])=>`<button class="${(sp.prep||false)===v?'on':''}" onclick="event.stopPropagation();setPrep(${i},${JSON.stringify(v)})">${l}</button>`).join('')}${!sp.prep&&/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<button class="ms-rit" onclick="event.stopPropagation();openCast(${i})">Cast as Ritual</button>`:''}</div>`}
+      ${sp.auto?'':`<div class="ms-prep"><span class="ms-prep-l">Prepared</span>${[[true,'Prepared'],['free','Always'],[false,'Not prepared']].filter(([v])=>v!==false||+sp.grad).map(([v,l])=>`<button class="${(sp.prep||false)===v?'on':''}" onclick="event.stopPropagation();setPrep(${i},${JSON.stringify(v)})">${l}</button>`).join('')}${!sp.prep&&/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<button class="ms-rit" onclick="event.stopPropagation();openCast(${i})">Cast as Ritual</button>`:''}</div>`}
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px">
         <span style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--green);text-transform:uppercase">Free casts</span>
         <input type="number" min="0" max="10" value="${sp.freeMax||0}" oninput="setFreeMax(${i},this.value)" onclick="event.stopPropagation()" style="width:46px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:var(--fs-txt);padding:3px 6px;outline:none;font-family:'Cinzel',serif;text-align:center">
@@ -3550,7 +3554,7 @@ function addSpellManual(){
   const name=prompt('Spell Name:');if(!name)return;
   const grad=parseInt(prompt('Level (0=Cantrip, 1-9):','1'))||0;
   const school=prompt('School:','')||'—';
-  st.mySpells.push({name,grad,school,prep:false,notes:''});buildMySpells();showToast(name+' added');
+  st.mySpells.push({name,grad,school,prep:grad===0,notes:''});buildMySpells(); // Paket S1: Cantrips immer vorbereitetshowToast(name+' added');
 }
 
 // FEATURES
@@ -4098,7 +4102,7 @@ function slAdd(idx,e){
   const sp=ZB_SPELLS[idx];
   if(st.zbAdded.has(idx)){showToast('Already added');return;}
   st.zbAdded.add(idx);
-  st.mySpells.push({name:sp.name,grad:sp.grad,school:sp.school,prep:false,notes:''});
+  st.mySpells.push({name:sp.name,grad:sp.grad,school:sp.school,prep:+sp.grad===0,notes:''}); // Paket S1: Cantrips immer vorbereitet
   const btn=document.getElementById('slab_'+idx);
   if(btn){btn.className='zb-addbtn done';btn.textContent='✓ On Sheet';}
   showToast('✦ '+sp.name+' added');
@@ -7508,15 +7512,18 @@ function hpMaxVal(){return parseInt(document.getElementById('hpM')?.value)||10;}
 function restLog(m){const n=document.getElementById('charName')?.textContent.trim();if(n)_pushLog(n,[m]);}
 function resetDeathSaves(){st.dsS=[0,0,0];st.dsF=[0,0,0];['dsS','dsF'].forEach(id=>document.getElementById(id)?.querySelectorAll('.dspip').forEach(p=>p.classList.remove('f')));}
 let _restMode=null,_restLast='',_castIdx=null;
-function openRest(mode){_restMode=mode;_restLast='';_restFx={};renderRest();document.getElementById('restModal').classList.add('on');}
-function closeRest(){document.getElementById('restModal').classList.remove('on');_restMode=null;_castIdx=null;_spr=null;}
+let _restUndo=null; // Paket S1: Stand vor dem Short Rest (Cancel setzt Hit Dice und HP zurück, erst „Finish“ zählt)
+function openRest(mode){_restMode=mode;_restLast='';_restFx={};_restUndo=mode==='short'?{hpC:st.hpC,by:JSON.parse(JSON.stringify(st.hdUsedBy===undefined?null:st.hdUsedBy)),hd:st.hdUsed,n:0}:null;renderRest();document.getElementById('restModal').classList.add('on');}
+function cancelRest(){const U=_restUndo;if(U&&U.n){st.hpC=U.hpC;st.hdUsedBy=U.by;st.hdUsed=U.hd;document.getElementById('hpC').textContent=st.hpC;updBar();buildHitDice();autoSave();restLog('Short Rest cancelled: Hit Dice and HP reset');showToast('Short Rest cancelled');}closeRest();}
+function restBackdrop(){if(_restUndo&&_restUndo.n)return;closeRest();} // Paket S1: Tippen daneben verwirft keine gewürfelten Hit Dice
+function closeRest(){document.getElementById('restModal').classList.remove('on');_restMode=null;_restUndo=null;_castIdx=null;_spr=null;}
 function hdSpend(own,die){ // Paket F5: die = Würfelgröße (Short Rest mit mehreren Größen), sonst die erste mit freien Würfeln
   const H=hdInfo(),h=H&&hdPool(H,die);if(!h||h.left<=0){showToast('No Hit Dice left');return;}
   let r;
   if(own===null||own===undefined)r=1+Math.floor(Math.random()*h.die);
   else{r=parseInt(own);if(!(r>=1&&r<=h.die)){showToast('Enter a roll from 1 to '+h.die);return;}}
   const con=getAbilityMod('CON'),gain=Math.max(1,r+con),m=hpMaxVal(),before=st.hpC;
-  st.hpC=Math.min(m,st.hpC+gain);hdSetUsed(h.die,h.used+1);
+  st.hpC=Math.min(m,st.hpC+gain);hdSetUsed(h.die,h.used+1);if(_restUndo)_restUndo.n++;
   document.getElementById('hpC').textContent=st.hpC;updBar();buildHitDice();
   const cs=con?(con>0?' + ':' − ')+Math.abs(con)+' CON':'';
   if(own===null||own===undefined){diceHistory.unshift({spec:'1d'+h.die+(con?(con>0?'+':'')+con:''),label:'Hit Die',total:r+con});if(diceHistory.length>DICE_HISTORY_MAX)diceHistory.length=DICE_HISTORY_MAX;renderDiceHistory();}
@@ -7552,7 +7559,7 @@ function renderRest(){
     const li=p.full.map(x=>`<li>${x.ab.name}<span>full</span></li>`).concat(p.one.map(x=>`<li>${x.ab.name}<span>+1</span></li>`));
     body+=`<div class="rest-sec"><div class="rest-h">Recovers</div>${li.length?`<ul class="rest-list">${li.join('')}</ul>`:`<div class="rest-note">Nothing to recover.</div>`}`+
       (p.manual.length?`<div class="rest-note">Use by hand if you want (see feature text): ${p.manual.map(a=>a.name).join(', ')}</div>`:'')+`</div>`+fxRestHtml('short');
-    box.innerHTML=`<div class="ws-head">☾ Short Rest · 1 hour</div>${warn}${body}<div class="rest-foot"><button class="ws-btn" onclick="closeRest()">Cancel</button><button class="ws-btn ws-go" onclick="doShortRest()">Finish Short Rest</button></div>`;
+    box.innerHTML=`<div class="ws-head">☾ Short Rest · 1 hour</div>${warn}${body}<div class="rest-foot"><button class="ws-btn" onclick="cancelRest()"${_restUndo&&_restUndo.n?' title="Gives back the Hit Dice and HP from this rest"':''}>Cancel</button><button class="ws-btn ws-go" onclick="doShortRest()">Finish Short Rest</button></div>`;
   }else{
     const li=[];
     if(st.hpC<m)li.push(`<li>Hit Points<span>${st.hpC} → ${m}</span></li>`);
@@ -8543,7 +8550,8 @@ function applyState(snap){
     if(el && fields[id]!==undefined) el.value=fields[id];
   });
   if(fields.hpT===undefined){const t=document.getElementById('hpT');if(t)t.value='0';} // Paket E2: alte Saves ohne Temp HP
-  if(!(restored.hdUsedBy&&typeof restored.hdUsedBy==='object')){st.hdUsedBy=null;hdMig();} // Paket F5: alt hdUsed → Würfel der Startklasse (hdUsed bleibt)
+  if(!(restored.hdUsedBy&&typeof restored.hdUsedBy==='object')){st.hdUsedBy=null;hdMig();}
+  (st.mySpells||[]).forEach(x=>{if(x&&+x.grad===0&&!x.prep)x.prep=true;}); // Paket S1: Cantrips sind immer vorbereitet (alte Saves) // Paket F5: alt hdUsed → Würfel der Startklasse (hdUsed bleibt)
   // Sync custom race input visibility
   const raceVal=document.getElementById('race')?.value;
   const raceCustom=document.getElementById('raceCustom');
@@ -8700,6 +8708,7 @@ function _doNewChar(name){
   _lastSnapName = _name;
   _undoClear();
   if(typeof buildLog==='function') buildLog();
+  _ciEdit=true;switchTabAll('info');buildCharCard();(document.scrollingElement||document.documentElement).scrollTop=0; // Paket S1: Formular offen bis „✓ Done“, auch wenn „＋“ in einem anderen Tab getippt wurde
   showToast('✨ New Character: '+_name);
   }
 }
@@ -8723,7 +8732,7 @@ function confirmDelete(){
   localStorage.setItem(LS_KEY,JSON.stringify(chars));
   const remaining=Object.keys(chars);
   if(remaining.length) loadChar(remaining[0]);
-  else { refreshCharSel(''); resetUI(); showToast('All characters deleted'); }
+  else { refreshCharSel(''); resetUI(); blankSheetNew(); showToast('All characters deleted'); }
 }
 
 function refreshCharSel(active){
@@ -8738,12 +8747,16 @@ function refreshCharSel(active){
   sel.style.color = names.length ? 'var(--text)' : 'var(--text3)';
 }
 
+// Paket S1 (04.10.2026): leeres Blatt (erster Start / alle Charaktere gelöscht) rechnet wie ein neuer Charakter mit Grundwerten –
+// sonst zeigt das Attribut-Fenster den Umstellungs-Dialog für alte Spielstände. resetUI selbst bleibt unverändert (Prüfskript).
+function blankSheetNew(){st.attrSrc=attrSrcNew();st.statSrc=statSrcNew();buildAttrs();}
 function initApp(){
   const chars = getAllChars();
   const names = Object.keys(chars);
   if(names.length){
     loadChar(names[0]);
   } else {
+    blankSheetNew();
     buildAttrs();buildSaves();buildSkills();buildWeapons();
     buildSlots();buildMySpells();buildFeats();
     buildBgSelect();calcSpell();updBar();
@@ -9362,7 +9375,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-03o';
+const APP_VERSION = 'willow-app-2026-10-04a';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -9702,7 +9715,7 @@ function rlModsHtml(){
   const chips=R.parts.map(rlChipHtml).join('');
   const acts=[];
   acts.push(`<button class="rl-act" onclick="rlReroll()">↻ Roll again</button>`);
-  if(R.k==='atk'&&R.dmg){const P=rlParse(R.dmg);if(P)acts.push(`<button class="rl-act go" onclick="rlDmgFromAtk()">🎲 ${R.nat===20?'Critical damage':'Damage'}</button>`);}
+  if(R.k==='atk'&&R.dmg){const P=rlParse(R.dmg);if(P)acts.push(`<button class="rl-act go" onclick="rlDmgFromAtk()">🎲 ${rlCrit(R)?'Critical damage':'Damage'}</button>`);}
   if(R.k!=='dmg'&&R.k!=='heal'&&(st.ins||[]).some(Boolean)&&!R.hi)acts.push(`<button class="rl-act" onclick="rlHeroic()" title="Reroll the lowest d20, you must use the new roll (XPHB)">✦ Heroic Inspiration: reroll</button>`);
   R.parts.forEach((p,i)=>{if(p.on&&p.once&&p.fx&&fxGet(p.fx))acts.push(`<button class="rl-act" onclick="rlUsed(${i})">${pkEsc(p.l)} used · remove</button>`);});
   const hint=R.parts.some(p=>!p.man)?'':`<div class="rl-hint">${R.k==='dmg'?'Damage effects (Divine Favor …) appear here when active.':'Conditions and effects (Bless, Poisoned …) appear here when active.'}</div>`;
@@ -9710,8 +9723,8 @@ function rlModsHtml(){
 }
 function rlShow(anim){
   rlCalc();const R=_rl,stage=document.getElementById('diceStage'),mods=document.getElementById('diceMods');if(!stage)return;
-  const cls=R.k==='heal'?'':R.k==='dmg'?(R.critOn?' crit':''):R.fail?' fail':R.nat===20?' crit':R.nat===1?' fail':'';
-  const head=(R.k==='free'&&!R.l?pkEsc(R.spec):pkEsc(R.l))+(R.k==='dmg'&&R.dt?` · ${pkEsc(R.dt)}`:'')+(R.sub?`<div class="rl-sub">${pkEsc(R.sub)}</div>`:'')+(R.fail?` <span class="rl-bad">· automatic failure (${pkEsc(R.fail.l)})</span>`:'')+(R.k!=='dmg'&&R.k!=='heal'&&R.nat===20?' <span class="rl-ok">· natural 20</span>':R.k!=='dmg'&&R.k!=='heal'&&R.nat===1?' <span class="rl-bad">· natural 1</span>':'');
+  const cls=R.k==='heal'?'':R.k==='dmg'?(R.critOn?' crit':''):R.fail?' fail':rlCrit(R)?' crit':R.nat===1?' fail':'';
+  const head=(R.k==='free'&&!R.l?pkEsc(R.spec):pkEsc(R.l))+(R.k==='dmg'&&R.dt?` · ${pkEsc(R.dt)}`:'')+(R.sub?`<div class="rl-sub">${pkEsc(R.sub)}</div>`:'')+(R.fail?` <span class="rl-bad">· automatic failure (${pkEsc(R.fail.l)})</span>`:'')+(R.k!=='dmg'&&R.k!=='heal'&&rlCrit(R)?' <span class="rl-ok">· '+(R.nat===20?'natural 20':'critical hit ('+R.nat+')')+'</span>':R.k!=='dmg'&&R.k!=='heal'&&R.nat===1?' <span class="rl-bad">· natural 1</span>':'');
   stage.innerHTML=`<div class="die-shape${anim?' rolling':cls}" id="rlDie">${anim?'?':R.total}</div><div class="dice-total">${head}</div><div class="dice-breakdown">${pkEsc(R.br.join('   '))}</div>`;
   if(mods)mods.innerHTML=rlModsHtml();
   const spec=R.k==='free'?R.spec+(R.mode==='adv'?' (Adv)':R.mode==='dis'?' (Dis)':''):R.k==='heal'?(R.spec||''):R.k==='dmg'?(R.critOn?'Crit ':'')+(R.spec||'')+(R.parts.some(p=>p.man&&p.m==='half'&&p.on)?' (½)':''):`d20${R.mode==='adv'?' (Adv)':R.mode==='dis'?' (Dis)':''}${R.mod?fmt(R.mod):''}`;
@@ -9728,7 +9741,7 @@ function rlStart(R){
   if(inp)inp.value=R.k==='dmg'||R.k==='heal'?(R.spec||''):`1d20${R.mod?fmt(R.mod):''}`;
   rlShow(true);
 }
-function rollD20(o){rlStart({k:o.k||'',l:o.l||'Roll',mod:parseInt(o.mod)||0,ab:o.ab||'',sk:o.sk||'',init:o.init?1:0,conc:o.conc?1:0,wpn:o.wpn?1:0,dmg:o.dmg||'',dt:o.dt||'',dl:o.dl||''});}
+function rollD20(o){rlStart({k:o.k||'',l:o.l||'Roll',mod:parseInt(o.mod)||0,ab:o.ab||'',sk:o.sk||'',init:o.init?1:0,conc:o.conc?1:0,wpn:o.wpn?1:0,dmg:o.dmg||'',dt:o.dt||'',dl:o.dl||'',cm:o.k==='atk'&&o.wpn?stCritMin():20});}
 function rollDmg(o){const P=rlParse(o.spec);if(!P){showToast('Damage: enter dice, e.g. 1d8+3');return;}
   rlStart({k:o.heal?'heal':'dmg',hk:o.heal||'',l:o.l||'Damage',spec:String(o.spec).trim(),P,wpn:o.wpn?1:0,dt:o.dt||'',crit:!!o.crit,ab:o.ab||'',
     sub:o.sub||'',half:o.half?1:0,nocrit:o.nocrit?1:0});} // Paket Q: sub = Save-Hinweis, half = Chip „Target saved“, heal = 'heal'|'temp'
@@ -9740,7 +9753,7 @@ function rlHeroic(){const R=_rl;if(!R||R.k==='dmg'||R.k==='heal'||R.k==='free'||
   showToast(`✦ Heroic Inspiration used: d20 ${old} → ${a[i]}`);rlShow(false);}
 function rlUsed(i){const R=_rl,p=R&&R.parts[i];if(!p||!p.fx)return;const a=fxList(),j=a.findIndex(e=>e.id===p.fx);if(j<0)return;
   const n=a[j].n;a.splice(j,1);buildFx();autoSave();showToast('✕ '+n+' removed');rlShow(false);}
-function rlDmgFromAtk(){const R=_rl;if(!R||!R.dmg)return;rollDmg({l:R.dl||R.l,spec:R.dmg,wpn:R.wpn,dt:R.dt,crit:R.nat===20,ab:R.ab});}
+function rlDmgFromAtk(){const R=_rl;if(!R||!R.dmg)return;rollDmg({l:R.dl||R.l,spec:R.dmg,wpn:R.wpn,dt:R.dt,crit:rlCrit(R),ab:R.ab});}
 const RL_W={d20:'D20 Tests',atk:'attack rolls',watk:'weapon attacks',save:'saving throws',check:'ability checks',init:'Initiative',dmg:'damage',wdmg:'weapon damage',ac:'AC',spd:'Speed'};
 function rlRulesTxt(rs,e){ // Kurzbeschreibung der Regeln eines Effekts (Fenster „Effects & Conditions“)
   const M={adv:'Advantage',dis:'Disadvantage',fail:'automatic failure',ex:'−2 × level',min17:'at least 17',base13:'13 + DEX (no armor)',x2:'doubled',half:'halved'};
@@ -9925,7 +9938,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
 </div>
 <!-- RAST / ZAUBERN (Paket D, 29.09.2026): Dialog für Short Rest, Long Rest und „Cast“ -->
 <div id="attrModal" class="ws-overlay" onclick="if(event.target===this)closeAttr()"><div class="ws-box rest-box" id="attrBox"></div></div>
-<div id="restModal" class="ws-overlay" onclick="if(event.target===this)closeRest()"><div class="ws-box rest-box" id="restBox"></div></div>
+<div id="restModal" class="ws-overlay" onclick="if(event.target===this)restBackdrop()"><div class="ws-box rest-box" id="restBox"></div></div>
 <div id="fxModal" class="ws-overlay" onclick="if(event.target===this)closeFx()"><div class="ws-box rest-box" id="fxBox"></div></div>
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
