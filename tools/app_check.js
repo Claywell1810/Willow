@@ -638,10 +638,15 @@ const REGRESSION = [
       if (typeof w.themeBase !== 'function') return 'themeBase fehlt';
       sel('Barbarian', 'Path of the Berserker (PHB)', 5); w.applyTheme('Barbarian');
       const v = k => d.documentElement.style.getPropertyValue('--' + k).trim().toLowerCase();
+      // seit Paket R1 (04.10.2026): Klassen-Farben nur im Design „Classic“ (⚙, willow_design), Standard Leder (WILLOW_PAL)
+      w.setDesign('klassisch');
       const T = w.eval('CLASS_THEMES.Barbarian');
-      if (v('purple') !== '#ecd592' || v('text3') !== '#b8a06a') return 'Highlight/Labels nicht hellgold: ' + v('purple') + ' / ' + v('text3');
-      if (v('muted') !== T.text3.toLowerCase()) return '--muted ≠ alter text3';
-      if (v('desc') !== w.hexMix(T.text, T.text2, .2)) return '--desc falsch: ' + v('desc');
+      if (v('purple') !== '#ecd592' || v('text3') !== '#b8a06a') return 'Classic: Highlight/Labels nicht hellgold: ' + v('purple') + ' / ' + v('text3');
+      if (v('muted') !== T.text3.toLowerCase()) return 'Classic: --muted ≠ alter text3';
+      if (v('desc') !== w.hexMix(T.text, T.text2, .2)) return 'Classic: --desc falsch: ' + v('desc');
+      w.setDesign('leder');
+      const L = w.eval('WILLOW_PAL.dark');
+      for (const k of ['purple', 'text3', 'muted', 'desc', 'gold', 'bg2']) if (v(k) !== L[k].toLowerCase()) return '--' + k + ' ≠ Leder-Palette: ' + v(k);
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
       for (const c of ['.ab-desc{', '.feat-desc{', '.desc-text{', '.bg-desc{']) { const i = css.indexOf(c); if (i < 0 || !css.slice(i, css.indexOf('}', i)).includes('var(--desc)')) return c + ' ohne --desc'; }
       const i = css.indexOf('.bnav-btn{'); if (!css.slice(i, css.indexOf('}', i)).includes('var(--muted)')) return 'Leiste inaktiv nicht --muted';
@@ -1489,6 +1494,64 @@ const REGRESSION = [
       w.eval(`saveThemeOverrides({[${JSON.stringify(cls)}]:{red:'#112233',icoAct:'#445566'}})`); w.applyTheme(cls);
       if (V('--ico-act') !== '#445566' || V('--red') !== '#112233') return 'eigener Icon-Wert geht nicht vor';
       w.eval(`saveThemeOverrides({})`); w.applyTheme(cls); return true;
+    } },
+  { name: 'Paket R1: ein Grunddesign Leder für alle Klassen (R-E1), eigene Farben je Klasse gehen vor, Copy Theme übernimmt eigene Farben, Modus willow_mode, Texturen/Naht/Knöpfe/Eingaben, nur Crimson Pro', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const V = k => d.documentElement.style.getPropertyValue('--' + k).trim().toLowerCase();
+      if (typeof w.willowMode !== 'function' || !w.eval('WILLOW_PAL.dark')) return 'WILLOW_PAL/willowMode fehlt';
+      w.eval('saveThemeOverrides({})');
+      const seen = new Set();
+      for (const c of ['', 'Druid', 'Wizard', 'Barbarian', 'Artificer']) { w.applyTheme(c); seen.add(['bg0', 'bg2', 'gold', 'text', 'purple'].map(V).join()); }
+      if (seen.size !== 1) return 'Klassen haben noch eigene Grundfarben (CLASS_THEMES angewendet)';
+      if (V('bg0') !== w.eval('WILLOW_PAL.dark.bg0')) return '--bg0 nicht Leder';
+      if (d.documentElement.dataset.mode !== 'dark') return 'data-mode nicht dark';
+      w.localStorage.setItem('willow_mode', 'unsinn'); if (w.willowMode() !== 'dark') return 'unbekannter Modus fällt nicht auf dark zurück'; w.localStorage.removeItem('willow_mode');
+      w.eval(`saveThemeOverrides({Druid:{gold:'#123456'}})`); w.applyTheme('Druid'); if (V('gold') !== '#123456') return 'eigene Farbe Druid geht nicht vor';
+      w.applyTheme('Wizard'); if (V('gold') === '#123456') return 'eigene Farbe Druid wirkt auf Wizard';
+      w.openSettings(); w.setSettingsClass('Wizard'); d.getElementById('copyThemeSel').value = 'Druid'; w.applyThemeFrom();
+      if (w.eval('loadThemeOverrides().Wizard.gold') !== '#123456') return 'Copy Theme übernimmt eigene Farben der Quelle nicht';
+      w.closeSettings(); w.eval('saveThemeOverrides({})'); w.applyTheme(w.eval("document.getElementById('cls').value||''"));
+      const html = d.documentElement.outerHTML;
+      if (/Crimson Text/.test(html)) return 'Crimson Text noch im Einsatz (nicht geladen)';
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
+      for (const s of ['--tex:url(', '.act-panel::after{', '.act-panel::before{', '.btn-p,', '.btn-d,', '.btn-q{', '.btn-s,', '--inp:']) if (!css.includes(s)) return 'CSS fehlt: ' + s;
+      if (!html.includes("localStorage.getItem('willow_mode')")) return 'Frühstart-Skript Modus fehlt';
+      return true;
+    } },
+  { name: 'Paket R1: ⚙ Design „Leather / Classic“ pro Gerät – Classic = alte Klassen-Farben ohne Leder-CSS, Wechsel zurück, Frühstart', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const V = k => d.documentElement.style.getPropertyValue('--' + k).trim().toLowerCase();
+      const st = d.getElementById('willowLeder');
+      if (!st || typeof w.setDesign !== 'function') return 'Stil-Block willowLeder oder setDesign fehlt';
+      w.eval('saveThemeOverrides({})');
+      if (w.willowDesign() !== 'leder') return 'Standard ist nicht Leder';
+      w.openSettings(); if (!d.querySelector('#dsRow .fbtn.on[data-ds="leder"]')) return '⚙: Leather nicht markiert';
+      w.setDesign('klassisch');
+      if (w.localStorage.getItem('willow_design') !== 'klassisch' || d.documentElement.dataset.design !== 'klassisch' || st.media !== 'not all') return 'Classic nicht gesetzt/gespeichert/Leder-CSS aktiv';
+      if (!d.querySelector('#dsRow .fbtn.on[data-ds="klassisch"]')) return '⚙: Classic nicht markiert';
+      const g = {}; for (const c of ['Druid', 'Wizard']) { w.applyTheme(c); g[c] = V('gold'); }
+      if (g.Druid !== w.eval('CLASS_THEMES.Druid.gold').toLowerCase() || g.Wizard !== w.eval('CLASS_THEMES.Wizard.gold').toLowerCase()) return 'Classic: Klassen-Farben nicht angewendet';
+      w.setDesign('leder');
+      if (st.media === 'not all' || 'design' in d.documentElement.dataset || V('gold') !== w.eval('WILLOW_PAL.dark.gold').toLowerCase()) return 'Zurück zu Leder klappt nicht';
+      w.closeSettings();
+      const html = d.documentElement.outerHTML;
+      if (!html.includes("localStorage.getItem('willow_design')==='klassisch'")) return 'Frühstart-Skript Design fehlt';
+      const root = [...d.querySelectorAll('style')][0].textContent;
+      if (!root.includes('--bg0:#0d0b14')) return 'Haupt-:root nicht mehr die alten Grundwerte';
+      return true;
+    } },
+  { name: 'Paket R1: Kontrast (WCAG ≥ 4,5) aller Text-Variablen auf allen Flächen (bg0–bg3; text/gold/purple auch auf purple3, bg0 auf gold)', datum: '04.10.2026',
+    run: ({ w }) => {
+      const L = h => { h = h.replace('#', ''); const c = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(x => x <= .03928 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
+      const cr = (a, b) => { const [x, y] = [L(a), L(b)].sort((p, q) => p - q); return (y + .05) / (x + .05); };
+      const P = [];
+      for (const [m, t] of Object.entries(w.eval('WILLOW_PAL'))) {
+        const pr = (f, s) => { const r = cr(t[f], t[s]); if (r < 4.5) P.push(`${m}: ${f} auf ${s} ${r.toFixed(2)}`); };
+        for (const f of ['text', 'text2', 'text3', 'desc', 'muted', 'gold', 'gold2', 'purple', 'green', 'red', 'blue']) for (const s of ['bg0', 'bg1', 'bg2', 'bg3']) pr(f, s);
+        for (const f of ['text', 'gold', 'purple']) pr(f, 'purple3');
+        pr('bg0', 'gold');
+      }
+      return P.length ? P.join('; ') : true;
     } },
   { name: 'My Spells: Unprepared einklappbar (Anzahl, Zustand pro Charakter in abGrpClosed, Prepared bleibt sichtbar)', datum: '01.10.2026',
     run: ({ w, d }) => {
