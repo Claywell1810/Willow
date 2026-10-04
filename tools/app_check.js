@@ -1199,7 +1199,7 @@ const REGRESSION = [
     run: ({ w, d, set, sel }) => {
       w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest D'");
       w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 16, CHA: 16 }, _f_lvl: '6', _f_hpM: '40', hpC: 12 });
-      sel('Cleric', '', 6); w.autoSave();
+      sel('Cleric', '', 6); w.eval('hpAskSet(-1,0);st.hpC=12;updBar()'); w.autoSave(); // 04.10.2026: offene HP-Wahl erst auflösen
       if (d.getElementById('hdBox').style.display === 'none' || d.getElementById('hdLbl').textContent !== 'Hit Dice · d8' || d.querySelectorAll('#hdPips .hdpip.av').length !== 6) return 'Hit-Dice-Anzeige';
       const cdMax = w.eval("abMaxUses(CLASS_DATA.Cleric.abilities.base.find(a=>a.id==='channeldivinity').uses,6)");
       w.eval(`st.abUses={channeldivinity:${cdMax}};st.slotUsed=[2,1,0,0,0,0,0,0,0]`);
@@ -1646,7 +1646,7 @@ const REGRESSION = [
     } },
   { name: 'Paket K: Custom-Rasse – Other/Weitere, ab Stufe, Vorteile, Natural AC, HP/Stufe, Sinne, Immunitäten, angeborene Zauber', datum: '02.10.2026',
     run: ({w, d, sel}) => {
-      sel('Fighter', '', 3);
+      sel('Fighter', '', 3); w.eval('hpAskSet(-1,0)'); // 04.10.2026: offene HP-Wahl erst auflösen
       d.getElementById('race').value = 'custom'; w.onRaceChange();
       d.getElementById('raceCustom').value = 'Testvolk';
       w.eval(`st.customRace={sub:'Testzweig',nac:13,hpl:1,tremor:30,immD:['Poison'],immC:['Charmed'],advS:['CON'],advC:['Frightened'],spAb:'WIS',
@@ -2400,7 +2400,7 @@ const REGRESSION = [
       Object.entries(SPELL_STATBLOCKS).concat(Object.entries(FEATURE_STATBLOCKS)).forEach(([k,L])=>(Array.isArray(L)?L:[L]).forEach(b=>{if(b&&b.n&&!b.type&&!b.ref&&!b.via)P.push('Stat-Block '+k+'|'+b.n+': type fehlt')}));`) },
   { name: 'Paket O1: Traglast – STR × 15 lb aus st.attrs, Größe, Powerful Build (Goliath, Custom), Anzeige lb statt kg', datum: '03.10.2026',
     run: ({w, d, sel}) => {
-      sel('Fighter', '', 3);
+      sel('Fighter', '', 3); w.eval('hpAskSet(-1,0)'); // 04.10.2026: offene HP-Wahl erst auflösen
       d.getElementById('race').value = ''; w.onRaceChange();
       w.eval("st.attrSrc=null; st.attrs.STR=16; st.items=[{id:1,name:'Testseil',qty:2,wt:5,cat:'Misc',note:''}]");
       w.renderItems();
@@ -2686,11 +2686,11 @@ const REGRESSION = [
       E('chLvl(-1)'); if (E('prof()') !== 3) return 'PB-Korrektur folgt der Stufe nicht'; E('chLvl(1);st.profAdj=0;buildCharCard()');
       E("st.mySpells=[{name:'Sacred Flame',grad:0,prep:true},{name:'Bless',grad:1,prep:true},{name:'Guiding Bolt',grad:1,prep:false}];buildMySpells()");
       if (!/Cantrips 1\/4 · Prepared 1\/9/.test(d.getElementById('spCountBox').textContent)) return 'Zähler: ' + d.getElementById('spCountBox').textContent;
-      // Max HP: 8 + 4×5 + CON 2×5 = 38; Fragen für Stufe 2–5
-      if (V('hpM') !== '38' || E('st.hpC') !== 38) return 'Max HP Cleric 5: ' + V('hpM') + ' / ' + E('st.hpC');
+      // Max HP: Stufen 2–5 offen → nur Stufe 1 (8 + CON 2) = 10; nach „All average“ 8 + 4×5 + CON 2×5 = 38 (04.10.2026: erst nach der Wahl)
+      if (V('hpM') !== '10' || E('st.hpC') !== 10) return 'Max HP Cleric 5 vor der Wahl: ' + V('hpM') + ' / ' + E('st.hpC');
       if (E('st.hpAsk.length') !== 4 || !d.getElementById('hpLvlAsk').textContent.includes('Avg 5')) return 'Level-Up-Frage: ' + E('JSON.stringify(st.hpAsk)');
-      E('hpAskSet(0,8)'); if (V('hpM') !== '41' || E('st.hpAsk.length') !== 3) return 'eigener Wurf 8: ' + V('hpM');
-      E('hpAskSet(-1,0)'); if (E('st.hpAsk.length') || d.getElementById('hpLvlAsk').style.display !== 'none') return '„All average“';
+      E('hpAskSet(0,8)'); if (V('hpM') !== '20' || E('st.hpAsk.length') !== 3) return 'eigener Wurf 8: ' + V('hpM');
+      E('hpAskSet(-1,0)'); if (E('st.hpAsk.length') || d.getElementById('hpLvlAsk').style.display !== 'none' || V('hpM') !== '41') return '„All average“: ' + V('hpM');
       const hm = d.getElementById('hpM'); hm.value = '45'; hm.dispatchEvent(new w.Event('change')); if (E('st.hpAdj') !== 4) return 'Max-HP-Korrektur: ' + E('st.hpAdj');
       E("st.feats.push({name:'Tough',tag:'Feat'});buildFeats()"); if (V('hpM') !== '55') return 'Tough: ' + V('hpM');
       E("st.feats=st.feats.filter(f=>f.name!=='Tough');st.hpAdj=0;buildFeats()");
@@ -2699,7 +2699,9 @@ const REGRESSION = [
       const s = d.getElementById('subcls'); s.value = 'Eldritch Knight (PHB)'; s.dispatchEvent(new w.Event('change'));
       if (E('spAttrVal()') !== 'INT') return 'Eldritch Knight: Attribut ' + E('spAttrVal()');
       s.value = ''; s.dispatchEvent(new w.Event('change'));
-      // Fighter 5: 10 + 4×6 + 10 = 44 (Würfe/Fragen der alten Klasse weg)
+      // Fighter 5: neue Klasse → Stufen 2–5 offen (10 + CON 2 = 12), nach „All average“ 10 + 4×6 + 10 = 44 (Würfe/Fragen der alten Klasse weg)
+      if (V('hpM') !== '12' || E('st.hpAsk.length') !== 4) return 'Fighter 5 vor der Wahl: ' + V('hpM') + ' ' + E('JSON.stringify(st.hpAsk)');
+      E('hpAskSet(-1,0)');
       if (V('hpM') !== '44' || E('JSON.stringify(st.hpRoll)') !== '{}') return 'Fighter 5 HP: ' + V('hpM') + ' ' + E('JSON.stringify(st.hpRoll)');
       // Origin Feat
       E("st.bg='Soldier';document.getElementById('bg').value='Soldier';buildBgLore()");
@@ -2728,11 +2730,26 @@ const REGRESSION = [
       // alter Spielstand: Max HP und PB bleiben, 10 = berechnet
       E("const ch=getAllChars();ch['S2 Alt']={_f_cls:'Fighter',_f_lvl:'3',_f_hpM:'28',_f_prof:'2',attrs:{STR:10,DEX:10,CON:14,INT:10,WIS:10,CHA:10},hpC:20,feats:[],mySpells:[],weapons:[],items:[]};ch['S2 Alt2']=Object.assign({},ch['S2 Alt'],{_f_hpM:'10',hpC:10});localStorage.setItem(LS_KEY,JSON.stringify(ch));loadChar('S2 Alt')");
       if (V('hpM') !== '28' || E('st.hpC') !== 20 || E('st.hpAsk.length') || V('prof') !== '2') return 'alter Save: ' + V('hpM') + ' ' + E('st.hpC') + ' PB ' + V('prof');
-      E("chLvl(1)"); if (V('hpM') !== '36' || E('st.hpAsk.length') !== 1) return 'alter Save Level-Up: ' + V('hpM');
+      E("chLvl(1)"); if (V('hpM') !== '28' || E('st.hpAsk.length') !== 1) return 'alter Save Level-Up vor der Wahl: ' + V('hpM');
+      E('hpAskSet(0,0)'); if (V('hpM') !== '36' || E('st.hpAsk.length')) return 'alter Save Level-Up Durchschnitt: ' + V('hpM');
       E("loadChar('S2 Alt2')"); if (V('hpM') !== '28' || E('st.hpC') !== 28) return 'alter Save mit 10: ' + V('hpM') + ' / ' + E('st.hpC');
       // aufräumen
       E("const c2=getAllChars();['S2 Test','S2 Alt','S2 Alt2'].forEach(n=>delete c2[n]);localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
       return true;
+    } },
+  { name: 'Level-Up: Max HP ändert sich erst nach der Wahl (Durchschnitt/Wurf), nicht schon beim Stufenwechsel', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js), V = id => d.getElementById(id).value;
+      E("switchTabAll('info');newChar();document.getElementById('newCharName').value='HP Wahl Test';confirmNewChar()");
+      const c = d.getElementById('cls'); c.value = 'Fighter'; c.dispatchEvent(new w.Event('change'));
+      E("st.attrSrc.CON={base:14};buildAttrs()");
+      const h1 = V('hpM'); E('chLvl(1)');
+      let r = true;
+      if (h1 !== '12') r = 'Stufe 1: ' + h1;
+      else if (V('hpM') !== '12' || E('st.hpAsk.length') !== 1) r = 'HP springt vor der Wahl: ' + V('hpM');
+      else { E('hpAskSet(0,4)'); if (V('hpM') !== '18') r = 'nach Wurf 4: ' + V('hpM'); }
+      E("const c2=getAllChars();delete c2['HP Wahl Test'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
+      return r;
     } },
   { name: 'Paket S3: Komfort – Magic-Initiate-Liste aus dem Background (BG_DATA.fv), Spell List „Up to <höchster Platz>“, Feats „Level ≤ N“, Standard Array/Point Buy, Log lesbar (keine Doppelzeile Background, Wahl-Werte, Datum), Speichern abgesichert (lsPut, Backup-Hinweis), englische Texte', datum: '04.10.2026',
     run: ({ w, d }) => {

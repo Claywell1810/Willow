@@ -3739,21 +3739,23 @@ function chHpT(d){const el=document.getElementById('hpT');el.value=Math.max(0,(p
 // oder gespeicherter Wurf st.hpRoll[Klasse][Stufe]; + CON-Mod je Charakterstufe; + Rasse (RACE_PICKS hp, z. B. Dwarven Toughness),
 // Feats aus dem Text (Tough: „twice your character level“, Boon of Fortitude: „increases by 40“), Draconic Resilience (+1 je Sorcerer-Stufe).
 // Feld #hpM = Ergebnis + st.hpAdj (Handkorrektur: Eintippen ins Feld). Neue Stufen → st.hpAsk (Durchschnitt / Wurf / eigener Wurf).
+// 04.10.2026 (Simon): offene Stufen in st.hpAsk zählen noch nicht (kein Würfel, kein CON, keine Stufen-Boni) – Max HP ändert sich erst nach der Wahl.
 function hpAvgOf(cls){const t=CLASS_CORE_TRAITS[cls],m=/\(or (\d+)\)/.exec(String(t&&t.hpPerLevel||'')),d=hdDieOf(cls);return m?+m[1]:(d?d/2+1:0);}
 function hpFeatBonus(f,T){const t=String(f&&f.d||'');
   if(/Hit Points? maximum increases by an amount equal to twice your (?:character )?level/i.test(t))return 2*T;
   const m=/Hit Points? maximum increases by (\d+)\b(?! whenever)/i.exec(t);return m?+m[1]:0;}
 function hpParts(){
   const C=charClasses();if(!C.length||!C.some(c=>hdDieOf(c.cls)))return null;
-  attrSync();const T=totLvl(),con=md(st.attrs.CON||10),R=st.hpRoll||{},P=[];
+  attrSync();const R=st.hpRoll||{},P=[],Q=(st.hpAsk||[]).filter(x=>C.some((c,i)=>c.cls===x.c&&x.l<=c.lvl&&!(i===0&&x.l===1)&&hdDieOf(c.cls))),
+    isQ=(k,l)=>Q.some(x=>x.c===k&&x.l===l),T=Math.max(1,totLvl()-Q.length),con=md(st.attrs.CON||10);
   C.forEach((c,i)=>{const d=hdDieOf(c.cls),a=hpAvgOf(c.cls);if(!d)return;let s=0,n=0;
-    for(let l=1;l<=c.lvl;l++){if(i===0&&l===1){s+=d;continue;}const r=R[c.cls]&&+R[c.cls][l];if(r>0){s+=Math.min(d,r);n++;}else s+=a;}
+    for(let l=1;l<=c.lvl;l++){if(i===0&&l===1){s+=d;continue;}if(isQ(c.cls,l))continue;const r=R[c.cls]&&+R[c.cls][l];if(r>0){s+=Math.min(d,r);n++;}else s+=a;}
     P.push({t:c.cls+' '+c.lvl+' (d'+d+(n?', '+n+' rolled':'')+')',v:s,k:'cls'});});
   if(con)P.push({t:'CON '+fmt(con)+' × '+T,v:con*T,k:'con'});
   const race=rcRace(),rp=race&&rcP(race);if(rp&&rp.hp&&rp.hp.per)P.push({t:rp.hp.t,v:rp.hp.per*T,k:'x',u:rp.custom?' HP':''});
   const seen=new Set();(st.feats||[]).forEach(f=>{if(!f||f.tag!=='Feat'||seen.has(f.name))return;seen.add(f.name);
     const F=FT_FEATS.filter(x=>x.n===f.name),ft=F.find(x=>x.src==='XPHB')||F[0],v=hpFeatBonus(ft,T);if(v)P.push({t:f.name,v,k:'x'});});
-  stFeatures().forEach(f=>{if(f.name==='Draconic Resilience'&&/hit point maximum increases by/i.test(f.desc||'')&&!P.some(x=>x.t==='Draconic Resilience'))P.push({t:'Draconic Resilience',v:f._cl,k:'x'});});
+  stFeatures().forEach(f=>{if(f.name==='Draconic Resilience'&&/hit point maximum increases by/i.test(f.desc||'')&&!P.some(x=>x.t==='Draconic Resilience'))P.push({t:'Draconic Resilience',v:Math.max(0,f._cl-Q.filter(x=>x.c==='Sorcerer').length),k:'x'});});
   return P;
 }
 function hpCalc(){const P=hpParts();return P?Math.max(1,P.reduce((a,x)=>a+x.v,0)):null;}
@@ -3769,7 +3771,7 @@ function hpLvAsk(){ // neue Klassenstufen seit dem letzten Stand → Frage; Stuf
 }
 function hpSync(){
   if(_hpHold)return;const el=document.getElementById('hpM');if(!el)return;
-  const P=hpParts();hpLvAsk();hpAskRender();
+  hpLvAsk();const P=hpParts();hpAskRender();
   const hint=document.getElementById('hpMHint');
   if(!P){const race=rcRace(),rp=race&&rcP(race);if(hint){hint.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}${rp.custom?' HP':''}`:'';el.title='';}return;} // ohne Klasse: nur Rassen-Hinweis wie bisher
   const c=Math.max(1,P.reduce((a,x)=>a+x.v,0)),adj=+st.hpAdj||0,v=Math.max(1,c+adj);
@@ -3793,7 +3795,7 @@ function hpAskRender(){
       +'<button class="hpa-b" onclick="hpAskSet('+i+',-1)" aria-label="Roll d'+d+'">🎲 d'+d+'</button>'
       +'<input class="hpa-in" type="number" inputmode="numeric" min="1" max="'+d+'" placeholder="own" aria-label="Own roll" onchange="hpAskSet('+i+',+this.value)"></div>';}).join('')
     +(A.length>1?'<button class="hpa-all" onclick="hpAskSet(-1,0)">All average</button>':'')
-    +'<div class="hpa-note">CON modifier is added automatically. Average is used until you choose.</div>';
+    +'<div class="hpa-note">Max HP updates once you choose. CON modifier is added automatically.</div>';
 }
 function hpAskSet(i,v){ // v: 0 = Durchschnitt, -1 = würfeln, sonst eigener Wurf
   const A=st.hpAsk||[],L=i<0?A.slice():[A[i]];if(!L[0])return;const R=st.hpRoll||(st.hpRoll={}),msg=[];
@@ -9689,7 +9691,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-04c';
+const APP_VERSION = 'willow-app-2026-10-04d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
