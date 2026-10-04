@@ -13,6 +13,8 @@ Aufruf (aus dem Ordner über dem Klon, braucht src/backgrounds.json):
 - BG_SPELLS = {"<Background>": [Zaubernamen]} aus `additionalSpells[].expanded` (Strixhaven, Ravnica):
   diese Zauber kommen auf die Liste der Zauberklasse (Spell List „★ My Class“, slMySpellCtx).
   Namen werden gegen ZB_SPELLS aufgelöst; fehlende werden gemeldet, nicht erfunden.
+- BG_DATA[].fv (Paket S3) = Variante des Origin Feats aus `feats` („magic initiate; cleric|xphb“ → „Cleric“);
+  die App belegt damit beim „+ Add“ die Wahl `st.picks['fs:<Feat>:v']` vor (FEAT_SPELLS-Variante „Cleric Spells“).
 - `--add AU,RHW,EFA`: Backgrounds dieser Quellen (ohne `reprintedAs`/`_copy`) in BG_DATA ergänzen
   (Felder s/t/f/a aus skillProficiencies/toolProficiencies/feats/ability, sortiert eingefügt) und in BG_EXTRA
   (`l` aus fluff-backgrounds.json). Gleicher Name schon da: nur ersetzen, wenn der alte Eintrag laut
@@ -121,7 +123,29 @@ def bg_data(b, featnames):
     for x in b.get('ability', []):
         w = (x.get('choose') or {}).get('weighted')
         if w: ab = ', '.join(a.upper() for a in w['from']); break
-    return {'n': b['name'], 's': sk, 't': tl, 'f': ft, 'a': ab, 'src': b['source']}
+    d = {'n': b['name'], 's': sk, 't': tl, 'f': ft, 'a': ab, 'src': b['source']}
+    return with_fv(d, b)
+
+
+def feat_var(b):
+    """Paket S3: Variante des Origin Feats aus 5e.tools `feats` („magic initiate; cleric|xphb“ → „Cleric“), sonst ''."""
+    for x in b.get('feats', []):
+        k = next(iter(x))
+        if k == 'anyFromCategory': continue
+        p = k.split('|')[0].split(';')
+        return p[1].strip().title() if len(p) > 1 else ''
+    return ''
+
+
+def with_fv(d, b):
+    """Feld `fv` (Variante, z. B. Magic Initiate → Cleric) direkt nach `f` setzen bzw. entfernen."""
+    v = feat_var(b)
+    r = {}
+    for k, x in d.items():
+        if k == 'fv': continue
+        r[k] = x
+        if k == 'f' and v: r['fv'] = v
+    return r
 
 
 def add_bgs(bgd, ex, bgs, srcs, src):
@@ -162,6 +186,15 @@ def main():
     assert json.dumps(bgd, ensure_ascii=False) == s[a2:z2], 'BG_DATA-Format weicht ab'
     if '--add' in sys.argv:
         add_bgs(bgd, ex, bgs, sys.argv[sys.argv.index('--add') + 1].split(','), src)
+
+    fvn = 0
+    for i, d in enumerate(bgd):
+        b = by.get((d['n'], d['src']))
+        if b and '_copy' not in b:
+            nd = with_fv(d, b)
+            if nd != d: fvn += 1
+            bgd[i] = nd
+    print(f"BG_DATA fv (Feat-Variante): {fvn} geändert, gesetzt: {[(d['n'], d['fv']) for d in bgd if d.get('fv')]}")
 
     neu, miss, chg = [], [], 0
     for e in ex:

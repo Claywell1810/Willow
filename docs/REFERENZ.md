@@ -534,6 +534,17 @@ Neue optionale Felder im Spielstand (B7; fehlen sie, gilt die Migration in `appl
 - **Zähler:** `buildMySpells()` = `buildMySpells0()` + `buildSpCount()` (Einzelklasse: `spClsCounts`, Always Prepared zählt nicht; Multiclass: Zeilen in `#spMcBox`).
 - **Log:** eigene Zeilen für `profAdj`, `hpAdj`, `hpRoll`; `hpAsk`, `hpLv`, `seLinkOff` in `LOG_SKIP`.
 
+## B28. Komfort (Paket S3, seit 04.10.2026)
+
+Keine neuen Felder im Spielstand. Neu in localStorage (außerhalb `dnd5e_chars`): `willow_lastBackup` (Zeit des letzten „⬇ Backup All“), `willow_bkRemind` (letzte Erinnerung). Bei Willow 2014 (Paket T) mit eigenem Präfix.
+- **Origin Feat mit Liste:** `BG_DATA[].fv` (von `bg_convert.py` aus 5e.tools `feats`, z. B. „magic initiate; cleric|xphb“ → „Cleric“; Acolyte, Guide, Moonwell Pilgrim, Sage). Anzeige „Magic Initiate (Cleric)“; `bgFeatAdd(f,v)` setzt `st.picks['fs:<Feat>:v']` auf die `FEAT_SPELLS`-Variante, die mit „<fv> “ beginnt – nur wenn noch keine gewählt ist.
+- **Spell List:** Grad-Filter `slFGrad='upto'` = Vorauswahl „Up to <Grad>“ (`slMaxGrad()`: höchster Platz aus `st.slotMax` inkl. ✎ Adjust, Pact Magic `pactInfo().lv`; ohne Plätze alle Grade, Knopf versteckt). Mystic Arcanum (6.–9. Grad Warlock) fällt darunter nicht → „All“. „Clear all“ setzt wieder `upto`.
+- **Feats:** `ftFLvl` (Standard an) blendet Feats mit `pre` „Level N“ über der Gesamtstufe (`totLvl()`) aus; mehrere „Level N“ → die kleinste. Knöpfe „Level ≤ N“ / „Any level“ unter den Kategorien, Zähler „· level N or lower“.
+- **Standard Array / Point Buy:** Knopf im Attribut-Fenster → `agOpen()`/`renderAg()`; `ATTR_GEN` aus `book-xphb.json` S. 38 (Array 15/14/13/12/10/8, 27 Punkte, Kosten 8–15, Tabelle „Standard Array by Class“ ohne Artificer → kein Vorschlag). „Apply“ setzt nur `st.attrSrc[*].base`, nur gültig (Array je Wert einmal, Point Buy ≤ 27).
+- **Log:** `_pickVal` (Wahl-Werte ohne „|QUELLE“, „STR:+2“ → „STR +2“, Modus voran „+2/+1: …“), `st.bg` nur geloggt, wenn das Formularfeld es nicht schon zeigt, Datum „Sun 4 Oct“ (Jahr nur, wenn nicht aktuell).
+- **Speichern:** alle Schreibzugriffe auf `LS_KEY` über `lsPut(chars)` (try/catch → `false` + Warn-Toast höchstens alle 20 s, `console.warn`; `saveChar` bricht dann ab). `showToast(msg,ms)` mit Dauer. `storageInit()` nach `initApp()`: `navigator.storage.persist()`, Erinnerung „Last backup: …“ höchstens 1×/Woche, wenn Charaktere da und letztes Backup > 14 Tage/nie. ⚙ zeigt „Last backup: …“ (`bkLabel`).
+- **Englisch:** Actions-Gruppen/Tags über `AB_GRP_EN` (Keys `aktion`/`bonus`/… und Daten-Tags „Bonusaktion“ … bleiben deutsch, B1c), Feat-Kategorie „Other“, Platzhalter/Knöpfe/Toasts.
+
 ## B8. Prüfskript `tools/app_check.js`
 
 ```bash

@@ -453,6 +453,7 @@ const REGRESSION = [
       if (w.eval('typeof SUBCLASS_SPELLS') === 'undefined' || w.eval('typeof slMySpellCtx') === 'undefined') return 'Klassenfilter fehlt (SUBCLASS_SPELLS/slMySpellCtx)';
       if (w.eval('typeof zbRender') !== 'undefined') return 'toter Code zbRender noch vorhanden';
       if (w.eval('slFClass') !== 'mine') return 'Standard-Filter nicht „meine Klasse"';
+      w.eval("slFGrad='all'"); // Paket S3: Standard ist „Up to <höchster Platz>“, dieser Test prüft die Klassenliste über alle Grade
       const ZB = JSON.parse(w.eval('JSON.stringify(ZB_SPELLS.map(s=>({name:s.name,grad:s.grad,classes:s.classes||[]})))')), SS = JSON.parse(w.eval('JSON.stringify(SUBCLASS_SPELLS)'));
       const on = (c, s) => s.classes.includes(c);
       const list = () => { w.slRender(); return new Map([...d.querySelectorAll('#slList .zb-card')].map(c => [c.querySelector('.zb-name').textContent, (c.querySelector('.sl-via')?.textContent || '').replace('✦ ', '')])); };
@@ -948,13 +949,13 @@ const REGRESSION = [
     } },
   { name: 'Feats-Filter: jede Kategorie der Daten hat einen Knopf und findet ihre Feats (Fighting Style inkl. FS:P/FS:R, Epic Boon, Dragonmark, Dark Gift)', datum: '01.10.2026',
     run: ({ w, d }) => {
-      w.switchTabAll && w.switchTabAll('feats'); w.ftBuildFilters();
+      w.switchTabAll && w.switchTabAll('feats'); w.ftBuildFilters(); w.eval('ftFLvl=false'); // Paket S3: Stufen-Vorauswahl aus
       const btns = [...d.querySelectorAll('#ftCatFilters .fbtn')];
       const cnt = v => { const b = btns.find(x => x.dataset.val === v); if (!b) return -1; b.click(); return d.querySelectorAll('#ftList .zb-card').length; };
       for (const c of w.eval('[...new Set(FT_FEATS.map(f=>f.cat))]')) if (!w.eval(`FT_CATS[${JSON.stringify(c)}]!==undefined`)) return 'Kategorie ohne Namen: ' + c;
       const exp = { FS: w.eval("FT_FEATS.filter(f=>f.cat.startsWith('FS')).length"), EB: w.eval("FT_FEATS.filter(f=>f.cat==='EB').length"), D: 12, DG: 9 };
       for (const [k, n] of Object.entries(exp)) { const c = cnt(k); if (c !== n) return `Filter ${k}: ${c} statt ${n}`; }
-      cnt('all');
+      cnt('all'); w.eval('ftFLvl=true');
       return true;
     } },
   { name: 'Backgrounds und Feats aus AU/RHW/EFA ergänzt: 12 neue Backgrounds, 4 durch Nachdruck ersetzt (Name gleich), 40 Feats inkl. Dark Gift, Origin Feat findbar', datum: '01.10.2026',
@@ -2731,6 +2732,61 @@ const REGRESSION = [
       E("loadChar('S2 Alt2')"); if (V('hpM') !== '28' || E('st.hpC') !== 28) return 'alter Save mit 10: ' + V('hpM') + ' / ' + E('st.hpC');
       // aufräumen
       E("const c2=getAllChars();['S2 Test','S2 Alt','S2 Alt2'].forEach(n=>delete c2[n]);localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
+      return true;
+    } },
+  { name: 'Paket S3: Komfort – Magic-Initiate-Liste aus dem Background (BG_DATA.fv), Spell List „Up to <höchster Platz>“, Feats „Level ≤ N“, Standard Array/Point Buy, Log lesbar (keine Doppelzeile Background, Wahl-Werte, Datum), Speichern abgesichert (lsPut, Backup-Hinweis), englische Texte', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      if (typeof w.lsPut !== 'function' || typeof w.agApply !== 'function' || typeof w.slMaxGrad !== 'function' || typeof w._pickVal !== 'function') return 'lsPut/agApply/slMaxGrad/_pickVal fehlen (Paket S3)';
+      E("switchTabAll('info');newChar();document.getElementById('newCharName').value='S3 Test';confirmNewChar()");
+      const c = d.getElementById('cls'); c.value = 'Cleric'; c.dispatchEvent(new w.Event('change'));
+      for (let i = 0; i < 4; i++) E('chLvl(1)');
+      // 1) Origin Feat mit Liste: Acolyte → Magic Initiate (Cleric)
+      if (E("BG_DATA.find(b=>b.n==='Acolyte').fv") !== 'Cleric' || E("BG_DATA.find(b=>b.n==='Sage').fv") !== 'Wizard' || E("BG_DATA.some(b=>b.n==='Soldier'&&b.fv)")) return 'BG_DATA.fv falsch';
+      E("st.bg='Acolyte';document.getElementById('bg').value='Acolyte';buildBgLore()");
+      const og = () => [...d.querySelectorAll('.di')].find(x => /Origin Feat/.test(x.textContent));
+      if (!/Magic Initiate \(Cleric\)/.test(og().textContent)) return 'Anzeige „Magic Initiate (Cleric)“';
+      [...og().querySelectorAll('button')].find(b => /Add/.test(b.textContent)).click();
+      if (E("JSON.stringify(st.picks['fs:Magic Initiate:v'])") !== '["Cleric Spells"]') return 'Magic Initiate nicht vorbelegt: ' + E("JSON.stringify(st.picks['fs:Magic Initiate:v'])");
+      // 2) Spell List: Cleric 5 → „Up to 3rd“, „All“ zeigt höhere Grade; Feats: Level-19-Boons erst mit „Any level“
+      E("switchTabAll('spelllist');slRender()");
+      const divs = () => [...d.querySelectorAll('#slList .zb-divider')].map(x => x.textContent).join();
+      if (E('slMaxGrad()') !== 3 || E('slFGrad') !== 'upto' || /4th|9th/.test(divs()) || !/3rd/.test(divs())) return 'Spell List Up to 3rd: ' + E('slMaxGrad()') + ' ' + divs();
+      if (d.getElementById('slUptoBtn').textContent !== 'Up to 3rd') return 'Knopf: ' + d.getElementById('slUptoBtn').textContent;
+      d.querySelector('#slGradRow .fbtn[data-val="all"]').click(); if (!/9th/.test(divs())) return '„All“ zeigt keine hohen Grade';
+      E('slClearAllFilters()'); if (E('slFGrad') !== 'upto') return '„Clear all“ nicht zurück auf „Up to“';
+      E("switchTabAll('feats');ftBuildFilters();ftRender()");
+      const ft = n => [...d.querySelectorAll('#ftList .zb-name')].some(x => x.textContent === n);
+      if (ft('Boon of Blazing Dawn') || !ft('Alert') || !/level 5 or lower/.test(d.getElementById('ftCount').textContent)) return 'Feats Level-Filter: ' + d.getElementById('ftCount').textContent;
+      E('ftFLvl=false;ftRender()'); if (!ft('Boon of Blazing Dawn')) return 'Feats „Any level“'; E('ftFLvl=true;ftRender()');
+      // 3) Standard Array (Vorschlag Cleric, XPHB-Tabelle) und Point Buy (27 Punkte)
+      E("switchTabAll('info');openAttr('STR');agOpen();agSuggest()"); if (!E('agValid()')) return 'Standard Array Cleric ungültig';
+      E('agApply()'); if (E("ATTRS.map(a=>st.attrSrc[a.k].base).join()") !== '14,8,13,10,15,12') return 'Standard Array: ' + E("ATTRS.map(a=>st.attrSrc[a.k].base).join()");
+      E("agOpen();agMode('pb');ATTRS.forEach(a=>_ag.v[a.k]=15)"); if (E('agValid()')) return 'Point Buy 6×15 gilt als gültig';
+      E("ATTRS.forEach((a,i)=>_ag.v[a.k]=i<3?15:8);renderAg()"); if (!E('agValid()') || !/Points left: 0 \/ 27/.test(d.getElementById('attrBox').textContent)) return 'Point Buy 15/15/15/8/8/8';
+      E("agApply();closeAttr()"); if (E("ATTRS.map(a=>st.attrSrc[a.k].base).join()") !== '15,15,15,8,8,8') return 'Point Buy übernommen';
+      // 4) Log lesbar
+      E("st.picks['bg:Acolyte:ability']=['+2/+1','WIS:+2','CHA:+1'];autoSave()");
+      const L = E("(st.log||[]).map(x=>x.m).join('\\n')");
+      if (/^bg:/m.test(L) || !/Background: .*Acolyte/.test(L)) return 'Log Background doppelt/fehlt';
+      if (!L.includes('"+2/+1: WIS +2, CHA +1"') || E("_pickVal(['Dice Set|XPHB'])") !== 'Dice Set') return 'Log Wahl-Werte technisch';
+      E("switchTabAll('log');buildLog()"); const day = d.querySelector('#logList > div').textContent;
+      if (!/^[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}$/.test(day)) return 'Log-Datum: ' + day;
+      // 5) Speichern abgesichert: Fehler beim Schreiben → false + Warnung, autoSave wirft nicht
+      E("window._svSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k){if(k===LS_KEY)throw new Error('QuotaExceededError');return window._svSet.apply(this,arguments)}");
+      let r, thr = '';
+      try { r = E('lsPut({})'); E("_lsErrAt=0;st.hpC=(st.hpC||0)+1;autoSave()"); } catch (e) { thr = e.message; }
+      E("Storage.prototype.setItem=window._svSet");
+      if (r !== false || thr || !/Could not save/.test(d.getElementById('toast').textContent)) return 'lsPut-Fehler: ' + r + ' ' + thr + ' ' + d.getElementById('toast').textContent;
+      E("localStorage.removeItem('willow_lastBackup');openSettings()"); if (d.getElementById('bkLast').textContent !== 'Last backup: never') return 'Backup-Anzeige never';
+      E("bkMark();bkLabel()"); if (d.getElementById('bkLast').textContent !== 'Last backup: today') return 'Backup-Anzeige today'; E("closeSettings();localStorage.removeItem('willow_lastBackup')");
+      // 6) englische Texte
+      E("switchTabAll('zauber');buildAbilities()");
+      const g = [...d.querySelectorAll('.ab-grp, .ab-tag')].map(x => x.textContent).join('|');
+      if (/Aktion|Bonusaktion|Reaktion|Passiv\b|Weitere/.test(g) || !/Passive/.test(g)) return 'Actions deutsch: ' + g.slice(0, 120);
+      if (d.getElementById('ftQ').placeholder !== 'Search feats...' || d.getElementById('bstQ').placeholder !== 'Search beasts...' || E("FT_CATS['']") !== 'Other') return 'Platzhalter/Kategorie deutsch';
+      // aufräumen
+      E("const c2=getAllChars();delete c2['S3 Test'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
