@@ -2751,6 +2751,19 @@ const REGRESSION = [
       E("const c2=getAllChars();delete c2['HP Wahl Test'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
       return r;
     } },
+  { name: 'Waffe aus dem Inventar als Karte wie die natürliche Waffe (Werte als Text, ✎ öffnet die Felder, ✓ schließt)', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      E("st.items=[{id:77,name:'Testkampfstab',qty:1,wt:4,cat:'Weapon',note:'',ref:'Quarterstaff|XPHB'}];st.weapons=[{name:'Eigene',atk:'+1',dmg:'1d4',type:'Piercing'}];itToWpn(77)");
+      const L = () => [...d.getElementById('weaponList').children];
+      let r = true;
+      if (L().length !== 2) r = 'Anzahl ' + L().length;
+      else if (!L()[0].querySelector('input')) r = 'eigene Waffe ohne Felder';
+      else if (!L()[1].classList.contains('cr-nw') || L()[1].querySelector('input') || !/Testkampfstab/.test(L()[1].querySelector('.cr-nw-h').textContent) || !L()[1].querySelector('#rollWpnA1')) r = 'Inventar-Waffe nicht als Karte';
+      else { E('wpnEdit(1)'); if (!L()[1].querySelector('input')) r = '✎ öffnet keine Felder'; else { E('wpnEdit(1)'); if (L()[1].querySelector('input')) r = '✓ schließt nicht'; } }
+      E("st.items=[];st.weapons=[];buildWeapons()");
+      return r;
+    } },
   { name: 'Paket S3: Komfort – Magic-Initiate-Liste aus dem Background (BG_DATA.fv), Spell List „Up to <höchster Platz>“, Feats „Level ≤ N“, Standard Array/Point Buy, Log lesbar (keine Doppelzeile Background, Wahl-Werte, Datum), Speichern abgesichert (lsPut, Backup-Hinweis), englische Texte', datum: '04.10.2026',
     run: ({ w, d }) => {
       const E = js => w.eval(js);

@@ -267,6 +267,7 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .cr-nw-v b{font-weight:normal;font-family:'Crimson Pro',serif;font-size:var(--fs-txt);color:var(--text)}
 .cr-nw-v b.g{color:var(--gold)}
 .cr-nw-s{font-size:var(--fs-2xs);color:var(--text3);font-family:'Cinzel',serif}
+.wp-ib{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;padding:0 5px;line-height:1}.cr-nw-h .wp-ib:first-of-type{margin-left:auto}
 .wp-sub{font-size:var(--fs-xs);color:var(--text3);line-height:1.35;margin-top:-2px}
 .wp-chips{display:flex;gap:6px;flex-wrap:wrap}.wp-chips .pk-chip{min-height:30px;padding:3px 10px;font-size:var(--fs-sm)}.wp-chips .pk-chip.on{border-color:var(--gold);color:var(--gold)}
 .wp-calc{line-height:1.5;font-family:'Crimson Pro',Georgia,serif;font-size:var(--fs-xs);letter-spacing:0}.wp-calc b.g{color:var(--gold);font-weight:600}
@@ -2689,13 +2690,19 @@ function buildWeapons(){
   g.innerHTML=nwH;
   st.weapons.forEach((w,i)=>{
     const V=wpnVals(w),R=!!V.A; // Paket O5: verknüpfte Waffe (ref) – Werte live, Eingabe überschreibt
+    if(R&&!_wpEdit.has(w)){ // 04.10.2026 (Simon): verknüpfte Waffe wie die natürliche Waffe als Karte, Felder erst über ✎
+      const c=document.createElement('div');c.className='cr-nw';
+      c.innerHTML=`<div class="cr-nw-h">${pkEsc(w.name||'')}<span class="sk-bdg">Items</span><button class="wp-ib" onclick="wpnEdit(${i})" aria-label="Edit weapon" title="Edit">✎</button><button class="wp-ib" onclick="delWeapon(${i})" aria-label="Remove weapon">&times;</button></div>`
+        +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${pkEsc(V.atk||'—')}</b></span><span><small>DAMAGE</small><b>${pkEsc(V.dmg||'—')}</b></span><span><small>TYPE</small><b>${pkEsc(V.type||'—')}</b></span></div>`
+        +wpnRefHtml(w,i,V)+rlWpnBtns('rollWpn',i,V.atk,V.dmg);
+      g.appendChild(c);return;}
     const fIn=k=>R?`wpnSet(${i},'${k}',this.value)" onchange="buildWeapons()`:`st.weapons[${i}].${k}=this.value;autoSave();rlWpnUpd(${i})`;
     const d=document.createElement('div');
     d.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px';
     d.innerHTML=`
       <div style="display:flex;gap:6px;align-items:center">
         <input value="${w.name||''}" placeholder="Weapon name" oninput="st.weapons[${i}].name=this.value;autoSave()" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:var(--fs-txt);padding:5px 8px;outline:none;font-family:'Crimson Pro',serif">
-        <button onclick="delWeapon(${i})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">&times;</button>
+        ${R?`<button class="wp-ib" onclick="wpnEdit(${i})" aria-label="Done" title="Done" style="color:var(--gold)">✓</button>`:''}<button onclick="delWeapon(${i})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">&times;</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
         <div>
@@ -8218,6 +8225,8 @@ function wpnSet(i,k,v){
   if(A&&String(v).trim()===A[k])v='';   // gleich dem automatischen Wert = automatisch
   w[k]=v;autoSave();rlWpnUpd(i);
 }
+const _wpEdit=new WeakSet(); // verknüpfte Waffen, deren Felder offen sind (nur bis zum Neuladen)
+function wpnEdit(i){const w=(st.weapons||[])[i];if(!w)return;if(_wpEdit.has(w))_wpEdit.delete(w);else _wpEdit.add(w);buildWeapons();}
 function wpnTog(i,k){const w=(st.weapons||[])[i];if(!w)return;if(w[k])delete w[k];else w[k]=1;autoSave();buildWeapons();}
 function wpnAutoReset(i){const w=(st.weapons||[])[i];if(!w)return;w.atk='';w.dmg='';autoSave();buildWeapons();}
 function wpnRefHtml(w,i,V){ // Zusatz unter den Feldern einer verknüpften Waffe
@@ -9691,7 +9700,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-04d';
+const APP_VERSION = 'willow-app-2026-10-04e';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
