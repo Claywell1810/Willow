@@ -1021,7 +1021,7 @@ const REGRESSION = [
       ['Stealth', 'Perception', 'Acrobatics', 'Insight'].forEach(o => chip(ct, o).click());
       const ex2 = card('Expertise'); if (chip(ex2, 'Arcana') || !chip(ex2, 'Stealth')) return 'Expertise-Optionen';
       chip(ex2, 'Stealth').click(); chip(card('Expertise'), 'Perception').click();
-      if (pip(sk('Stealth')) !== 'e' || bdg(sk('Stealth')) !== 'Class,Expertise' || bon(sk('Stealth')) !== '+6') return 'Expertise nicht wirksam: ' + pip(sk('Stealth')) + ' ' + bdg(sk('Stealth')) + ' ' + bon(sk('Stealth'));
+      if (pip(sk('Stealth')) !== 'e' || bdg(sk('Stealth')) !== 'Class,Expertise' || bon(sk('Stealth')) !== '+8') return 'Expertise nicht wirksam: ' + pip(sk('Stealth')) + ' ' + bdg(sk('Stealth')) + ' ' + bon(sk('Stealth'));
       if (card('Expertise').textContent.includes('Level 6')) return 'L6-Expertise vor Stufe 6';
       sel('Rogue', '', 6); if (!card('Expertise').textContent.includes('Level 6')) return 'L6-Expertise fehlt';
       if (pip(sv('Wisdom')) !== '') return 'Slippery Mind vor L15';
@@ -1126,7 +1126,7 @@ const REGRESSION = [
       if (bw.querySelector('.rc-dc').textContent !== 'Save DC 13 (CON) · Damage 2d10') return 'Breath Weapon Werte: ' + bw.querySelector('.rc-dc').textContent;
       if (!card('Draconic Flight') || grp(card('Draconic Flight')) !== 'bonus' || grp(card('Draconic Ancestry')) !== 'weitere') return 'Draconic Flight / Ancestry';
       set('lvl', '4'); w.buildAbilities();
-      if (card('Draconic Flight') || card('Breath Weapon').querySelector('.rc-dc').textContent !== 'Save DC 13 (CON) · Damage 1d10' || pips(card('Breath Weapon')) !== 2) return 'Stufe 4: Draconic Flight/Schaden';
+      if (card('Draconic Flight') || card('Breath Weapon').querySelector('.rc-dc').textContent !== 'Save DC 12 (CON) · Damage 1d10' || pips(card('Breath Weapon')) !== 2) return 'Stufe 4: Draconic Flight/Schaden';
       // Goliath: Aktionsart je Boon
       set('lvl', '5'); race('Goliath');
       const ga = () => card('Giant Ancestry');
@@ -1150,7 +1150,7 @@ const REGRESSION = [
       race('Gnome'); chip(card('Gnomish Lineage'), 'Forest Gnome').click();
       if ([...card('Gnomish Lineage').querySelectorAll('.ab-sub .ab-pip')].length !== 2) return 'Forest Gnome Speak with Animals (PB 2 bei L3)';
       race('Aasimar'); if (w.slMyVia(w.slMySpellCtx(), { name: 'Light', classes: [] }) !== 'Aasimar: Light Bearer') return 'Light Bearer im ★-Filter';
-      if (card('Healing Hands').querySelector('.rc-dc').textContent !== 'Roll 3d4' || !card('Celestial Revelation')) return 'Aasimar-Tracker';
+      if (card('Healing Hands').querySelector('.rc-dc').textContent !== 'Roll 2d4' || !card('Celestial Revelation')) return 'Aasimar-Tracker';
       // Nebenfund C4: Optionsnamen der Verwandlungen (fehlten im RACE_DATA-Text), bleiben in derselben Karte
       const crn = [...card('Celestial Revelation').querySelectorAll('.fd-n')].map(x => x.textContent).join('|');
       if (crn !== 'Heavenly Wings.|Inner Radiance.|Necrotic Shroud.') return 'Celestial Revelation Optionsnamen: ' + crn;
@@ -1229,9 +1229,10 @@ const REGRESSION = [
       // Long Rest
       sel('Wizard', '', 5);
       w.eval("st.hpC=3;st.hdUsed=4;st.hdUsedBy={6:4};st.slotUsed=[3,1,2,0,0,0,0,0,0];st.abUses={wz_arcanerecovery:1};st.dsS=[1,0,0];st.dsF=[1,1,0];st.mySpells=[{name:'Shield',grad:1,school:'Abjuration',prep:true,freeMax:1,freeUsed:1}];document.getElementById('hpT').value=5");
-      w.openRest('long'); if (!box.textContent.includes('Hit Points3 → 40') || !box.textContent.includes('Hit Dice1 → 5')) return 'Long-Rest-Dialog: ' + box.textContent;
+      w.openRest('long'); if (!box.textContent.includes('Hit Points3 → ' + w.hpMaxVal()) ||   // Paket S2: Max HP berechnet
+       !box.textContent.includes('Hit Dice1 → 5')) return 'Long-Rest-Dialog: ' + box.textContent;
       w.doLongRest();
-      if (w.eval('st.hpC') !== 40 || d.getElementById('hpT').value !== '0' || w.eval('st.hdUsed') !== 0 || w.eval('st.slotUsed.join()') !== '0,0,0,0,0,0,0,0,0' || Object.keys(w.eval('st.abUses')).length || w.eval('st.mySpells[0].freeUsed') || w.eval('st.dsS.join()+st.dsF.join()') !== '0,0,00,0,0') return 'Long Rest unvollständig';
+      if (w.eval('st.hpC') !== w.hpMaxVal() || d.getElementById('hpT').value !== '0' || w.eval('st.hdUsed') !== 0 || w.eval('st.slotUsed.join()') !== '0,0,0,0,0,0,0,0,0' || Object.keys(w.eval('st.abUses')).length || w.eval('st.mySpells[0].freeUsed') || w.eval('st.dsS.join()+st.dsF.join()') !== '0,0,00,0,0') return 'Long Rest unvollständig';
       if (d.querySelector('#dsF .dspip.f')) return 'Death-Save-Kreise nicht geleert';
       if (d.body.innerHTML.includes('onclick="restoreAllUses()"')) return 'alter Reset-Knopf noch da';
       w.resetUI(); return true;
@@ -1317,12 +1318,13 @@ const REGRESSION = [
       // Undo/Redo
       const ub = d.getElementById('undoBtn'), rb = d.getElementById('redoBtn');
       if (!ub || !rb || ub.disabled || !rb.disabled) return 'Undo-Knöpfe Zustand';
+      const hp0 = w.eval('st.hpC');   // Paket S2: Max HP folgt der Stufe → Ausgangswert merken
       w.eval('st.hpC=7'); w.autoSave(); w.eval('st.hpC=3'); w.autoSave();
       w.doUndo(); if (w.eval('st.hpC') !== 7 || d.getElementById('hpC').textContent !== '7') return 'Undo HP: ' + w.eval('st.hpC');
       if (rb.disabled) return 'Redo nicht aktiv';
       if (!L().some(m => m.startsWith('↶ Undone: HP: 3 → 7'))) return 'Undo-Log: ' + L().slice(-1);
       w.doRedo(); if (w.eval('st.hpC') !== 3) return 'Redo HP: ' + w.eval('st.hpC');
-      w.doUndo(); w.doUndo(); if (w.eval('st.hpC') !== 10) return 'zweites Undo: ' + w.eval('st.hpC');
+      w.doUndo(); w.doUndo(); if (w.eval('st.hpC') !== hp0) return 'zweites Undo: ' + w.eval('st.hpC');
       // Tippen = ein Schritt
       typ('n_notes', 'A'); typ('n_notes', 'AB'); typ('n_notes', 'ABC');
       w.doUndo(); if (d.getElementById('n_notes').value !== 'Drache im Norden') return 'Tipp-Folge nicht ein Schritt: ' + d.getElementById('n_notes').value;
@@ -2547,8 +2549,8 @@ const REGRESSION = [
   { name: 'Paket O5: Rüstung/Schild „Equip“ setzt den AC-Rechner (eq, arm/sh, beide Richtungen, Hand-AC nur Entwurf), Waffe „→ Weapons“ mit Angriff/Schaden live (STR/DEX, Finesse, PB abschaltbar, Two-handed, Eingabe überschreibt), alte Text-Waffen unverändert, Log', datum: '03.10.2026',
     run: ({ w, d }) => {
       if (typeof w.itEquip !== 'function' || typeof w.wpnVals !== 'function') return 'itEquip/wpnVals fehlen (Paket O5)';
-      const bak = w.eval('JSON.stringify({a:st.attrs,as:st.attrSrc,ss:st.statSrc,we:st.weapons,it:st.items})'), pf = d.getElementById('prof').value;
-      d.getElementById('prof').value = '2';
+      const bak = w.eval('JSON.stringify({a:st.attrs,as:st.attrSrc,ss:st.statSrc,we:st.weapons,it:st.items})'), pf = w.eval('+st.profAdj||0');
+      w.eval('st.profAdj=2-pbOfLvl(totLvl())');   // Paket S2: PB folgt der Stufe, Test setzt die Korrektur
       w.eval("st.attrSrc=null;st.attrs=Object.assign({},st.attrs,{STR:16,DEX:14});st.statSrc=statSrcNew();itemFilter='all'");
       w.eval(`st.weapons=[{name:'Old Club',atk:'+4',dmg:'1d4+2',type:'Bludgeoning'}];st.items=[
         {id:1,name:'Chain Mail',qty:1,wt:55,cat:'Armor',note:'',ref:'Chain Mail|XPHB'},{id:2,name:'Breastplate',qty:1,wt:20,cat:'Armor',note:'',ref:'Breastplate|XPHB'},
@@ -2597,7 +2599,7 @@ const REGRESSION = [
       w.eval('itToWpn(4)'); if (W().length !== 2) return 'Dagger doppelt eingetragen';
       let v = V(1); if (v.atk !== '+5' || v.dmg !== '1d4+3' || v.ab !== 'STR') return 'Dagger STR: ' + JSON.stringify(v);
       w.eval("st.attrs.DEX=18"); v = V(1); if (v.atk !== '+6' || v.dmg !== '1d4+4' || v.ab !== 'DEX') return 'Finesse nimmt nicht das bessere: ' + JSON.stringify(v);
-      d.getElementById('prof').value = '3'; if (V(1).atk !== '+7') return 'PB nicht live';
+      w.eval('st.profAdj=3-pbOfLvl(totLvl())'); if (V(1).atk !== '+7') return 'PB nicht live';
       w.eval('wpnTog(1,"np")'); if (V(1).atk !== '+4' || V(1).dmg !== '1d4+4') return 'PB abschalten: ' + JSON.stringify(V(1));
       w.eval('wpnTog(1,"np")');
       w.eval("wpnSet(1,'atk','+9')"); if (V(1).atk !== '+9' || W()[1].atk !== '+9') return 'Eingabe überschreibt nicht';
@@ -2620,7 +2622,7 @@ const REGRESSION = [
       if (!/proficiency bonus: off/.test(lg2) || /iid/.test(lg2)) return 'Log Waffe: ' + lg2;
       // aufräumen
       w.eval(`(()=>{const b=${bak};st.attrs=b.a;st.attrSrc=b.as;st.statSrc=b.ss;st.weapons=b.we;st.items=b.it;})();renderItems();buildWeapons()`);
-      d.getElementById('prof').value = pf;
+      w.eval('st.profAdj=' + pf);
       return true;
     } },
   { name: 'Paket S1: Playtest-Fehler – Level −/+ speichert, neuer Charakter (Info-Tab, Bearbeiten offen, Grundwerte, auch leeres Blatt), Toast versteckt, BG-Hinweis, Krit-Schwelle Champion, Short Rest Cancel, Cantrips vorbereitet', datum: '04.10.2026',
@@ -2665,6 +2667,70 @@ const REGRESSION = [
       if (E("st.mySpells[0].prep") !== true) return 'alter Save: Cantrip nicht vorbereitet';
       // aufräumen
       E("const ch2=getAllChars();delete ch2['S1 Test'];localStorage.setItem(LS_KEY,JSON.stringify(ch2));_ciEdit=null;switchTabAll('info')");
+      return true;
+    } },
+  { name: 'Paket S2: Werte automatisch – PB aus Gesamtstufe (Feld = Korrektur, alte Saves), Zauberattribut aus der Klasse (EK = INT), Max HP (Startklasse voll, Durchschnitt/Wurf je Stufe, CON, Dwarven Toughness, Tough, Frage beim Level-Up, alte Saves behalten ihr Maximum), Origin Feat „+ Add“/„→ Feats“, Startausrüstung „Use now?“ (Equip/→ Weapons), Fighting Style → My Feats, Weapon Mastery (Anzahl aus Class Table/Text, Hervorhebung), Heil-Knopf (Second Wind, Lay on Hands), Zähler Cantrips/Prepared', datum: '04.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js), V = id => d.getElementById(id).value;
+      if (typeof w.pbSync !== 'function' || typeof w.hpParts !== 'function' || typeof w.fpFsWm !== 'function') return 'pbSync/hpParts/fpFsWm fehlen (Paket S2)';
+      E("switchTabAll('info');newChar();document.getElementById('newCharName').value='S2 Test';confirmNewChar()");
+      const c = d.getElementById('cls'); c.value = 'Cleric'; c.dispatchEvent(new w.Event('change'));
+      E("st.attrSrc.WIS={base:16};st.attrSrc.CON={base:14};buildAttrs()");
+      for (let i = 0; i < 4; i++) E('chLvl(1)');
+      // PB + Zauberattribut + Zähler
+      if (V('prof') !== '3' || !d.getElementById('prof').readOnly) return 'PB Stufe 5: ' + V('prof');
+      if (V('spAttr') !== '' || V('spDC') !== '14' || V('spAtk') !== '+6') return 'Cleric 5: DC/Angriff ' + V('spDC') + ' ' + V('spAtk');
+      E("togPbEdit()"); const pf = d.getElementById('prof'); pf.value = '4'; pf.dispatchEvent(new w.Event('input', { bubbles: true })); E("togPbEdit()");
+      if (E('st.profAdj') !== 1 || E('prof()') !== 4 || V('spDC') !== '15') return 'PB-Korrektur: ' + E('st.profAdj') + ' DC ' + V('spDC');
+      E('chLvl(-1)'); if (E('prof()') !== 3) return 'PB-Korrektur folgt der Stufe nicht'; E('chLvl(1);st.profAdj=0;buildCharCard()');
+      E("st.mySpells=[{name:'Sacred Flame',grad:0,prep:true},{name:'Bless',grad:1,prep:true},{name:'Guiding Bolt',grad:1,prep:false}];buildMySpells()");
+      if (!/Cantrips 1\/4 · Prepared 1\/9/.test(d.getElementById('spCountBox').textContent)) return 'Zähler: ' + d.getElementById('spCountBox').textContent;
+      // Max HP: 8 + 4×5 + CON 2×5 = 38; Fragen für Stufe 2–5
+      if (V('hpM') !== '38' || E('st.hpC') !== 38) return 'Max HP Cleric 5: ' + V('hpM') + ' / ' + E('st.hpC');
+      if (E('st.hpAsk.length') !== 4 || !d.getElementById('hpLvlAsk').textContent.includes('Avg 5')) return 'Level-Up-Frage: ' + E('JSON.stringify(st.hpAsk)');
+      E('hpAskSet(0,8)'); if (V('hpM') !== '41' || E('st.hpAsk.length') !== 3) return 'eigener Wurf 8: ' + V('hpM');
+      E('hpAskSet(-1,0)'); if (E('st.hpAsk.length') || d.getElementById('hpLvlAsk').style.display !== 'none') return '„All average“';
+      const hm = d.getElementById('hpM'); hm.value = '45'; hm.dispatchEvent(new w.Event('change')); if (E('st.hpAdj') !== 4) return 'Max-HP-Korrektur: ' + E('st.hpAdj');
+      E("st.feats.push({name:'Tough',tag:'Feat'});buildFeats()"); if (V('hpM') !== '55') return 'Tough: ' + V('hpM');
+      E("st.feats=st.feats.filter(f=>f.name!=='Tough');st.hpAdj=0;buildFeats()");
+      // EK = INT
+      c.value = 'Fighter'; c.dispatchEvent(new w.Event('change'));
+      const s = d.getElementById('subcls'); s.value = 'Eldritch Knight (PHB)'; s.dispatchEvent(new w.Event('change'));
+      if (E('spAttrVal()') !== 'INT') return 'Eldritch Knight: Attribut ' + E('spAttrVal()');
+      s.value = ''; s.dispatchEvent(new w.Event('change'));
+      // Fighter 5: 10 + 4×6 + 10 = 44 (Würfe/Fragen der alten Klasse weg)
+      if (V('hpM') !== '44' || E('JSON.stringify(st.hpRoll)') !== '{}') return 'Fighter 5 HP: ' + V('hpM') + ' ' + E('JSON.stringify(st.hpRoll)');
+      // Origin Feat
+      E("st.bg='Soldier';document.getElementById('bg').value='Soldier';buildBgLore()");
+      const og = () => [...d.querySelectorAll('.di')].find(x => /Origin Feat/.test(x.textContent));
+      [...og().querySelectorAll('button')].find(b => /Add/.test(b.textContent)).click();
+      if (!E("st.feats.some(f=>f.name==='Savage Attacker')") || !/in My Feats/.test(og().textContent)) return 'Origin Feat „+ Add“';
+      E("bgFeatGo('Magic Initiate')"); if (V('ftQ') !== 'Magic Initiate' || !d.querySelector('#ftList .zb-detail.on')) return '„→ Feats“ sucht nicht';
+      E("document.getElementById('ftQ').value='';ftRender();switchTabAll('aktionen');buildAbilities()");
+      // Fighting Style / Weapon Mastery
+      const card = n => [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.startsWith(n));
+      const chip = (n, o) => [...card(n).querySelectorAll('.pk-chip')].find(b => b.dataset.o === o);
+      chip('Fighting Style', 'Defense').click(); chip('Fighting Style', 'Archery').click();
+      if (E("st.feats.filter(f=>f.via==='fs:Fighter').map(f=>f.name).join()") !== 'Archery' || E("st.feats.some(f=>f.name==='Defense')")) return 'Fighting Style → My Feats';
+      if (!/choose 4 \(0\/4\)/.test(card('Weapon Mastery').querySelector('.pk-h').textContent)) return 'Weapon Mastery Fighter 5: ' + card('Weapon Mastery').querySelector('.pk-h').textContent;
+      chip('Weapon Mastery', 'Greatsword').click();
+      E("st.items=[{id:91,name:'Greatsword',qty:1,wt:6,cat:'Weapon',note:'',ref:'Greatsword|XPHB',from:'Fighter'},{id:92,name:'Flail',qty:1,wt:2,cat:'Weapon',note:'',ref:'Flail|XPHB',from:'Fighter'},{id:93,name:'Chain Mail',qty:1,wt:55,cat:'Armor',note:'',ref:'Chain Mail|XPHB',from:'Fighter'}];st.weapons=[];st.equipDone={'cls:Fighter':'A'};buildCoreTraits()");
+      const lk = d.querySelector('.se-link'); if (!lk || !/Equip Chain Mail/.test(lk.textContent) || !/Greatsword → Weapons/.test(lk.textContent)) return 'Startausrüstung: „Use now?“ fehlt';
+      [...lk.querySelectorAll('button')].find(b => /Do all/.test(b.textContent)).click();
+      if (E('st.weapons.length') !== 2 || !E("st.items.find(i=>i.id===93).eq") || d.querySelector('.se-link')) return '„Do all“';
+      const ms = [...d.querySelectorAll('.wp-mast')].map(x => x.classList.contains('on')).join(); if (ms !== 'true,false') return 'Mastery-Hervorhebung: ' + ms;
+      // Heilen
+      E("switchTabAll('aktionen');buildAbilities();st.hpC=5;updBar()");
+      const hb = card('Second Wind').querySelector('.ab-heal-b'); if (!hb || hb.textContent !== '🎲 Heal 1d10+5') return 'Second Wind Knopf: ' + (hb && hb.textContent);
+      hb.click(); if (E('st.abUses.secondwind') !== 1 || E('_rl.k') !== 'heal') return 'Second Wind: Nutzung/Wurf'; E('rlHealMe();closeDice&&closeDice()');
+      if (E('st.hpC') <= 5) return 'Heal me';
+      // alter Spielstand: Max HP und PB bleiben, 10 = berechnet
+      E("const ch=getAllChars();ch['S2 Alt']={_f_cls:'Fighter',_f_lvl:'3',_f_hpM:'28',_f_prof:'2',attrs:{STR:10,DEX:10,CON:14,INT:10,WIS:10,CHA:10},hpC:20,feats:[],mySpells:[],weapons:[],items:[]};ch['S2 Alt2']=Object.assign({},ch['S2 Alt'],{_f_hpM:'10',hpC:10});localStorage.setItem(LS_KEY,JSON.stringify(ch));loadChar('S2 Alt')");
+      if (V('hpM') !== '28' || E('st.hpC') !== 20 || E('st.hpAsk.length') || V('prof') !== '2') return 'alter Save: ' + V('hpM') + ' ' + E('st.hpC') + ' PB ' + V('prof');
+      E("chLvl(1)"); if (V('hpM') !== '36' || E('st.hpAsk.length') !== 1) return 'alter Save Level-Up: ' + V('hpM');
+      E("loadChar('S2 Alt2')"); if (V('hpM') !== '28' || E('st.hpC') !== 28) return 'alter Save mit 10: ' + V('hpM') + ' / ' + E('st.hpC');
+      // aufräumen
+      E("const c2=getAllChars();['S2 Test','S2 Alt','S2 Alt2'].forEach(n=>delete c2[n]);localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────

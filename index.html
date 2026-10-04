@@ -72,6 +72,10 @@ input[type=number]{-moz-appearance:textfield}
 
 /* HP */
 .hp-row{display:flex;gap:8px;margin-bottom:6px}
+.hpa-box{grid-column:1/-1;order:0;min-width:0;background:var(--bg2);border:1px solid var(--gold);border-radius:8px;padding:8px 10px;margin-bottom:8px}.hpa-h{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.hpa-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}.hpa-n{flex:1;min-width:0;white-space:nowrap;font-family:'Cinzel',serif;font-size:var(--fs-sm);color:var(--text)}.hpa-n small{color:var(--text3);font-size:var(--fs-2xs)}
+.hpa-b,.hpa-all{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--gold);font-family:inherit;font-size:var(--fs-sm);padding:6px 8px;min-height:36px;cursor:pointer;white-space:nowrap}.hpa-in{width:52px;min-height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);text-align:center;font-size:var(--fs-sm)}
+.hpa-all{width:100%;margin-bottom:4px}.hpa-note{font-size:var(--fs-2xs);color:var(--text3)}
 .hpbox{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center}
 .hp-lbl{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text2);margin-bottom:5px;text-transform:uppercase}
 .hp-ctrl{display:flex;align-items:center;gap:5px;justify-content:center}
@@ -141,6 +145,9 @@ input[type=number]{-moz-appearance:textfield}
 .se-add{display:block;width:100%;margin:4px 0 0;font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:.5px;background:var(--bg3);border:1px solid var(--gold);border-radius:8px;color:var(--gold);padding:8px 10px;min-height:38px;cursor:pointer}
 .se-add:disabled{opacity:.45;cursor:default;border-color:var(--border);color:var(--text3)}
 .se-done{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:var(--fs-txt);color:var(--green);margin-top:4px}
+.ab-heal{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px;align-items:center}.ab-heal-b{background:var(--bg3);border:1px solid var(--green);border-radius:6px;color:var(--green);font-family:inherit;font-size:var(--fs-sm);padding:5px 9px;min-height:34px;cursor:pointer}.ab-heal-b:disabled{opacity:.4;cursor:default}.ab-heal-in{width:64px;min-height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);text-align:center;font-size:var(--fs-sm)}
+.wp-mast{color:var(--text3)}.wp-mast.on{color:var(--gold);font-weight:bold}
+.se-link{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border2)}.se-link-b{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
 .se-again{font-size:var(--fs-sm);background:none;border:1px solid var(--border);border-radius:12px;color:var(--text3);padding:4px 10px;cursor:pointer}
 /* Paket F1 + J (03.10.2026): Charakterkarte im Info-Tab + Multiclass-Zeilen */
 .ci-card{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 9%,var(--bg2)),var(--bg2) 70%);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:10px}
@@ -438,6 +445,7 @@ textarea.cr-in{min-height:64px;resize:vertical;line-height:1.5;margin:6px 0}
 .spmc-n .spmc-ab{margin-left:6px;font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--text2)}
 .spmc-c{font-size:var(--fs-sm);color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
 .spmc-over{color:var(--red)}
+.sp-count{font-family:'Cinzel',serif;font-size:var(--fs-sm);color:var(--text3);margin:0 2px 8px;letter-spacing:.3px}.sp-count b{font-weight:normal;color:var(--gold)}.sp-count b.spmc-over{color:var(--red)}
 .spmc-dc{text-align:center;color:var(--purple);font-family:'Cinzel',serif;font-size:var(--fs-md);line-height:1.1}
 .spmc-dc label{display:block;font-size:var(--fs-2xs);color:var(--text3);letter-spacing:1px}
 .spmc-atk{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-md);padding:6px 10px;min-height:40px;cursor:pointer;white-space:nowrap}
@@ -1046,7 +1054,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <select id="subcls" onchange="onSubclsChange()"><option value="">—</option></select></div>
         <div class="ifield"><label>Alignment</label>
           <select id="align"><option value="">—</option><option>Lawful Good</option><option>Neutral Good</option><option>Chaotic Good</option><option>Lawful Neutral</option><option>Neutral</option><option>Chaotic Neutral</option><option>Lawful Evil</option><option>Neutral Evil</option><option>Chaotic Evil</option></select></div>
-        <div class="ifield"><label>Proficiency Bonus</label><input type="number" id="prof" value="2" min="2" max="6"><div class="pk-note" id="profHint"></div></div>
+        <div class="ifield"><label>Proficiency Bonus</label><div style="display:flex;gap:6px;align-items:center"><input type="number" id="prof" value="2" min="1" max="10" readonly class="pb-auto" style="flex:1;min-width:0"><button onclick="togPbEdit()" id="pbAdjBtn" class="filter-toggle" style="padding:3px 10px;white-space:nowrap" title="Correction to the level-based bonus">✎ Adjust</button></div><div class="pk-note" id="profHint"></div></div>
       </div>
       <div id="mcBox" class="mc-box"></div>
       </div>
@@ -1222,7 +1230,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
         <div class="hpbox">
           <div class="hp-lbl">Maximum</div>
           <div class="hp-ctrl">
-            <input class="hpin" type="number" id="hpM" value="10" min="1" inputmode="numeric" oninput="autoSave()" onchange="onHpMChange()">
+            <input class="hpin" type="number" id="hpM" value="10" min="1" inputmode="numeric" onchange="onHpMUser()">
           </div>
           <div class="rc-hint" id="hpMHint"></div>
         </div>
@@ -1233,6 +1241,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           </div>
         </div>
       </div>
+      <div id="hpLvlAsk" class="hpa-box" style="display:none"></div>
       <!-- SCHADEN / HEILUNG (Paket P, 03.10.2026): Temp HP zuerst, Konzentration, 0 HP, Heilung bis Max. (XPHB „Damage and Healing“) -->
       <div class="dmg-box" id="dmgBox">
         <div class="dmg-head"><div class="ds-lbl">Damage / Healing</div>
@@ -1355,6 +1364,7 @@ html[data-ts="sehrgross"]{zoom:1.3;--zf:1.3}
           <button onclick="toggleInfoSection('sb-myspells','sb-myspells-btn')" id="sb-myspells-btn" class="filter-toggle" style="padding:3px 10px">▴ Collapse</button>
         </div>
         <div id="sb-myspells">
+          <div id="spCountBox" class="sp-count" style="display:none"></div>
           <div id="mySpellFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
             <button class="filter-toggle on" id="msf_all" onclick="setMySpellFilter('all')">All</button>
             <button class="filter-toggle" id="msf_action" onclick="setMySpellFilter('action')">Action</button>
@@ -1538,7 +1548,21 @@ let st={
 
 const md=v=>Math.floor((v-10)/2);
 const fmt=n=>(n>=0?'+':'')+n;
-const prof=()=>parseInt(document.getElementById('prof')?.value||2);
+// Paket S2: Übungsbonus folgt der Gesamtstufe; st.profAdj = Handkorrektur (nur im Modus „✎ Adjust“), Feld #prof zeigt den Endwert
+const prof=()=>Math.max(1,pbOfLvl(totLvl())+(+st.profAdj||0));
+let _pbEdit=false,_pbShown=null;
+function pbSync(){
+  const el=document.getElementById('prof');if(!el)return;
+  const v=prof();if(document.activeElement!==el||!_pbEdit)el.value=v;el.readOnly=!_pbEdit;el.classList.toggle('pb-auto',!_pbEdit);
+  const b=document.getElementById('pbAdjBtn');if(b){b.classList.toggle('on',_pbEdit);b.textContent=_pbEdit?'✓ Done':'✎ Adjust';}
+  if(_pbShown!==null&&_pbShown!==v){buildSaves();buildSkills();calcSpell();buildWeapons();}
+  _pbShown=v;
+}
+function togPbEdit(){_pbEdit=!_pbEdit;buildCharCard();}
+function onPbInput(){
+  const el=document.getElementById('prof'),v=parseInt(el.value);if(!_pbEdit||isNaN(v))return;
+  st.profAdj=Math.max(-4,Math.min(4,v-pbOfLvl(totLvl())));pbSync();buildCharCard();autoSave();
+}
 
 // Websuche per Lupe (Paket B, 28.09.2026): nur Link zu Google öffnen, keine Daten übernehmen; letzte Suchen pro Gerät
 const WS_KEY='willow_websearch';
@@ -1604,7 +1628,7 @@ function attrCalc(k,G){
 function attrSync(){if(!attrOn())return;const G=calcGrants();ATTRS.forEach(a=>{st.attrs[a.k]=attrCalc(a.k,G).total;});}
 function buildAttrs(){
   const g=document.getElementById('attrGrid');if(!g)return;g.innerHTML='';
-  attrSync();
+  attrSync();hpSync(); // Paket S2: CON → Max HP
   ATTRS.forEach(a=>{
     // Karte nur Name, große Zahl, Modifikator hervorgehoben (Wunsch Simon 02.10.2026); alle Boni im Fenster (Tippen)
     const v=st.attrs[a.k],m=md(v);
@@ -1990,7 +2014,7 @@ function pkAb(el){
   }
   st.picks[k]=a;pkRefresh();
 }
-function pkRefresh(){autoSave();buildCoreTraits();buildBgLore();buildRaceLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildMcLore();buildAbilities();}
+function pkRefresh(){fsSync();autoSave();buildCoreTraits();buildBgLore();buildRaceLore();buildAttrs();buildSaves();buildSkills();buildClsLore();buildSubclsLore();buildMcLore();buildAbilities();}
 function bgAbilityUI(bg){
   const opts=bgAbOpts(bg);if(opts.length!==3)return '';
   const k=pkEsc(pkKeyBgAb(bg.n)),{mode,list}=bgAbility(bg),done=mode==='+1/+1/+1'||list.length===2;
@@ -2363,7 +2387,7 @@ function buildRaceStats(){
   statRender();
   const el=document.getElementById('raceStats'),hp=document.getElementById('hpMHint');
   const race=rcRace(),v=race&&rcVals(race),rp=race&&rcP(race);
-  if(hp)hp.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}${rp.custom?' HP':''}`:'';
+  hpSync(); // Paket S2: Max HP mit Rasse (Hinweis #hpMHint kommt aus hpSync)
   if(!el)return;if(!v){el.innerHTML='';return;}
   const spd=parseInt(document.getElementById('spd')?.value)||0,ch=[];
   const spW=!statOn('spd')&&spd!==v.speed; // seit Paket E: berechnete Speed weicht absichtlich ab (Klasse, Exhaustion …)
@@ -2461,7 +2485,46 @@ function fpLinkOf(cls,grp,name){
 }
 // Anzeige eines Features mit Auswahl: {suf: Zusatz zum Titel, body: HTML statt fmtDesc(desc)}
 function fpHtml(cls,grp,f,ctx,maxLvl){const r=fpHtml0(cls,grp,f,ctx,maxLvl),sb=featStatBlocks(cls,grp,f.name,ctx&&ctx.lvl);if(sb)r.body+=sb;return r;}
+// ── Paket S2 (04.10.2026): Fighting Style und Weapon Mastery als Wahl ──
+// Fighting Style: ein Feat der Kategorie FS (Paladin zusätzlich FS:P = Blessed Warrior, Ranger FS:R = Druidic Warrior) unter
+// st.picks['fs:<Klasse>']; der gewählte Feat steht in My Feats ({…,via:'fs:<Klasse>'}, Wechsel ersetzt ihn).
+// Weapon Mastery: N Waffenarten (XPHB-Waffen mit Mastery; Anzahl aus der Class Table „Weapon Mastery“, sonst aus dem Text
+// „mastery properties of two kinds“; Barbarian nur Nahkampf laut Text) unter st.picks['wm:<Klasse>'].
+const WM_NUM={one:1,two:2,three:3,four:4,five:5,six:6};
+function fsOptsOf(cls){const x=cls==='Paladin'?'FS:P':cls==='Ranger'?'FS:R':'';return FT_FEATS.filter(f=>f.cat==='FS'||(x&&f.cat===x)).map(f=>f.n).filter((n,i,a)=>a.indexOf(n)===i).sort();}
+function wmCountOf(cls,lvl,desc){const t=CLASS_TABLES[cls],r=t&&(t.rows||[]).find(x=>+x.lvl===lvl),e=t&&(t.extra||[]).find(x=>/weapon mastery/i.test(String(x.l)));
+  if(e&&r){const v=parseInt(r[e.k]);if(v>0)return v;}const m=/mastery properties of (\w+) kinds/i.exec(desc||'');return m?(WM_NUM[m[1].toLowerCase()]||parseInt(m[1])||0):0;}
+function wmOptsOf(desc){const mel=/Melee weapons/i.test(desc||'');return ITEM_DATA.filter(i=>i.s==='XPHB'&&i.m&&i.m.length&&/Weapon/.test(i.t||'')&&(!mel||/Melee/.test(i.t))).map(i=>i.n).filter((n,i,a)=>a.indexOf(n)===i).sort();}
+function wmChosen(){const s=new Set();stFeatures().forEach(f=>{if(f.name!=='Weapon Mastery'||!/mastery propert/i.test(f.desc||''))return;
+  pkValid('wm:'+f._c,wmOptsOf(f.desc),wmCountOf(f._c,f._cl,f.desc)).forEach(x=>s.add(x));});return s;}
+function wmLbl(n){const it=ITEM_DATA.find(i=>i.n===n&&i.s==='XPHB');return n+(it&&it.m&&it.m.length?' ('+it.m.join(', ')+')':'');}
+function fpFsWm(cls,f,ctx){
+  const more=(lbl,inner)=>`<details class="fp-more"><summary>${lbl}</summary>${inner}</details>`,desc=fmtDesc(f.desc,ctx);
+  if(f.name==='Fighting Style'&&/Fighting Style feat/i.test(f.desc||'')){
+    const k='fs:'+cls,o=fsOptsOf(cls),sel=pkValid(k,o,1)[0],chips=pickUI(k,o,1,{head:'Fighting Style feat: choose 1',note:'The feat is added to My Feats (Feats tab).'});
+    if(!sel)return {suf:'',body:chips+desc};
+    const ft=FT_FEATS.find(x=>x.n===sel);
+    return {suf:' · '+sel,body:(ft?`<div class="fp-sel"><b>${pkEsc(sel)}.</b> ${fmtDesc(ft.d,ctx)}</div>`:'')+more('Change / rules',chips+desc)};
+  }
+  if(f.name==='Weapon Mastery'&&/mastery propert/i.test(f.desc||'')){
+    const lvl=(ctx&&ctx.lvl)||fpLvl(cls),n=wmCountOf(cls,lvl,f.desc),o=wmOptsOf(f.desc);if(!n||!o.length)return null;
+    const k='wm:'+cls,sel=pkValid(k,o,n),lb={};o.forEach(x=>{const it=ITEM_DATA.find(i=>i.n===x&&i.s==='XPHB');if(it&&it.m)lb[x]=it.m.join(', ');});
+    const chips=pickUI(k,o,n,{head:'Weapon kinds: choose '+n,marks:lb,note:'Mastery property in small print. Highlighted on these weapons in Weapons & Attacks.'});
+    if(sel.length<n)return {suf:sel.length?' · '+sel.join(', '):'',body:chips+desc};
+    return {suf:' · '+sel.join(', '),body:`<div class="fp-sel">${sel.map(x=>pkEsc(wmLbl(x))).join(' · ')}</div>`+more('↻ Change (after a Long Rest) · rules',chips+desc)};
+  }
+  return null;
+}
+function fsSync(){ // Fighting-Style-Wahl → My Feats
+  let ch=false;st.feats=st.feats||[];
+  Object.keys(st.picks||{}).filter(k=>/^fs:[^:]+$/.test(k)).concat((st.feats||[]).filter(f=>f.via&&/^fs:/.test(f.via)).map(f=>f.via)).filter((k,i,a)=>a.indexOf(k)===i).forEach(k=>{
+    const cls=k.slice(3),sel=pkValid(k,fsOptsOf(cls),1)[0]||'';
+    const before=st.feats.length;st.feats=st.feats.filter(f=>!(f.via===k&&f.name!==sel));if(st.feats.length!==before)ch=true;
+    if(sel&&!st.feats.some(f=>f.tag==='Feat'&&f.name===sel)){const ft=FT_FEATS.find(x=>x.n===sel);st.feats.push({name:sel,tag:'Feat',desc:ft?ft.d:'',via:k});ch=true;}});
+  if(ch){if(typeof ftRenderMy==='function'){ftRenderMy();ftRender();}buildFeatsInfo();buildFeats();buildBgLore();}
+}
 function fpHtml0(cls,grp,f,ctx,maxLvl){
+  if(grp==='base'){const S=fpFsWm(cls,f,ctx);if(S)return S;} // Paket S2
   const desc=fmtDesc(f.desc,ctx),keys=grp?fpKeysFor(cls,grp,f.name,f.lvl,maxLvl):[];
   const more=(lbl,inner)=>`<details class="fp-more"><summary>${lbl}</summary>${inner}</details>`;
   if(!keys.length){
@@ -2582,8 +2645,11 @@ function buildWeapons(){
 }
 
 function calcSpell(){calcSpell0();buildSpMc();} // Paket F4: Zeilen je Zauberklasse mitziehen
+// Paket S2: Zauberattribut der Startklasse automatisch aus 5e.tools (spellcastingAbility; Eldritch Knight/Arcane Trickster über MC_SLOTS.sub), Feld „Ability“ nur als Handwahl
+function spAttrVal(){const v=document.getElementById('spAttr')?.value||'';return v||spAbOf(curCls(),curSub());}
+function spAttrOpt(){const o=document.querySelector('#spAttr option[value=""]');if(!o)return;const a=spAbOf(curCls(),curSub());o.textContent=a?'Auto ('+a+')':'—';}
 function calcSpell0(){
-  const a=document.getElementById('spAttr')?.value;if(!a)return;attrSync();
+  spAttrOpt();const a=spAttrVal();if(!a)return;attrSync();
   const m=md(st.attrs[a]||10),p=prof();
   const dc=document.getElementById('spDC'),atk=document.getElementById('spAtk');
   if(dc)dc.value=8+p+m;if(atk)atk.value=fmt(p+m);
@@ -3355,7 +3421,14 @@ function apSync(){
   }
   return JSON.stringify(L)!==before;
 }
-function buildMySpells(){
+// Paket S2: Zähler „Cantrips x/y · Prepared x/y“ über My Spells (Class Table; Always Prepared zählt nicht)
+function buildMySpells(){buildMySpells0();buildSpCount();}
+function buildSpCount(){const el=document.getElementById('spCountBox');if(!el)return;
+  const X=spMcX(),multi=isMulti();let h='';
+  if(!multi&&X.S.length===1){const n=spClsCounts(X.S[0],X),n2=(a,b)=>'<b class="'+(a>b?'spmc-over':'')+'">'+a+'/'+b+'</b>';
+    h=[n.cant!==null?'Cantrips '+n2(n.cc,n.cant):'',n.prep!==null?'Prepared '+n2(n.pc,n.prep):''].filter(Boolean).join(' · ');}
+  el.innerHTML=h;el.style.display=h?'':'none';if(multi)buildSpMc();}
+function buildMySpells0(){
   apSync();buildSpMc(); // Paket F4: Prepared-Zahlen je Klasse
   const list=document.getElementById('mySpells');if(!list)return;list.innerHTML='';
   // 01.10.2026: Always Prepared nicht mehr eigener Block – mit Prepared nach Grad, je Grad zuerst, dann alphabetisch
@@ -3560,6 +3633,7 @@ function addSpellManual(){
 // FEATURES
 function buildFeats(){
   statRender(); // Paket E: Alert → Initiative
+  hpSync(); // Paket S2: Tough, Boon of Fortitude
   const list=document.getElementById('featList');if(!list)return;list.innerHTML='';
   st.feats.forEach((f,i)=>{
     const d=document.createElement('div');d.className='feat-card';
@@ -3589,6 +3663,74 @@ function hpCEdit(){
 function chHpT(d){const el=document.getElementById('hpT');el.value=Math.max(0,(parseInt(el.value)||0)+d);autoSave();}
 // 03.10.2026 (Simon): Current folgt dem neuen Maximum nur bei vollen HP, sonst bleibt er (höchstens das neue Maximum).
 // Erst beim Übernehmen (change: Enter/Verlassen), nicht je Tastendruck – sonst kürzen Zwischenwerte („5“ auf dem Weg zu „50“) die HP.
+// ── Paket S2 (04.10.2026): Max HP automatisch ──
+// Startklasse Stufe 1 = voller Würfel, jede weitere Klassenstufe = Durchschnitt aus CLASS_CORE_TRAITS[].hpPerLevel („d10 (or 6)“)
+// oder gespeicherter Wurf st.hpRoll[Klasse][Stufe]; + CON-Mod je Charakterstufe; + Rasse (RACE_PICKS hp, z. B. Dwarven Toughness),
+// Feats aus dem Text (Tough: „twice your character level“, Boon of Fortitude: „increases by 40“), Draconic Resilience (+1 je Sorcerer-Stufe).
+// Feld #hpM = Ergebnis + st.hpAdj (Handkorrektur: Eintippen ins Feld). Neue Stufen → st.hpAsk (Durchschnitt / Wurf / eigener Wurf).
+function hpAvgOf(cls){const t=CLASS_CORE_TRAITS[cls],m=/\(or (\d+)\)/.exec(String(t&&t.hpPerLevel||'')),d=hdDieOf(cls);return m?+m[1]:(d?d/2+1:0);}
+function hpFeatBonus(f,T){const t=String(f&&f.d||'');
+  if(/Hit Points? maximum increases by an amount equal to twice your (?:character )?level/i.test(t))return 2*T;
+  const m=/Hit Points? maximum increases by (\d+)\b(?! whenever)/i.exec(t);return m?+m[1]:0;}
+function hpParts(){
+  const C=charClasses();if(!C.length||!C.some(c=>hdDieOf(c.cls)))return null;
+  attrSync();const T=totLvl(),con=md(st.attrs.CON||10),R=st.hpRoll||{},P=[];
+  C.forEach((c,i)=>{const d=hdDieOf(c.cls),a=hpAvgOf(c.cls);if(!d)return;let s=0,n=0;
+    for(let l=1;l<=c.lvl;l++){if(i===0&&l===1){s+=d;continue;}const r=R[c.cls]&&+R[c.cls][l];if(r>0){s+=Math.min(d,r);n++;}else s+=a;}
+    P.push({t:c.cls+' '+c.lvl+' (d'+d+(n?', '+n+' rolled':'')+')',v:s,k:'cls'});});
+  if(con)P.push({t:'CON '+fmt(con)+' × '+T,v:con*T,k:'con'});
+  const race=rcRace(),rp=race&&rcP(race);if(rp&&rp.hp&&rp.hp.per)P.push({t:rp.hp.t,v:rp.hp.per*T,k:'x',u:rp.custom?' HP':''});
+  const seen=new Set();(st.feats||[]).forEach(f=>{if(!f||f.tag!=='Feat'||seen.has(f.name))return;seen.add(f.name);
+    const F=FT_FEATS.filter(x=>x.n===f.name),ft=F.find(x=>x.src==='XPHB')||F[0],v=hpFeatBonus(ft,T);if(v)P.push({t:f.name,v,k:'x'});});
+  stFeatures().forEach(f=>{if(f.name==='Draconic Resilience'&&/hit point maximum increases by/i.test(f.desc||'')&&!P.some(x=>x.t==='Draconic Resilience'))P.push({t:'Draconic Resilience',v:f._cl,k:'x'});});
+  return P;
+}
+function hpCalc(){const P=hpParts();return P?Math.max(1,P.reduce((a,x)=>a+x.v,0)):null;}
+let _hpHold=false;
+function hpLvAsk(){ // neue Klassenstufen seit dem letzten Stand → Frage; Stufe zurück → Würfe/Fragen darüber verwerfen
+  const C=charClasses(),L=st.hpLv||(st.hpLv={}),A=st.hpAsk||(st.hpAsk=[]),R=st.hpRoll||(st.hpRoll={});
+  C.forEach((c,i)=>{const was=L[c.cls]||0;
+    if(c.lvl>was&&hdDieOf(c.cls))for(let l=Math.max(was+1,i===0?2:1);l<=c.lvl;l++)if(!A.some(x=>x.c===c.cls&&x.l===l))A.push({c:c.cls,l});
+    if(c.lvl<was&&R[c.cls])Object.keys(R[c.cls]).forEach(l=>{if(+l>c.lvl)delete R[c.cls][l];});
+    L[c.cls]=c.lvl;});
+  Object.keys(L).forEach(k=>{if(!C.some(c=>c.cls===k)){delete L[k];delete R[k];}});
+  st.hpAsk=A.filter(x=>{const c=C.find(y=>y.cls===x.c);return c&&x.l<=c.lvl&&!(C[0].cls===x.c&&x.l===1);});
+}
+function hpSync(){
+  if(_hpHold)return;const el=document.getElementById('hpM');if(!el)return;
+  const P=hpParts();hpLvAsk();hpAskRender();
+  const hint=document.getElementById('hpMHint');
+  if(!P){const race=rcRace(),rp=race&&rcP(race);if(hint){hint.textContent=rp&&rp.hp?`${rp.hp.t} +${rp.hp.per*fpLvl()}${rp.custom?' HP':''}`:'';el.title='';}return;} // ohne Klasse: nur Rassen-Hinweis wie bisher
+  const c=Math.max(1,P.reduce((a,x)=>a+x.v,0)),adj=+st.hpAdj||0,v=Math.max(1,c+adj);
+  if(hint){hint.textContent=P.filter(x=>x.k==='x').map(x=>x.t+' +'+x.v+(x.u||'')).concat(adj?['adj. '+fmt(adj)]:[]).join(' · ');
+    el.title='Max HP: '+P.map(x=>x.t+' '+fmt(x.v)).join(', ')+(adj?', correction '+fmt(adj):'')+' = '+v;}
+  if(document.activeElement===el)return;
+  if(parseInt(el.value)!==v){el.value=v;onHpMChange();}
+}
+function onHpMUser(){ // Paket S2: Eintippen = Korrektur gegenüber dem berechneten Wert
+  const el=document.getElementById('hpM'),n=parseInt(el.value),c=hpCalc();
+  if(n>0&&c!==null)st.hpAdj=n-c;
+  onHpMChange();hpSync();
+}
+function hpAskRender(){
+  const el=document.getElementById('hpLvlAsk');if(!el)return;const A=st.hpAsk||[];
+  if(!A.length){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML='<div class="hpa-h">New level · Hit Points</div>'+A.map((x,i)=>{const d=hdDieOf(x.c),a=hpAvgOf(x.c);
+    return '<div class="hpa-row"><span class="hpa-n">'+pkEsc(x.c)+' '+x.l+' <small>d'+d+'</small></span>'
+      +'<button class="hpa-b" onclick="hpAskSet('+i+',0)">Avg '+a+'</button>'
+      +'<button class="hpa-b" onclick="hpAskSet('+i+',-1)" aria-label="Roll d'+d+'">🎲 d'+d+'</button>'
+      +'<input class="hpa-in" type="number" inputmode="numeric" min="1" max="'+d+'" placeholder="own" aria-label="Own roll" onchange="hpAskSet('+i+',+this.value)"></div>';}).join('')
+    +(A.length>1?'<button class="hpa-all" onclick="hpAskSet(-1,0)">All average</button>':'')
+    +'<div class="hpa-note">CON modifier is added automatically. Average is used until you choose.</div>';
+}
+function hpAskSet(i,v){ // v: 0 = Durchschnitt, -1 = würfeln, sonst eigener Wurf
+  const A=st.hpAsk||[],L=i<0?A.slice():[A[i]];if(!L[0])return;const R=st.hpRoll||(st.hpRoll={}),msg=[];
+  L.forEach(x=>{const d=hdDieOf(x.c);let r=v;if(r===-1)r=1+Math.floor(Math.random()*d);r=Math.max(0,Math.min(d,parseInt(r)||0));
+    if(r>0){(R[x.c]||(R[x.c]={}))[x.l]=r;msg.push(x.c+' '+x.l+': rolled '+r);}else{if(R[x.c])delete R[x.c][x.l];msg.push(x.c+' '+x.l+': average '+hpAvgOf(x.c));}});
+  st.hpAsk=i<0?[]:A.filter((_,j)=>j!==i);
+  hpSync();autoSave();showToast('❤ '+msg.join(' · '));
+}
 var _hpMPrev=null;
 function onHpMChange(){
   const el=document.getElementById('hpM'),n=parseInt(el.value);
@@ -6319,7 +6461,7 @@ function buildCharCard(){
   let h='<div class="ci-card"><div class="ci-top"><div class="ci-rune">'+(start?(CLASS_RUNES[start]||'⚔'):'✦')+'</div><div class="ci-main">';
   h+=C.length?'<div class="ci-cls">'+C.map(c=>fdEsc(c.cls)+' <b>'+c.lvl+'</b>').join('<span class="ci-sl">/</span>')+'</div>'
     :'<div class="ci-cls ci-none">No class chosen</div>';
-  h+='<div class="ci-lv">'+(multi?'Character Level <b>'+T+'</b>':'Level <b>'+T+'</b>')+' · PB <b>+'+pb+'</b></div>';
+  h+='<div class="ci-lv">'+(multi?'Character Level <b>'+T+'</b>':'Level <b>'+T+'</b>')+' · PB <b>+'+prof()+'</b>'+((+st.profAdj||0)?' <span class="ci-src">adjusted</span>':'')+'</div>';
   C.filter(c=>c.sub).forEach(c=>{const s=mcSubParts(c.cls,c.sub);h+='<div class="ci-sub">'+(multi?'<span class="ci-sc">'+fdEsc(c.cls)+'</span>':'')+fdEsc(s.n)+(s.src?'<span class="ci-src">'+fdEsc(s.src)+'</span>':'')+'</div>';});
   h+='</div></div>';   // ci-main, ci-top; Chips und Hinweise über die ganze Breite
   const rn=mcRaceName(),bg=(document.getElementById('bg')?.value||'').trim(),al=document.getElementById('align')?.value||'';
@@ -6329,8 +6471,8 @@ function buildCharCard(){
     +(al?'<button class="ci-chip" onclick="ciOpenEdit()">'+fdEsc(al)+'</button>':'<button class="ci-chip dim" onclick="ciOpenEdit()">+ Alignment</button>')
     +'</div>';
   const w=[];
-  const pf=parseInt(document.getElementById('prof')?.value);
-  if(C.length&&!isNaN(pf)&&pf!==pb) w.push('Proficiency Bonus field is +'+pf+' – level '+T+' gives +'+pb+'.');
+  pbSync();hpSync(); // Paket S2: Feld folgt der Stufe, Max HP
+  const pf=prof(),pa=+st.profAdj||0;
   if(T>20) w.push('Total level '+T+' is above 20.');
   if(multi){const G=calcGrants(),bad=C.map(c=>({c,r:mcReq(c.cls,G)})).filter(x=>x.r&&!x.r.ok);
     if(bad.length) w.push('Multiclassing needs '+bad.map(x=>x.c.cls+': '+x.r.txt+' (you have '+x.r.have+')').join('; ')+'.');}
@@ -6341,7 +6483,7 @@ function buildCharCard(){
   if(cl) cl.textContent=multi?'First Class':'Class';
   if(ll) ll.textContent=multi?(start+' Level'):'Level';
   const ph=document.getElementById('profHint');
-  if(ph){ph.textContent=C.length?(multi?'Character level '+T:'Level '+T)+': +'+pb:'';ph.classList.toggle('warn',C.length&&!isNaN(pf)&&pf!==pb);}
+  if(ph){ph.textContent=(multi?'Character level '+T:'Level '+T)+': +'+pb+(pa?' · corrected '+(pa>0?'+':'')+pa+' → +'+pf:' (automatic)');ph.classList.toggle('warn',!!pa);}
   buildMcBox();
 }
 function buildMcBox(){
@@ -6470,7 +6612,7 @@ function onClsChange(){
   buildClsLore();buildClassTable();
   buildSubclsLore();
   buildSaves();buildSkills();
-  mcRefresh();
+  mcRefresh();calcSpell(); // Paket S2: Zauberattribut folgt der Klasse
 }
 function onSubclsChange(){
   buildAbilities();
@@ -6478,7 +6620,7 @@ function onSubclsChange(){
   buildClsLore();buildClassTable();
   buildSubclsLore();
   buildSaves();buildSkills();
-  buildCharCard();
+  buildCharCard();calcSpell(); // Paket S2: EK/AT = INT
 }
 
 function renderBgText(raw){
@@ -6526,7 +6668,7 @@ function buildBgLore(){
   if(data.f){
     const fn=x=>(x||'').toLowerCase().replace(/\s*\(.*\)\s*$/,'').trim();
     const onSheet=(st.feats||[]).some(f=>fn(f.name)===fn(data.f));
-    html+=`<div class="di"><label>Origin Feat</label><span>${data.f}<span style="display:block;font-size:var(--fs-xs);color:${onSheet?'var(--green)':'var(--text3)'}">${onSheet?'✓ in My Feats':'not in My Feats'}</span>${onSheet?'':` <button type="button" class="pk-chip" style="min-height:0;padding:2px 8px;font-size:var(--fs-xs)" onclick="switchTab('feats')">→ Feats</button>`}</span></div>`;
+    html+=`<div class="di"><label>Origin Feat</label><span>${data.f}<span style="display:block;font-size:var(--fs-xs);color:${onSheet?'var(--green)':'var(--text3)'}">${onSheet?'✓ in My Feats':'not in My Feats'}</span>${onSheet?'':(bgFeatOf(data.f)?` <button type="button" class="pk-chip" style="min-height:0;padding:2px 8px;font-size:var(--fs-xs)" onclick="bgFeatAdd(this.dataset.f)" data-f="${pkEsc(data.f)}">+ Add</button>`:'')+` <button type="button" class="pk-chip" style="min-height:0;padding:2px 8px;font-size:var(--fs-xs)" onclick="bgFeatGo(this.dataset.f)" data-f="${pkEsc(data.f)}">→ Feats</button>`}</span></div>`;
   }
   if(data.a&&bgAbOpts(data).length!==3) html+=`<div class="di"><label>Ability Scores</label><span>${data.a}</span></div>`;
   html+='</div>';
@@ -6596,7 +6738,7 @@ function seHtml(src,name){
     if(opt)h+=vars(opt);
   });
   const n=src==='cls'?'class':'background';
-  if(done)h+=`<div class="se-done"><span>✓ Added to Items${done&&done!=='_'?' (option '+pkEsc(done)+')':''}</span><button type="button" class="se-again" onclick="seUnlock('${src}',this.dataset.n)" data-n="${pkEsc(name)}">Allow again</button></div>`;
+  if(done)h+=`<div class="se-done"><span>✓ Added to Items${done&&done!=='_'?' (option '+pkEsc(done)+')':''}</span><button type="button" class="se-again" onclick="seUnlock('${src}',this.dataset.n)" data-n="${pkEsc(name)}">Allow again</button></div>`+seLinkHtml(src,name);
   else h+=`<button type="button" class="se-add" data-n="${pkEsc(name)}"${r.miss.length?' disabled':''} onclick="seAdd('${src}',this.dataset.n)">＋ Add to Items</button>`+
     `<div class="pk-note">${r.miss.length?pkEsc(r.miss.join(' · '))+' first. ':''}Adds the items (Items tab) and the money (Currency) of this ${n} once.</div>`;
   return h+'</div>';
@@ -6647,6 +6789,21 @@ function seAdd(src,name){
   renderItems();seRefresh(src);
   showToast(`Added ${r.items.length} item${r.items.length===1?'':'s'}${r.cp?' and '+seMoney(r.cp):''} to Items`);
 }
+// Paket S2: nach „Add to Items“ Rüstung/Schild „Equip“ und Waffen „→ Weapons“ vorschlagen (Gegenstände mit from = Quelle,
+// Funktionen aus O5). Bleibt sichtbar, bis alles verknüpft ist oder „Not now“ (st.seLinkOff[Quelle]).
+function seLinkList(name){const out=[];(st.items||[]).forEach(i=>{if(i.from!==name||!i.ref)return;const a=itArmor(i),it=ITEM_MAP[i.ref];
+  if(a){if(!i.eq)out.push({i,k:'eq'});}else if(it&&it.d&&!(st.weapons||[]).some(w=>w.iid===i.id))out.push({i,k:'w'});});return out;}
+function seLinkHtml(src,name){
+  const key=src+':'+name;if((st.seLinkOff||{})[key])return '';const L=seLinkList(name);if(!L.length)return '';
+  return '<div class="se-link"><div class="pk-h">Use now?</div><div class="se-link-b">'+L.map(x=>`<button type="button" class="pk-chip" onclick="seLink('${src}',${x.i.id},'${x.k}')">${x.k==='eq'?'🛡 Equip ':'⚔ '}${pkEsc(x.i.name)}${x.k==='w'?' → Weapons':''}</button>`).join('')+'</div>'
+    +`<div class="se-done" style="color:var(--text3)"><button type="button" class="se-again" data-n="${pkEsc(name)}" onclick="seLinkAll('${src}',this.dataset.n)">✓ Do all</button><button type="button" class="se-again" data-n="${pkEsc(name)}" onclick="seLinkNo('${src}',this.dataset.n)">Not now</button></div></div>`;
+}
+function seLink(src,id,k){if(k==='eq')itEquip(id);else itToWpn(id);seRefresh(src);}
+function seLinkAll(src,name){const L=seLinkList(name),eqA=new Set();
+  L.forEach(x=>{if(x.k!=='eq')return;const a=itArmor(x.i),c=a.c==='S'?'S':'A';if(eqA.has(c))return;eqA.add(c);itEquip(x.i.id);}); // je eine Rüstung und ein Schild
+  L.forEach(x=>{if(x.k==='w')itToWpn(x.i.id);});
+  seRefresh(src);showToast('✓ Equipped / linked · AC '+(document.getElementById('ac')?.value||''));}
+function seLinkNo(src,name){(st.seLinkOff||(st.seLinkOff={}))[src+':'+name]=1;seRefresh(src);}
 function seUnlock(src,name){
   if(!st.equipDone)return;delete st.equipDone[src+':'+name];
   seRefresh(src);showToast('Can be added again – items already added stay in the Items tab');
@@ -7322,7 +7479,7 @@ function buildAbilities(){
           <div class="ab-tag">${c?clsBadge(c.cls):''}${tagLabel}${ab.rc?' · '+pkEsc(rcName(ab.rc)):''}</div>
         </div>
         ${usesHtml}
-      </div>${subsHtml}
+      </div>${subsHtml}${healHtml(ab,lvl,maxUses,used)}
       <div class="ab-body${isOpen?' on':''}" id="ab_${ab.id}">
         <div class="ab-desc">${fpT.body}</div>
       </div>`;
@@ -7405,6 +7562,37 @@ function togAb(id){
   const c=b.closest('.ab-card');if(c)c.classList.toggle('open',b.classList.contains('on'));
 }
 
+// ── Paket S2 (04.10.2026): Heil-Features mit Wurf – „🎲 Heal“ an der Karte (kuratiert, Beleg = Satz im Feature-Text; passt der
+// Text nicht mehr, entfällt der Knopf). Wurf über rollDmg({heal:'heal'}) → „Heal me“; verbraucht eine Nutzung bzw. die Würfel aus dem Pool.
+function hfMod(a){const m=getAbilityMod(a);return m?fmt(m):'';}
+function hfMa(L){const t=CLASS_TABLES.Monk,r=t&&(t.rows||[]).find(x=>+x.lvl===L);return (r&&r.martial)||'1d6';}
+const HEAL_FX={
+  secondwind:{re:/regain Hit Points equal to 1d10 plus your Fighter level/i,f:L=>'1d10+'+L},
+  mk_uncannymetabolism:{re:/roll your Martial Arts die, and regain a number of Hit Points equal to your Monk level plus the number rolled/i,f:L=>hfMa(L)+'+'+L},
+  mk_woh_wholeness:{re:/roll your Martial Arts die\. You regain a number of Hit Points equal to the number rolled plus your Wisdom modifier/i,f:L=>hfMa(L)+hfMod('WIS')},
+  wl_un_indestructiblelife:{re:/regain hit points equal to 1d8 \+ your warlock level/i,f:L=>'1d8+'+L},
+  wl_un_defydeath:{re:/regain hit points equal to 1d8 \+ your Constitution modifier/i,f:()=>'1d8'+hfMod('CON')},
+  channeldivinity:{re:/Divine Spark:[^\n]*Roll 1d8 and add your Wisdom modifier\. You either restore Hit Points/i,f:L=>(L>=18?4:L>=13?3:L>=7?2:1)+'d8'+hfMod('WIS'),l:'Divine Spark'},
+  bb_zl_warrior:{re:/pool of four d12s that you can spend to heal yourself/i,die:12},
+  wl_cep_healinglight:{re:/pool of d6s[\s\S]*maximum number of dice you can expend at once equals your Charisma modifier/i,die:6,cap:()=>Math.max(1,getAbilityMod('CHA'))},
+  wl_ce_healinglight:{re:/pool of d6s[\s\S]*maximum number of dice you can spend at once equals your Charisma modifier/i,die:6,cap:()=>Math.max(1,getAbilityMod('CHA'))},
+  layonhands:{re:/restore a total number of Hit Points equal to five times your Paladin level/i,hp:1}
+};
+function healHtml(ab,lvl,max,used){
+  const H=HEAL_FX[ab.id];if(!H||!H.re.test(ab.desc||''))return '';const rest=max>0?Math.max(0,max-Math.min(used,max)):0,id=ab.id;
+  const b=(spec,n,lbl)=>`<button type="button" class="ab-heal-b" data-id="${id}" data-spec="${pkEsc(spec)}" data-n="${n}" data-max="${max}" data-l="${pkEsc(H.l||ab.name)}" onclick="abHeal(this)"${max>0&&rest<n?' disabled':''}>🎲 ${pkEsc(lbl||spec)}</button>`;
+  let h='';
+  if(H.hp)h=`<input class="ab-heal-in" id="abh_${id}" type="number" inputmode="numeric" min="1" max="${rest}" placeholder="HP" aria-label="Hit Points from the pool"><button type="button" class="ab-heal-b" onclick="abHealPool('${id}',${max})"${rest?'':' disabled'}>💚 Heal me</button>`;
+  else if(H.die){const cap=Math.min(H.cap?H.cap():99,Math.max(rest,1));for(let n=1;n<=cap;n++)h+=b(n+'d'+H.die,n);}
+  else h=b(H.f(lvl),1,(H.l?H.l+' ':'Heal ')+H.f(lvl));
+  return `<div class="ab-heal" onclick="event.stopPropagation()">${h}</div>`;
+}
+function abHeal(el){const id=el.dataset.id,n=+el.dataset.n||1,max=+el.dataset.max||0,used=getAbUses(id);
+  if(max>0){if(used+n>max){showToast('No uses left');return;}setAbUses(id,used+n);buildAbilities();autoSave();}
+  rollDmg({heal:'heal',spec:el.dataset.spec,l:el.dataset.l});}
+function abHealPool(id,max){const i=document.getElementById('abh_'+id),rest=Math.max(0,max-Math.min(getAbUses(id),max)),miss=Math.max(0,hpMaxVal()-st.hpC);
+  let n=parseInt(i&&i.value);if(!(n>0))n=Math.min(rest,miss);n=Math.min(n,rest);if(!(n>0)){showToast(rest?'Already at full HP':'Pool is empty');return;}
+  setAbUses(id,getAbUses(id)+n);const a=document.getElementById('dmgAmt');if(a){a.value=n;hpApply('heal');a.value='';}buildAbilities();autoSave();}
 function togAbUse(id,i,max){
   const used=Math.min(getAbUses(id),max);
   // gefüllter Kreis (i < Rest) = verfügbar → antippen verbraucht eine Nutzung; leerer Kreis → eine zurück
@@ -7950,10 +8138,11 @@ function wpnTog(i,k){const w=(st.weapons||[])[i];if(!w)return;if(w[k])delete w[k
 function wpnAutoReset(i){const w=(st.weapons||[])[i];if(!w)return;w.atk='';w.dmg='';autoSave();buildWeapons();}
 function wpnRefHtml(w,i,V){ // Zusatz unter den Feldern einer verknüpften Waffe
   const A=V.A,it=A.it,pr=itProps(it),typ=[itCap(it.wc||''),it.t||''].filter(Boolean).join(' ');
-  const sub=[typ].concat(pr.length?[pr.join(', ')]:[]).concat(it.m&&it.m.length?['Mastery: '+it.m.join(', ')]:[]).join(' · ');
+  const sub=[typ].concat(pr.length?[pr.join(', ')]:[]).join(' · '),wmOn=it.m&&it.m.length&&wmChosen().has(it.n); // Paket S2: Mastery nur bei gewählten Waffenarten hervorheben
+  const mast=it.m&&it.m.length?`<span class="wp-mast${wmOn?' on':''}" title="${wmOn?'Weapon Mastery: you can use this property':'Not one of your Weapon Mastery choices'}">${wmOn?'✦ ':''}Mastery: ${pkEsc(it.m.join(', '))}</span>`:'';
   const calc=`${A.ab}${A.fin?' (Finesse)':''} ${fmt(A.m)}`+(A.pb?` · PB ${fmt(A.pb)}`:'')+(A.dmg?` · ${A.dmg}`:'');
   const man=V.ha||V.hd?` · <b class="g">${V.ha&&V.hd?'attack & damage':V.ha?'attack':'damage'} set by hand</b> <button class="wp-auto" onclick="wpnAutoReset(${i})">↺ Auto</button>`:'';
-  return `<div class="wp-sub">${pkEsc(sub)}</div>`
+  return `<div class="wp-sub">${pkEsc(sub)}${mast?(sub?' · ':'')+mast:''}</div>`
     +`<div class="wp-chips"><button class="pk-chip${w.np?'':' on'}" onclick="wpnTog(${i},'np')">${w.np?'Not proficient':'✓ Proficient'}</button>`
     +(it.d2?`<button class="pk-chip${w.th?' on':''}" onclick="wpnTog(${i},'th')">${w.th?'✓ ':''}Two-handed (${pkEsc(it.d2)})</button>`:'')+`</div>`
     +`<div class="cr-nw-s wp-calc">Auto: ${pkEsc(calc)}${man}</div>`;
@@ -8279,6 +8468,17 @@ function ftRenderMy(){
 }
 
 function ftAddToFeats(name,desc){ftToggle(name,desc);}
+// Paket S2: Origin Feat des Backgrounds – „+ Add“ trägt den Feat ein (Log/Undo über autoSave), „→ Feats“ sucht ihn und scrollt nach oben
+function bgFeatOf(f){const k=String(f||'').toLowerCase().replace(/\s*\(.*\)\s*$/,'').trim();if(!k)return null;const F=FT_FEATS.filter(x=>x.n.toLowerCase()===k);return F.find(x=>x.src==='XPHB')||F[0]||null;}
+function bgFeatAdd(f){const ft=bgFeatOf(f);if(!ft){bgFeatGo(f);return;}
+  if(!(st.feats||[]).some(x=>x.tag==='Feat'&&x.name===ft.n))ftAddInst(ft.n,ft.d);buildBgLore();}
+function bgFeatGo(f){const ft=bgFeatOf(f),n=ft?ft.n:String(f||'').replace(/\s*\(.*\)\s*$/,'').trim();
+  switchTab('feats');ftFCat='all';document.querySelectorAll('#ftCatFilters .fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val==='all'));
+  const q=document.getElementById('ftQ');if(q){q.value=n;if(typeof onSearch==='function')onSearch('ftQ');}
+  ftRender();const c=[...document.querySelectorAll('#ftList .zb-card')].find(x=>(x.querySelector('.zb-name')||{}).textContent===n);
+  if(c){const dt=c.querySelector('.zb-detail');if(dt)dt.classList.add('on');}
+  const box=document.getElementById('ftQ');(document.scrollingElement||document.documentElement).scrollTop=0;if(box&&box.scrollIntoView)box.scrollIntoView({block:'start'});
+}
 
 
 // BESTIEN-DATENBANK
@@ -8381,7 +8581,7 @@ function sbDet(b,you){return `<details class="sb-det" onclick="event.stopPropaga
 const SB_NUM={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
 function sbYou(b,cls,lvl){
   if(!cls||!lvl)return '';
-  const P=[],pb=prof(),sa=document.getElementById('spAttr')?.value||'',sm=sa?md(st.attrs[sa]||10):0,t=JSON.stringify(b);
+  const P=[],pb=prof(),sa=spAttrVal(),sm=sa?md(st.attrs[sa]||10):0,t=JSON.stringify(b);
   const h=String(b.hp||'').match(new RegExp('^(\\d+) (?:plus|\\+) (\\w+) times your '+cls+' level','i'));
   const hx=!h&&String(b.hp||'').match(new RegExp('^(\\d+) × your '+cls+' level','i')); // Paket M: Eldritch Cannon „5 × your artificer level“
   if(hx)P.push(`HP <b>${+hx[1]*lvl}</b>`);
@@ -8513,7 +8713,7 @@ function getAllChars(){
 }
 
 function collectState(){
-  attrSync();statSync(); // Paket E: Endwert der Attribute mitspeichern (ältere App-Versionen lesen st.attrs)
+  attrSync();statSync();if(typeof pbSync==='function')pbSync(); // Paket S2: #prof = Endwert (ältere App-Versionen lesen das Feld) // Paket E: Endwert der Attribute mitspeichern (ältere App-Versionen lesen st.attrs)
   const snap = JSON.parse(JSON.stringify(st, (k,v) => v instanceof Set ? [...v] : v));
   TEXT_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -8525,6 +8725,7 @@ function collectState(){
 function applyState(snap){
   // restore st
   const restored = JSON.parse(JSON.stringify(snap));
+  _hpHold=true; // Paket S2: Max HP erst nach dem Laden aller Felder abgleichen
   // Extract field values before overwriting st
   const fields = {};
   TEXT_IDS.forEach(id=>{ if('_f_'+id in restored){ fields[id]=restored['_f_'+id]; delete restored['_f_'+id]; }});
@@ -8537,7 +8738,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},profAdj:0,hpAdj:0,hpRoll:{},hpAsk:[],hpLv:null,seLinkOff:{}
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -8549,6 +8750,11 @@ function applyState(snap){
     const el=document.getElementById(id);
     if(el && fields[id]!==undefined) el.value=fields[id];
   });
+  if(!('profAdj' in restored)){const pf=parseInt(fields.prof),au=pbOfLvl(totLvl());st.profAdj=(!isNaN(pf)&&pf!==2&&pf!==au)?pf-au:0;} // Paket S2: alte Saves – Feld 2 = nie angefasst → automatisch, sonst Abweichung als Korrektur behalten
+  _pbEdit=false;_pbShown=null;
+  _hpHold=false;_hpMPrev=parseInt(fields.hpM)||null; // gespeichertes Maximum = Bezug für „Current folgt bei vollen HP“
+  if(!st.hpLv||typeof st.hpLv!=='object'){st.hpLv={};charClasses().forEach(c=>{st.hpLv[c.cls]=c.lvl;});st.hpAsk=[];} // Paket S2: alte Saves – keine Fragen für schon erreichte Stufen
+  if(!('hpAdj' in restored)){const hs=parseInt(fields.hpM),hc=hpCalc();st.hpAdj=(hc!==null&&!isNaN(hs)&&hs!==10)?hs-hc:0;} // Paket S2: altes Maximum bleibt (als Korrektur); 10 = nie angefasst → berechnet
   if(fields.hpT===undefined){const t=document.getElementById('hpT');if(t)t.value='0';} // Paket E2: alte Saves ohne Temp HP
   if(!(restored.hdUsedBy&&typeof restored.hdUsedBy==='object')){st.hdUsedBy=null;hdMig();}
   (st.mySpells||[]).forEach(x=>{if(x&&+x.grad===0&&!x.prep)x.prep=true;}); // Paket S1: Cantrips sind immer vorbereitet (alte Saves) // Paket F5: alt hdUsed → Würfel der Startklasse (hdUsed bleibt)
@@ -8680,8 +8886,9 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},profAdj:0,hpAdj:0,hpRoll:{},hpAsk:[],hpLv:{},seLinkOff:{}
   });
+  _pbEdit=false;_pbShown=null;_hpHold=false;
   st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
   document.getElementById('charName').textContent=_name;
   TEXT_IDS.forEach(id=>{
@@ -8773,7 +8980,7 @@ function _skillLabel(k){ return (typeof SKILLS!=='undefined' && (SKILLS.find?.(s
 // Paket G (01.10.2026): Log bildet alles ab. Bekannte Felder mit lesbaren Namen, alles Übrige generisch
 // (jeder Schlüssel aus collectState, Pfad als Name), damit neue Felder automatisch mitkommen.
 // Einträge: String oder {m, k, prev, next} für Texte (Notizen) – _pushLog fasst Tipp-Folgen zusammen.
-const LOG_SKIP=['log','abGrpClosed','charInfoClosed','zbAdded']; // reine Anzeige-Zustände; zbAdded spiegelt nur mySpells
+const LOG_SKIP=['log','abGrpClosed','charInfoClosed','zbAdded','hpAsk','hpLv','seLinkOff']; // Paket S2: hpAsk/hpLv = offene Fragen/letzter Stand (technisch) // reine Anzeige-Zustände; zbAdded spiegelt nur mySpells
 const LOG_FIELDS={cls:'Class',subcls:'Subclass',race:'Race',raceCustom:'Custom Race',lvl:'Level',bg:'Background',align:'Alignment',prof:'Proficiency Bonus',hpM:'Max HP',hpT:'Temp HP',ac:'AC',ini:'Initiative',spd:'Speed',spAttr:'Spellcasting Ability',cur_pp:'Platinum',cur_gp:'Gold',cur_ep:'Electrum',cur_sp:'Silver',cur_cp:'Copper'};
 const LOG_TEXTS={n_bg_notes:'Background Notes',n_bst_notes:'Beast Notes',n_ft_notes:'Feat Notes',n_class_traits:'Class Traits Notes',n_bg_feature:'Background Feature',n_bg_extra:'Background Extra',n_pers:'Personality Trait',n_ideal:'Ideals',n_bond:'Bonds',n_flaw:'Flaws',n_equip:'Equipment',n_notes:'Notes',n_equip_notes:'Equipment Notes',skillNotes:'Skill Notes',raceNotes:'Race Notes'};
 let _abNames=null;
@@ -9017,6 +9224,9 @@ function _diffSnaps(a,b){
   done.add('saveP');profDiff(a.saveP,b.saveP,'Save',k=>k);
   done.add('skillP');profDiff(a.skillP,b.skillP,'Skill',_skillLabel);
   done.add('customRace');_crLog(out,a.customRace,b.customRace);
+  done.add('profAdj');if((+a.profAdj||0)!==(+b.profAdj||0))out.push(`Proficiency Bonus adjustment: ${fmt(+a.profAdj||0)} → ${fmt(+b.profAdj||0)}`); // Paket S2
+  done.add('hpAdj');if((+a.hpAdj||0)!==(+b.hpAdj||0))out.push(`Max HP adjustment: ${fmt(+a.hpAdj||0)} → ${fmt(+b.hpAdj||0)}`);
+  done.add('hpRoll');{const ra=a.hpRoll||{},rb=b.hpRoll||{};new Set([...Object.keys(ra),...Object.keys(rb)]).forEach(c=>{const x=ra[c]||{},y=rb[c]||{};new Set([...Object.keys(x),...Object.keys(y)]).forEach(l=>{if((x[l]||0)!==(y[l]||0))out.push(y[l]?`HP roll ${c} level ${l}: ${y[l]}`:`HP roll ${c} level ${l} removed (was ${x[l]})`);});});}
   done.add('picks');const pA=a.picks||{}, pB=b.picks||{};
   new Set([...Object.keys(pA),...Object.keys(pB)]).forEach(k=>{ const x=(pA[k]||[]).join(', '), y=(pB[k]||[]).join(', '); if(x!==y) out.push(`Choice ${_pickLabel(k)}: "${x||'—'}" → "${y||'—'}"`); });
   // alles Übrige (auch künftige Felder aus Paket E/F) generisch
@@ -9235,7 +9445,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
   switchTab(btn.dataset.tab);
 });
 
-document.getElementById('prof').addEventListener('input',()=>{buildSaves();buildSkills();calcSpell()});
+document.getElementById('prof').addEventListener('input',onPbInput); // Paket S2: Feld nur als Korrektur
 
 // EXPORT / IMPORT
 function exportChars(){
@@ -9375,7 +9585,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
   try{new ResizeObserver(()=>measureNav()).observe(nav);}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-04a';
+const APP_VERSION = 'willow-app-2026-10-04b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -9763,7 +9973,7 @@ function rlClear(){_rl=null;const m=document.getElementById('diceMods');if(m)m.i
 // Aufrufe aus der Oberfläche
 function rollAttr(k){attrSync();const a=ATTRS.find(x=>x.k===k);if(!a)return;rollD20({k:'check',ab:k,l:a.l+' Check',mod:md(st.attrs[k]||10)});}
 function rollInit(){statSync();rollD20({k:'check',ab:'DEX',init:1,l:'Initiative',mod:parseInt(document.getElementById('ini')?.value)||0});}
-function rollSpellAtk(){const a=document.getElementById('spAttr')?.value||'';calcSpell();rollD20({k:'atk',ab:a,l:'Spell Attack',mod:parseInt(document.getElementById('spAtk')?.value)||0});}
+function rollSpellAtk(){const a=spAttrVal();calcSpell();rollD20({k:'atk',ab:a,l:'Spell Attack',mod:parseInt(document.getElementById('spAtk')?.value)||0});}
 function rlAtkNum(s){const m=/[+-]?\s*\d+/.exec(String(s||'').replace(/[−–]/g,'-'));return m?parseInt(m[0].replace(/\s/g,'')):0;}
 function rollWpn(i,dmg){const w=(st.weapons||[])[i];if(!w)return;const n=(w.name||'').trim()||'Weapon',V=wpnVals(w),ab=V.ab?{ab:V.ab}:{};
   if(dmg)rollDmg(Object.assign({l:n+' Damage',spec:V.dmg,wpn:1,dt:V.type},ab));
@@ -9804,7 +10014,7 @@ function spClsOf(sp,X){
   return has(start)?start:X.S[0].cls;
 }
 function spCalcCls(cls){const c=charClasses().find(x=>x.cls===cls);
-  if(c&&c.start&&document.getElementById('spAttr')?.value)return spCalc();
+  if(c&&c.start&&spAttrVal())return spCalc();
   attrSync();const ab=c?spAbOf(c.cls,c.sub):'',mod=ab?md(st.attrs[ab]||10):0,p=prof();
   return {ab,mod,atk:p+mod,dc:8+p+mod};}
 function rollSpellAtkCls(cls){const C=spCalcCls(cls);rollD20({k:'atk',ab:C.ab,l:'Spell Attack ('+cls+')',mod:C.atk});}
@@ -9826,7 +10036,7 @@ function buildSpMc(){const el=document.getElementById('spMcBox');if(!el)return;
 }
 function spCalc(sp){ // Paket F4: mit Zauber → Attribut seiner Klasse (Multiclass), sonst Feld „Ability“ (Startklasse)
   if(sp&&isMulti()){const c=spClsOf(sp);if(c&&c!==curCls())return spCalcCls(c);}
-  calcSpell0();attrSync();const ab=document.getElementById('spAttr')?.value||'';
+  calcSpell0();attrSync();const ab=spAttrVal();
   return {ab,mod:ab?md(st.attrs[ab]||10):0,atk:parseInt(document.getElementById('spAtk')?.value)||0,dc:parseInt(document.getElementById('spDC')?.value)||0};}
 function spDice(o,lv,cl,mod){ // Würfel der Option bei Platz-Grad lv bzw. Charakterstufe cl (Cantrips) → Text oder null
   let d=String(o.d||'');
