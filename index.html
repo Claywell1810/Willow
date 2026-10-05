@@ -1272,6 +1272,54 @@ html[data-ts="sehrgross"] .bnav-btn .bnav-label{letter-spacing:0}
 .wr-btn .ico{width:17px;height:17px}
 .wr-empty{font-size:var(--fs-md);color:var(--muted);padding:6px 2px}
 </style>
+<style id="willowSuche">
+/* ── Paket R6 (05.10.2026): Suche „In App / Web“ (beide Designs; Leder-Fläche am Ende des Leder-Blocks, REFERENZ B1d „Suche R6“) ── */
+.ws-overlay.sr-ov{padding:max(10px,env(safe-area-inset-top)) 10px 10px}
+.sr-box{display:flex;flex-direction:column;gap:8px;max-width:480px;max-height:calc((100vh - 20px) / var(--zf));padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+@supports (height:100dvh){.sr-box{max-height:calc((100dvh - 20px) / var(--zf))}}
+.sr-head{display:flex;align-items:center;gap:6px}
+.sr-seg{flex:1;display:flex;gap:3px;padding:3px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px}
+.sr-seg button{flex:1;min-height:36px;border:0;border-radius:7px;background:none;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:.6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sr-seg button.on{background:var(--bg2);color:var(--gold);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 45%,transparent)}
+.sr-form{display:flex;gap:6px;align-items:stretch;margin:0}
+.sr-form .search-wrap{flex:1;min-width:0}
+.sr-wh{font-size:var(--fs-sm);color:var(--muted);margin-top:-2px}
+.sr-box[data-m="app"] .sr-web{display:none}
+.sr-box[data-m="web"] .sr-cats,.sr-box[data-m="web"] .sr-list{display:none}
+.sr-cats{flex-wrap:nowrap;flex:0 0 auto;padding-bottom:1px}
+.sr-cats:empty,.sr-list:empty{display:none}
+.sr-cats .fbtn{flex:0 0 auto;white-space:nowrap}
+.sr-list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.sr-gh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin:12px 2px 5px}
+.sr-gh:first-child{margin-top:2px}
+.sr-gn{color:var(--muted);margin-left:6px;letter-spacing:.5px}
+.sr-gh button{background:none;border:0;padding:4px 0 4px 10px;color:var(--text2);font-family:inherit;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+.sr-row{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin:0 0 4px;padding:8px 10px;text-align:left;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sr-row:active{border-color:var(--gold)}
+.sr-row.open{border-color:color-mix(in srgb,var(--gold) 55%,transparent);border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
+.sr-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sr-n{font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold);line-height:1.25;overflow-wrap:anywhere}
+.sr-on{display:inline-block;margin-left:7px;padding:0 6px;border:1px solid color-mix(in srgb,var(--green) 55%,transparent);border-radius:9px;font-family:'Crimson Pro',serif;font-size:var(--fs-2xs);letter-spacing:.3px;color:var(--green);vertical-align:2px;white-space:nowrap}
+.sr-s{font-size:var(--fs-sm);color:var(--text2);line-height:1.3}
+.sr-p{font-size:var(--fs-sm);color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sr-go{flex:0 0 auto;width:8px;height:8px;margin:0 4px 0 2px;border-right:1.6px solid var(--text3);border-top:1.6px solid var(--text3);transform:rotate(45deg)}
+.sr-go.inl{transform:rotate(135deg);margin-top:-4px}
+.sr-row.open .sr-go.inl{transform:rotate(-45deg);margin-top:4px}
+.sr-x{margin:0 0 6px;padding:8px 10px 10px;background:var(--bg3);border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);border-top:0;border-radius:0 0 8px 8px;font-size:var(--fs-txt);color:var(--desc);line-height:1.55}
+.sr-x .it-info{margin:0 0 6px}
+.sr-x .sr-add{width:100%;margin:6px 0 0}
+.sr-note{font-size:var(--fs-sm);color:var(--muted);margin-top:6px}
+.sr-empty{padding:14px 6px;text-align:center;color:var(--muted);font-size:var(--fs-md);line-height:1.5}
+.sr-cap{padding:8px 6px 4px;font-size:var(--fs-sm)}
+.sr-webq{display:flex;align-items:center;justify-content:center;width:100%}
+.sr-box .ws-recent{margin-top:0}
+.ws-recent.off,.ws-recent:empty{display:none}
+.sr-rl{width:100%;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.sr-box .rest-foot{margin-top:2px}
+.zb-card,.lf-card,.item-card,.nt-card{scroll-margin-top:64px}
+.sr-hit{animation:srHit 2.2s ease-out}
+@keyframes srHit{0%,35%{box-shadow:0 0 0 2px var(--gold),0 0 16px color-mix(in srgb,var(--gold) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}
+</style>
 <style id="willowLeder">
 /* ── Paket R1 (04.10.2026): Design-Fundament Leder (eigener Block, bei ⚙ Design „Classic“ abgeschaltet) – Tokens, Flächen, Karten, Knöpfe, Eingaben (REFERENZ B1d) ── */
 :root{
@@ -1385,6 +1433,8 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
   background-color:var(--inp);border-color:var(--inp-bd);box-shadow:inset 0 2px 4px rgba(0,0,0,.45)}
 .ifield input:focus,.ifield select:focus,.cr-in:focus,.at-in:focus,.fx-in:focus,.dice-custom-row input:focus,.rest-act input:focus,.item-add-row input:focus,.item-add-row select:focus,.search-wrap input:focus,.spell-notes textarea:focus,.dmg-amt:focus,.char-sel:focus{
   border-color:var(--gold);outline:none;box-shadow:inset 0 2px 4px rgba(0,0,0,.45),0 0 0 2px color-mix(in srgb,var(--gold) 22%,transparent)}
+/* Paket R6: Suchfenster mit Lederfläche */
+.sr-box{background-image:var(--tex);background-size:var(--tex-size);border-color:var(--edge)}
 </style>
 <script>try{if(localStorage.getItem('willow_design')==='klassisch'){document.documentElement.dataset.design='klassisch';document.getElementById('willowLeder').media='not all';}}catch(e){}</script>
 <script>try{var _md=localStorage.getItem('willow_mode');document.documentElement.dataset.mode=(_md==='light'||_md==='dark')?_md:'dark';}catch(e){document.documentElement.dataset.mode='dark';}</script>
@@ -2002,25 +2052,242 @@ function onPbInput(){
   st.profAdj=Math.max(-4,Math.min(4,v-pbOfLvl(totLvl())));pbSync();buildCharCard();autoSave();
 }
 
-// Websuche per Lupe (Paket B, 28.09.2026): nur Link zu Google öffnen, keine Daten übernehmen; letzte Suchen pro Gerät
-const WS_KEY='willow_websearch';
+// Suche (Paket R6, 05.10.2026; vorher nur Websuche, Paket B 28.09.2026): 🔍 öffnet ein Fenster mit Umschalter „In App / Web“ (R-E4),
+// Modus pro Gerät in willow_search_mode (Standard In App). In App: Zauber, Klassen-/Subklassen-Features aller Klassen, Feats, Items (Katalog
+// ITEM_DATA, gleiche Namen einmal, + eigene st.items), Backgrounds, Bestien, Notizzettel (st.notes). Tippen springt zur Karte und öffnet sie
+// (Spell List, Info-Tab, Feats, Items, Background, Beasts, Notes; Filter nur zurückgesetzt, wenn die Karte sonst verborgen wäre); ohne Karte
+// (Features fremder Klassen, Katalog-Items) klappt der Treffer im Fenster auf, Items mit „Add to Items“. Web: Startpage mit „D&D 5e“ wie bisher.
+// Letzte Suchen (beide Modi, nur wenn gesprungen/gesucht wurde) pro Gerät in willow_websearch. Nur Anzeige: Charakterdaten ändert nur „Add to Items“.
+const WS_KEY='willow_websearch',SR_MODE_KEY='willow_search_mode';
 function wsRecent(){try{const a=JSON.parse(localStorage.getItem(WS_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function wsRemember(q){try{const r=wsRecent().filter(x=>x.toLowerCase()!==q.toLowerCase());r.unshift(q);localStorage.setItem(WS_KEY,JSON.stringify(r.slice(0,8)));}catch(e){}}
 // Startpage statt google.com (01.10.2026): iOS öffnet google.com-Links in der Google-App; Startpage liefert Google-Ergebnisse und öffnet wie der 5e.tools-Link im Browser-Fenster der App
 function wsUrl(q){return 'https://www.startpage.com/do/search?q='+encodeURIComponent('D&D 5e '+q);}
+const SR_TYPES={note:'Notes',spell:'Spells',feature:'Features',feat:'Feats',item:'Items',bg:'Backgrounds',beast:'Beasts'};
+const SR_ORDER=Object.keys(SR_TYPES),SR_ALL=4,SR_MAX=60;
+let _srIdx=null,_srCat='',_srRes=[],_srX=-1,_srT=0;
+function srMode(){try{return localStorage.getItem(SR_MODE_KEY)==='web'?'web':'app';}catch(e){return 'app';}}
+function srSetMode(m){try{localStorage.setItem(SR_MODE_KEY,m==='web'?'web':'app');}catch(e){}_srX=-1;srRender();try{document.getElementById('webSearchIn').focus();}catch(e){}}
 function openWebSearch(){
   const m=document.getElementById('webSearchModal'),inp=document.getElementById('webSearchIn');
-  const r=wsRecent(),box=document.getElementById('webSearchRecent');
-  box.innerHTML=r.map((q,i)=>`<button class="ws-chip" onclick="runWebSearch(wsRecent()[${i}])">${q.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</button>`).join('');
-  inp.value='';m.classList.add('on');setTimeout(()=>inp.focus(),30);
+  if(typeof closeMore==='function')closeMore();
+  _srX=-1;onSearch('webSearchIn');srRender();m.classList.add('on');
+  setTimeout(()=>{try{inp.focus();inp.select();}catch(e){}},30);   // letzte Eingabe bleibt stehen, Tippen ersetzt sie
 }
-function closeWebSearch(){document.getElementById('webSearchModal').classList.remove('on');}
+function closeWebSearch(){clearTimeout(_srT);document.getElementById('webSearchModal').classList.remove('on');}
 function runWebSearch(q){
   q=(q!==undefined?q:document.getElementById('webSearchIn').value).trim();
   if(!q) return;
   if(navigator.onLine===false){showToast('No internet connection');return;}
-  try{const r=wsRecent().filter(x=>x.toLowerCase()!==q.toLowerCase());r.unshift(q);localStorage.setItem(WS_KEY,JSON.stringify(r.slice(0,8)));}catch(e){}
+  wsRemember(q);
   window.open(wsUrl(q),'_blank','noopener');
   closeWebSearch();
+}
+function srSubmit(){if(srMode()==='web'){runWebSearch();return;}clearTimeout(_srT);srRender();try{document.getElementById('webSearchIn').blur();}catch(e){}}
+function srInput(){onSearch('webSearchIn');_srX=-1;clearTimeout(_srT);_srT=setTimeout(srRender,120);}
+function srClear(){const i=document.getElementById('webSearchIn');i.value='';onSearch('webSearchIn');_srX=-1;srRender();try{i.focus();}catch(e){}}
+function srRecentTap(i){const q=wsRecent()[i];if(q==null)return;if(srMode()==='web'){runWebSearch(q);return;}
+  const inp=document.getElementById('webSearchIn');inp.value=q;onSearch('webSearchIn');_srX=-1;_srCat='';srRender();}
+function srCatSet(k){_srCat=k;_srX=-1;srRender();const l=document.getElementById('srList');if(l)l.scrollTop=0;}
+function srL(s){return String(s??'').toLowerCase().replace(/[‘’]/g,"'");}
+function srSubKey(D,sub){return D&&D.subclass&&sub?(D.subclass[sub]?sub:sub.replace(/\s*\([^)]+\)\s*$/,'').trim()):'';}
+// fester Index (einmal beim ersten Suchen): h = Suchtext klein (Name + Text), t = Text für die Vorschau
+function srBuild(){
+  const I=[];
+  ZB_SPELLS.forEach((s,i)=>I.push({k:'spell',n:s.name,i,t:[s.desc,s.higher].filter(Boolean).join(' '),h:srL([s.name,s.school,(s.classes||[]).join(' '),s.desc,s.higher].join('\n'))}));
+  Object.keys(CLASS_DATA).forEach(cls=>{
+    const D=CLASS_DATA[cls];
+    const add=(arr,grp,lab)=>{const seen={};(arr||[]).forEach(f=>{
+      if(!f||!f.name)return;const o=seen[f.name];if(o){if(!o.lv.includes(f.lvl))o.lv.push(f.lvl);return;}   // ASI u. ä. einmal je Klasse
+      I.push(seen[f.name]={k:'feature',n:f.name,cls,grp,lab,lv:[f.lvl],tag:f.tag,t:f.desc||'',h:srL([f.name,cls,lab,f.desc].join('\n'))});});};
+    add(D.base,'base','');
+    Object.keys(D.subclass||{}).forEach(k=>{const full=(D.subclassList||[]).find(x=>x===k||x.replace(/\s*\([^)]+\)\s*$/,'').trim()===k)||k;add(D.subclass[k],k,subclsLabel(cls,full));});
+  });
+  FT_FEATS.forEach(f=>I.push({k:'feat',n:f.n,f,t:f.d||'',h:srL([f.n,f.pre,FT_CATS[f.cat],f.d].join('\n'))}));
+  const by={},rk=i=>i.s==='XPHB'?0:i.s==='PHB'?1:2;
+  ITEM_DATA.forEach(i=>{const n=itNorm(i.n).trim();if(!by[n]||rk(i)<rk(by[n]))by[n]=i;});
+  Object.values(by).forEach(i=>I.push({k:'item',n:i.n,ref:i.n+'|'+i.s,t:i.pk?'':(i.x||''),h:srL([i.n,i.t,i.x].join('\n'))}));
+  BG_DATA.forEach(b=>{const ex=BG_EXTRA_MAP[b.n+'|'+b.src]||{};I.push({k:'bg',n:b.n,b,t:[ex.l,ex.f].filter(Boolean).join(' '),h:srL([b.n,b.f,(b.s||[]).join(' '),(b.t||[]).join(' '),ex.l,ex.f].join('\n'))});});
+  BST_DATA.forEach(b=>I.push({k:'beast',n:b.n,b,t:'',h:srL([b.n,b.type,b.tt].join('\n'))}));
+  return I;
+}
+// veränderliche Einträge (bei jeder Suche neu): Notizzettel, eigene Items
+function srDyn(){
+  const R=[];
+  (st.notes||[]).forEach(n=>{if(!n||(!String(n.t).trim()&&!String(n.x).trim()))return;
+    R.push({k:'note',n:String(n.t).trim()||'Untitled',id:n.id,t:n.x||'',note:n,h:srL(n.t+'\n'+n.x+'\n'+(n.c||[]).join(' '))});});
+  (st.items||[]).forEach(it=>{const c=it.ref&&ITEM_MAP[it.ref];
+    R.push({k:'item',n:it.name||'Item',sid:it.id,ref:it.ref||'',on:1,qty:it.qty||1,t:it.note||'',h:srL([it.name,it.note,c&&c.t,c&&c.x].join('\n'))});});
+  return R;
+}
+function srMine(e,C){
+  switch(e.k){
+    case 'spell':return st.zbAdded&&st.zbAdded.has&&st.zbAdded.has(e.i)?'On Sheet':'';
+    case 'feature':return C.some(c=>c.cls===e.cls&&(e.grp==='base'||srSubKey(CLASS_DATA[c.cls],c.sub)===e.grp))?'Your class':'';
+    case 'feat':return (st.feats||[]).some(f=>f.name===e.n&&f.tag==='Feat')?'On Sheet':'';
+    case 'item':return e.on?'On Sheet'+(e.qty>1?' ×'+e.qty:''):'';
+    case 'bg':return st.bg===e.n?'Yours':'';
+    case 'beast':return (st.savedBeasts||[]).some(s=>s.n===e.n)?'Saved':'';
+  }
+  return '';
+}
+// Rang: Name gleich < Name beginnt < Wortanfang im Namen < alle Wörter im Namen < nur im Text (Wortanfang); Eigenes (Your class/On Sheet) zuerst
+function srSearch(q){
+  const ql=srL(q).trim(),terms=ql.split(/\s+/).filter(Boolean);
+  if(ql.length<2)return [];
+  if(!_srIdx)_srIdx=srBuild();
+  const C=charClasses(),dyn=srDyn(),out=[];
+  const own=new Set();dyn.forEach(e=>{if(e.k==='item'){if(e.ref)own.add(e.ref);own.add('n:'+itNorm(e.n).trim());}});
+  // im Namen genügt ein Teilwort, im Text nur Wortanfänge („rope“ findet nicht „property“, „sage“ nicht „message“)
+  const wre=terms.map(t=>new RegExp('(^|[^a-z0-9])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  const test=e=>{
+    const n=srL(e.n);
+    if(!terms.every((t,j)=>n.includes(t)||(e.h.includes(t)&&wre[j].test(e.h))))return;
+    const s=n===ql?0:n.startsWith(ql)?1:(' '+n).includes(' '+ql)?2:terms.every(t=>n.includes(t))?3:5;
+    const mine=srMine(e,C);out.push({e,s:s-(mine?.5:0),r:s,nm:s<5,mine});
+  };
+  dyn.forEach(test);
+  _srIdx.forEach(e=>{if(e.k==='item'&&(own.has(e.ref)||own.has('n:'+itNorm(e.n).trim())))return;test(e);});
+  out.sort((a,b)=>a.s-b.s||a.e.n.localeCompare(b.e.n,'en',{sensitivity:'base'})||String(a.e.cls||'').localeCompare(String(b.e.cls||'')));
+  return out;
+}
+function srSnip(t,terms){
+  t=String(t||'').replace(/\*\*/g,'').replace(/\s+/g,' ').trim();if(!t)return '';
+  const lt=srL(t);let i=-1;terms.forEach(x=>{const j=lt.indexOf(x);if(j>=0&&(i<0||j<i))i=j;});
+  let a=0;if(i>40){a=i-30;const sp=t.indexOf(' ',a);if(sp>0&&sp<i)a=sp+1;}
+  let s=t.slice(a,a+130);if(a+130<t.length){const sp=s.lastIndexOf(' ');if(sp>80)s=s.slice(0,sp);s+='…';}
+  return (a?'…':'')+ntHi(s,terms);
+}
+function srSub(e){
+  switch(e.k){
+    case 'spell':{const s=ZB_SPELLS[e.i];return [s.grad===0?'Cantrip':ordinal(s.grad)+' level',s.school,(s.classes||[]).join(', ')].filter(Boolean).join(' · ');}
+    case 'feature':{const lv=[...e.lv].sort((a,b)=>a-b);return [e.cls,e.lab,(lv.length>1?'Levels ':'Level ')+lv.join(', '),ftagEn(e.tag)].filter(Boolean).join(' · ');}
+    case 'feat':return [FT_CATS[e.f.cat]||'',e.f.pre||'',e.f.src].filter(Boolean).join(' · ');
+    case 'item':{const c=e.ref&&ITEM_MAP[e.ref];if(!c)return 'Own item';const sm=itSum(c);return [c.t,sm!==c.t?sm:'',c.w!=null?c.w+' lb':'',c.s].filter(Boolean).join(' · ');}
+    case 'bg':return [e.b.src,e.b.f?'Feat: '+e.b.f:''].filter(Boolean).join(' · ');
+    case 'beast':{const b=e.b,t=b.tt||(b.type?b.type.charAt(0).toUpperCase()+b.type.slice(1):'');return [t,'CR '+b.cr,SIZE_MAP[b.size]||b.size].filter(Boolean).join(' · ');}
+    case 'note':return [(e.note.c||[]).join(', '),ntDate(e.note.u||e.note.d)].filter(Boolean).join(' · ')||'Note';
+  }
+  return '';
+}
+function srInline(x){return (x.e.k==='feature'&&!x.mine)||(x.e.k==='item'&&!x.e.on);}
+function srDetail(i){
+  const x=_srRes[i],e=x.e;
+  if(e.k==='feature')return fmtDesc(e.t)+'<div class="sr-note">Not one of your classes – shown here only.</div>';
+  if(e.k==='item')return itInfo({ref:e.ref})+`<button type="button" class="add-btn btn-p sr-add" onclick="srItemAdd(${i})"><i class="mi mi-plus l"></i>Add to Items</button>`;
+  return '';
+}
+function srRow(i,terms){
+  const x=_srRes[i],e=x.e,inl=srInline(x),open=inl&&_srX===i;
+  const snip=e.t&&(!x.nm||e.k==='note')?`<span class="sr-p">${srSnip(e.t,terms)}</span>`:'';
+  return `<button type="button" class="sr-row${open?' open':''}" data-k="${e.k}" onclick="srTap(${i})"><span class="sr-tx"><span class="sr-n">${ntHi(e.n,terms)}${x.mine?`<span class="sr-on">${ntE(x.mine)}</span>`:''}</span>`
+    +`<span class="sr-s">${ntE(srSub(e))}</span>${snip}</span><span class="sr-go${inl?' inl':''}" aria-hidden="true"></span></button>`+(open?`<div class="sr-x">${srDetail(i)}</div>`:'');
+}
+function srRender(){
+  const box=document.getElementById('srBox'),inp=document.getElementById('webSearchIn');if(!box||!inp)return;
+  const m=srMode(),q=inp.value.trim();box.dataset.m=m;
+  box.querySelectorAll('.sr-seg button').forEach(b=>{const on=b.dataset.m===m;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+  inp.placeholder=m==='web'?'e.g. Fireball':'Spells, features, items, notes…';
+  inp.setAttribute('enterkeyhint',m==='web'?'search':'done');
+  const r=wsRecent(),rb=document.getElementById('webSearchRecent');
+  rb.innerHTML=r.length?'<span class="sr-rl">Recent</span>'+r.map((x,i)=>`<button type="button" class="ws-chip" onclick="srRecentTap(${i})">${ntE(x)}</button>`).join(''):'';
+  rb.classList.toggle('off',m==='app'&&q.length>=2);
+  const cats=document.getElementById('srCats'),list=document.getElementById('srList');
+  if(m==='web'){cats.innerHTML='';list.innerHTML='';_srRes=[];return;}
+  const res=_srRes=srSearch(q);
+  if(q.length<2){cats.innerHTML='';list.innerHTML='<div class="sr-empty">Search spells, class features, feats, items, backgrounds, beasts and your notes.</div>';return;}
+  if(!res.length){cats.innerHTML='';list.innerHTML=`<div class="sr-empty">Nothing found in Willow.</div><button type="button" class="ws-btn sr-webq" onclick="runWebSearch()"><i class="mi mi-ext l"></i>Search the web for “${ntE(q)}”</button>`;return;}
+  const cnt={};res.forEach(x=>{cnt[x.e.k]=(cnt[x.e.k]||0)+1;});
+  if(_srCat&&!cnt[_srCat])_srCat='';
+  cats.innerHTML=`<button type="button" class="fbtn${_srCat?'':' on'}" onclick="srCatSet('')">All<span class="nt-n">${res.length}</span></button>`
+    +SR_ORDER.filter(k=>cnt[k]).map(k=>`<button type="button" class="fbtn${_srCat===k?' on':''}" data-cat="${k}" onclick="srCatSet('${k}')">${SR_TYPES[k]}<span class="nt-n">${cnt[k]}</span></button>`).join('');
+  const terms=srL(q).split(/\s+/).filter(Boolean);let h='';
+  if(!_srCat){
+    const g={};res.forEach((x,i)=>{(g[x.e.k]=g[x.e.k]||[]).push(i);});
+    const best=k=>Math.min(...g[k].map(i=>res[i].r));   // Gruppen nach bestem Namens-Treffer, Eigenes zählt hier nicht
+    SR_ORDER.filter(k=>g[k]).sort((a,b)=>best(a)-best(b)||SR_ORDER.indexOf(a)-SR_ORDER.indexOf(b)).forEach(k=>{const ix=g[k];
+      h+=`<div class="sr-gh"><span>${SR_TYPES[k]}<span class="sr-gn">${ix.length}</span></span>${ix.length>SR_ALL?`<button type="button" onclick="srCatSet('${k}')">Show all ›</button>`:''}</div>`
+        +ix.slice(0,SR_ALL).map(i=>srRow(i,terms)).join('');});
+  } else {
+    const ix=[];res.forEach((x,i)=>{if(x.e.k===_srCat)ix.push(i);});
+    h=ix.slice(0,SR_MAX).map(i=>srRow(i,terms)).join('')+(ix.length>SR_MAX?`<div class="sr-empty sr-cap">Showing ${SR_MAX} of ${ix.length} – type more to narrow it down.</div>`:'');
+  }
+  list.innerHTML=h;
+}
+function srTap(i){
+  const x=_srRes[i];if(!x)return;
+  if(srInline(x)){const l=document.getElementById('srList'),y=l?l.scrollTop:0;_srX=_srX===i?-1:i;srRender();if(l)l.scrollTop=y;return;}
+  srGo(x);
+}
+// ── Sprung zur Karte ──
+function srQ(id,v){const i=document.getElementById(id);if(i){i.value=v;onSearch(id);}}
+function srFlt(row,val){document.querySelectorAll('#'+row+' .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.val===String(val)));}
+function srZb(sel,name,src){
+  const c=[...document.querySelectorAll(sel+' .zb-card')].find(x=>(x.querySelector('.zb-name')?.textContent||'').trim()===name
+    &&(!src||[...x.querySelectorAll('.zb-src')].some(b=>b.textContent.trim()===src)));
+  if(!c)return null;
+  const d=c.querySelector('.zb-detail'),on=d&&(d.classList.contains('on')||d.style.display==='block');
+  if(d&&!on)c.querySelector('.zb-top')?.click();
+  return c;
+}
+function srFlash(el){
+  if(!el)return;
+  el.classList.remove('sr-hit');void el.offsetWidth;el.classList.add('sr-hit');
+  clearTimeout(el._srT);el._srT=setTimeout(()=>el.classList.remove('sr-hit'),2200);
+  setTimeout(()=>{try{el.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){try{el.scrollIntoView(true);}catch(y){}}},40);
+}
+function srGo(x){
+  const e=x.e,q=document.getElementById('webSearchIn').value.trim();
+  if(q)wsRemember(q);
+  closeWebSearch();
+  let el=null;
+  if(e.k==='spell'){const n=ZB_SPELLS[e.i].name;switchTab('spelllist');srQ('slQ',n);slRender();el=srZb('#slList',n);
+    if(!el){slFGrad='all';slFSchool='all';slFClass='all';srFlt('slClassRow','all');srFlt('slGradRow','all');srFlt('slSchoolRow','all');slRender();el=srZb('#slList',n);}}
+  else if(e.k==='feat'){switchTab('feats');
+    if(x.mine){ftRenderMy();el=srZb('#ftMyList',e.n);}
+    if(!el){srQ('ftQ',e.n);ftRender();el=srZb('#ftList',e.n,e.f.src);
+      if(!el){ftFCat='all';ftFLvl=false;srFlt('ftCatFilters','all');ftRender();el=srZb('#ftList',e.n,e.f.src);}}}
+  else if(e.k==='bg'){switchTab('hintergrund');
+    if(x.mine)el=srZb('#bgMyCard',e.n);
+    if(!el){srQ('bgQ',e.n);bgRender();el=srZb('#bgList',e.n,e.b.src);
+      if(!el){bgFSrc='all';srFlt('bgSrcFilters','all');bgRender();el=srZb('#bgList',e.n,e.b.src);}}}
+  else if(e.k==='beast'){switchTab('bestien');srQ('bstQ',e.n);bstRender();el=srZb('#bstList',e.n);
+    if(!el){bstFType='all';bstFCR='all';srFlt('bstTypeFilters','all');srFlt('bstCRFilters','all');bstRender();el=srZb('#bstList',e.n);}}
+  else if(e.k==='note'){switchTab('notizen');srQ('ntQ','');_ntCat='';_ntCatEdit=false;ntDropEmpty(e.id);_ntOpen=e.id;_ntDelAsk=null;ntRender();el=document.querySelector('#ntList .nt-card.open');}
+  else if(e.k==='item'&&e.on)el=srItemCard(e.sid);
+  else if(e.k==='feature')el=srFeature(e);
+  srFlash(el);
+  return el;
+}
+function srItemCard(id){
+  switchTab('ausruestung');itemFilter='all';srFlt('itemCatFilter','all');_itemOpen.clear();_itemOpen.add(id);renderItems();
+  return document.querySelector('#itemList .item-card[data-id="'+id+'"]');
+}
+function srItemAdd(i){
+  const x=_srRes[i];if(!x||!ITEM_MAP[x.e.ref])return;
+  const q=document.getElementById('webSearchIn').value.trim();if(q)wsRemember(q);
+  closeWebSearch();switchTab('ausruestung');
+  const had=(st.items||[]).some(y=>y.ref===x.e.ref&&!y.from);
+  const qe=document.getElementById('itemQty');if(qe)qe.value='1';
+  itPick(x.e.ref);addItem();
+  if(!had)showToast(x.e.n+' added');
+  const it=[...(st.items||[])].reverse().find(y=>y.ref===x.e.ref&&!y.from);
+  if(it)srFlash(srItemCard(it.id));
+}
+// eigenes Feature: Startklasse → Info-Abschnitt Class/Subclass aufklappen, weitere Klasse (Multiclass) → #mcLoreWrap
+function srFeature(e){
+  const c=charClasses().find(c=>c.cls===e.cls&&(e.grp==='base'||srSubKey(CLASS_DATA[c.cls],c.sub)===e.grp));
+  if(!c)return null;
+  switchTab('info');
+  let box;
+  if(c.start){
+    box=document.getElementById(e.grp==='base'?'clsLoreBody':'subclsLoreBody');
+    if(box&&box.style.display==='none'){if(e.grp==='base')toggleClsLore();else toggleInfoSection('subclsLoreBody','subclsLoreBtn');}
+  } else {_mcOpen[e.cls+'|'+(e.grp==='base'?'base':'sub')]=true;buildMcLore();box=document.getElementById('mcLoreWrap');}
+  const k=e.cls+'|'+e.grp+'|'+Math.min(...e.lv)+'|'+e.n;
+  const card=box&&[...box.querySelectorAll('.lf-card')].find(y=>y.dataset.k===k);
+  if(card&&!card.classList.contains('on'))card.querySelector('.lf-head')?.click();
+  return card||box;
 }
 
 function showToast(msg,ms){
@@ -8723,7 +8990,7 @@ function renderItems(){
   itemWeightHead(totalWt);
   list.innerHTML='';
   filtered.forEach(item=>{
-    const card=document.createElement('div');card.className='item-card';
+    const card=document.createElement('div');card.className='item-card';card.dataset.id=item.id;   // Paket R6: Sprungziel der Suche
     const top=document.createElement('div');top.className='item-top';
     const itRef=item.ref&&ITEM_MAP[item.ref],sub=itSum(itRef);
     top.innerHTML=`<span class="item-cat">${ITEM_CATS[item.cat]||'📦'}</span><span class="item-name">${pkEsc(item.name)}${sub?`<small class="item-sub">${pkEsc(sub)}</small>`:''}</span>${item.eq&&itArmor(item)?'<span class="it-eq">Equipped</span>':''}<span class="item-qty">×${item.qty}</span>${item.wt?`<span class="item-wt">${item.wt} lb</span>`:''}`;
@@ -10428,7 +10695,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-05e';
+const APP_VERSION = 'willow-app-2026-10-05f';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',frame:'Header Art & Frames',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -10972,19 +11239,23 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').catch(()=>{});});
 }
 </script>
-<!-- WEBSUCHE (Lupe in der Kopfzeile, Startpage/Google-Ergebnisse mit Präfix „D&D 5e“, Paket B 28.09.2026) -->
-<div id="webSearchModal" class="ws-overlay" onclick="if(event.target===this)closeWebSearch()">
-  <div class="ws-box">
-    <div class="ws-head">Web search · Startpage</div>
-    <form onsubmit="runWebSearch();return false" style="display:flex;gap:6px">
-      <div class="ws-pre">D&amp;D 5e</div>
-      <input id="webSearchIn" type="search" enterkeyhint="search" autocomplete="off" placeholder="z. B. Fireball">
-    </form>
-    <div id="webSearchRecent" class="ws-recent"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-      <button class="ws-btn" onclick="closeWebSearch()">Cancel</button>
-      <button class="ws-btn ws-go" onclick="runWebSearch()">Search</button>
+<!-- SUCHE (Paket R6, 05.10.2026; vorher Websuche, Paket B 28.09.2026): 🔍 in der Leiste, Umschalter „In App / Web“ – In App durchsucht Zauber,
+     Features, Feats, Items, Backgrounds, Bestien und Notizzettel und springt zur Karte; Web = Startpage mit Präfix „D&D 5e“ -->
+<div id="webSearchModal" class="ws-overlay sr-ov" onclick="if(event.target===this)closeWebSearch()">
+  <div class="ws-box sr-box" id="srBox" data-m="app">
+    <div class="sr-head">
+      <div class="sr-seg" role="group" aria-label="Search in"><button type="button" data-m="app" onclick="srSetMode('app')">In App</button><button type="button" data-m="web" onclick="srSetMode('web')">Web</button></div>
+      <button type="button" class="cl-x" onclick="closeWebSearch()" aria-label="Close">✕</button>
     </div>
+    <form class="sr-form" onsubmit="srSubmit();return false">
+      <div class="ws-pre sr-web">D&amp;D 5e</div>
+      <div class="search-wrap"><span class="si"><i class="mi mi-srch"></i></span><input id="webSearchIn" type="search" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Spells, features, items, notes…" oninput="srInput()" style="padding-right:32px"><button type="button" class="search-clear" id="webSearchIn-clear" onclick="srClear()" style="display:none" aria-label="Clear">✕</button></div>
+    </form>
+    <div class="sr-web sr-wh">Opens Startpage (Google results) in your browser.</div>
+    <div class="filter-row sr-cats" id="srCats"></div>
+    <div class="sr-list" id="srList"></div>
+    <div id="webSearchRecent" class="ws-recent"></div>
+    <div class="rest-foot sr-web"><button type="button" class="ws-btn" onclick="closeWebSearch()">Cancel</button><button type="button" class="ws-btn ws-go" onclick="runWebSearch()">Search</button></div>
   </div>
 </div>
 <!-- RAST / ZAUBERN (Paket D, 29.09.2026): Dialog für Short Rest, Long Rest und „Cast“ -->

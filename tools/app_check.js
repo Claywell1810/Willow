@@ -2962,7 +2962,7 @@ const REGRESSION = [
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
       for (const [px, pre] of [[408, ''], [469, 'html[data-ts="gross"] '], [530, 'html[data-ts="sehrgross"] ']])
         if (!css.includes('@media (max-width:' + px + 'px){' + pre + '.hp-row.hpx .hpx-main{grid-column:1/-1}}')) return 'HP schmal nicht über die ganze Breite: ' + px;
-      if (!d.getElementById('willowKampf') || d.getElementById('willowKampf').nextElementSibling.id !== 'willowLeder') return 'Block willowKampf nicht vor willowLeder';
+      if (!d.getElementById('willowKampf') || !(d.getElementById('willowKampf').compareDocumentPosition(d.getElementById('willowLeder')) & 4)) return 'Block willowKampf nicht vor willowLeder';   // seit Paket R6 liegt willowSuche dazwischen
       // 2) Waffen: Kampfzeile, Felder nach Antippen, Entfernen fragt
       E("st.weapons=[{name:'Testaxt',atk:'+5',dmg:'1d8+3',type:'Slashing'},{name:'Testbogen',atk:'+4',dmg:'1d6+2',type:'Piercing'}];buildWeapons()");
       const L = () => [...d.querySelectorAll('#weaponList > .wr')];
@@ -3160,6 +3160,66 @@ const REGRESSION = [
       if ((E("charExportObj('V Alt')").data.notes || []).length !== 3) return 'Export ohne Zettel';
       w.resetUI(); if (E('st.notes.length') || d.querySelectorAll('#ntList .nt-card').length) return 'resetUI leert Zettel nicht';
       E("const c=getAllChars();delete c['V Alt'];localStorage.setItem(LS_KEY,JSON.stringify(c))"); w.switchTab('info');
+      return true;
+    } },
+  { name: 'Paket R6: Suche „In App / Web“ (Umschalter pro Gerät, Treffer aus Zaubern/Features/Feats/Items/Backgrounds/Bestien/Notizzetteln, Wortanfang im Text, Sprung zur geöffneten Karte inkl. Multiclass, Inline-Treffer + Add to Items, Web wie bisher)', datum: '05.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      for (const id of ['webSearchModal', 'srBox', 'webSearchIn', 'srCats', 'srList', 'webSearchRecent']) if (!d.getElementById(id)) return 'fehlt: ' + id;
+      if (d.querySelectorAll('#srBox .sr-seg button').length !== 2) return 'Umschalter fehlt';
+      const sub = E("CLASS_DATA.Druid.subclassList.find(s=>/Moon/.test(s))");
+      E(`const c=getAllChars();c['R6 Test']={_f_cls:'Druid',_f_lvl:'3',_f_subcls:${JSON.stringify(sub)},bg:'Sage',mc:[{cls:'Fighter',sub:'',lvl:5}],attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:14,CHA:10},feats:[],mySpells:[],weapons:[],items:[{id:7,name:'Rope of Ara',qty:2,wt:0,cat:'Misc',note:'climbing'}],notes:[{id:'ntr6',t:'Fireball plan',x:'Lure the goblins into the cave',c:['Quests'],d:1,u:1}],log:[]};localStorage.setItem(LS_KEY,JSON.stringify(c))`);
+      w.loadChar('R6 Test');
+      w.localStorage.removeItem('willow_search_mode'); w.localStorage.removeItem('willow_websearch');
+      const inp = d.getElementById('webSearchIn');
+      const q = v => { w.openWebSearch(); inp.value = v; w.srRender(); return E('_srRes'); };
+      const pick = (v, f) => { const r = q(v); const i = r.findIndex(f); return i < 0 ? null : { i, x: r[i] }; };
+      w.openWebSearch();
+      if (d.getElementById('srBox').dataset.m !== 'app' || !d.querySelector('.sr-seg button.on[data-m="app"]')) return 'Standard nicht In App';
+      // Treffer und Rang
+      let r = q('fireball');
+      const ks = new Set(r.map(x => x.e.k));
+      if (!ks.has('spell') || !ks.has('note')) return 'fireball: ' + [...ks];
+      if (r.find(x => x.e.k === 'spell').e.n !== 'Fireball') return 'Rang Zauber';
+      if (!d.querySelector('#srCats .fbtn.on') || !d.querySelector('#srCats .fbtn[data-cat="spell"]') || !d.querySelector('#srList .sr-gh')) return 'Kategorien/Gruppen';
+      if (!d.querySelector('#srList .sr-n mark.nt-hl')) return 'Hervorhebung';
+      r = q('wild shape'); if (r[0].e.k !== 'feature' || r[0].e.n !== 'Wild Shape' || r[0].mine !== 'Your class') return 'Feature eigene Klasse vorn';
+      r = q('rope'); if (r.some(x => /^property$/i.test(x.e.n)) || !r.some(x => x.e.k === 'item' && x.e.on && x.mine === 'On Sheet ×2')) return 'eigenes Item';
+      if (r.some(x => x.e.k !== 'item' && !x.e.h.match(/(^|[^a-z0-9])rope/) && !x.e.n.toLowerCase().includes('rope'))) return 'Text ohne Wortanfang (property)';
+      if (q('dire wolf')[0].e.k !== 'beast' || q('sage').find(x => x.e.k === 'bg').mine !== 'Yours') return 'Bestie/Background';
+      w.srCatSet('feat'); q('alert'); if ([...d.querySelectorAll('#srList .sr-row')].some(b => b.dataset.k !== 'feat')) return 'Kategorie-Filter';
+      w.srCatSet('');
+      q('xyzzy'); if (!d.querySelector('#srList .sr-webq')) return 'nichts gefunden ohne Web-Knopf';
+      // Sprung: Zauber (Filter nur zurück, wenn nötig), Note, Feature Startklasse/Multiclass, Feat, Background, Bestie, Item
+      E("slFClass='mine'"); let p = pick('magic missile', x => x.e.n === 'Magic Missile'); let el = w.srGo(p.x);
+      if (d.getElementById('webSearchModal').classList.contains('on')) return 'Fenster bleibt offen';
+      if (!d.getElementById('tab-spelllist').classList.contains('on') || !el || el.querySelector('.zb-name').textContent !== 'Magic Missile' || el.querySelector('.zb-detail').style.display !== 'block' || !el.classList.contains('sr-hit')) return 'Sprung Zauber';
+      if (E('slFClass') !== 'all') return 'Zauber-Filter nicht zurückgesetzt';
+      el = w.srGo(pick('goblins', x => x.e.k === 'note').x); if (!d.getElementById('tab-notizen').classList.contains('on') || E('_ntOpen') !== 'ntr6' || !el.classList.contains('open')) return 'Sprung Notiz';
+      el = w.srGo(pick('circle forms', x => x.e.k === 'feature' && x.e.cls === 'Druid').x);
+      if (!d.getElementById('tab-info').classList.contains('on') || !el.classList.contains('lf-card') || !el.classList.contains('on') || !el.closest('#subclsLoreBody') || d.getElementById('subclsLoreBody').style.display === 'none') return 'Sprung Subklassen-Feature';
+      p = pick('action surge', x => x.e.k === 'feature' && x.e.cls === 'Fighter'); if (!p || p.x.mine !== 'Your class' || E(`srInline(_srRes[${p.i}])`)) return 'Multiclass-Feature nicht eigenes';
+      el = w.srGo(p.x); if (!el.classList.contains('lf-card') || !el.closest('#mcLoreWrap') || !el.classList.contains('on')) return 'Sprung Multiclass-Feature';
+      p = pick('rage', x => x.e.k === 'feature' && x.e.cls === 'Barbarian' && x.e.n === 'Rage'); w.srTap(p.i);
+      if (!d.getElementById('webSearchModal').classList.contains('on') || !d.querySelector('#srList .sr-row.open + .sr-x')) return 'fremdes Feature nicht im Fenster aufgeklappt';
+      el = w.srGo(pick('alert', x => x.e.k === 'feat' && x.e.n === 'Alert').x); if (!d.getElementById('tab-feats').classList.contains('on') || !el.querySelector('.zb-detail.on')) return 'Sprung Feat';
+      el = w.srGo(pick('acolyte', x => x.e.k === 'bg').x); if (!el.closest('#bgList') || !el.querySelector('.zb-detail.on')) return 'Sprung Background';
+      el = w.srGo(pick('dire wolf', x => x.e.k === 'beast').x); if (!d.getElementById('tab-bestien').classList.contains('on') || !el.querySelector('.zb-detail.on')) return 'Sprung Bestie';
+      el = w.srGo(pick('rope of', x => x.e.on).x); if (el?.dataset.id !== '7' || !el.querySelector('.item-detail.on')) return 'Sprung eigenes Item';
+      p = pick('longsword', x => x.e.n === 'Longsword'); if (!E(`srInline(_srRes[${p.i}])`)) return 'Katalog-Item nicht inline';
+      w.srTap(p.i); if (!d.querySelector('.sr-x .sr-add')) return 'Add to Items fehlt';
+      w.srItemAdd(p.i); const it = E("st.items.find(x=>x.ref&&x.ref.startsWith('Longsword|'))");
+      if (!it || !d.querySelector('#itemList .item-card[data-id="' + it.id + '"] .item-detail.on')) return 'Add to Items';
+      if (!E("getAllChars()['R6 Test'].items.some(x=>x.ref&&x.ref.startsWith('Longsword|'))")) return 'Item nicht gespeichert';
+      if (q('longsword').some(x => x.e.k === 'item' && !x.e.on && x.e.n === 'Longsword')) return 'Katalog-Item trotz eigenem doppelt';
+      if (JSON.parse(w.localStorage.getItem('willow_websearch'))[0] !== 'longsword') return 'letzte Suche nach Sprung nicht gemerkt';
+      // Web-Modus: pro Gerät, Startpage wie bisher
+      let opened = null; w.open = u => { opened = u; };
+      w.srSetMode('web'); if (w.localStorage.getItem('willow_search_mode') !== 'web' || d.getElementById('srBox').dataset.m !== 'web' || d.getElementById('srList').innerHTML) return 'Web-Modus';
+      inp.value = 'Grapple'; w.srSubmit(); if (opened !== 'https://www.startpage.com/do/search?q=D%26D%205e%20Grapple') return 'Websuche: ' + opened;
+      w.openWebSearch(); if (d.getElementById('srBox').dataset.m !== 'web') return 'Modus nicht gemerkt';
+      w.srSetMode('app'); w.closeWebSearch();
+      E("const c=getAllChars();delete c['R6 Test'];localStorage.setItem(LS_KEY,JSON.stringify(c))"); w.resetUI(); w.switchTab('info');
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
