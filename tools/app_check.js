@@ -576,8 +576,7 @@ const REGRESSION = [
       const ab = d.getElementById('abilitiesSection'), sp = d.getElementById('subpanel-meinezauber');
       if (!(ab.compareDocumentPosition(sp) & 4)) return 'Class Features steht nicht vor Spellcasting';
       if (!(d.getElementById('weaponList').compareDocumentPosition(ab) & 4)) return 'Class Features steht vor Weapons';
-      // 3) Tab heißt „Actions" (oben und unten), data-tab bleibt „zauber"
-      if (d.querySelector('.tab[data-tab="zauber"]')?.textContent.trim() !== 'Actions') return 'oberer Tab heißt nicht „Actions"';
+      // 3) Tab heißt „Actions" (untere Leiste; obere Tab-Reihen seit Paket R2 entfallen), data-tab bleibt „zauber"
       if (d.querySelector('.bnav-btn[data-tab="zauber"] .bnav-label')?.textContent.trim() !== 'Actions') return 'untere Leiste heißt nicht „Actions"';
       // 4) Pips: alle gefüllt = alles verfügbar; Tippen auf gefüllten Kreis verbraucht, auf leeren gibt zurück
       sel('Barbarian', 'Path of the Berserker (PHB)', 5);
@@ -702,18 +701,17 @@ const REGRESSION = [
       if (!js.includes('desc.innerHTML=fmtDesc(faDesc(ft))') || !js.includes('<div class="feat-desc">${fmtDesc(f.desc)}</div>')) return 'Feats nicht formatiert';
       return true;
     } },
-  { name: 'UI-Kleinkram: Würfel-Knopf in der unteren Leiste (kein .dice-fab, kein Tab-Wechsel), Skills-Icon 🎯', datum: '27.09.2026',
+  { name: 'UI-Kleinkram: Würfel-Knopf in der unteren Leiste (kein .dice-fab, kein Tab-Wechsel), Skills-Icon (seit Paket R2: 6 Knöpfe mit „Dice“ + „More“, SVG statt 🎯)', datum: '27.09.2026',
     run: ({ w, d, sel }) => {
       if (d.querySelector('.dice-fab')) return 'schwebender Würfel-Knopf noch vorhanden';
       const btns = [...d.querySelectorAll('#bottomNav .bnav-btn')];
-      if (btns.length !== 5) return 'untere Leiste hat ' + btns.length + ' statt 5 Knöpfe';
+      if (btns.length !== 6) return 'untere Leiste hat ' + btns.length + ' statt 6 Knöpfe';
       const labels = btns.map(b => b.querySelector('.bnav-label').textContent.trim());
-      if (JSON.stringify(labels) !== '["Info","Skills","Würfel","Items","Actions"]') return 'Reihenfolge/Beschriftung: ' + JSON.stringify(labels);
+      if (JSON.stringify(labels) !== '["Info","Skills","Dice","Items","Actions","More"]') return 'Reihenfolge/Beschriftung: ' + JSON.stringify(labels);
       const diceBtn = btns[2];
       if (diceBtn.dataset.tab) return 'Würfel-Knopf hat data-tab (würde Tab wechseln)';
       if (diceBtn.getAttribute('onclick') !== "openDice('',0)") return 'Würfel-Knopf ruft nicht openDice auf';
-      const skillsIcon = btns[1].querySelector('.bnav-icon').textContent;
-      if (skillsIcon !== '🎯') return 'Skills-Icon ist „' + skillsIcon + '“ statt 🎯';
+      if (!btns.every(b => b.querySelector('.bnav-icon svg.ico') && !b.querySelector('.bnav-icon').textContent.trim())) return 'Leisten-Symbole nicht als SVG (Paket R2)';
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
       const i = css.indexOf('.bnav-dice .bnav-icon{');
       if (i < 0) return '.bnav-dice .bnav-icon Regel fehlt';
@@ -723,8 +721,7 @@ const REGRESSION = [
       diceBtn.click();
       if (!d.getElementById('diceModal').classList.contains('on')) return 'Würfel-Dialog öffnet sich nicht';
       if ([...d.querySelectorAll('.bnav-btn.on')].some(b => b === diceBtn)) return 'Würfel-Knopf wird als aktiver Tab markiert';
-      const infoTab = d.querySelector('.tab[data-tab="info"]');
-      if (!infoTab.classList.contains('on')) return 'Würfel-Knopf hat den Tab gewechselt';
+      if (!d.getElementById('tab-info').classList.contains('on')) return 'Würfel-Knopf hat den Tab gewechselt';
       w.closeDice();
       return true;
     } },
@@ -2880,6 +2877,70 @@ const REGRESSION = [
       if (d.getElementById('ftQ').placeholder !== 'Search feats...' || d.getElementById('bstQ').placeholder !== 'Search beasts...' || E("FT_CATS['']") !== 'Other') return 'Platzhalter/Kategorie deutsch';
       // aufräumen
       E("const c2=getAllChars();delete c2['S3 Test'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
+      return true;
+    } },
+  { name: 'Paket R2: Kopf + Navigation – schmale Leiste (SVG-Symbole), großer Kopf (Vignette/Rune je Startklasse, „Klasse Stufe · Subklasse“, „Rasse · Background“, Einklappen), Charakterliste (wechseln, neu, löschen ohne Wechsel), untere Leiste + More, offene Wahlen in der Charakterkarte, englische Texte', datum: '05.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      if (!d.getElementById('hxBar') || !d.getElementById('hxHero') || typeof w.openCharList !== 'function' || typeof w.toggleMore !== 'function') return 'Kopf/Charakterliste/More fehlen (Paket R2)';
+      // 1) Leiste: ↶ ↷ 🔍 ⚙ als SVG, alte Charakterleiste und obere Tabs weg, Texte englisch
+      for (const id of ['undoBtn', 'redoBtn', 'webSearchBtn', 'settingsBtn']) { const b = d.getElementById(id); if (!b || !b.closest('#hxBar') || !b.querySelector('svg.ico') || b.textContent.trim()) return 'Leisten-Knopf ohne SVG: ' + id; }
+      if (d.querySelector('.char-bar') || d.getElementById('tabsToggleBtn') || d.querySelector('.tabs')) return 'alte Charakterleiste/obere Tabs noch da';
+      const html = d.documentElement.outerHTML;
+      if (/Kein Charakter|>Würfel</.test(html)) return 'deutsche Reste (Kein Charakter/Würfel)';
+      // 2) großer Kopf: alle Klassen der App haben Vignette + Rune (neue Klasse → tools/design_r_art.py)
+      const miss = E("Object.keys(CLASS_DATA).filter(c=>!WILLOW_VIG[c]||!WILLOW_EMB[c]).join()");
+      if (miss || !E("WILLOW_VIG['']&&WILLOW_EMB['']")) return 'Vignette/Emblem fehlt für: ' + (miss || 'ohne Klasse') + ' (tools/design_r_art.py)';
+      E("switchTabAll('info');newChar();document.getElementById('newCharName').value='R2 Test A';confirmNewChar()");
+      if (d.getElementById('charName').textContent !== 'R2 Test A' || d.getElementById('hxMiniName').textContent !== 'R2 Test A') return 'Name im Kopf/Leiste';
+      const vg = () => d.getElementById('hxVig'), ru = () => d.getElementById('hxRune');
+      if (vg().dataset.c !== '' || !vg().querySelector('svg.hx-vig') || d.getElementById('hxCls').textContent) return 'ohne Klasse: Standard-Vignette, keine Klassenzeile';
+      const c = d.getElementById('cls'); c.value = 'Druid'; c.dispatchEvent(new w.Event('change'));
+      const s = d.getElementById('subcls'); s.value = E("CLASS_DATA.Druid.subclassList.find(x=>/Moon/.test(x))"); s.dispatchEvent(new w.Event('change'));
+      for (let i = 0; i < 4; i++) E('chLvl(1)');
+      if (!/^Druid 5 · Circle of the Moon$/.test(d.getElementById('hxCls').textContent)) return 'Klassenzeile: ' + d.getElementById('hxCls').textContent;
+      if (vg().dataset.c !== 'Druid' || ru().dataset.c !== 'Druid' || !ru().querySelector('svg.emb')) return 'Vignette/Rune Druid';
+      E("st.bg='Sage';document.getElementById('bg').value='Sage';buildCharCard()");
+      const r = d.getElementById('race'); r.value = [...r.options].map(o => o.value).find(v => /^Elf/.test(v)); r.dispatchEvent(new w.Event('change', { bubbles: true }));
+      if (!/^Elf · Sage$/.test(d.getElementById('hxSub').textContent)) return 'Rasse · Background: ' + d.getElementById('hxSub').textContent;
+      E("st.mc=[{cls:'Wizard',lvl:2,sub:''}];mcRefresh()");
+      if (d.getElementById('hxCls').textContent !== 'Druid 5 / Wizard 2' || vg().dataset.c !== 'Druid') return 'Multiclass: ' + d.getElementById('hxCls').textContent + ' (Vignette = Startklasse)';
+      E("st.mc=[];mcRefresh();autoSave()");
+      // Einklappen: Kopf außer Sicht → Leiste „mini“, Tippen auf den Titel öffnet die Liste
+      E("document.getElementById('hxHero').getBoundingClientRect=()=>({top:-200,bottom:-20});hxScroll()");
+      if (!d.getElementById('hxBar').classList.contains('mini')) return 'Kopf klappt nicht ein';
+      E("hxTitleTap()"); if (!d.getElementById('charListModal').classList.contains('on')) return 'Titel (eingeklappt) öffnet die Liste nicht';
+      E("closeCharList();delete document.getElementById('hxHero').getBoundingClientRect;hxScroll()");
+      // 3) Charakterliste: Zeilen mit Zusammenfassung, wechseln, löschen eines anderen Charakters ohne Wechsel
+      E("newChar();document.getElementById('newCharName').value='R2 Test B';confirmNewChar()");
+      E("openCharList()");
+      const rows = () => [...d.querySelectorAll('#charList .cl-row')];
+      const rowA = rows().find(x => x.textContent.includes('R2 Test A'));
+      if (!rowA || !/Druid 5 · Elf/.test(rowA.textContent) || !rows().find(x => x.classList.contains('on') && x.textContent.includes('R2 Test B'))) return 'Liste: Zusammenfassung/aktiver Charakter';
+      if (d.getElementById('clSaveBtn').style.display !== 'none') return '„Save this sheet as…“ bei benanntem Charakter sichtbar';
+      rowA.querySelector('.cl-pick').click();
+      if (d.getElementById('charName').textContent !== 'R2 Test A' || d.getElementById('cls').value !== 'Druid' || d.getElementById('charListModal').classList.contains('on')) return 'Wechsel über die Liste';
+      E("openCharList()"); rows().find(x => x.textContent.includes('R2 Test B')).querySelector('.cl-del').click();
+      if (d.getElementById('deleteModal').style.display !== 'flex' || d.getElementById('deleteModalName').textContent !== 'R2 Test B') return 'Löschen fragt nicht nach';
+      E('confirmDelete()');
+      if (E("!!getAllChars()['R2 Test B']") || d.getElementById('charName').textContent !== 'R2 Test A' || rows().some(x => x.textContent.includes('R2 Test B'))) return 'anderen Charakter gelöscht: aktueller muss bleiben, Liste aktualisiert';
+      E("closeCharList()");
+      // 4) More: Kachel wechselt den Tab, „More“ markiert, Fenster zu
+      E("toggleMore()"); if (!d.getElementById('moreModal').classList.contains('on')) return 'More öffnet nicht';
+      d.querySelector('#moreModal .more-tile[data-tab="feats"]').click();
+      if (!d.getElementById('tab-feats').classList.contains('on') || !d.getElementById('bnavMore').classList.contains('on') || d.getElementById('moreModal').classList.contains('on')) return 'More-Kachel Feats';
+      E("switchTabAll('skills')"); if (d.getElementById('bnavMore').classList.contains('on') || !d.querySelector('.bnav-btn[data-tab="skills"]').classList.contains('on')) return 'More bleibt markiert';
+      // 5) offene Wahlen in der Charakterkarte (Druid ohne Skill-Wahl), Tippen öffnet Class Traits
+      E("switchTabAll('info');buildCharCard()");
+      const op = d.querySelector('#ciCard .ci-open');
+      if (!op || !/Class skills 0\/2/.test(op.textContent)) return 'offene Wahlen fehlen in der Charakterkarte: ' + (op ? op.textContent : '–');
+      E("document.getElementById('coreTraitsBody').style.display='none'"); [...op.querySelectorAll('.ci-pend')].find(b => /Class skills/.test(b.textContent)).click();
+      if (d.getElementById('coreTraitsBody').style.display === 'none') return 'Tippen öffnet Class Traits nicht';
+      // 6) leeres Blatt: „No character“
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
+      if (!css.includes(".hx-name:empty::before{content:'No character'")) return 'Platzhalter „No character“ fehlt';
+      if (!css.includes('@supports (overflow:clip){.app{overflow-x:clip}}')) return '.app overflow-x:hidden → Leiste klebt nicht (sticky)';
+      E("const c2=getAllChars();delete c2['R2 Test A'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;refreshCharSel('');switchTabAll('info')");
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
