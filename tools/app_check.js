@@ -701,14 +701,14 @@ const REGRESSION = [
       if (!js.includes('desc.innerHTML=fmtDesc(faDesc(ft))') || !js.includes('<div class="feat-desc">${fmtDesc(f.desc)}</div>')) return 'Feats nicht formatiert';
       return true;
     } },
-  { name: 'UI-Kleinkram: Würfel-Knopf in der unteren Leiste (kein .dice-fab, kein Tab-Wechsel), Skills-Icon (seit Paket R2: 6 Knöpfe mit „Dice“ + „More“, SVG statt 🎯)', datum: '27.09.2026',
+  { name: 'UI-Kleinkram: Würfel-Knopf in der unteren Leiste (kein .dice-fab, kein Tab-Wechsel), Skills-Icon (seit Paket R2: 7 Knöpfe, Würfel in der Mitte, „Dice“, „Notes“ + „More“, SVG statt 🎯)', datum: '27.09.2026',
     run: ({ w, d, sel }) => {
       if (d.querySelector('.dice-fab')) return 'schwebender Würfel-Knopf noch vorhanden';
       const btns = [...d.querySelectorAll('#bottomNav .bnav-btn')];
-      if (btns.length !== 6) return 'untere Leiste hat ' + btns.length + ' statt 6 Knöpfe';
+      if (btns.length !== 7) return 'untere Leiste hat ' + btns.length + ' statt 7 Knöpfe';
       const labels = btns.map(b => b.querySelector('.bnav-label').textContent.trim());
-      if (JSON.stringify(labels) !== '["Info","Skills","Dice","Items","Actions","More"]') return 'Reihenfolge/Beschriftung: ' + JSON.stringify(labels);
-      const diceBtn = btns[2];
+      if (JSON.stringify(labels) !== '["Info","Skills","Items","Dice","Actions","Notes","More"]') return 'Reihenfolge/Beschriftung: ' + JSON.stringify(labels);
+      const diceBtn = btns[3];
       if (diceBtn.dataset.tab) return 'Würfel-Knopf hat data-tab (würde Tab wechseln)';
       if (diceBtn.getAttribute('onclick') !== "openDice('',0)") return 'Würfel-Knopf ruft nicht openDice auf';
       if (!btns.every(b => b.querySelector('.bnav-icon svg.ico') && !b.querySelector('.bnav-icon').textContent.trim())) return 'Leisten-Symbole nicht als SVG (Paket R2)';
@@ -2929,6 +2929,9 @@ const REGRESSION = [
       E("toggleMore()"); if (!d.getElementById('moreModal').classList.contains('on')) return 'More öffnet nicht';
       d.querySelector('#moreModal .more-tile[data-tab="feats"]').click();
       if (!d.getElementById('tab-feats').classList.contains('on') || !d.getElementById('bnavMore').classList.contains('on') || d.getElementById('moreModal').classList.contains('on')) return 'More-Kachel Feats';
+      if (d.querySelector('#moreModal [data-tab="notizen"]') || !d.querySelector('.bnav-btn[data-tab="notizen"]')) return 'Notes gehört in die untere Leiste (nicht ins More-Fenster)';
+      const css2 = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
+      if (!css2.includes('.bottom-nav .bnav-btn{flex:1 1 0;min-width:0')) return 'Leisten-Knöpfe nicht gleich breit (Würfel nicht mittig)';
       E("switchTabAll('skills')"); if (d.getElementById('bnavMore').classList.contains('on') || !d.querySelector('.bnav-btn[data-tab="skills"]').classList.contains('on')) return 'More bleibt markiert';
       // 5) offene Wahlen in der Charakterkarte (Druid ohne Skill-Wahl), Tippen öffnet Class Traits
       E("switchTabAll('info');buildCharCard()");

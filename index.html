@@ -1038,6 +1038,9 @@ html[data-ts="gross"] .hx-t0{letter-spacing:3px}html[data-ts="sehrgross"] .hx-t0
 .cl-foot button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0;padding:11px;border-radius:10px;font-family:'Cinzel',serif;font-size:var(--fs-md)}
 .cl-foot .ico{width:20px;height:20px}
 /* untere Leiste + More */
+.bottom-nav .bnav-btn{flex:1 1 0;min-width:0;padding-left:0;padding-right:0} /* 7 gleich breite Knöpfe → Würfel genau in der Mitte */
+.bnav-btn .bnav-label{white-space:nowrap}
+html[data-ts="sehrgross"] .bnav-btn .bnav-label{letter-spacing:0}
 .bnav-btn .bnav-icon{line-height:0}
 .bnav-btn .bnav-icon .ico{width:24px;height:24px}
 .bnav-dice .bnav-icon .ico{width:28px;height:28px}
@@ -1167,7 +1170,6 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
       <button class="tab more-tile" data-tab="hintergrund"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 4.8 6.8 4.3 3 5v13.5c3.8-.7 7-.2 9 1.5 2-1.7 5.2-2.2 9-1.5V5c-3.8-.7-7-.2-9 1.5z"/><path d="M12 6.5V20"/></svg><span>Background</span></button>
       <button class="tab more-tile" data-tab="feats"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m12 6 1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5L11 8z"/><path d="m8.5 14 -1.5 7 5-2.5 5 2.5-1.5-7"/></svg><span>Feats</span></button>
       <button class="tab more-tile" data-tab="spelllist"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="m12 6.5.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg><span>Spell List</span></button>
-      <button class="tab more-tile" data-tab="notizen"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3c-6 1-10.5 5.5-12 12l-2 6"/><path d="M20 3c.5 5-2 9.5-7 12H8"/><path d="M11 9h5M9.5 12h4.5"/></svg><span>Notes</span></button>
       <button class="tab more-tile" data-tab="log"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 3v4h4"/><path d="M12 7.5V12l3 2"/></svg><span>Log</span></button>
     </div>
   </div>
@@ -8476,7 +8478,7 @@ function updItem(id,key,val){
 
 function switchTabAll(t, bnavBtn){switchTab(t);} // Paket R2: obere Tab-Reihen entfallen, Tabs nur noch über die untere Leiste + „More“
 // Paket R2 (05.10.2026): More-Fenster (Beasts, Background, Feats, Spell List, Notes, Log)
-const MORE_TABS=['bestien','hintergrund','feats','spelllist','notizen','log'];
+const MORE_TABS=['bestien','hintergrund','feats','spelllist','log']; // Notes seit R2-Nachtrag in der unteren Leiste
 function openMore(){const m=document.getElementById('moreModal');if(m)m.classList.add('on');document.getElementById('bnavMore')?.classList.add('open');}
 function closeMore(){const m=document.getElementById('moreModal');if(m)m.classList.remove('on');document.getElementById('bnavMore')?.classList.remove('open');}
 function toggleMore(){const m=document.getElementById('moreModal');if(m&&m.classList.contains('on'))closeMore();else openMore();}
@@ -10542,14 +10544,17 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   <button class="bnav-btn" data-tab="skills" onclick="switchTabAll('skills',this)">
     <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg></span><span class="bnav-label">Skills</span>
   </button>
-  <button class="bnav-btn bnav-dice" onclick="openDice('',0)" title="Dice Roller">
-    <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20.5 7.3v9.4L12 21.5 3.5 16.7V7.3z"/><path d="M12 7.6 16.6 15.6H7.4z"/><path d="M12 2.5v5.1M20.5 7.3l-3.9 8.3M3.5 7.3l3.9 8.3M7.4 15.6 3.5 16.7M16.6 15.6l3.9 1.1M7.4 15.6 12 21.5l4.6-5.9"/></svg></span><span class="bnav-label">Dice</span>
-  </button>
   <button class="bnav-btn" data-tab="ausruestung" onclick="switchTabAll('ausruestung',this)">
     <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 5V4a2.5 2.5 0 0 1 5 0v1"/><path d="M6 12h12M9 16h6v5H9z"/></svg></span><span class="bnav-label">Items</span>
   </button>
+  <button class="bnav-btn bnav-dice" onclick="openDice('',0)" title="Dice Roller">
+    <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20.5 7.3v9.4L12 21.5 3.5 16.7V7.3z"/><path d="M12 7.6 16.6 15.6H7.4z"/><path d="M12 2.5v5.1M20.5 7.3l-3.9 8.3M3.5 7.3l3.9 8.3M7.4 15.6 3.5 16.7M16.6 15.6l3.9 1.1M7.4 15.6 12 21.5l4.6-5.9"/></svg></span><span class="bnav-label">Dice</span>
+  </button>
   <button class="bnav-btn" data-tab="zauber" onclick="switchTabAll('zauber',this)">
     <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 3.5h3l9.5 9.5M13 17l4-4M15.5 15.5l4 4M18.5 20.5l2-2"/><path d="M20.5 3.5h-3L12.8 8.2M11 17l-4-4M8.5 15.5l-4 4M5.5 20.5l-2-2M7.5 11.5 3.5 7.5v-4"/></svg></span><span class="bnav-label">Actions</span>
+  </button>
+  <button class="bnav-btn" data-tab="notizen" onclick="switchTabAll('notizen',this)">
+    <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3c-6 1-10.5 5.5-12 12l-2 6"/><path d="M20 3c.5 5-2 9.5-7 12H8"/><path d="M11 9h5M9.5 12h4.5"/></svg></span><span class="bnav-label">Notes</span>
   </button>
   <button class="bnav-btn bnav-more" id="bnavMore" onclick="toggleMore()" aria-label="More tabs">
     <span class="bnav-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></span><span class="bnav-label">More</span>
