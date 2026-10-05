@@ -1059,6 +1059,83 @@ html[data-ts="sehrgross"] .bnav-btn .bnav-label{letter-spacing:0}
 .ci-open-t{font-family:'Cinzel',serif;font-size:var(--fs-sm);color:var(--gold);letter-spacing:.5px;margin-right:2px}
 .ci-chip.ci-pend{border-color:color-mix(in srgb,var(--gold) 55%,transparent);color:var(--text)}
 </style>
+<style id="willowKampf">
+/* ── Paket R3 (05.10.2026): HP-Block + Actions (Bau für beide Designs; Leder-Oberflächen im Block willowLeder, REFERENZ B1d „Design R3“) ── */
+.hp-row.hpx .hpx-main{grid-column:span 2;position:relative;overflow:hidden;min-width:0;padding:8px 10px 10px;text-align:center;
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;justify-content:center}
+.hpx-nums{position:relative;display:flex;align-items:baseline;justify-content:center;gap:2px;min-width:0}
+.hpx-main #hpC{font-size:50px;font-weight:700;line-height:1.05;color:var(--text);min-width:0;text-shadow:0 2px 5px rgba(0,0,0,.55);
+  border-bottom:1px dashed color-mix(in srgb,var(--gold) 30%,transparent)}
+.hpx-main #hpC .hpc-in{width:3.2ch;font-size:inherit;color:var(--text);border-bottom:1px solid var(--gold)}
+.hpx-sl{font-family:'Cinzel',serif;font-size:32px;line-height:1;color:color-mix(in srgb,var(--text) 40%,transparent);margin:0 3px}
+.hpx-main .hpx-max{font-size:34px;font-weight:600;width:2.4ch;padding:0;text-align:center;color:color-mix(in srgb,var(--text) 62%,transparent);
+  border-bottom:1px dashed color-mix(in srgb,var(--gold) 22%,transparent);border-radius:0}
+.hpx-barwrap{position:relative;margin:10px 0 0;padding:0 10px}
+.hpx-bar.hpbar-w{position:relative;height:14px;margin:0;padding:2px;box-sizing:border-box;border-radius:8px;overflow:hidden;background:var(--bg3);
+  border:1px solid color-mix(in srgb,var(--gold) 60%,transparent);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.hpx-barwrap::before,.hpx-barwrap::after{content:'';position:absolute;top:50%;z-index:1;width:8px;height:8px;background:var(--bg2);border:1px solid var(--gold);transform:translateY(-50%) rotate(45deg)}
+.hpx-barwrap::before{left:4px}.hpx-barwrap::after{right:4px}
+.hpx-bar .hpbar{position:relative;border-radius:6px}
+.hpx-bar .hpbar::after{content:'';position:absolute;inset:1px 3px 50%;border-radius:5px;background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0))}
+.hpx-main .rc-hint{position:relative;margin-top:6px}.hpx-main .rc-hint:empty{display:none}
+.hpx-temp.hpbox{display:flex;flex-direction:column;justify-content:center;align-items:center;border-radius:10px}
+.hpx-temp .hpin{font-size:28px;color:var(--purple);width:3ch}
+/* schmal (wie die übrigen 2-Spalten-Regeln, REFERENZ B1d): HP über die ganze Breite, darunter Temp | Inspiration */
+@container (max-width:362px){.hp-row.hpx .hpx-main{grid-column:1/-1}}
+@media (max-width:408px){.hp-row.hpx .hpx-main{grid-column:1/-1}}
+@media (max-width:469px){html[data-ts="gross"] .hp-row.hpx .hpx-main{grid-column:1/-1}}
+@media (max-width:530px){html[data-ts="sehrgross"] .hp-row.hpx .hpx-main{grid-column:1/-1}}
+/* Schaden/Heilung: farbige Knöpfe mit Symbol */
+.dmg-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border-left-width:1px;min-width:0;padding-left:5px;padding-right:5px;letter-spacing:0}
+.dmg-btn .ico{width:14px;height:14px;flex:0 0 auto}.rest-btn .ico{width:16px;height:16px;flex:0 0 auto}
+.dmg-btn.d{color:var(--red);border-color:color-mix(in srgb,var(--red) 55%,transparent);background-color:color-mix(in srgb,var(--red) 14%,var(--bg2))}
+.dmg-btn.h{color:var(--green);border-color:color-mix(in srgb,var(--green) 55%,transparent);background-color:color-mix(in srgb,var(--green) 14%,var(--bg2))}
+.dmg-btn.t{color:var(--purple);border-color:color-mix(in srgb,var(--purple) 50%,transparent);background-color:color-mix(in srgb,var(--purple) 12%,var(--bg2))}
+.rest-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+/* Death Saves: gefüllte Kreise mit Zeichen */
+.dspip{display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.dspip.f::before{font-size:14px;font-weight:700;line-height:1;color:var(--bg0)}
+.dspip.s.f::before{content:'\2713\FE0E'}.dspip.x.f::before{content:'\2715\FE0E'}
+/* Waffen: Kampfzeile */
+.wr{background:var(--bg2);border:1px solid var(--border);border-radius:10px;min-width:0}
+.wr-top{display:flex;align-items:stretch;gap:6px;padding:6px;min-height:50px}
+.wr-name{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:2px 2px 2px 5px;background:none;border:none;
+  text-align:left;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent;font:inherit}
+.wr.nw .wr-name{cursor:default}
+.wr-name b{display:flex;align-items:center;gap:4px;min-width:0;font-family:'Cinzel',serif;font-weight:600;font-size:var(--fs-txt);line-height:1.2;color:var(--text)}
+.wr-name b>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wr-none{color:var(--muted);font-style:italic}
+.wr-chev{width:15px;height:15px;flex:0 0 auto;color:var(--gold);opacity:.7;transition:transform .2s}
+.wr.open .wr-chev{transform:rotate(90deg)}
+.wr-name small{font-size:var(--fs-sm);line-height:1.3;color:var(--text2);overflow-wrap:anywhere}
+.wr-roll{flex:0 0 auto;width:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 3px;min-width:0;
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wr-dmg{width:82px}
+.wr-roll small{max-width:100%;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;text-transform:uppercase;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-roll small.wr-t{font-family:'Crimson Pro',serif;font-size:var(--fs-xs);letter-spacing:0;text-transform:none}
+.wr-roll b{max-width:100%;font-family:'Cinzel',serif;font-size:19px;font-weight:700;line-height:1.1;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-dmg b{font-family:'Crimson Pro',serif;font-size:17px;font-weight:600;color:var(--text)}   /* Cinzel kennt keine Kleinbuchstaben: „1D6“ */
+.wr-roll:disabled{opacity:.5;cursor:default}
+.wr-roll:not(:disabled):active{transform:scale(.96)}
+.wr-set{font-family:'Crimson Pro',serif;font-weight:600;color:var(--gold)}
+.wr-ed{display:flex;flex-direction:column;gap:8px;padding:8px 10px 10px;border-top:1px dashed var(--border2)}
+.wr-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.wr-fl{display:flex;flex-direction:column;gap:3px;min-width:0}
+.wr-fl span{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.wr-in{width:100%;min-width:0;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:'Crimson Pro',serif;font-size:16px;padding:6px 8px;outline:none;text-align:center}
+.wr-in.wr-nm{text-align:left}
+.wr-foot,.wr-ask{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wr-foot{justify-content:space-between}
+.wr-ask span{flex:1 1 140px;font-size:var(--fs-txt);color:var(--text)}
+.wr-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;
+  background:var(--bg3);color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:.3px;cursor:pointer}
+.wr-btn.btn-p{color:var(--gold);border-color:var(--gold2)}
+.wr-btn.btn-d{color:var(--red);border-color:color-mix(in srgb,var(--red) 50%,transparent)}
+.wr-btn.wr-rm{background:none;border-color:transparent;padding-left:4px}
+.wr-btn .ico{width:17px;height:17px}
+.wr-empty{font-size:var(--fs-md);color:var(--muted);padding:6px 2px}
+</style>
 <style id="willowLeder">
 /* ── Paket R1 (04.10.2026): Design-Fundament Leder (eigener Block, bei ⚙ Design „Classic“ abgeschaltet) – Tokens, Flächen, Karten, Knöpfe, Eingaben (REFERENZ B1d) ── */
 :root{
@@ -1099,7 +1176,6 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
 /* Knöpfe: sekundär (Standard) · primär (Gold) · Gefahr (Rot) · leise (ohne Rahmen) */
 .btn-s,.rest-btn,.ws-btn,.char-btn,.rl-act,.rl-wbtn,.dice-preset-btn,.filter-toggle,.ms-prep button{
   background-image:linear-gradient(180deg,rgba(255,236,200,.08),rgba(0,0,0,.24));border-color:var(--btn-bd);box-shadow:inset 0 1px 0 rgba(255,236,200,.07),0 1px 2px rgba(0,0,0,.5)}
-.dmg-btn{background-image:linear-gradient(180deg,rgba(255,236,200,.08),rgba(0,0,0,.24));border-top-color:var(--btn-bd);border-right-color:var(--btn-bd);border-bottom-color:var(--btn-bd);box-shadow:inset 0 1px 0 rgba(255,236,200,.07),0 1px 2px rgba(0,0,0,.5)}
 .btn-s:active,.rest-btn:active,.ws-btn:active,.char-btn:active,.rl-act:active,.rl-wbtn:active,.dice-preset-btn:active,.filter-toggle:active,.ms-prep button:active,.dmg-btn:active{
   background-image:linear-gradient(180deg,rgba(0,0,0,.3),rgba(255,236,200,.03));box-shadow:inset 0 2px 4px rgba(0,0,0,.55)}
 .btn-p,.rest-btn.long,.dice-custom-row button,.it-btn.on{background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 88%,#fff),color-mix(in srgb,var(--gold) 72%,#000));
@@ -1109,6 +1185,25 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
 .btn-d,.char-btn.danger{background-image:linear-gradient(180deg,color-mix(in srgb,var(--red) 16%,transparent),color-mix(in srgb,var(--red) 4%,rgba(0,0,0,.25)));
   border-color:color-mix(in srgb,var(--red) 50%,transparent);color:var(--red)}
 .btn-q{background:none;border:1px solid transparent;color:var(--text2);box-shadow:none}
+/* Paket R3: HP-Block + Actions im Leder (Abschnittsköpfe mit Raute + Goldlinie, eingelassene Kästen, farbige Knöpfe, Kampfzeilen) */
+#tab-zauber .act-panel > .sec-top{border-bottom:none;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+#tab-zauber .act-panel > .sec-top > span:first-child{display:flex;align-items:center;gap:9px;flex:1 1 auto;min-width:0}
+#tab-zauber .act-panel > .sec-top > span:first-child::before{content:'';width:7px;height:7px;flex:0 0 auto;border:1px solid var(--gold);transform:rotate(45deg)}
+#tab-zauber .act-panel > .sec-top > span:first-child::after{content:'';flex:1;height:1px;min-width:0;margin-right:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 80%,transparent),transparent)}
+.hp-row.hpx .hpx-main{background:none;border-color:transparent;box-shadow:none}
+.hpx-bar.hpbar-w{background:linear-gradient(180deg,#050302,#17110c)}
+.hpx-barwrap::before,.hpx-barwrap::after{background:var(--bg1)}
+.hpx-temp.hpbox,#tab-zauber .ds-box,.dmg-box,.wr{background:color-mix(in srgb,var(--bg0) 62%,var(--bg2));background-image:none;
+  border:1px solid color-mix(in srgb,var(--gold) 24%,transparent);box-shadow:inset 0 2px 6px rgba(0,0,0,.5),0 1px 0 rgba(255,236,200,.04)}
+.dmg-btn{background-image:linear-gradient(180deg,rgba(255,236,200,.08),rgba(0,0,0,.24));box-shadow:inset 0 1px 0 rgba(255,236,200,.07),0 1px 2px rgba(0,0,0,.5)}
+.dspip.s.f{background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--green) 70%,#fff),var(--green) 70%)}
+.dspip.x.f{background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--red) 70%,#fff),var(--red) 70%)}
+.wr-roll{background:linear-gradient(180deg,rgba(255,236,200,.08),rgba(0,0,0,.24)),var(--bg2);border-color:var(--btn-bd);box-shadow:inset 0 1px 0 rgba(255,236,200,.07),0 1px 2px rgba(0,0,0,.5)}
+.wr-roll:not(:disabled):active{background:linear-gradient(180deg,rgba(0,0,0,.3),rgba(255,236,200,.03)),var(--bg2);box-shadow:inset 0 2px 4px rgba(0,0,0,.55)}
+.wr.open{border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.wr-in{background-color:var(--inp);border-color:var(--inp-bd);box-shadow:inset 0 2px 4px rgba(0,0,0,.45)}
+.wr-in:focus{border-color:var(--gold);box-shadow:inset 0 2px 4px rgba(0,0,0,.45),0 0 0 2px color-mix(in srgb,var(--gold) 22%,transparent)}
+.wr-btn.btn-q{background:none;box-shadow:none;border-color:transparent;color:var(--text2)}
 .btn-q:active{color:var(--gold)}
 /* Eingaben: eingelassen, Gold beim Fokus */
 .ifield input,.ifield select,.cr-in,.at-in,.fx-in,.dice-custom-row input,.rest-act input,.item-add-row input,.item-add-row select,.search-wrap input,.spell-notes textarea,.dmg-amt,.char-sel{
@@ -1393,26 +1488,16 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
       </div>
       <div id="sb-hitpoints">
       <div class="hp-grid"><div class="hp-inner">
-      <div class="hp-row">
-        <div class="hpbox" style="border-color:color-mix(in srgb, var(--green) 40%, transparent)">
-          <div class="hp-lbl">Current</div>
-          <div class="hp-ctrl">
-            <div class="hpval hp-tap" id="hpC" onclick="hpCEdit()" title="Tap to correct">10</div>
-          </div>
-          <div class="hpbar-w"><div class="hpbar" id="hpBar" style="width:100%"></div></div>
-        </div>
-        <div class="hpbox">
-          <div class="hp-lbl">Maximum</div>
-          <div class="hp-ctrl">
-            <input class="hpin" type="number" id="hpM" value="10" min="1" inputmode="numeric" onchange="onHpMUser()">
-          </div>
+      <!-- Paket R3 (05.10.2026): verbundene Anzeige Current / Max, Balken mit Goldrahmen, Temp als Kasten (Emblem dahinter auf Wunsch Simon entfernt) -->
+      <div class="hp-row hpx">
+        <div class="hpx-main">
+          <div class="hpx-nums"><div class="hpval hp-tap" id="hpC" onclick="hpCEdit()" title="Current HP – tap to correct">10</div><span class="hpx-sl" aria-hidden="true">/</span><input class="hpin hpx-max" type="number" id="hpM" value="10" min="1" inputmode="numeric" onchange="onHpMUser()" aria-label="Maximum HP" title="Maximum HP – tap to correct"></div>
+          <div class="hpx-barwrap"><div class="hpbar-w hpx-bar"><div class="hpbar" id="hpBar" style="width:100%"></div></div></div>
           <div class="rc-hint" id="hpMHint"></div>
         </div>
-        <div class="hpbox" style="border-color:rgba(180,139,224,0.35)">
+        <div class="hpbox hpx-temp">
           <div class="hp-lbl">Temp</div>
-          <div class="hp-ctrl">
-            <input class="hpin" type="number" id="hpT" value="0" min="0" inputmode="numeric" style="color:var(--purple)" oninput="autoSave()">
-          </div>
+          <div class="hp-ctrl"><input class="hpin" type="number" id="hpT" value="0" min="0" inputmode="numeric" oninput="autoSave()" aria-label="Temporary HP"></div>
         </div>
       </div>
       <div id="hpLvlAsk" class="hpa-box" style="display:none"></div>
@@ -1422,9 +1507,9 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
           <button class="dmg-opt" id="dmgHalf" onclick="dmgTogHalf()" title="Resistance: damage is halved (round down)">½ Resistance</button></div>
         <div class="dmg-in">
           <input class="dmg-amt" type="number" id="dmgAmt" min="0" inputmode="numeric" placeholder="e.g. 7" aria-label="Amount">
-          <div class="dmg-bts"><button class="dmg-btn d" onclick="hpApply('dmg')">Damage</button>
-          <button class="dmg-btn h" onclick="hpApply('heal')">Heal</button>
-          <button class="dmg-btn t" onclick="hpApply('temp')">+ Temp</button></div>
+          <div class="dmg-bts"><button class="dmg-btn d" onclick="hpApply('dmg')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.9 12 3.5 12 3.5z"/></svg>Damage</button>
+          <button class="dmg-btn h" onclick="hpApply('heal')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></svg>Heal</button>
+          <button class="dmg-btn t" onclick="hpApply('temp')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 6v5.2c0 4.6-3 8-7 9.6-4-1.6-7-5-7-9.6V6z"/></svg>Temp</button></div>
         </div>
         <div id="dmgRes"></div>
       </div>
@@ -1455,8 +1540,8 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
       <div class="rest-row">
         <div class="ds-box hd-box" id="hdBox" style="display:none"><div class="ds-lbl" id="hdLbl">Hit Dice</div><div class="hd-pips" id="hdPips"></div></div>
         <div class="rest-btns">
-          <button class="rest-btn" onclick="openRest('short')">☾ Short Rest</button>
-          <button class="rest-btn long" onclick="openRest('long')">☀︎ Long Rest</button>
+          <button class="rest-btn" onclick="openRest('short')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z"/></svg>Short Rest</button>
+          <button class="rest-btn long" onclick="openRest('long')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>Long Rest</button>
         </div>
       </div></div>
       </div>
@@ -2361,9 +2446,8 @@ function crWeapons(){
 }
 function crWeaponsHtml(){
   const L=crWeapons();if(!L.length)return '';const rn=pkEsc(rcName('custom'));
-  return L.map((w,i)=>`<div class="cr-nw"><div class="cr-nw-h">${pkEsc(w.n)}<span class="sk-bdg">${rn}</span></div>`
-    +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${w.atk}</b></span><span><small>DAMAGE</small>${w.dmg?`<b>${pkEsc(w.dmg)}</b>`:'<b class="g" title="Enter the damage dice in Race › Natural weapons">set dice</b>'}</span><span><small>TYPE</small><b>${pkEsc(w.type||'—')}</b></span></div>`
-    +rlWpnBtns('rollNw',i,w.atk,w.dmg)+`<div class="cr-nw-s">Natural weapon · ${w.ab} + Proficiency · set in Race</div></div>`).join('');
+  return L.map((w,i)=>`<div class="wr nw"><div class="wr-top"><div class="wr-name"><b>${pkEsc(w.n)}</b><small>Natural weapon · ${w.ab} + Proficiency · set in ${rn}</small></div>`
+    +wrRolls('rollNw',i,w.atk,w.dmg,w.type,'<span class="wr-set" title="Enter the damage dice in Race › Natural weapons">set dice</span>')+`</div></div>`).join('');
 }
 function crUsesTxt(t){return t.uses?(t.uses==='pb'?'PB':t.uses+'×')+' / '+(t.restore==='short'?'Short':'Long')+' Rest':'';}
 const CR_SPU=u=>u==='pb'?'PB × / Long Rest':u?u+'× / Long Rest':'at will';
@@ -2844,50 +2928,55 @@ function buildSkills(){
 
 function addWeapon(){
   if(!st.weapons) st.weapons=[];
-  st.weapons.push({name:'',atk:'',dmg:'',type:''});
+  const w={name:'',atk:'',dmg:'',type:''};st.weapons.push(w);_wpEdit.add(w);
   autoSave();buildWeapons();
+  setTimeout(()=>{const n=document.getElementById('wrNm'+(st.weapons.length-1));if(n)n.focus();},30);
 }
 function delWeapon(i){
+  const w=(st.weapons||[])[i];if(w){_wpEdit.delete(w);if(_wpDel===w)_wpDel=null;}
   st.weapons.splice(i,1);autoSave();buildWeapons();
+}
+// Paket R3 (05.10.2026): Waffe als kompakte Kampfzeile (Name + Eigenschaften | Angriff | Schaden), Antippen des Namens öffnet die Felder;
+// „Remove“ fragt erst nach (vorher × ohne Rückfrage). Ids rollWpnA/D<i> mit <b> bleiben (rlWpnUpd, Würfel-Tests).
+let _wpDel=null;
+function wpnDelAsk(i){const w=(st.weapons||[])[i];_wpDel=_wpDel===w?null:w;buildWeapons();}
+function wrRolls(fn,i,atk,dmg,type,miss){const P=rlParse(dmg);
+  return `<button class="wr-roll wr-atk" id="${fn}A${i}" onclick="${fn}(${i},0)" aria-label="Roll attack"><small>To hit</small><b>${pkEsc(fmt(rlAtkNum(atk)))}</b></button>`
+    +`<button class="wr-roll wr-dmg" id="${fn}D${i}"${P?'':' disabled'} onclick="${fn}(${i},1)" aria-label="Roll damage"><small class="wr-t">${pkEsc(type||'Damage')}</small><b>${P?pkEsc(String(dmg).trim()):(miss||'—')}</b></button>`;}
+function wpnSubHtml(w,V){ // Eigenschaften + Mastery einer verknüpften Waffe (Zeile unter dem Namen)
+  if(!V.A)return '';const it=V.A.it,pr=itProps(it),wmOn=it.m&&it.m.length&&wmChosen().has(it.n);
+  const mast=it.m&&it.m.length?`<span class="wp-mast${wmOn?' on':''}" title="${wmOn?'Weapon Mastery: you can use this property':'Not one of your Weapon Mastery choices'}">${wmOn?'✦ ':''}Mastery: ${pkEsc(it.m.join(', '))}</span>`:'';
+  return [pr.length?pkEsc(pr.join(', ')):pkEsc(itCap(it.wc||'')+' '+(it.t||'')).trim(),mast].filter(Boolean).join(' · ');
 }
 function buildWeapons(){
   const g=document.getElementById('weaponList');if(!g)return;
   const nwH=crWeaponsHtml(); // Paket K: natürliche Waffen der Custom-Rasse (berechnet, nicht in st.weapons)
-  if(!st.weapons||!st.weapons.length){g.innerHTML=nwH||'<div style="font-size:var(--fs-md);color:var(--muted);padding:6px 2px">No weapons added.</div>';return;}
+  if(!st.weapons||!st.weapons.length){g.innerHTML=nwH||'<div class="wr-empty">No weapons added.</div>';return;}
+  if(_wpDel&&!st.weapons.includes(_wpDel))_wpDel=null;
   g.innerHTML=nwH;
   st.weapons.forEach((w,i)=>{
     const V=wpnVals(w),R=!!V.A; // Paket O5: verknüpfte Waffe (ref) – Werte live, Eingabe überschreibt
-    if(R&&!_wpEdit.has(w)){ // 04.10.2026 (Simon): verknüpfte Waffe wie die natürliche Waffe als Karte, Felder erst über ✎
-      const c=document.createElement('div');c.className='cr-nw';
-      c.innerHTML=`<div class="cr-nw-h">${pkEsc(w.name||'')}<span class="sk-bdg">Items</span><button class="wp-ib" onclick="wpnEdit(${i})" aria-label="Edit weapon" title="Edit">✎</button><button class="wp-ib" onclick="delWeapon(${i})" aria-label="Remove weapon">&times;</button></div>`
-        +`<div class="cr-nw-v"><span><small>ATK BONUS</small><b class="g">${pkEsc(V.atk||'—')}</b></span><span><small>DAMAGE</small><b>${pkEsc(V.dmg||'—')}</b></span><span><small>TYPE</small><b>${pkEsc(V.type||'—')}</b></span></div>`
-        +wpnRefHtml(w,i,V)+rlWpnBtns('rollWpn',i,V.atk,V.dmg);
-      g.appendChild(c);return;}
+    const open=_wpEdit.has(w)||(!R&&!String(w.name||'').trim()&&!String(w.atk||'').trim()&&!String(w.dmg||'').trim());
     const fIn=k=>R?`wpnSet(${i},'${k}',this.value)" onchange="buildWeapons()`:`st.weapons[${i}].${k}=this.value;autoSave();rlWpnUpd(${i})`;
-    const d=document.createElement('div');
-    d.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px';
-    d.innerHTML=`
-      <div style="display:flex;gap:6px;align-items:center">
-        <input value="${w.name||''}" placeholder="Weapon name" oninput="st.weapons[${i}].name=this.value;autoSave()" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:var(--fs-txt);padding:5px 8px;outline:none;font-family:'Crimson Pro',serif">
-        ${R?`<button class="wp-ib" onclick="wpnEdit(${i})" aria-label="Done" title="Done" style="color:var(--gold)">✓</button>`:''}<button onclick="delWeapon(${i})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">&times;</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <div>
-          <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">ATK BONUS</div>
-          <input value="${pkEsc(V.atk||'')}" placeholder="+5" oninput="${fIn('atk')}" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gold);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
-        </div>
-        <div>
-          <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">DAMAGE</div>
-          <input value="${pkEsc(V.dmg||'')}" placeholder="1d8+3" oninput="${fIn('dmg')}" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;font-weight:600;padding:5px 8px;outline:none;text-align:center">
-        </div>
-        <div>
-          <div style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--text3);margin-bottom:3px">TYPE</div>
-          <input value="${pkEsc(V.type||'')}" placeholder="Slashing" oninput="st.weapons[${i}].type=this.value;autoSave()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;padding:5px 8px;outline:none;text-align:center">
-        </div>
-      </div>${R?wpnRefHtml(w,i,V):''}${rlWpnBtns('rollWpn',i,V.atk,V.dmg)}`;
-    g.appendChild(d);
+    const sub=wpnSubHtml(w,V),nm=String(w.name||'').trim();
+    const c=document.createElement('div');c.className='wr'+(open?' open':'')+(R?' linked':'');
+    let h=`<div class="wr-top"><button class="wr-name" onclick="wpnEdit(${i})" aria-expanded="${open}" title="${open?'Close':'Edit'}">`
+      +`<b><span id="wrN${i}"${nm?'':' class="wr-none"'}>${nm?pkEsc(nm):'New weapon'}</span><svg class="wr-chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></b>`
+      +(sub?`<small>${sub}</small>`:'')+`</button>`+wrRolls('rollWpn',i,V.atk,V.dmg,V.type)+`</div>`;
+    if(open){
+      const fld=(k,l,ph,v)=>`<label class="wr-fl"><span>${l}</span><input class="wr-in" value="${pkEsc(v||'')}" placeholder="${ph}" oninput="${k==='type'?`st.weapons[${i}].type=this.value;autoSave();rlWpnUpd(${i})`:fIn(k)}"></label>`;
+      h+=`<div class="wr-ed"><input class="wr-in wr-nm" id="wrNm${i}" value="${pkEsc(w.name||'')}" placeholder="Weapon name" aria-label="Weapon name" oninput="st.weapons[${i}].name=this.value;autoSave();wrName(${i})">`
+        +`<div class="wr-f">${fld('atk','Atk bonus','+5',V.atk)}${fld('dmg','Damage','1d8+3',V.dmg)}${fld('type','Type','Slashing',V.type)}</div>`
+        +(R?wpnRefHtml(w,i,V):'')
+        +(_wpDel===w
+          ?`<div class="wr-ask"><span>Remove ${nm?'„'+pkEsc(nm)+'“':'this weapon'} from Weapons?</span><button class="wr-btn btn-d" onclick="delWeapon(${i})">Remove</button><button class="wr-btn btn-s" onclick="wpnDelAsk(${i})">Keep</button></div>`
+          :`<div class="wr-foot"><button class="wr-btn btn-q wr-rm" onclick="wpnDelAsk(${i})">${WILLOW_ICO.trash||''}Remove</button><button class="wr-btn btn-p" onclick="wpnEdit(${i})">Done</button></div>`)
+        +`</div>`;
+    }
+    c.innerHTML=h;g.appendChild(c);
   });
 }
+function wrName(i){const w=(st.weapons||[])[i],e=document.getElementById('wrN'+i);if(!w||!e)return;const n=String(w.name||'').trim();e.textContent=n||'New weapon';e.classList.toggle('wr-none',!n);}
 
 function calcSpell(){calcSpell0();buildSpMc();} // Paket F4: Zeilen je Zauberklasse mitziehen
 // Paket S2: Zauberattribut der Startklasse automatisch aus 5e.tools (spellcastingAbility; Eldritch Knight/Arcane Trickster über MC_SLOTS.sub), Feld „Ability“ nur als Handwahl
@@ -3994,6 +4083,7 @@ function updBar(){
   st.hpC=Math.min(st.hpC,m);document.getElementById('hpC').textContent=st.hpC;
   const p=Math.round(st.hpC/m*100);
   const b=document.getElementById('hpBar');b.style.width=p+'%';
+  const mx=document.getElementById('hpM');if(mx&&mx.classList.contains('hpx-max'))mx.style.width=(Math.max(1,String(m).length)+.35)+'ch'; // Paket R3
   b.style.background=p>50?'var(--green)':p>25?'#d4a017':'var(--red)';
   if(typeof buildFx==='function')buildFx(); // Paket E2: Bloodied
 }
@@ -8396,8 +8486,8 @@ function wpnSet(i,k,v){
   if(A&&String(v).trim()===A[k])v='';   // gleich dem automatischen Wert = automatisch
   w[k]=v;autoSave();rlWpnUpd(i);
 }
-const _wpEdit=new WeakSet(); // verknüpfte Waffen, deren Felder offen sind (nur bis zum Neuladen)
-function wpnEdit(i){const w=(st.weapons||[])[i];if(!w)return;if(_wpEdit.has(w))_wpEdit.delete(w);else _wpEdit.add(w);buildWeapons();}
+const _wpEdit=new WeakSet(); // Waffen, deren Felder offen sind (nur bis zum Neuladen; seit Paket R3 alle Waffen, vorher nur verknüpfte)
+function wpnEdit(i){const w=(st.weapons||[])[i];if(!w)return;if(_wpEdit.has(w)){_wpEdit.delete(w);if(_wpDel===w)_wpDel=null;}else _wpEdit.add(w);buildWeapons();}
 function wpnTog(i,k){const w=(st.weapons||[])[i];if(!w)return;if(w[k])delete w[k];else w[k]=1;autoSave();buildWeapons();}
 function wpnAutoReset(i){const w=(st.weapons||[])[i];if(!w)return;w.atk='';w.dmg='';autoSave();buildWeapons();}
 function wpnRefHtml(w,i,V){ // Zusatz unter den Feldern einer verknüpften Waffe
@@ -8406,8 +8496,7 @@ function wpnRefHtml(w,i,V){ // Zusatz unter den Feldern einer verknüpften Waffe
   const mast=it.m&&it.m.length?`<span class="wp-mast${wmOn?' on':''}" title="${wmOn?'Weapon Mastery: you can use this property':'Not one of your Weapon Mastery choices'}">${wmOn?'✦ ':''}Mastery: ${pkEsc(it.m.join(', '))}</span>`:'';
   const calc=`${A.ab}${A.fin?' (Finesse)':''} ${fmt(A.m)}`+(A.pb?` · PB ${fmt(A.pb)}`:'')+(A.dmg?` · ${A.dmg}`:'');
   const man=V.ha||V.hd?` · <b class="g">${V.ha&&V.hd?'attack & damage':V.ha?'attack':'damage'} set by hand</b> <button class="wp-auto" onclick="wpnAutoReset(${i})">↺ Auto</button>`:'';
-  return `<div class="wp-sub">${pkEsc(sub)}${mast?(sub?' · ':'')+mast:''}</div>`
-    +`<div class="wp-chips"><button class="pk-chip${w.np?'':' on'}" onclick="wpnTog(${i},'np')">${w.np?'Not proficient':'✓ Proficient'}</button>`
+  return `<div class="wp-chips"><button class="pk-chip${w.np?'':' on'}" onclick="wpnTog(${i},'np')">${w.np?'Not proficient':'✓ Proficient'}</button>`
     +(it.d2?`<button class="pk-chip${w.th?' on':''}" onclick="wpnTog(${i},'th')">${w.th?'✓ ':''}Two-handed (${pkEsc(it.d2)})</button>`:'')+`</div>`
     +`<div class="cr-nw-s wp-calc">Auto: ${pkEsc(calc)}${man}</div>`;
 }
@@ -9948,7 +10037,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-05a';
+const APP_VERSION = 'willow-app-2026-10-05b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
@@ -10467,7 +10556,7 @@ function rlHealMe(){const R=_rl;if(!R||R.k!=='heal'||R.applied)return;const el=d
 function rlWpnUpd(i){ // Beschriftung nach Eingabe aktualisieren (ohne Neuaufbau, damit die Tastatur offen bleibt)
   const w=(st.weapons||[])[i];if(!w)return;const V=wpnVals(w),a=document.getElementById('rollWpnA'+i),d=document.getElementById('rollWpnD'+i),P=rlParse(V.dmg);
   if(a)a.querySelector('b').textContent=fmt(rlAtkNum(V.atk));
-  if(d){d.disabled=!P;d.querySelector('b').textContent=P?String(V.dmg).trim():'—';}}
+  if(d){d.disabled=!P;d.querySelector('b').textContent=P?String(V.dmg).trim():'—';const t=d.querySelector('.wr-t');if(t)t.textContent=V.type||'Damage';}}
 // Fenster „Effects & Conditions“: wo ein Effekt mitrechnet (feste Regeln als Text, eigene als Auswahl e.ap)
 function fxApChips(ap,pre){return `<div class="pk-chips">${RL_AP.map(([k,l])=>`<button class="pk-chip${(ap||[]).includes(k)?' on':''}" onclick="${pre}'${k}')">${l}</button>`).join('')}</div>`;}
 function fxApHtml(e,own){

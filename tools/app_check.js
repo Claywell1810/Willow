@@ -1626,7 +1626,7 @@ const REGRESSION = [
       // 02.10.2026: Hit Points einheitlich zentriert, Inspiration im 2-Spalten-Raster ohne Platzhalter, Sonne als Schriftzeichen
       if (w.getComputedStyle(d.querySelector('.ds-death')).alignItems !== 'center') return 'Death Saves nicht zentriert';
       if ((css.match(/\.ds-insp \.ds-sub\{display:none\}/g) || []).length !== 4) return 'Inspiration-Platzhalter nicht in allen 2-Spalten-Regeln ausgeblendet';
-      if (!/\u2600\uFE0E Long Rest/.test(d.querySelector('.rest-btn.long').textContent)) return 'Long-Rest-Sonne als Emoji';
+      { const lr = d.querySelector('.rest-btn.long'); if (/\u2600(?!\uFE0E)/.test(lr.textContent) || !/Long Rest/.test(lr.textContent) || !lr.querySelector('svg.ico')) return 'Long-Rest-Sonne als Emoji (seit Paket R3 SVG-Symbol)'; }
       // seit Paket E (02.10.2026): AC/Initiative/Speed ohne −/+ (wie die Attribute, Tippen öffnet das Fenster)
       if (d.querySelector('.stat3 .hbtn') || !d.getElementById('acV')) return 'AC/Initiative/Speed: Karte hat noch −/+ oder keinen Wert-Knopf';
       const top = d.createElement('div'); top.className = 'ab-top'; const t = d.createElement('div'); t.className = 'ab-title'; top.appendChild(t); d.body.appendChild(top);
@@ -2672,7 +2672,7 @@ const REGRESSION = [
       if (V(3).ab !== 'DEX' || V(3).atk !== '+7' || V(3).dmg !== '1d8+4') return 'Longbow DEX: ' + JSON.stringify(V(3));
       v = V(0); if (v.atk !== '+4' || v.dmg !== '1d4+2' || v.type !== 'Bludgeoning' || v.ab !== '') return 'alte Text-Waffe verändert: ' + JSON.stringify(v);
       // Karte im Actions-Tab und Würfeln
-      w.eval('buildWeapons()');
+      w.eval('st.weapons.forEach(x=>_wpEdit.add(x));buildWeapons()');   // seit Paket R3: Auto-Zeile/Chips im geöffneten Bereich
       const wl = d.getElementById('weaponList').textContent;
       if (!/Auto: STR \+3 · PB \+3 · 1d10\+3/.test(wl) || !/Two-handed \(1d10\)/.test(wl) || !/DEX \(Finesse\) \+4/.test(wl) || !/Mastery: Nick/.test(wl)) return 'Waffen-Karte: ' + wl.slice(0, 400);
       if (d.getElementById('rollWpnA1').querySelector('b').textContent !== '+7' || d.getElementById('rollWpnD2').querySelector('b').textContent !== '1d10+3') return 'Würfel-Knöpfe ohne Live-Werte';
@@ -2682,6 +2682,7 @@ const REGRESSION = [
       const lg2 = w.eval("_diffSnaps({weapons:[{name:'Dagger',ref:'Dagger|XPHB',iid:4,atk:'',dmg:''}]},{weapons:[{name:'Dagger',ref:'Dagger|XPHB',iid:4,atk:'',dmg:'',np:1}]})").join('|');
       if (!/proficiency bonus: off/.test(lg2) || /iid/.test(lg2)) return 'Log Waffe: ' + lg2;
       // aufräumen
+      w.eval('st.weapons.forEach(x=>_wpEdit.delete(x))');
       w.eval(`(()=>{const b=${bak};st.attrs=b.a;st.attrSrc=b.as;st.statSrc=b.ss;st.weapons=b.we;st.items=b.it;})();renderItems();buildWeapons()`);
       w.eval('st.profAdj=' + pf);
       return true;
@@ -2818,8 +2819,8 @@ const REGRESSION = [
       const L = () => [...d.getElementById('weaponList').children];
       let r = true;
       if (L().length !== 2) r = 'Anzahl ' + L().length;
-      else if (!L()[0].querySelector('input')) r = 'eigene Waffe ohne Felder';
-      else if (!L()[1].classList.contains('cr-nw') || L()[1].querySelector('input') || !/Testkampfstab/.test(L()[1].querySelector('.cr-nw-h').textContent) || !L()[1].querySelector('#rollWpnA1')) r = 'Inventar-Waffe nicht als Karte';
+      else if (!L()[0].classList.contains('wr') || L()[0].querySelector('input')) r = 'eigene Waffe nicht als Kampfzeile (seit Paket R3)';
+      else if (!L()[1].classList.contains('wr') || L()[1].querySelector('input') || !/Testkampfstab/.test(L()[1].querySelector('.wr-name').textContent) || !L()[1].querySelector('#rollWpnA1')) r = 'Inventar-Waffe nicht als Kampfzeile';
       else { E('wpnEdit(1)'); if (!L()[1].querySelector('input')) r = '✎ öffnet keine Felder'; else { E('wpnEdit(1)'); if (L()[1].querySelector('input')) r = '✓ schließt nicht'; } }
       E("st.items=[];st.weapons=[];buildWeapons()");
       return r;
@@ -2944,6 +2945,39 @@ const REGRESSION = [
       if (!css.includes(".hx-name:empty::before{content:'No character'")) return 'Platzhalter „No character“ fehlt';
       if (!css.includes('@supports (overflow:clip){.app{overflow-x:clip}}')) return '.app overflow-x:hidden → Leiste klebt nicht (sticky)';
       E("const c2=getAllChars();delete c2['R2 Test A'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;refreshCharSel('');switchTabAll('info')");
+      return true;
+    } },
+  { name: 'Paket R3: HP-Block (Current / Max verbunden, Balken mit Goldrahmen, ohne Emblem dahinter, Temp-Kasten, farbige Knöpfe mit SVG) + Waffen als Kampfzeile (Felder nach Antippen, Entfernen mit Rückfrage, natürliche Waffen), Death Saves/Rasten', datum: '05.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      // 1) HP-Block
+      const m = d.querySelector('#hpPanel .hp-row.hpx .hpx-main');
+      if (!m || !m.querySelector('.hpx-nums #hpC') || !m.querySelector('.hpx-nums #hpM') || !m.querySelector('.hpx-bar #hpBar') || !d.querySelector('.hp-row.hpx .hpx-temp #hpT')) return 'HP-Block nicht verbunden (Paket R3)';
+      if (d.querySelectorAll('#hpPanel .hp-row .hpbox').length !== 1) return 'alte Kästen Current/Maximum noch da';
+      w.applyState({ attrs: { STR: 10, DEX: 14, CON: 14, INT: 10, WIS: 16, CHA: 10 }, _f_cls: 'Druid', _f_lvl: '5', _f_hpM: '40', hpC: 20 }); E('hxUpd()');
+      if (d.getElementById('hpEmb') || m.querySelector('svg.emb')) return 'Emblem hinter den HP (Simon 05.10.2026: störend)';
+      E("document.getElementById('hpM').value='123';st.hpC=60;updBar()"); if (d.getElementById('hpM').style.width !== '3.35ch') return 'Max-Feld nicht so breit wie die Zahl: ' + d.getElementById('hpM').style.width;
+      for (const k of ['d', 'h', 't']) if (!d.querySelector('.dmg-btn.' + k + ' svg.ico')) return 'Schaden/Heilung/Temp ohne Symbol: ' + k;
+      if (!d.querySelector('.rest-btn:not(.long) svg.ico') || /☾/.test(d.querySelector('.rest-btn:not(.long)').textContent)) return 'Short Rest ohne Symbol';
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      for (const [px, pre] of [[408, ''], [469, 'html[data-ts="gross"] '], [530, 'html[data-ts="sehrgross"] ']])
+        if (!css.includes('@media (max-width:' + px + 'px){' + pre + '.hp-row.hpx .hpx-main{grid-column:1/-1}}')) return 'HP schmal nicht über die ganze Breite: ' + px;
+      if (!d.getElementById('willowKampf') || d.getElementById('willowKampf').nextElementSibling.id !== 'willowLeder') return 'Block willowKampf nicht vor willowLeder';
+      // 2) Waffen: Kampfzeile, Felder nach Antippen, Entfernen fragt
+      E("st.weapons=[{name:'Testaxt',atk:'+5',dmg:'1d8+3',type:'Slashing'},{name:'Testbogen',atk:'+4',dmg:'1d6+2',type:'Piercing'}];buildWeapons()");
+      const L = () => [...d.querySelectorAll('#weaponList > .wr')];
+      if (L().length !== 2 || d.querySelector('#weaponList input')) return 'Waffen nicht als geschlossene Kampfzeilen';
+      if (d.getElementById('rollWpnA0').querySelector('b').textContent !== '+5' || d.getElementById('rollWpnD1').querySelector('b').textContent !== '1d6+2' || !/Slashing/.test(d.getElementById('rollWpnD0').textContent)) return 'Kampfzeile: Werte';
+      E('wpnEdit(0)'); if (L()[0].querySelectorAll('input').length !== 4 || L()[1].querySelector('input')) return 'Antippen öffnet nicht genau diese Waffe';
+      const t = L()[0].querySelectorAll('.wr-in')[3]; t.value = 'Fire'; t.dispatchEvent(new w.Event('input'));
+      if (!/Fire/.test(d.getElementById('rollWpnD0').textContent) || E('st.weapons[0].type') !== 'Fire') return 'Schadensart nicht live';
+      const n = d.getElementById('wrNm0'); n.value = 'Testbeil'; n.dispatchEvent(new w.Event('input')); if (d.getElementById('wrN0').textContent !== 'Testbeil') return 'Name nicht live';
+      E('wpnDelAsk(0)'); if (E('st.weapons.length') !== 2 || !L()[0].querySelector('.wr-ask')) return 'Remove löscht ohne Rückfrage';
+      E('wpnDelAsk(0)'); if (L()[0].querySelector('.wr-ask')) return 'Keep schließt die Rückfrage nicht';
+      E('wpnDelAsk(0)'); L()[0].querySelector('.wr-ask .btn-d').click(); if (E('st.weapons.length') !== 1 || E('st.weapons[0].name') !== 'Testbogen') return 'Remove nach Rückfrage';
+      E('addWeapon()'); if (E('st.weapons.length') !== 2 || !L()[1].classList.contains('open') || !d.getElementById('wrNm1')) return 'neue Waffe nicht offen';
+      E('wpnEdit(1)'); if (!L()[1].classList.contains('open')) return 'leere Waffe klappt zu (unsichtbar)';
+      E("st.weapons=[];buildWeapons()"); if (!/No weapons added/.test(d.getElementById('weaponList').textContent)) return 'leere Liste';
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
