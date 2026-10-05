@@ -296,6 +296,40 @@ EMB = {'': emb_none(), 'Artificer': emb_artificer(), 'Barbarian': emb_barbarian(
        'Druid': emb_druid(), 'Fighter': emb_fighter(), 'Monk': emb_monk(), 'Paladin': emb_paladin(), 'Ranger': emb_ranger(),
        'Rogue': emb_rogue(), 'Sorcerer': emb_sorcerer(), 'Warlock': emb_warlock(), 'Wizard': emb_wizard()}
 
+# ─────────── Masken-Symbole (Paket R4, 05.10.2026): <i class="mi mi-<name>"></i> in Knöpfen/Feldern ───────────
+# Farbe = currentColor (CSS-Maske), Größe 1.1em → passen sich Schrift und Design (Leather/Classic) an. mi_css() erzeugt
+# die CSS-Zeilen für <style id="willowTabs"> (Klasse .mi + je Symbol --mi). Ersetzen bunte Emojis in Knöpfen (R-E3).
+MI = {
+ 'dz':    '<path d="M12 2.5 20.5 7.3v9.4L12 21.5l-8.5-4.8V7.3z"/><path d="M12 7.6l4.4 7.6H7.6z"/><path d="M12 2.5v5.1M20.5 7.3l-4.1 7.9M3.5 7.3l4.1 7.9M7.6 15.2l-4.1 1.5M16.4 15.2l4.1 1.5M7.6 15.2 12 21.5l4.4-6.3"/>',
+ 'srch':  '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/>',
+ 'filt':  '<path d="M4 5h16l-6.2 7.4V19l-3.6-1.8v-4.8z"/>',
+ 'exp':   '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
+ 'ext':   '<path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+ 'shield':'<path d="M12 3 5 6v5.5c0 4.3 3 7.8 7 9.5 4-1.7 7-5.2 7-9.5V6z"/>',
+ 'swords':'<path d="M4 4l10 10M12 16l4-4M14 14l4.5 4.5"/><path d="M20 4 10 14M8 12l4 4M10 14l-4.5 4.5"/><circle cx="19.3" cy="19.3" r="1"/><circle cx="4.7" cy="19.3" r="1"/>',
+ 'box':   '<path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/>',
+ 'link':  '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+ 'trash': '<path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+ 'share': '<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M8.5 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2.5"/>',
+ 'down':  '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+ 'up':    '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+ 'gear':  f'<path d="{_gear(12, 12, 8, 9.6, 7.4)}"/><circle cx="12" cy="12" r="3"/>',
+ 'hist':  '<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 3v4h4"/><path d="M12 7.5V12l3 2"/>',
+ 'plus':  '<path d="M12 5v14M5 12h14"/>',
+ 'check': '<path d="m5 12.5 4.5 4.5L19 7"/>',
+ 'reset': '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4 4v4.5h4.5"/>',
+ 'pen':   '<path d="M15.5 4.5l4 4L8 20H4v-4z"/><path d="M13.5 6.5l4 4"/>',
+}
+def mi_css():
+    from urllib.parse import quote
+    rows = ['.mi{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.2em;flex:0 0 auto;background-color:currentColor;'
+            '-webkit-mask:var(--mi) center/contain no-repeat;mask:var(--mi) center/contain no-repeat}']
+    for k, body in MI.items():
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" '
+               'stroke-linecap="round" stroke-linejoin="round">' + body + '</svg>')
+        rows.append(f'.mi-{k}{{--mi:url("data:image/svg+xml,{quote(svg, safe="")}")}}')
+    return '\n'.join(rows)
+
 if __name__ == '__main__':
     import sys
     out = sys.argv[1] if len(sys.argv) > 1 else 'design_r_art.html'
@@ -308,5 +342,6 @@ if __name__ == '__main__':
     h += [f'<div class="c"><div class="v">{v}</div>{k or "—"}</div>' for k, v in VIG.items()]
     h += ['<br>'] + [f'<div class="c">{v}<br>{k or "—"}</div>' for k, v in EMB.items()]
     h += ['<br>'] + [f'<div class="c">{v}<br>{k}</div>' for k, v in ICO.items()]
+    h += ['<br>'] + [f'<div class="c">{_i(v)}<br>mi-{k}</div>' for k, v in MI.items()]
     open(out, 'w').write('<!doctype html><meta charset="utf-8">' + ''.join(h))
     print(out, 'geschrieben', sum(map(len, VIG.values())), 'Bytes Vignetten,', sum(map(len, EMB.values())), 'Embleme,', sum(map(len, ICO.values())), 'Symbole')

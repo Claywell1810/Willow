@@ -2785,7 +2785,7 @@ const REGRESSION = [
       const ms = [...d.querySelectorAll('.wp-mast')].map(x => x.classList.contains('on')).join(); if (ms !== 'true,false') return 'Mastery-Hervorhebung: ' + ms;
       // Heilen
       E("switchTabAll('aktionen');buildAbilities();st.hpC=5;updBar()");
-      const hb = card('Second Wind').querySelector('.ab-heal-b'); if (!hb || hb.textContent !== '🎲 Heal 1d10+5') return 'Second Wind Knopf: ' + (hb && hb.textContent);
+      const hb = card('Second Wind').querySelector('.ab-heal-b'); if (!hb || hb.textContent.trim() !== 'Heal 1d10+5') return 'Second Wind Knopf: ' + (hb && hb.textContent);
       hb.click(); if (E('st.abUses.secondwind') !== 1 || E('_rl.k') !== 'heal') return 'Second Wind: Nutzung/Wurf'; E('rlHealMe();closeDice&&closeDice()');
       if (E('st.hpC') <= 5) return 'Heal me';
       // alter Spielstand: Max HP und PB bleiben, 10 = berechnet
@@ -2978,6 +2978,63 @@ const REGRESSION = [
       E('addWeapon()'); if (E('st.weapons.length') !== 2 || !L()[1].classList.contains('open') || !d.getElementById('wrNm1')) return 'neue Waffe nicht offen';
       E('wpnEdit(1)'); if (!L()[1].classList.contains('open')) return 'leere Waffe klappt zu (unsichtbar)';
       E("st.weapons=[];buildWeapons()"); if (!/No weapons added/.test(d.getElementById('weaponList').textContent)) return 'leere Liste';
+      return true;
+    } },
+  { name: 'Paket R4: übrige Tabs + Fenster (Symbole statt bunter Emojis in Knöpfen/Feldern, Skills-Gruppen, Items-Eingabe beschriftet + nur eine Karte offen + Remove neben Equip, einheitliche Auswahl „Add to Sheet“/„On Sheet“ + „Remove“, ⚙ ohne Inline-Stile, englische Reste)', datum: '05.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      if (!d.getElementById('willowTabs') || d.getElementById('willowTabs').nextElementSibling.id !== 'willowKampf') return 'Block willowTabs fehlt / nicht vor willowKampf';
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      for (const k of ['dz', 'srch', 'filt', 'exp', 'trash', 'plus', 'check', 'share', 'down', 'up', 'gear', 'ext']) if (!css.includes('.mi-' + k + '{--mi:url(')) return 'Symbol fehlt: mi-' + k;
+      if (!/\.fbtn\.on,\.ts-row \.fbtn\.on\{background:linear-gradient\(180deg,color-mix\(in srgb,var\(--gold\)/.test(d.getElementById('willowLeder').textContent)) return 'aktive Chips im Leder nicht Gold';
+      // 1) keine bunten Emojis in Knöpfen und Feldern
+      w.applyState({ attrs: { STR: 12, DEX: 14, CON: 14, INT: 10, WIS: 16, CHA: 10 }, _f_cls: 'Druid', _f_lvl: '3' }); E('buildSkills();buildSaves()');
+      const bad = [...d.querySelectorAll('button, .sk-roll-ic, .rl-dz, .si, label')].filter(b => /🎲|📤|⬇|⬆|📜|🐾|⛶|🔍|⚙ Filter/.test(b.textContent)).map(b => b.textContent.trim().slice(0, 20));
+      if (bad.length) return 'Emoji in Knopf/Feld: ' + bad.slice(0, 3).join(' | ');
+      if (d.querySelectorAll('#skillsGrid .sk-roll-ic .mi-dz').length !== 18 || d.querySelectorAll('#savesGrid .sk-roll-ic .mi-dz').length !== 6) return 'Würfel-Symbol an Skills/Saves';
+      // 2) Skills: Gruppenköpfe als Klasse, Notizfeld wie die übrigen
+      const g = d.querySelectorAll('#skillsGrid > .sk-grp'); if (g.length !== 5 || [...g].some(x => x.getAttribute('style'))) return 'Skills-Gruppenköpfe: ' + g.length;
+      if (!d.getElementById('skillNotes').classList.contains('nta') || /z\.B\.|auf alle/.test(d.getElementById('skillNotes').placeholder)) return 'Skill Notes: Feld/Text';
+      // 3) Items: Eingabe beschriftet, nur eine Karte offen, Remove direkt neben Equip
+      const lb = [...d.querySelectorAll('.item-add-row .ia-f > span')].map(x => x.textContent).join('|'); if (lb !== 'Qty|lb|Category') return 'Items-Eingabe ohne Beschriftung: ' + lb;
+      if (!d.querySelector('.item-add-row .ia-top #itemName') || !d.querySelector('.item-add-row .ia-top .ia-add')) return 'Items-Eingabe: Add neben der Suche';
+      const la = E("ITEM_DATA.find(x=>x.n==='Leather Armor')"), sc = E("ITEM_DATA.find(x=>x.n==='Scimitar')");
+      E('st.items=' + JSON.stringify([{ id: 901, name: 'Leather Armor', qty: 1, wt: 10, cat: 'Armor', note: '', ref: la.n + '|' + la.s }, { id: 902, name: 'Scimitar', qty: 1, wt: 3, cat: 'Weapon', note: '', ref: sc.n + '|' + sc.s }]));
+      E("_itemOpen.clear();itemFilter='all';renderItems()");
+      const cards = () => [...d.querySelectorAll('#itemList .item-card')];
+      cards()[0].querySelector('.item-top').click(); cards()[1].querySelector('.item-top').click();
+      if (d.querySelectorAll('#itemList .item-detail.on').length !== 1 || !cards()[1].querySelector('.item-detail.on')) return 'mehr als eine Item-Karte offen';
+      cards()[1].querySelector('.item-top').click(); if (d.querySelector('#itemList .item-detail.on')) return 'Karte schließt nicht';
+      cards()[0].querySelector('.item-top').click();
+      const bt = [...cards()[0].querySelectorAll('.it-btns > button')].map(b => b.textContent.trim()); if (bt[0] !== 'Equip' || bt[1] !== 'Remove') return 'Equip/Remove: ' + bt.join('|');
+      const fl = [...cards()[0].querySelectorAll('.item-detail-row .ia-f > span')].map(x => x.textContent).join('|'); if (fl !== 'Qty|Weight (lb)') return 'Item-Karte: Menge/Gewicht ohne Beschriftung';
+      // 4) Auswahl einheitlich: Background, Beasts (Feats über dieselbe Funktion)
+      const bg = E('BG_DATA[0]'); E("st.bg=''"); let c = w.bgMakeCard(bg);
+      if (!c.querySelector('.sel-row .sel-add') || c.querySelector('.sel-add').textContent.trim() !== 'Add to Sheet' || !c.querySelector('.sel-row a.ext-link')) return 'Background: „Add to Sheet“ + Link';
+      c.querySelector('.sel-add').click(); if (E('st.bg') !== bg.n) return 'Background: Add setzt nicht';
+      const my = d.querySelector('#bgMyCard'); if (!my.querySelector('.sel-on') || !my.querySelector('.sel-rm')) return 'Background: „On Sheet“ + „Remove“';
+      my.querySelector('.sel-rm').click(); if (E('st.bg') !== '' || !/No background selected yet/.test(d.getElementById('bgMyCard').textContent)) return 'Background: Remove';
+      if (!/>TOOLS</.test(c.innerHTML) || !/>ABILITIES</.test(c.innerHTML)) return 'Background: deutsche Beschriftung';
+      E('st.savedBeasts=[];buildSavedBeasts()'); if (!/No beasts saved yet/.test(d.getElementById('bstSavedList').textContent)) return 'Beasts: deutscher Leertext';
+      c = w.bstMakeCard(E('BST_DATA[0]')); if (!c.querySelector('.sel-add')) return 'Beasts: „Add to Sheet“'; c.querySelector('.sel-add').click();
+      if (E('st.savedBeasts.length') !== 1 || !d.querySelector('#bstSavedList .sel-rm')) return 'Beasts: Add/Remove';
+      E('bstRender&&bstRender()'); if (/Kreaturen/.test(d.getElementById('bstCount').textContent)) return 'Beasts: „Kreaturen“';
+      if (!/^[A-Z]/.test(d.getElementById('n_notes').placeholder) || /Abenteuer/.test(d.getElementById('n_notes').placeholder)) return 'Notes: deutscher Platzhalter';
+      // 5) ⚙ ohne Inline-Stile, Chips wie überall
+      E('openSettings()'); const sm = d.getElementById('settingsModal');
+      if (!sm.classList.contains('set-modal') || sm.style.display !== 'flex' || sm.querySelector('.set-sheet').getAttribute('style')) return '⚙: Klassen';
+      if (!d.querySelector('#settingsClassPicker .fbtn.on')) return '⚙: Klassen-Chips'; E('closeSettings()');
+      // 6) Fixliste 05.10.2026: Misc-Feld behält beim Tippen den Fokus (vorher Neuaufbau je Taste), Wert zählt nach „change“
+      E("st.skillMisc={};skEditMode=false;toggleSkEdit()");
+      let mi = d.querySelector('#skillsGrid .sk-misc input'); mi.focus(); mi.value = '1'; mi.dispatchEvent(new w.Event('input'));
+      if (d.activeElement !== mi) return 'Misc-Feld verliert beim Tippen den Fokus';
+      mi.value = '-2'; mi.dispatchEvent(new w.Event('input')); mi.dispatchEvent(new w.Event('change'));
+      if (E("st.skillMisc['Athletics']") !== -2 || !/\(-2\)/.test(d.querySelector('#skillsGrid .sk-row').textContent)) return 'Misc-Wert nach change';
+      E("st.skillMisc={};toggleSkEdit();buildSkills()");
+      // 7) Fixliste 05.10.2026: Zauber-Texte ohne verlorene Listen-Trenner („cube.You“), Listen als „• …“
+      const zbBad = E("ZB_SPELLS.filter(x=>/[a-z]\\.[A-Z][a-z]|\\.  [A-Z]/.test(x.desc||'')).map(x=>x.name)");
+      if (zbBad.length) return 'Zauber-Texte ohne Trenner: ' + zbBad.slice(0, 4).join(', ');
+      if (!/\n\n• You instantaneously extinguish/.test(E("ZB_SPELLS.find(x=>x.name==='Control Flames').desc"))) return 'Control Flames: Liste';
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
