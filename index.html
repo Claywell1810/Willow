@@ -1075,6 +1075,37 @@ html[data-ts="sehrgross"] .bnav-btn .bnav-label{letter-spacing:0}
 .ci-chip.ci-pend{border-color:color-mix(in srgb,var(--gold) 55%,transparent);color:var(--text)}
 </style>
 <style id="willowTabs">
+/* ── Paket V (05.10.2026): Notes-Tab als Notizzettel-Sammlung (Karten wie Items, Chips wie Filter) ── */
+.nt-cats{margin:8px 0 2px}
+.nt-cats .mi,.nt-ecats .mi{width:1em;height:1em;vertical-align:-.12em}
+.nt-n{opacity:.65;margin-left:4px}
+.nt-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 6px}
+.nt-bar .zb-count{margin:0}
+.nt-sort{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.5px;padding:4px 6px;outline:none;max-width:60%}
+.nt-card .item-top{align-items:flex-start}
+.nt-head{flex:1;min-width:0}
+.nt-trow{display:flex;align-items:baseline;gap:8px}
+.nt-title{flex:1;min-width:0;font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);overflow-wrap:anywhere}
+.nt-untitled{color:var(--muted)}
+.nt-date{flex-shrink:0;font-size:var(--fs-xs);color:var(--text3);white-space:nowrap}
+.nt-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.nt-tag{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:10px;padding:1px 7px;white-space:nowrap}
+.nt-prev{margin-top:5px;color:var(--desc,var(--text2));font-size:var(--fs-sm);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line;overflow-wrap:anywhere}
+.nt-hl{background:color-mix(in srgb,var(--gold) 35%,transparent);color:inherit;border-radius:2px;padding:0}
+.nt-arr{flex-shrink:0;color:var(--text3);font-size:var(--fs-sm);margin-top:3px;transition:transform .2s}
+.nt-card.open .nt-arr{transform:rotate(180deg)}
+.nt-edit{padding:2px 10px 10px;border-top:1px solid var(--border2)}
+.nt-ti{display:block;width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:16px;padding:8px 10px;outline:none;margin:10px 0 8px}
+.nt-ti:focus,.nt-cin:focus{border-color:var(--purple)}
+.nt-ti::placeholder{color:var(--muted)}
+.nt-ecats{margin-bottom:8px}
+.nt-ta{min-height:160px;margin-bottom:8px;padding-right:40px}
+.nt-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.nt-dates{font-size:var(--fs-xs);color:var(--text3)}
+.nt-cin{background:var(--bg3);border:1px solid var(--gold);border-radius:20px;color:var(--text);font-size:16px;padding:3px 10px;width:9em;outline:none}
+.fbtn.nt-ed .x{margin-left:7px;color:var(--red)}
+.fbtn.nt-ed.ask{border-color:var(--red);color:var(--red)}
+.nt-empty{color:var(--muted);font-size:var(--fs-sm);padding:10px 2px}
 /* ── Paket R4 (05.10.2026): übrige Tabs + Fenster – Bau-CSS für beide Designs (Leder-Oberflächen am Ende von willowLeder, „Paket R4“; REFERENZ B1d) ── */
 .mi{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.2em;flex:0 0 auto;background-color:currentColor;-webkit-mask:var(--mi) center/contain no-repeat;mask:var(--mi) center/contain no-repeat}
 .mi-dz{--mi:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202.5%2020.5%207.3v9.4L12%2021.5l-8.5-4.8V7.3z%22%2F%3E%3Cpath%20d%3D%22M12%207.6l4.4%207.6H7.6z%22%2F%3E%3Cpath%20d%3D%22M12%202.5v5.1M20.5%207.3l-4.1%207.9M3.5%207.3l4.1%207.9M7.6%2015.2l-4.1%201.5M16.4%2015.2l4.1%201.5M7.6%2015.2%2012%2021.5l4.4-6.3%22%2F%3E%3C%2Fsvg%3E")}
@@ -1895,15 +1926,16 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
       <div id="slList"></div>
     </div>
 
-    <!-- NOTIZEN -->
+    <!-- NOTIZEN – Paket V (05.10.2026): Notizzettel statt fester Felder (Personality/Ideals/Bonds/Flaws/Notes werden beim Laden zu Zetteln) -->
     <div class="panel" id="tab-notizen">
-      <div class="sec">Personality</div>
-      <textarea class="nta" id="n_pers" placeholder="Personality Trait..."></textarea>
-      <textarea class="nta" id="n_ideal" placeholder="Ideals..."></textarea>
-      <textarea class="nta" id="n_bond" placeholder="Bonds..."></textarea>
-      <textarea class="nta" id="n_flaw" placeholder="Flaws..."></textarea>
-      <div class="sec" style="margin-top:4px">Notes</div>
-      <div class="nta-wrap"><textarea class="nta" id="n_notes" placeholder="Adventures, NPCs, quests…" style="min-height:120px"></textarea><button class="nta-expand" onclick="openNoteModal('n_notes','Notes')"><i class="mi mi-exp"></i></button></div>
+      <div class="sec sec-row"><span>Notes</span><button class="filter-toggle nt-new" onclick="ntNew()"><i class="mi mi-plus l"></i>New Note</button></div>
+      <div class="search-wrap">
+        <span class="si"><i class="mi mi-srch"></i></span>
+        <input type="search" id="ntQ" placeholder="Search notes..." oninput="ntRender();onSearch('ntQ')" style="padding-right:32px"><button class="search-clear" id="ntQ-clear" onclick="clearSearch('ntQ')" style="display:none">✕</button>
+      </div>
+      <div class="filter-row nt-cats" id="ntCats"></div>
+      <div class="nt-bar"><span class="zb-count" id="ntCount"></span><select id="ntSort" class="nt-sort" onchange="ntSetSort(this.value)" aria-label="Sort notes"></select></div>
+      <div id="ntList"></div>
     </div>
 
     <div class="panel" id="tab-log">
@@ -9206,6 +9238,7 @@ function switchTab(t){
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
   document.getElementById('bnavMore')?.classList.toggle('on',MORE_TABS.includes(tabId));closeMore(); // Paket R2
   if(tabId==='ausruestung'){renderItems();}
+  if(tabId==='notizen'){ntRender();} // Paket V
   if(tabId==='bestien'){bstInit();buildSavedBeasts();}
   if(tabId==='feats'){ftBuildFilters();}
   if(tabId==='hintergrund')bgInit();
@@ -9215,9 +9248,195 @@ function switchTab(t){
   if(tabId==='info'){buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();buildAttrs();}
 }
 
+// ===== NOTES (Paket V, 05.10.2026): Notizzettel statt fester Felder =====
+// st.notes=[{id, t:Titel, x:Text, c:[Kategorien], d:erstellt, u:geändert (ms)}], st.noteCats=[Kategorien, Reihenfolge der Chips].
+// Alte Felder n_pers/n_ideal/n_bond/n_flaw/n_notes werden nur noch gelesen: applyState → ntMigrate (Text, der noch kein Zettel ist).
+// Filter/Suche/offener Zettel nicht im Charakter; Sortierung pro Gerät (willow_note_sort). ntMatch/ntTerms auch für die Suche (R6).
+const NOTE_CATS_DEF=['NPCs','Places','Quests','Lore'];
+const NOTE_OLD=[['n_pers','Personality Trait','Personality'],['n_ideal','Ideals','Personality'],['n_bond','Bonds','Personality'],['n_flaw','Flaws','Personality'],['n_notes','Notes','']];
+const NT_SORTS={edit:'Last edited',new:'Newest',old:'Oldest',az:'Title A–Z'};
+let _ntOpen=null,_ntCat='',_ntDelAsk=null,_ntCatEdit=false,_ntCatIn=null,_ntCatDelAsk=null,_ntMig=0;
+function ntId(){return 'nt'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function ntE(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ntNorm(a){
+  const ids=new Set();
+  return (Array.isArray(a)?a:[]).filter(n=>n&&typeof n==='object').map(n=>{
+    let id=typeof n.id==='string'&&n.id?n.id:ntId();if(ids.has(id))id=ntId();ids.add(id);
+    const c=[...new Set((Array.isArray(n.c)?n.c:[]).map(x=>String(x).trim()).filter(Boolean))];
+    return {id,t:String(n.t??''),x:String(n.x??''),c,d:+n.d||0,u:+n.u||+n.d||0};
+  });
+}
+function ntMigrate(old){
+  if(!Array.isArray(st.notes))st.notes=[];
+  if(!Array.isArray(st.noteCats))st.noteCats=NOTE_CATS_DEF.slice();
+  let n=0;const now=Date.now();
+  NOTE_OLD.forEach(([id,t,c],i)=>{
+    const x=old&&old[id];if(typeof x!=='string'||!x.trim())return;
+    if(st.notes.some(z=>z.x===x))return;   // schon übernommen (idempotent)
+    st.notes.push({id:ntId(),t,x,c:c?[c]:[],d:now-i,u:now-i});
+    if(c&&!st.noteCats.includes(c))st.noteCats.push(c);
+    n++;
+  });
+  return n;
+}
+function ntCatsAll(){const o=(st.noteCats||[]).slice();(st.notes||[]).forEach(n=>(n.c||[]).forEach(c=>{if(!o.includes(c))o.push(c);}));return o;}
+function ntSort(){let v='edit';try{v=localStorage.getItem('willow_note_sort')||'edit';}catch(e){}return NT_SORTS[v]?v:'edit';}
+function ntSetSort(v){try{localStorage.setItem('willow_note_sort',v);}catch(e){}ntRender();}
+function ntTerms(q){return String(q||'').toLowerCase().split(/\s+/).filter(Boolean);}
+function ntMatch(n,terms){const h=(n.t+'\n'+n.x+'\n'+(n.c||[]).join(' ')).toLowerCase();return terms.every(t=>h.includes(t));}
+function ntHi(s,terms){
+  s=String(s??'');if(!terms.length)return ntE(s);
+  const re=new RegExp('('+terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
+  return s.split(re).map((p,i)=>i%2?'<mark class="nt-hl">'+ntE(p)+'</mark>':ntE(p)).join('');
+}
+function ntDate(ms,long){
+  if(!ms)return '';const d=new Date(ms),y=d.getFullYear()!==new Date().getFullYear();
+  const s=d.toLocaleDateString('en-GB',Object.assign({day:'numeric',month:'short'},(y||long)?{year:'numeric'}:{}));
+  return long?s+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):s;
+}
+function ntPrev(x,terms){
+  x=String(x||'');let i=-1;
+  if(terms.length){const lx=x.toLowerCase();terms.forEach(t=>{const j=lx.indexOf(t);if(j>=0&&(i<0||j<i))i=j;});}
+  if(i>60){x='…'+x.slice(i-40);}
+  return ntHi(x.length>400?x.slice(0,400):x,terms);
+}
+function ntFind(id){return (st.notes||[]).find(n=>n.id===id);}
+function ntEmpty(n){return !!n&&!n.t.trim()&&!n.x.trim();}
+// offener Zettel ohne Titel und Text verschwindet beim Schließen
+function ntDropEmpty(keep){
+  if(!_ntOpen||_ntOpen===keep)return;
+  const n=ntFind(_ntOpen);
+  if(ntEmpty(n)){st.notes=st.notes.filter(z=>z!==n);autoSave();}
+}
+function ntRender(){
+  const box=document.getElementById('ntList');if(!box)return;
+  if(!Array.isArray(st.notes))st.notes=[];
+  const notes=st.notes,cats=ntCatsAll(),terms=ntTerms(document.getElementById('ntQ')?.value);
+  if(_ntOpen&&!ntFind(_ntOpen))_ntOpen=null;
+  if(_ntCat&&_ntCat!=='_none'&&!cats.includes(_ntCat))_ntCat='';
+  const unsorted=notes.filter(n=>!n.c.length).length;
+  if(_ntCat==='_none'&&!unsorted)_ntCat='';
+  // Kategorie-Chips
+  const cnt=c=>notes.filter(n=>n.c.includes(c)).length;
+  let ch='';
+  if(_ntCatEdit){
+    cats.forEach((c,i)=>{
+      if(_ntCatIn===i){ch+=`<input class="nt-cin" id="ntCatIn" value="${ntE(c)}" onkeydown="if(event.key==='Enter'){event.preventDefault();ntCatOk()}" onblur="ntCatOk()">`;return;}
+      const ask=_ntCatDelAsk===i;
+      ch+=`<span class="fbtn nt-ed${ask?' ask':''}" onclick="ntCatRen(${i})">${ntE(c)}<span class="x" onclick="event.stopPropagation();ntCatDel(${i})">${ask?'Remove?':'✕'}</span></span>`;
+    });
+    if(_ntCatIn==='new')ch+=`<input class="nt-cin" id="ntCatIn" placeholder="New category" onkeydown="if(event.key==='Enter'){event.preventDefault();ntCatOk()}" onblur="ntCatOk()">`;
+    else ch+=`<button class="fbtn" onclick="ntCatNew()" aria-label="Add category"><i class="mi mi-plus"></i></button>`;
+    ch+=`<button class="fbtn on" onclick="ntCatEditTog()">Done</button>`;
+  } else {
+    ch+=`<button class="fbtn${_ntCat===''?' on':''}" onclick="ntFilt('')">All<span class="nt-n">${notes.length}</span></button>`;
+    cats.forEach(c=>{const k=cnt(c);ch+=`<button class="fbtn${_ntCat===c?' on':''}" data-cat="${ntE(c)}" onclick="ntFilt(this.dataset.cat)">${ntE(c)}${k?`<span class="nt-n">${k}</span>`:''}</button>`;});
+    if(unsorted&&notes.length>unsorted)ch+=`<button class="fbtn${_ntCat==='_none'?' on':''}" onclick="ntFilt('_none')">Unsorted<span class="nt-n">${unsorted}</span></button>`;
+    ch+=`<button class="fbtn" onclick="ntCatEditTog()" aria-label="Edit categories"><i class="mi mi-pen"></i></button>`;
+  }
+  const cb=document.getElementById('ntCats');if(cb)cb.innerHTML=ch;
+  const sel=document.getElementById('ntSort'),so=ntSort();
+  if(sel){if(sel.options.length!==Object.keys(NT_SORTS).length)sel.innerHTML=Object.entries(NT_SORTS).map(([k,l])=>`<option value="${k}">${l}</option>`).join('');sel.value=so;}
+  // Liste: Filter + Suche (offener Zettel bleibt immer sichtbar), Sortierung
+  let list=notes.filter(n=>n.id===_ntOpen||((!_ntCat||(_ntCat==='_none'?!n.c.length:n.c.includes(_ntCat)))&&ntMatch(n,terms)));
+  const cmpT=(a,b)=>(a.t.trim()?0:1)-(b.t.trim()?0:1)||a.t.localeCompare(b.t,'en',{sensitivity:'base'});
+  list.sort(so==='az'?cmpT:so==='new'?(a,b)=>b.d-a.d:so==='old'?(a,b)=>a.d-b.d:(a,b)=>b.u-a.u);
+  const shown=list.filter(n=>!(n.id===_ntOpen&&ntEmpty(n))).length;
+  const ct=document.getElementById('ntCount');
+  if(ct)ct.textContent=!notes.length?'':(shown===notes.length?notes.length+' note'+(notes.length===1?'':'s'):shown+' of '+notes.length+' notes');
+  if(!list.length){box.innerHTML=`<div class="nt-empty">${notes.length?'No notes match.':'No notes yet. Tap “New Note” to start – NPCs, places, quests, anything worth remembering.'}</div>`;return;}
+  const useD=so==='new'||so==='old';
+  box.innerHTML=list.map(n=>{
+    const open=n.id===_ntOpen,ttl=n.t.trim()?ntHi(n.t,terms):'<span class="nt-untitled">Untitled</span>';
+    let h=`<div class="item-card nt-card${open?' open':''}" data-id="${n.id}"><div class="item-top nt-top" onclick="ntTog('${n.id}')"><div class="nt-head">`
+      +`<div class="nt-trow"><span class="nt-title">${ttl}</span><span class="nt-date">${ntDate(useD?n.d:n.u)}</span></div>`;
+    if(!open){
+      if(n.c.length)h+=`<div class="nt-meta">${n.c.map(c=>`<span class="nt-tag">${ntE(c)}</span>`).join('')}</div>`;
+      if(n.x.trim())h+=`<div class="nt-prev">${ntPrev(n.x,terms)}</div>`;
+    }
+    h+=`</div><span class="nt-arr">▾</span></div>`;
+    if(open){
+      const ask=_ntDelAsk===n.id;
+      h+=`<div class="nt-edit"><input class="nt-ti" placeholder="Title" value="${ntE(n.t)}" oninput="ntSet('${n.id}','t',this.value)">`
+        +`<div class="filter-row nt-ecats">${cats.map(c=>`<button class="fbtn${n.c.includes(c)?' on':''}" data-cat="${ntE(c)}" onclick="ntTogCat('${n.id}',this.dataset.cat)">${ntE(c)}</button>`).join('')}`
+        +(_ntCatIn==='note'?`<input class="nt-cin" id="ntCatIn" placeholder="New category" onkeydown="if(event.key==='Enter'){event.preventDefault();ntCatOk()}" onblur="ntCatOk()">`:`<button class="fbtn" onclick="ntCatNew('note')"><i class="mi mi-plus l"></i>Category</button>`)+`</div>`
+        +`<div class="nta-wrap"><textarea class="nta nt-ta" placeholder="Write your note..." oninput="ntSet('${n.id}','x',this.value)">${ntE(n.x)}</textarea><button class="nta-expand" onclick="openNoteModalEl(this.previousElementSibling,document.querySelector('.nt-card.open .nt-ti')?.value||'Note')" aria-label="Expand"><i class="mi mi-exp"></i></button></div>`
+        +`<div class="nt-foot"><span class="nt-dates">${n.d?'Created '+ntDate(n.d,1):''}${n.u&&n.u!==n.d?'<br>Edited '+ntDate(n.u,1):''}</span>`
+        +`<button class="it-btn item-del" onclick="ntDel('${n.id}')"><i class="mi mi-trash l"></i>${ask?'Remove?':'Remove'}</button></div></div>`;
+    }
+    return h+'</div>';
+  }).join('');
+}
+function ntFocus(sel){setTimeout(()=>{const e=document.querySelector(sel);if(e){try{e.focus();}catch(x){}}},30);}
+function ntNew(){
+  ntDropEmpty();
+  const now=Date.now(),n={id:ntId(),t:'',x:'',c:_ntCat&&_ntCat!=='_none'?[_ntCat]:[],d:now,u:now};
+  st.notes.push(n);_ntOpen=n.id;_ntDelAsk=null;_ntCatIn=null;_ntCatEdit=false;
+  ntRender();ntFocus('.nt-card.open .nt-ti');   // gespeichert wird mit der ersten Eingabe
+  try{document.querySelector('.nt-card.open')?.scrollIntoView({block:'nearest'});}catch(e){}
+}
+function ntTog(id){
+  _ntDelAsk=null;if(_ntCatIn==='note')_ntCatIn=null;
+  if(_ntOpen===id){ntDropEmpty();_ntOpen=null;}
+  else{ntDropEmpty(id);_ntOpen=id;}
+  ntRender();
+  if(_ntOpen){try{document.querySelector('.nt-card.open')?.scrollIntoView({block:'nearest'});}catch(e){}}
+}
+function ntSet(id,f,v){
+  const n=ntFind(id);if(!n)return;
+  n[f]=v;n.u=Date.now();_ntDelAsk=null;
+  if(f==='t'){const t=document.querySelector('.nt-card.open .nt-title');if(t)t.innerHTML=v.trim()?ntE(v):'<span class="nt-untitled">Untitled</span>';}
+  // speichern: das input-Ereignis läuft weiter zu autoSave (Log + Undo, Tippen = ein Schritt)
+}
+function ntTogCat(id,c){
+  const n=ntFind(id);if(!n)return;
+  n.c=n.c.includes(c)?n.c.filter(x=>x!==c):[...n.c,c];n.u=Date.now();
+  ntRender();autoSave();
+}
+function ntDel(id){
+  if(_ntDelAsk!==id){_ntDelAsk=id;ntRender();return;}
+  const n=ntFind(id);_ntDelAsk=null;if(!n)return;
+  st.notes=st.notes.filter(z=>z!==n);_ntOpen=null;
+  ntRender();autoSave();showToast('Note removed');
+}
+function ntFilt(c){_ntCat=(c&&_ntCat===c)?'':c;ntRender();}
+function ntCatEditTog(){_ntCatEdit=!_ntCatEdit;_ntCatIn=null;_ntCatDelAsk=null;ntRender();}
+function ntCatNew(w){_ntCatIn=w==='note'?'note':'new';_ntCatDelAsk=null;ntRender();ntFocus('#ntCatIn');}
+function ntCatRen(i){_ntCatIn=i;_ntCatDelAsk=null;ntRender();ntFocus('#ntCatIn');}
+function ntCatOk(){
+  const inp=document.getElementById('ntCatIn'),w=_ntCatIn;
+  if(!inp||w===null)return;
+  _ntCatIn=null;
+  const v=inp.value.trim().replace(/\s+/g,' ');
+  const cats=ntCatsAll();
+  st.noteCats=cats;   // Kategorien aus Zetteln (z. B. Import) in die Liste übernehmen
+  if(typeof w==='number'){
+    const old=cats[w];
+    if(v&&old!==undefined&&v!==old){
+      st.noteCats=cats.map(c=>c===old?v:c).filter((c,i,a)=>a.indexOf(c)===i);
+      st.notes.forEach(n=>{if(n.c.includes(old))n.c=n.c.map(c=>c===old?v:c).filter((c,i,a)=>a.indexOf(c)===i);});
+      if(_ntCat===old)_ntCat=v;
+    }
+  } else if(v){
+    if(!st.noteCats.includes(v))st.noteCats.push(v);
+    if(w==='note'){const n=ntFind(_ntOpen);if(n&&!n.c.includes(v)){n.c.push(v);n.u=Date.now();}}
+  }
+  ntRender();autoSave();
+}
+function ntCatDel(i){
+  const cats=ntCatsAll(),c=cats[i];if(c===undefined)return;
+  if(_ntCatDelAsk!==i){_ntCatDelAsk=i;_ntCatIn=null;ntRender();return;}
+  _ntCatDelAsk=null;
+  st.noteCats=cats.filter(x=>x!==c);
+  st.notes.forEach(n=>{if(n.c.includes(c))n.c=n.c.filter(x=>x!==c);});   // Zettel bleiben, nur die Kategorie geht
+  if(_ntCat===c)_ntCat='';
+  ntRender();autoSave();
+}
+function ntReset(){_ntOpen=null;_ntCat='';_ntDelAsk=null;_ntCatEdit=false;_ntCatIn=null;_ntCatDelAsk=null;}
+
 // LOCALSTORAGE / MEHRCHARAKTERE
 const LS_KEY = 'dnd5e_chars';
-const TEXT_IDS = ['cls','race','raceCustom','lvl','bg','subcls','align','prof','hpM','hpT','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_pers','n_ideal','n_bond','n_flaw','n_equip','n_notes','n_equip_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
+const TEXT_IDS = ['cls','race','raceCustom','lvl','bg','subcls','align','prof','hpM','hpT','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_equip','n_equip_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
 
 function getAllChars(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
@@ -9240,6 +9459,7 @@ function applyState(snap){
   _hpHold=true; // Paket S2: Max HP erst nach dem Laden aller Felder abgleichen
   // Extract field values before overwriting st
   const fields = {};
+  const _ntOld={};NOTE_OLD.forEach(([id])=>{if(('_f_'+id) in restored){_ntOld[id]=restored['_f_'+id];delete restored['_f_'+id];}}); // Paket V: alte Notizfelder nur lesen
   TEXT_IDS.forEach(id=>{ if('_f_'+id in restored){ fields[id]=restored['_f_'+id]; delete restored['_f_'+id]; }});
   // Restore zbAdded as Set
   if(Array.isArray(restored.zbAdded)) restored.zbAdded = new Set(restored.zbAdded);
@@ -9250,7 +9470,7 @@ function applyState(snap){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},profAdj:0,hpAdj:0,hpRoll:{},hpAsk:[],hpLv:null,seLinkOff:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},notes:[],noteCats:['NPCs','Places','Quests','Lore'],profAdj:0,hpAdj:0,hpRoll:{},hpAsk:[],hpLv:null,seLinkOff:{}
   }, restored);
   // Apply field values (cls first so subcls dropdown gets populated)
   const clsEl=document.getElementById('cls');
@@ -9262,6 +9482,7 @@ function applyState(snap){
     const el=document.getElementById(id);
     if(el && fields[id]!==undefined) el.value=fields[id];
   });
+  st.notes=ntNorm(st.notes);if(!Array.isArray(st.noteCats))st.noteCats=NOTE_CATS_DEF.slice();_ntMig=ntMigrate(_ntOld); // Paket V
   if(!('profAdj' in restored)){const pf=parseInt(fields.prof),au=pbOfLvl(totLvl());st.profAdj=(!isNaN(pf)&&pf!==2&&pf!==au)?pf-au:0;} // Paket S2: alte Saves – Feld 2 = nie angefasst → automatisch, sonst Abweichung als Korrektur behalten
   _pbEdit=false;_pbShown=null;
   _hpHold=false;_hpMPrev=parseInt(fields.hpM)||null; // gespeichertes Maximum = Bezug für „Current folgt bei vollen HP“
@@ -9295,6 +9516,7 @@ function applyState(snap){
   _hpMPrev=hpMaxVal(); // Maximum vor der nächsten Änderung (onHpMChange)
   updBar();
   if(typeof dmgRender==='function') dmgRender();
+  ntRender(); // Paket V
   if(typeof buildLog==='function') buildLog();
 }
 
@@ -9321,7 +9543,8 @@ function loadChar(name){
   if(!chars[name]) return;
   _saving = true;
   _ciEdit = null; _mcDelAsk = -1; _loreOpen = {}; // Paket J; Paket U: Klappzustand der Features je Charakter neu: Ansicht je Charakter neu (ohne Klasse → Bearbeiten offen)
-  _crEdit = null; // Paket K: Maske je Charakter neu entscheiden (leer → offen)
+  _crEdit = null; // Paket K
+  ntReset(); // Paket V: Maske je Charakter neu entscheiden (leer → offen)
   applyState(chars[name]);
   st.log = chars[name].log || [];
   refreshCharSel(name);
@@ -9332,6 +9555,11 @@ function loadChar(name){
   _lastSnap = JSON.parse(JSON.stringify(collectState()));
   _lastSnapName = name;
   _undoClear();
+  if(_ntMig){ // Paket V: alte Notizfelder sind jetzt Zettel → gleich so speichern (+ Log)
+    const c=getAllChars();if(c[name]){const s=collectState();s.log=c[name].log||[];c[name]=s;lsPut(c);_lastSnap=JSON.parse(JSON.stringify(s));
+      _pushLog(name,['Notes: '+_ntMig+' old note field'+(_ntMig>1?'s':'')+' converted to notes']);}
+    _ntMig=0;
+  }
   if(typeof buildLog==='function') buildLog();
 }
 
@@ -9368,7 +9596,7 @@ function resetUI(){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},notes:[],noteCats:['NPCs','Places','Quests','Lore']
   });
   document.getElementById('charName').textContent='';
   TEXT_IDS.forEach(id=>{
@@ -9384,12 +9612,13 @@ function resetUI(){
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();_ciEdit=null;_mcDelAsk=-1;mcRefresh();
   const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
+  ntReset();ntRender(); // Paket V
   _undoClear();
 }
 
 function _doNewChar(name){
   const _name=name;
-  _crEdit=null;_ciEdit=null;_mcDelAsk=-1;
+  _crEdit=null;_ciEdit=null;_mcDelAsk=-1;ntReset(); // Paket V
   {
   _saving = true;
   // Reset state
@@ -9399,7 +9628,7 @@ function _doNewChar(name){
     hpC:10,dsS:[0,0,0],dsF:[0,0,0],ins:[0,0,0],
     slotMax:[4,3,3,3,2,1,1,1,1],slotUsed:[0,0,0,0,0,0,0,0,0],
     mySpells:[],feats:[],bg:'',weapons:[],zbAdded:new Set(),
-    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},profAdj:0,hpAdj:0,hpRoll:{},hpAsk:[],hpLv:{},seLinkOff:{}
+    abUses:{},abPick:{},abGrpClosed:{},picks:{},charInfoClosed:false,slotAdj:[0,0,0,0,0,0,0,0,0],hdUsed:0,hdUsedBy:{},savedBeasts:[],items:[],raceNotes:"",customRace:{},attrSrc:null,statSrc:null,conditions:[],exhaustion:0,effects:[],mc:[],equipDone:{},notes:[],noteCats:['NPCs','Places','Quests','Lore'],profAdj:0,hpAdj:0,hpRoll:{},hpAsk:[],hpLv:{},seLinkOff:{}
   });
   _pbEdit=false;_pbShown=null;_hpHold=false;
   st.attrSrc=attrSrcNew();st.statSrc=statSrcNew(); // Paket E: neue Charaktere rechnen gleich mit Grundwert + Boni
@@ -9415,7 +9644,7 @@ function _doNewChar(name){
   onClsChange(); // also calls applyTheme
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxVal();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
-  calcSpell();
+  calcSpell();ntRender(); // Paket V
   const chars = getAllChars();
   const snap = collectState();
   snap.log = [{t:Date.now(),m:'✨ Character created'}];
@@ -9720,6 +9949,8 @@ function _diffSnaps(a,b){
   });
   done.add('skillNotes');_logTxtOut(out,'skillNotes',LOG_TEXTS.skillNotes,a.skillNotes,b.skillNotes);
   done.add('raceNotes');_logTxtOut(out,'raceNotes',LOG_TEXTS.raceNotes,a.raceNotes,b.raceNotes);
+  done.add('noteCats');{const ca=a.noteCats||[],cb=b.noteCats||[];cb.filter(x=>!ca.includes(x)).forEach(x=>out.push(`+ Note category: ${x}`));ca.filter(x=>!cb.includes(x)).forEach(x=>out.push(`− Note category removed: ${x}`));} // Paket V
+  done.add('notes');_logList(out,a.notes,b.notes,'Note',x=>x&&x.id,{name:x=>(x&&x.t&&x.t.trim())||'Untitled',txt:['t','x'],skip:['id','d','u'],fl:{t:'Title',x:'Text',c:'Categories'}});
   done.add('mySpells');
   const prepS=v=>(v.prep==='free'||v.prep2)?'Always Prepared':(v.prep?'Prepared':'Unprepared');
   _logList(out,a.mySpells,b.mySpells,'Spell',x=>x&&x.name,{skip:['prep','prep2','freeMax','freeUsed','auto','autoInfo','autoNew','autoPrev'],name:x=>x&&(x.name+(x.auto?' (✦ '+x.auto+')':'')),txt:['notes'],fl:{notes:'Note',grad:'Level',school:'School',cls:'Class'},
@@ -10197,7 +10428,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-05d';
+const APP_VERSION = 'willow-app-2026-10-05e';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',frame:'Header Art & Frames',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';

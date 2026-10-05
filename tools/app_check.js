@@ -1297,10 +1297,10 @@ const REGRESSION = [
       const L = () => w.eval('st.log').map(e => e.m);
       const typ = (id, v) => { const el = d.getElementById(id); el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); };
       // Notizen: Tippen = ein Eintrag mit Details
-      typ('n_notes', 'D'); typ('n_notes', 'Dra'); typ('n_notes', 'Drache im Norden');
+      typ('n_bg_notes', 'D'); typ('n_bg_notes', 'Dra'); typ('n_bg_notes', 'Drache im Norden');   // Paket V: Notes-Tab ohne feste Felder → Background Notes
       let log = w.eval('st.log');
-      const nt = log.filter(e => /^Notes/.test(e.m));
-      if (nt.length !== 1 || nt[0].m !== 'Notes: + "Drache im Norden"' || !nt[0].d || nt[0].d.b !== 'Drache im Norden') return 'Notizen: ' + JSON.stringify(nt);
+      const nt = log.filter(e => /^Background Notes/.test(e.m));
+      if (nt.length !== 1 || nt[0].m !== 'Background Notes: + "Drache im Norden"' || !nt[0].d || nt[0].d.b !== 'Drache im Norden') return 'Notizen: ' + JSON.stringify(nt);
       // Always Prepared (prep:'free')
       w.eval("st.mySpells=[{name:'Bless',grad:1,school:'Enchantment',prep:true,notes:''}]"); w.autoSave();
       w.togPrep(0);
@@ -1329,8 +1329,8 @@ const REGRESSION = [
       w.doRedo(); if (w.eval('st.hpC') !== 3) return 'Redo HP: ' + w.eval('st.hpC');
       w.doUndo(); w.doUndo(); if (w.eval('st.hpC') !== hp0) return 'zweites Undo: ' + w.eval('st.hpC');
       // Tippen = ein Schritt
-      typ('n_notes', 'A'); typ('n_notes', 'AB'); typ('n_notes', 'ABC');
-      w.doUndo(); if (d.getElementById('n_notes').value !== 'Drache im Norden') return 'Tipp-Folge nicht ein Schritt: ' + d.getElementById('n_notes').value;
+      typ('n_bg_notes', 'A'); typ('n_bg_notes', 'AB'); typ('n_bg_notes', 'ABC');
+      w.doUndo(); if (d.getElementById('n_bg_notes').value !== 'Drache im Norden') return 'Tipp-Folge nicht ein Schritt: ' + d.getElementById('n_bg_notes').value;
       if (rb.disabled) return 'Redo nach Undo leer';
       w.eval('st.hpC=12'); w.autoSave(); if (!rb.disabled) return 'neue Änderung leert Redo nicht';
       // Charakterwechsel leert
@@ -3019,7 +3019,7 @@ const REGRESSION = [
       c = w.bstMakeCard(E('BST_DATA[0]')); if (!c.querySelector('.sel-add')) return 'Beasts: „Add to Sheet“'; c.querySelector('.sel-add').click();
       if (E('st.savedBeasts.length') !== 1 || !d.querySelector('#bstSavedList .sel-rm')) return 'Beasts: Add/Remove';
       E('bstRender&&bstRender()'); if (/Kreaturen/.test(d.getElementById('bstCount').textContent)) return 'Beasts: „Kreaturen“';
-      if (!/^[A-Z]/.test(d.getElementById('n_notes').placeholder) || /Abenteuer/.test(d.getElementById('n_notes').placeholder)) return 'Notes: deutscher Platzhalter';
+      if (!/^[A-Z]/.test(d.getElementById('ntQ').placeholder) || /Notiz|Suche/.test(d.getElementById('ntQ').placeholder)) return 'Notes: deutscher Platzhalter';   // Paket V: Suchfeld statt n_notes
       // 5) ⚙ ohne Inline-Stile, Chips wie überall
       E('openSettings()'); const sm = d.getElementById('settingsModal');
       if (!sm.classList.contains('set-modal') || sm.style.display !== 'flex' || sm.querySelector('.set-sheet').getAttribute('style')) return '⚙: Klassen';
@@ -3093,6 +3093,73 @@ const REGRESSION = [
       if (!E("['Beast Sense','Speak with Animals'].every(n=>st.mySpells.some(s=>s.name===n&&s.auto))")) return 'Wild Heart: Rituale fehlen';
       if (E("ALWAYS_PREP.Warlock['Archfey Patron'].s.find(x=>x[1]==='Misty Step')[0]") !== 3) return 'Archfey Misty Step: Stufe';
       E("st.mySpells=[];const c=getAllChars();delete c['U Test'];delete c['U Alt'];localStorage.setItem(LS_KEY,JSON.stringify(c))");
+      return true;
+    } },
+  { name: 'Paket V: Notes-Tab als Notizzettel-Sammlung (alte Felder → Zettel einmalig, neu/bearbeiten/löschen, Kategorien filtern/umbenennen/löschen, Suche, Sortierung, Log + Undo, Export, andere Notizfelder bleiben)', datum: '05.10.2026',
+    run: ({ w, d }) => {
+      const E = js => w.eval(js);
+      const typ = (el, v) => { el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); };
+      // 1) feste Felder weg, andere Notizfelder bleiben
+      for (const id of ['n_pers', 'n_ideal', 'n_bond', 'n_flaw', 'n_notes']) if (d.getElementById(id)) return 'altes Feld noch da: ' + id;
+      for (const id of ['n_bg_notes', 'n_ft_notes', 'n_bst_notes', 'n_equip_notes', 'n_class_traits', 'skillNotes']) if (!d.getElementById(id)) return 'anderes Notizfeld fehlt: ' + id;
+      if (!d.getElementById('ntQ') || !d.getElementById('ntCats') || !d.getElementById('ntList') || !d.querySelector('#tab-notizen .nt-new')) return 'Notes-Tab: Suche/Chips/Liste/New fehlt';
+      // 2) alter Save: nicht-leere Felder → Zettel (einmalig), leere verschwinden
+      E("const c=getAllChars();c['V Alt']={_f_cls:'Druid',_f_lvl:'3',_f_n_pers:'Brave and loud',_f_n_ideal:'',_f_n_bond:'My sister Ara',_f_n_flaw:'  ',_f_n_notes:'Met the dragon\\nin the north',attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:14,CHA:10},feats:[],mySpells:[],weapons:[],items:[],log:[]};localStorage.setItem(LS_KEY,JSON.stringify(c))");
+      w.loadChar('V Alt');
+      const ns = E('st.notes');
+      if (ns.length !== 3) return 'Migration: ' + ns.length + ' Zettel';
+      const by = t => ns.find(n => n.t === t);
+      if (!by('Personality Trait') || by('Personality Trait').x !== 'Brave and loud' || by('Personality Trait').c.join() !== 'Personality') return 'Personality Trait';
+      if (!by('Bonds') || by('Bonds').c.join() !== 'Personality' || !by('Notes') || by('Notes').c.length || by('Notes').x !== 'Met the dragon\nin the north') return 'Bonds/Notes';
+      if (!E("st.noteCats.includes('Personality')")) return 'Kategorie Personality fehlt';
+      const sv = E("getAllChars()['V Alt']");
+      if (Object.keys(sv).some(k => /^_f_n_(pers|ideal|bond|flaw|notes)$/.test(k)) || (sv.notes || []).length !== 3) return 'Save nach Migration nicht umgestellt';
+      if (!(sv.log || []).some(e => e.m === 'Notes: 3 old note fields converted to notes')) return 'Log Migration: ' + JSON.stringify((sv.log || []).map(e => e.m));
+      w.loadChar('V Alt'); if (E('st.notes.length') !== 3) return 'Migration nicht einmalig';
+      if ('_f_n_notes' in E('collectState()')) return 'collectState schreibt altes Feld';
+      // 3) Liste, Filter, Suche, Sortierung
+      w.switchTab('notizen');
+      const cards = () => [...d.querySelectorAll('#ntList .nt-card')];
+      if (cards().length !== 3) return 'Liste: ' + cards().length;
+      w.ntFilt('Personality'); if (cards().length !== 2 || !d.querySelector('#ntCats .fbtn.on[data-cat="Personality"]')) return 'Filter Personality';
+      w.ntFilt('_none'); if (cards().length !== 1) return 'Filter Unsorted';
+      w.ntFilt('');
+      typ(d.getElementById('ntQ'), 'SISTER'); if (cards().length !== 1 || !cards()[0].querySelector('mark.nt-hl') || !/1 of 3/.test(d.getElementById('ntCount').textContent)) return 'Suche';
+      typ(d.getElementById('ntQ'), 'dragon north'); if (cards().length !== 1 || !/Notes/.test(cards()[0].textContent)) return 'Suche mehrere Wörter';
+      typ(d.getElementById('ntQ'), '');
+      w.ntSetSort('az'); if (cards().map(c => c.querySelector('.nt-title').textContent).join('|') !== 'Bonds|Notes|Personality Trait') return 'Sortierung A–Z: ' + cards().map(c => c.querySelector('.nt-title').textContent).join('|');
+      w.ntSetSort('edit');
+      // 4) neuer Zettel über die Oberfläche: Tippen = ein Log-Eintrag, Undo
+      E('st.log=[]'); w.ntNew();
+      let open = d.querySelector('.nt-card.open'); if (!open) return 'neuer Zettel nicht offen';
+      typ(open.querySelector('.nt-ti'), 'Ara'); typ(open.querySelector('.nt-ti'), 'Aramil');
+      typ(open.querySelector('.nt-ta'), 'E'); typ(open.querySelector('.nt-ta'), 'Elf bard in Neverwinter');
+      if (E("st.notes.filter(n=>n.t==='Aramil'&&n.x==='Elf bard in Neverwinter').length") !== 1) return 'Zettel nicht übernommen';
+      if (E("getAllChars()['V Alt'].notes.length") !== 4) return 'Zettel nicht gespeichert';
+      const L = E('st.log').map(e => e.m);
+      if (L.filter(m => /Text/.test(m)).length !== 1 || !L.some(m => /^\+ Note: Ara/.test(m))) return 'Log: ' + L.join(' / ');
+      w.doUndo(); if (E("st.notes.find(n=>n.t==='Aramil').x") !== '' || d.querySelector('.nt-card.open .nt-ta')?.value !== '') return 'Undo Text';
+      w.doRedo();
+      // Kategorie am Zettel + neue Kategorie
+      open = d.querySelector('.nt-card.open'); [...open.querySelectorAll('.nt-ecats .fbtn')].find(b => b.textContent === 'NPCs').click();
+      if (E("st.notes.find(n=>n.t==='Aramil').c.join()") !== 'NPCs') return 'Kategorie am Zettel';
+      w.ntCatNew('note'); d.getElementById('ntCatIn').value = 'Neverwinter'; w.ntCatOk();
+      if (E("st.notes.find(n=>n.t==='Aramil').c.join()") !== 'NPCs,Neverwinter' || !E("st.noteCats.includes('Neverwinter')")) return 'neue Kategorie am Zettel';
+      // 5) Kategorien umbenennen / löschen (Zettel bleiben)
+      w.ntCatEditTog(); const iN = E("ntCatsAll().indexOf('NPCs')"); w.ntCatRen(iN); d.getElementById('ntCatIn').value = 'People'; w.ntCatOk();
+      if (E("st.notes.find(n=>n.t==='Aramil').c.join()") !== 'People,Neverwinter' || E("st.noteCats.includes('NPCs')")) return 'Umbenennen';
+      const iP = E("ntCatsAll().indexOf('People')"); w.ntCatDel(iP); if (!E("st.noteCats.includes('People')")) return 'Löschen ohne Rückfrage';
+      w.ntCatDel(iP); if (E("st.noteCats.includes('People')") || E("st.notes.find(n=>n.t==='Aramil').c.join()") !== 'Neverwinter' || E('st.notes.length') !== 4) return 'Kategorie löschen';
+      w.ntCatEditTog();
+      // 6) leerer neuer Zettel verschwindet beim Schließen, Löschen mit Rückfrage
+      w.ntNew(); const eid = E('_ntOpen'); w.ntTog(eid); if (E('st.notes.length') !== 4) return 'leerer Zettel bleibt';
+      const aid = E("st.notes.find(n=>n.t==='Aramil').id"); w.ntTog(aid); w.ntDel(aid); if (E('st.notes.length') !== 4) return 'Löschen ohne Rückfrage';
+      w.ntDel(aid); if (E('st.notes.length') !== 3 || E("getAllChars()['V Alt'].notes.length") !== 3) return 'Löschen';
+      if (!E('st.log').some(e => /Note removed: Aramil/.test(e.m))) return 'Log Löschen';
+      // 7) Export, Charakterwechsel
+      if ((E("charExportObj('V Alt')").data.notes || []).length !== 3) return 'Export ohne Zettel';
+      w.resetUI(); if (E('st.notes.length') || d.querySelectorAll('#ntList .nt-card').length) return 'resetUI leert Zettel nicht';
+      E("const c=getAllChars();delete c['V Alt'];localStorage.setItem(LS_KEY,JSON.stringify(c))"); w.switchTab('info');
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
@@ -3172,8 +3239,12 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
         if (chg.length) console.log('      geändert (max 5): ' + chg.slice(0, 5).join(', '));
         // Name bleibt, nur die Quelle wechselt (Nachdruck, z. B. Haunted One VRGR → RHW): kein Verlust für Savegames, nur melden (01.10.2026)
         const nm = k => k.split('|')[0], namesB = new Set([...mb.keys()].map(nm));
-        const moved = del.filter(k => namesB.has(nm(k))), lost = del.filter(k => !namesB.has(nm(k)));
+        const moved = del.filter(k => namesB.has(nm(k))); let lost = del.filter(k => !namesB.has(nm(k)));
         if (moved.length) console.log(`      Quelle gewechselt (Name bleibt): ${moved.join(', ')}`);
+        // Paket V (05.10.2026): alte Notizfelder werden nur noch gelesen (NOTE_OLD → Zettel), Savegames verlieren nichts
+        const readOnly = b === 'TEXT_IDS' ? new Set(JSON.parse(get(w, 'NOTE_OLD') || '[]').map(x => x[0])) : new Set();
+        const ro = lost.filter(k => readOnly.has(k)); if (ro.length) console.log(`      nur noch gelesen (NOTE_OLD → Zettel): ${ro.join(', ')}`);
+        lost = lost.filter(k => !readOnly.has(k));
         if (lost.length) bad(`${b}: gelöscht: ${lost.slice(0, 10).join(', ')}${lost.length > 10 ? ' …' : ''}`);
       } else {
         const del = Object.keys(a).filter(k => !(k in n)), add = Object.keys(n).filter(k => !(k in a));
