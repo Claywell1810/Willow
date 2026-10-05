@@ -202,7 +202,11 @@ for k, v in report_missing.items(): print('  ', k, ':', ', '.join(v))
 
 # ── ALWAYS_PREP (Paket H, 01.10.2026): automatisch eingetragene Always-Prepared-Zauber nach Stufe ──
 # Regel: alle festen Zauber aus `prepared`; aus `known` feste Cantrips immer, feste Zauber ab Grad 1 außer beim Wizard
-# (dort heißt „known“ = im Zauberbuch, z. B. Necromancy AU Find Familiar). Nicht: `expanded`, `innate`, choose/all-Filter.
+# (dort heißt „known“ = im Zauberbuch, z. B. Necromancy AU Find Familiar). Seit Paket U (05.10.2026) auch alle festen
+# Zauber aus `innate` (ohne Platz/als Ritual/über Ressource wirkbar: Artificer Tinker's Magic Mending, Glamour Command,
+# Wild Heart Rituale, Psi Warrior Telekinesis …; die freien Würfe zählen die Tracker der Features). Nicht: `expanded`,
+# choose/all-Filter. Alternativen ohne Namen mit je genau einem Zauber (Path of the Giant: Druidcraft oder Thaumaturgy)
+# heißen wie dieser Zauber und koppeln an die FEATURE_PICKS-Wahl gleichen Namens.
 # Mehrere additionalSpells-Einträge = Alternativen: mit Namen und passender FEATURE_PICKS-Wahl gekoppelt (Landtyp,
 # Divine-Soul-Affinität), sonst übersprungen und gemeldet. Format: {Klasse:{Gruppe:{v:Abzeichen,pick?:FEATURE_PICKS-Key,
 # s:[[Stufe,Zauber,Option?],…]}}}, Gruppe = 'base' oder CLASS_DATA-Subklassen-Key.
@@ -213,7 +217,7 @@ ap, ap_skip, ap_choose = {}, [], []
 
 def ap_levels(cls, cat, blk, lst, opt):
     for k, v in (blk or {}).items():
-        lvl = int(k) if k.isdigit() else 1
+        lvl = int(k) if k.isdigit() else (None if cat == 'innate' else 1)   # innate '_' (Archfey Misty Step) = erste Stufe der Gruppe
         names, filters, missing = set(), [], set()
         collect(v, names, filters, missing)
         if filters: ap_choose.append(f'{cls} {cat} L{lvl}')
@@ -221,18 +225,28 @@ def ap_levels(cls, cat, blk, lst, opt):
             if cat == 'known' and grad.get(n, 0) > 0 and cls == 'Wizard': continue
             lst.append([lvl, n] + ([opt] if opt else []))
 
+AP_CATS = ('prepared', 'known', 'innate')
+def ap_alt_name(x):   # Paket U: unbenannte Alternative mit genau einem festen Zauber → Zaubername
+    if x.get('name'): return x['name']
+    names, filters, missing = set(), [], set()
+    for cat in AP_CATS: collect(x.get(cat) or {}, names, filters, missing)
+    return next(iter(names)) if len(names) == 1 and not filters else None
+
 def ap_group(cls, a_list, lst, label, pick_prefix):
     a_list = a_list or []
-    named = [x.get('name') for x in a_list]
+    named = [ap_alt_name(x) for x in a_list]
     if len(a_list) > 1:
         pk = next((k for k, v in FPICKS.items() if k.startswith(pick_prefix) and all(n in v.get('o', []) for n in named)), None) if all(named) else None
         if not pk:
-            if any('prepared' in x or 'known' in x for x in a_list): ap_skip.append(f'{label} ({len(a_list)} Alternativen ohne Wahl)')
+            if any(c in x for x in a_list for c in AP_CATS): ap_skip.append(f'{label} ({len(a_list)} Alternativen ohne Wahl)')
             return None
     else: pk = None
     for x in a_list:
-        for cat in ('prepared', 'known'):
-            if cat in x: ap_levels(cls, cat, x[cat], lst, x.get('name') if pk else None)
+        for cat in AP_CATS:
+            if cat in x: ap_levels(cls, cat, x[cat], lst, ap_alt_name(x) if pk else None)
+    m = min([e[0] for e in lst if e[0] is not None], default=1)
+    for e in lst:
+        if e[0] is None: e[0] = m
     return pk
 
 for cls in CLASSES:

@@ -3037,6 +3037,64 @@ const REGRESSION = [
       if (!/\n\n• You instantaneously extinguish/.test(E("ZB_SPELLS.find(x=>x.name==='Control Flames').desc"))) return 'Control Flames: Liste';
       return true;
     } },
+  { name: 'Paket U: Sammelfunde (Long Rest wie Short Rest, Save-Knopf in der Charakterliste, Feature-Tags englisch, Background-Beschreibung, Features einklappbar, Farbregler „Header Art & Frames“, Feature-Zauber aus innate)', datum: '05.10.2026',
+    run: ({ w, d, sel }) => {
+      const E = js => w.eval(js);
+      const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+      // 1) Long Rest = Short Rest (kein Gold-Haupt-Knopf mehr)
+      if (/\.rest-btn\.long/.test(css)) return 'Long Rest noch mit eigener Regel (.rest-btn.long)';
+      // 2) Save-Knopf nur in der Zeile des geöffneten Charakters
+      E("const ch=getAllChars();ch['U Test']={_f_cls:'Druid',_f_lvl:'5',attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:16,CHA:10},feats:[],mySpells:[],weapons:[],items:[]};ch['U Alt']=Object.assign({},ch['U Test']);localStorage.setItem(LS_KEY,JSON.stringify(ch));loadChar('U Test');openCharList()");
+      const sv = d.querySelectorAll('#charList .cl-sv');
+      if (sv.length !== 1 || !sv[0].closest('.cl-row.on') || sv[0].nextElementSibling?.className !== 'cl-del') return 'Save-Knopf: ' + sv.length + ' / nicht links neben Löschen in der offenen Zeile';
+      E("const c0=getAllChars();c0['U Test'].hpC=1;localStorage.setItem(LS_KEY,JSON.stringify(c0))"); E('st.hpC=7');
+      sv[0].click(); if (E("getAllChars()['U Test'].hpC") !== 7 || !/U Test saved/.test(d.getElementById('toast').textContent)) return 'Save-Knopf speichert nicht';
+      if (!d.getElementById('charListModal').classList.contains('on')) return 'Liste schließt nach Save';
+      E('closeCharList()');
+      // 3) Feature-Tags englisch (Daten bleiben deutsch)
+      sel('Druid', 'Circle of the Moon (PHB)', 5); E('buildClsLore();buildSubclsLore()');
+      const tags = [...d.querySelectorAll('#clsLoreBody .lf-tag,#subclsLoreBody .lf-tag')].map(x => x.textContent);
+      if (!tags.length || tags.some(t => /Passiv$|Aktion|Bonusaktion|Reaktion/.test(t))) return 'Feature-Tags: ' + [...new Set(tags)].join(',');
+      if (E("CLASS_DATA.Druid.base.find(f=>f.name==='Wild Shape').tag") !== 'Bonusaktion') return 'Tag-Daten geändert';
+      // 5) Features einklappbar: offen nur aktuelle Stufe; getippter Zustand bleibt bis zum Stufenwechsel
+      const cards = () => [...d.querySelectorAll('#clsLoreBody .lf-card')];
+      const lvOf = c => +c.closest('.lf-lvl').querySelector('.lf-lvl-h').textContent.replace(/\D/g, '');
+      if (!cards().length || cards().some(c => c.classList.contains('on') !== (lvOf(c) === 5 || (lvOf(c) < 5 && !!c.querySelector('.pk-h.open'))))) return 'aufgeklappt nicht genau Stufe 5: ' + cards().filter(c => c.classList.contains('on')).map(lvOf).join(',');
+      if (!cards().some(c => lvOf(c) < 5 && c.querySelector('.pk-h.open') && c.classList.contains('on'))) return 'offene Wahl früherer Stufe nicht aufgeklappt';
+      const ws = cards().find(c => /Wild Shape/.test(c.querySelector('.lf-name').textContent));
+      ws.querySelector('.lf-head').click(); if (!ws.classList.contains('on')) return 'Tippen klappt nicht auf';
+      E('buildClsLore()'); if (!cards().find(c => /Wild Shape/.test(c.querySelector('.lf-name').textContent)).classList.contains('on')) return 'Zustand nach Neuaufbau verloren';
+      sel('Druid', 'Circle of the Moon (PHB)', 6); E('buildClsLore()');
+      if (cards().find(c => /Wild Shape/.test(c.querySelector('.lf-name').textContent)).classList.contains('on')) return 'Stufenwechsel setzt nicht zurück';
+      if (!d.querySelectorAll('#subclsLoreBody .lf-card.sub.on').length) return 'Subklasse: Stufe 6 nicht offen';
+      // 4) Background-Beschreibung (BG_EXTRA[].l) oben im Kasten und in der Liste
+      E("st.bg='Charlatan';buildBgLore()"); const bl = d.querySelector('#bgLoreBody .bg-lore');
+      if (!bl || !/favorite stool/.test(bl.textContent)) return 'Background-Beschreibung fehlt im Info-Tab';
+      const bc = w.bgMakeCard(E("BG_DATA.find(b=>b.n==='Sage')")); bc.querySelector('.zb-top').click();
+      if (!bc.querySelector('.zb-detail > div:first-child .bg-lore')) return 'Background-Beschreibung fehlt in der Liste';
+      E("st.bg=''");
+      // 6) Farbregler frame: ohne eigenen Wert = Accent, eigener Wert nur für --frame
+      if (!/\.hx-rune\{[^}]*color:var\(--frame\)/.test(css) || !/--edge:color-mix\(in srgb,var\(--frame\)/.test(css)) return 'Kopf/Rahmen nicht an --frame';
+      if (!E("COLOR_GROUPS.find(g=>g[0]==='Accents')[1].includes('frame')")) return 'Regler fehlt in ⚙';
+      E("const o=loadThemeOverrides();delete o['Druid'];saveThemeOverrides(o);applyTheme('Druid')");
+      const rs = d.documentElement.style; if (rs.getPropertyValue('--frame') !== rs.getPropertyValue('--gold')) return 'frame ≠ gold ohne eigene Farbe';
+      E("const o=loadThemeOverrides();o['Druid']={frame:'#33aa55'};saveThemeOverrides(o);applyTheme('Druid')");
+      if (rs.getPropertyValue('--frame') !== '#33aa55' || rs.getPropertyValue('--gold') === '#33aa55') return 'eigene frame-Farbe wirkt nicht getrennt';
+      E("const o=loadThemeOverrides();delete o['Druid'];saveThemeOverrides(o);applyTheme('Druid')");
+      // 7) Feature-Zauber aus innate (Artificer Tinker's Magic → Mending; Path of the Giant je nach Wahl)
+      E("st.mySpells=[];st.picks={}"); sel('Artificer', '', 1); w.buildMySpells();
+      const me = E("st.mySpells.find(s=>s.name==='Mending')"); if (!me || me.prep !== 'free' || !me.auto) return 'Artificer: Mending fehlt (innate)';
+      if (E("spClsCounts({cls:'Artificer',lvl:1},spMcX()).cc") !== 0) return 'Mending zählt gegen das Cantrip-Limit';
+      E("st.mySpells=[]"); sel('Barbarian', 'Path of the Giant (BGG)', 3); w.buildMySpells();
+      if (E("st.mySpells.some(s=>/Druidcraft|Thaumaturgy/.test(s.name))")) return 'Giant: Cantrip ohne Wahl';
+      E("st.picks['feat:Barbarian|Path of the Giant|Giant Power']=['Thaumaturgy']"); w.buildMySpells();
+      if (E("st.mySpells.map(s=>s.name).filter(n=>/Druidcraft|Thaumaturgy/.test(n)).join()") !== 'Thaumaturgy') return 'Giant: Wahl Thaumaturgy';
+      E("st.mySpells=[];st.picks={}"); sel('Barbarian', 'Path of the Wild Heart (XPHB)', 3); w.buildMySpells();
+      if (!E("['Beast Sense','Speak with Animals'].every(n=>st.mySpells.some(s=>s.name===n&&s.auto))")) return 'Wild Heart: Rituale fehlen';
+      if (E("ALWAYS_PREP.Warlock['Archfey Patron'].s.find(x=>x[1]==='Misty Step')[0]") !== 3) return 'Archfey Misty Step: Stufe';
+      E("st.mySpells=[];const c=getAllChars();delete c['U Test'];delete c['U Alt'];localStorage.setItem(LS_KEY,JSON.stringify(c))");
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

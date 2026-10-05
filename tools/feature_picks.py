@@ -48,6 +48,8 @@ SPEC = {
     'Sorcerer|Draconic Bloodline|Dragon Ancestor': {'t': 'opt', 'lk': ['Elemental Affinity']},
     'Sorcerer|Draconic Sorcery|Elemental Affinity': {'t': 'opt', 'o': ['Acid', 'Cold', 'Fire', 'Lightning', 'Poison'], 'nt': 1},
     'Sorcerer|Divine Soul|Divine Magic': {'t': 'opt'},
+    # Paket U (05.10.2026): Cantrip-Wahl (5e.tools additionalSpells innate, zwei Alternativen) → ALWAYS_PREP koppelt daran
+    'Barbarian|Path of the Giant|Giant Power': {'t': 'opt', 'o': ['Druidcraft', 'Thaumaturgy'], 'nt': 1},
     'Bard|College of Swords|Fighting Style': {'t': 'opt'},
     # Artificer (Paket M): „You can change the armor's model whenever you finish a Short or Long Rest"
     'Artificer|Armorer|Armor Model': {'t': 'opt', 'o': ['Dreadnaught', 'Guardian', 'Infiltrator'], 'sw': 'Short or Long Rest', 'lk': ['Perfected Armor']},
