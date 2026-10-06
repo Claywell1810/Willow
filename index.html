@@ -1438,6 +1438,22 @@ body{background:var(--tex) 0 0/var(--tex-size),radial-gradient(140% 90% at 50% 0
   border-color:var(--gold);outline:none;box-shadow:inset 0 2px 4px rgba(0,0,0,.45),0 0 0 2px color-mix(in srgb,var(--gold) 22%,transparent)}
 /* Paket R6: Suchfenster mit Lederfläche */
 .sr-box{background-image:var(--tex);background-size:var(--tex-size);border-color:var(--edge)}
+/* Paket W (06.10.2026): ⚙ Regler Leder / Prägung / Einlage */
+.wt{display:grid;gap:12px;border:1px dashed var(--border);border-radius:10px;padding:12px;margin:0 0 14px;background:color-mix(in srgb,var(--bg3) 60%,transparent)}
+.wt-r{display:grid;gap:6px;min-width:0}
+.wt-l{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text2);text-transform:uppercase}
+.wt input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:16px;border-radius:8px;border:1px solid var(--border);margin:4px 0;outline-offset:3px}
+.wt-hue{background:linear-gradient(90deg,#c8645a,#c89a4a,#a8a84a,#6aa85a,#4aa89a,#4a8ac8,#7a6ac8,#b05ab8,#c8645a)}
+.wt-sat{background:linear-gradient(90deg,#6b5a48,var(--wt-c,#c8645a))}
+.wt input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--text);border:2px solid var(--bg0);box-shadow:0 1px 4px rgba(0,0,0,.5)}
+.wt input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--text);border:2px solid var(--bg0)}
+.wt-chips{display:flex;flex-wrap:wrap;gap:6px}
+.wt-chips .fbtn{display:inline-flex;align-items:center;gap:6px}
+.wt-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.25);flex:0 0 auto}
+.wt-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.wt-in input[type=color]{width:40px;height:32px;border:none;background:none;padding:0;cursor:pointer}
+.wt-sw{width:26px;height:26px;border-radius:50%;border:2px solid var(--border)}
+.wt-note{font-size:var(--fs-2xs);color:var(--muted)}
 </style>
 <style id="willowPergament">
 /* ── Paket R5 (06.10.2026): Pergament (hell) – wirkt nur bei html[data-mode="light"] (⚙ Mode Light/Auto, nur im Design Leather; Classic = immer dark).
@@ -10491,6 +10507,43 @@ function hexMix(a,b,w){const h=x=>{x=String(x||'').replace('#','');if(x.length==
 // Paket R1 (04.10.2026, R-E1): ein Grunddesign für alle Klassen – Leder (dunkel); Pergament (hell) folgt mit R5.
 // CLASS_THEMES wird nicht mehr angewendet (bleibt als Daten stehen). Eigene Farben aus ⚙ (dnd5e_theme_overrides, je Klasse) gehen weiter vor.
 const WILLOW_PAL={"dark": {"bg0": "#120d09", "bg1": "#1e1610", "bg2": "#2a1f16", "bg3": "#160f0a", "gold": "#d6b05c", "gold2": "#b08c46", "purple": "#e8cf8a", "purple2": "#9a7438", "purple3": "#3a2a18", "text": "#f3e8d2", "text2": "#c2ad8e", "text3": "#cfae6e", "desc": "#e8dcc6", "muted": "#a48e74", "border": "rgba(214,176,92,.30)", "border2": "rgba(214,176,92,.15)", "green": "#62b07c", "red": "#e26d5e", "blue": "#6a9fd0"}, "light": {"bg0": "#efe5ce", "bg1": "#f6efdf", "bg2": "#fcf9f0", "bg3": "#f0e7d3", "gold": "#74490f", "gold2": "#6a4310", "purple": "#7a2e1c", "purple2": "#9c7436", "purple3": "#ecdcb8", "text": "#2a1c0f", "text2": "#4e3a22", "text3": "#6a4614", "desc": "#33241a", "muted": "#665236", "border": "rgba(110,72,28,.38)", "border2": "rgba(110,72,28,.2)", "green": "#276134", "red": "#9a2a1f", "blue": "#2a5a8c"}};
+// Paket W (06.10.2026, Wunsch Simon): Klassen-Themes im Leder aus drei Schichten – Leder (Färbung der Flächen, lederHue/lederSat 0–100),
+// Prägung (Metall für Schrift/Knöpfe, metal) und Einlage (Klassenfarbe = frame, inlay; Farben von D&D Beyond). ⚙ Regler dafür je Klasse
+// (gleiche Speicher wie die eigenen Farben, Keys WILLOW_THEME_KEYS – heilig wie die Farb-Keys). Ohne Klasse = Leder pur (WILLOW_PAL).
+// Einlage und Text werden für den Kontrast automatisch angepasst (Einlage ≥ 3,6 : 1 auf Card BG). Design Classic unberührt.
+const WILLOW_METAL={"dark":{"gold":{"gold":"#d6b05c","gold2":"#b08c46","purple":"#e8cf8a","purple2":"#9a7438","text3":"#cfae6e","purple3":"#3a2a18","text":"#f3e8d2","desc":"#e8dcc6"},"sonne":{"gold":"#e8c35a","gold2":"#bf9a3c","purple":"#f4dc8e","purple2":"#a07e30","text3":"#dcbc6a","purple3":"#372c0c","text":"#f1e9d2","desc":"#e5ddc7"},"weissgold":{"gold":"#e0cd98","gold2":"#b9a572","purple":"#f2e6c4","purple2":"#8f7d52","text3":"#d4c194","purple3":"#342d1a","text":"#f1e9d2","desc":"#e4ddcb"},"bronze":{"gold":"#c99a5e","gold2":"#b2864e","purple":"#e6c898","purple2":"#8c6438","text3":"#c6a070","purple3":"#3b2a14","text":"#f7e6d3","desc":"#e9dbca"},"kupfer":{"gold":"#d98e5e","gold2":"#bf7c50","purple":"#f0c29c","purple2":"#8c5434","text3":"#d39c74","purple3":"#412614","text":"#fbe4d6","desc":"#eed9cc"},"silber":{"gold":"#c9ced6","gold2":"#9ea6b0","purple":"#e6eaf0","purple2":"#6e7682","text3":"#b9c0ca","purple3":"#2c2e30","text":"#e4e9f1","desc":"#d9dee6"},"stahl":{"gold":"#b4bac2","gold2":"#8e959e","purple":"#dde1e7","purple2":"#646b75","text3":"#aab1ba","purple3":"#2c2e30","text":"#e4eaf1","desc":"#d8dee5"},"mondsilber":{"gold":"#c4bfd6","gold2":"#9a94b0","purple":"#e6e2f2","purple2":"#6c6684","text3":"#b8b2cc","purple3":"#2e2c34","text":"#eae6fa","desc":"#dedbeb"}},"light":{"gold":{"gold":"#74490f","gold2":"#6a4310","purple2":"#9c7436","text3":"#6a4614","purple3":"#ecdcb8","text":"#2a1c0f","desc":"#33241a"},"sonne":{"gold":"#6a5000","gold2":"#614900","purple2":"#957921","text3":"#624b00","purple3":"#ecdcb2","text":"#261e09","desc":"#2e2714"},"weissgold":{"gold":"#60532c","gold2":"#584c29","purple2":"#8a7b52","text3":"#594e2c","purple3":"#e5ddc6","text":"#231f14","desc":"#2b271d"},"bronze":{"gold":"#6e4c1e","gold2":"#64461c","purple2":"#9a7444","text3":"#664820","purple3":"#f0dabf","text":"#271d11","desc":"#2f261a"},"kupfer":{"gold":"#7a441f","gold2":"#6f3f1d","purple2":"#a86c45","text3":"#704121","purple3":"#f9d5bf","text":"#2b1b11","desc":"#33241a"},"silber":{"gold":"#51545a","gold2":"#4a4d52","purple2":"#797c82","text3":"#4c4f54","purple3":"#dbdde1","text":"#1e1f21","desc":"#272829"},"stahl":{"gold":"#50545a","gold2":"#494d52","purple2":"#787d83","text3":"#4b4f54","purple3":"#dbdee1","text":"#1e1f21","desc":"#272829"},"mondsilber":{"gold":"#555161","gold2":"#4e4a59","purple2":"#7d798b","text3":"#4f4c5a","purple3":"#dedce6","text":"#201f23","desc":"#28272b"}}};
+const WILLOW_CLS={"Artificer":{"lederHue":69,"lederSat":72,"metal":"kupfer","inlay":"#d59139"},"Barbarian":{"lederHue":36,"lederSat":85,"metal":"bronze","inlay":"#e7623e"},"Bard":{"lederHue":326,"lederSat":64,"metal":"gold","inlay":"#ab6dac"},"Cleric":{"lederHue":250,"lederSat":20,"metal":"silber","inlay":"#91a1b2"},"Druid":{"lederHue":117,"lederSat":55,"metal":"bronze","inlay":"#7a853b"},"Fighter":{"lederHue":43,"lederSat":38,"metal":"bronze","inlay":"#7f513e"},"Monk":{"lederHue":226,"lederSat":52,"metal":"gold","inlay":"#51a5c5"},"Paladin":{"lederHue":92,"lederSat":54,"metal":"weissgold","inlay":"#b59e54"},"Ranger":{"lederHue":156,"lederSat":38,"metal":"bronze","inlay":"#507f62"},"Rogue":{"lederHue":125,"lederSat":20,"metal":"stahl","inlay":"#555752"},"Sorcerer":{"lederHue":25,"lederSat":78,"metal":"gold","inlay":"#992e2e"},"Warlock":{"lederHue":311,"lederSat":77,"metal":"mondsilber","inlay":"#7b469b"},"Wizard":{"lederHue":263,"lederSat":76,"metal":"silber","inlay":"#2a50a1"}};
+const WILLOW_METAL_NAMES=[['gold','Gold'],['sonne','Sun Gold'],['weissgold','White Gold'],['bronze','Bronze'],['kupfer','Copper'],['silber','Silver'],['stahl','Steel'],['mondsilber','Moon Silver']];
+const WILLOW_THEME_KEYS=['lederHue','lederSat','metal','inlay'];
+function okRgb(L,C,H){const a=C*Math.cos(H*Math.PI/180),b=C*Math.sin(H*Math.PI/180);
+  const l=(L+.3963377774*a+.2158037573*b)**3,m=(L-.1055613458*a-.0638541728*b)**3,s=(L-.0894841775*a-1.2914855480*b)**3;
+  return [4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.7076147010*s];}
+function okHex(L,C,H){return '#'+okRgb(L,C,H).map(x=>{x=Math.max(0,Math.min(1,x));x=x<=.0031308?12.92*x:1.055*x**(1/2.4)-.055;return Math.round(x*255).toString(16).padStart(2,'0');}).join('');}
+function okLch(hex){hex=String(hex||'').replace('#','');if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');
+  const [r,g,b]=[0,2,4].map(i=>parseInt(hex.slice(i,i+2),16)/255||0).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);
+  const cb=v=>Math.cbrt(v),l=cb(.4122214708*r+.5363325363*g+.0514459929*b),m=cb(.2119034982*r+.6806995451*g+.1073969566*b),s=cb(.0883024619*r+.2817188376*g+.6299787005*b);
+  const L=.2104542553*l+.7936177850*m-.0040720468*s,A=1.9779984951*l-2.4285922050*m+.4505937099*s,B=.0259040371*l+.7827717662*m-.8086757660*s;
+  return [L,Math.hypot(A,B),(Math.atan2(B,A)*180/Math.PI+360)%360];}
+function wcagRatio(a,b){const Y=h=>{h=String(h).replace('#','');const c=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(x=>x<=.03928?x/12.92:((x+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
+  const [x,y]=[Y(a),Y(b)].sort((p,q)=>p-q);return (y+.05)/(x+.05);}
+// Einlage lesbar machen: Helligkeit in Richtung Kontrast schieben (Dark heller, Light dunkler), Farbton bleibt
+function willowInlay(hex,bgs,mode){let [L,C,H]=okLch(hex);const up=mode!=='light',ok=()=>okRgb(L,C,H).every(v=>v>=-.002&&v<=1.002),cr=()=>Math.min(...bgs.map(b=>wcagRatio(okHex(L,C,H),b)));
+  for(let i=0;i<100&&cr()<3.6;i++){L+=up?.01:-.01;if(up?L>.98:L<.05)break;while(C>.01&&!ok())C-=.005;}
+  return okHex(L,C,H);}
+function willowSpec(cls,ov){const s={lederHue:0,lederSat:0,metal:'gold',inlay:'',...(WILLOW_CLS[cls]||{})};
+  if(ov)WILLOW_THEME_KEYS.forEach(k=>{if(ov[k]!==undefined&&ov[k]!=='')s[k]=ov[k];});
+  s.lederHue=((+s.lederHue||0)%360+360)%360;s.lederSat=Math.max(0,Math.min(100,+s.lederSat||0));if(!WILLOW_METAL.dark[s.metal])s.metal='gold';
+  if(s.inlay!=='none'&&!/^#[0-9a-f]{6}$/i.test(s.inlay||''))s.inlay='';return s;}
+function willowDerive(sp,mode){
+  const B=WILLOW_PAL[mode]||WILLOW_PAL.dark,t={...B},C=sp.lederSat/100*.04,H=sp.lederHue,lt=mode==='light';
+  if(C>0)['bg0','bg1','bg2','bg3'].forEach(k=>{t[k]=okHex(okLch(B[k])[0],lt?C*.3:C,H);/* Light: Papier bleibt cremig */});
+  if(sp.metal!=='gold')Object.assign(t,WILLOW_METAL[lt?'light':'dark'][sp.metal]);
+  if(C>0||sp.metal!=='gold'){const mh=okLch(t.gold)[2],dh=Math.abs(((H-mh)%360+540)%360-180),hh=C<.015?mh:(dh<120?H:mh);
+    ['text2','muted'].forEach(k=>{const [L,c0]=okLch(B[k]);t[k]=okHex(L+(k==='muted'?(lt?-.02:.02):0),Math.min(c0,.03+C*.6),hh);});
+    const g=okRgb(...okLch(t.gold)).map(x=>Math.round(Math.max(0,Math.min(1,x<=.0031308?12.92*x:1.055*x**(1/2.4)-.055))*255)).join(',');
+    t.border=`rgba(${g},${lt?.38:.30})`;t.border2=`rgba(${g},${lt?.2:.15})`;}
+  if(sp.inlay&&sp.inlay!=='none')t.frame=willowInlay(sp.inlay,[t.bg1,t.bg2],mode);
+  return t;}
 // Paket R5 (06.10.2026): ⚙ „Mode“ pro Gerät – willow_mode = dark (Standard) | light (Pergament) | auto (folgt dem System); im Design Classic immer dark
 function willowModeSet(){let m='dark';try{m=localStorage.getItem('willow_mode')||'dark'}catch(e){}return (m==='light'||m==='auto')?m:'dark';}
 function willowMode(){if(willowDesign()==='klassisch')return 'dark';let m=willowModeSet();
@@ -10504,7 +10557,7 @@ function themeBase(cls){
     return {...t, purple:THEME_GOLD_HI, text3:THEME_GOLD_LBL, muted:t.text3, desc:hexMix(t.text,t.text2,.2),
       red:t.red||'#e05555', green:t.green||'#4caf7d', blue:t.blue||'#5b9bd5'};
   }
-  return {...WILLOW_PAL[willowMode()]};
+  return willowDerive(willowSpec(cls,loadThemeOverrides()[cls]),willowMode());   // Paket W: Klassen-Theme (ohne Klasse = Leder pur)
 }
 function markDesign(){const v=willowDesign();document.querySelectorAll('#dsRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.ds===v));markMode();}
 function markMode(){const v=willowModeSet();document.querySelectorAll('#mdRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.md===v));
@@ -10769,7 +10822,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-06a';
+const APP_VERSION = 'willow-app-2026-10-06b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = 'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -10826,6 +10879,7 @@ function buildColorPanel(){
   const clsLabel = settingsActiveClass || 'Default';
   panel.innerHTML = `
     <div class="set-h set-cl">${clsLabel}</div>
+    ${willowDesign()==='klassisch'?'':wtPanel()}
     ${COLOR_GROUPS.map(([g, keys]) => `<details class="clr-grp" ${colorGrpOpen.has(g)?'open':''} ontoggle="colorGrpOpen[this.open?'add':'delete']('${g}')">
       <summary>${g}</summary>
       ${keys.map(key => [key, COLOR_LABELS[key]]).map(([key, label]) => `
@@ -10841,6 +10895,39 @@ function buildColorPanel(){
         ${(ov[settingsActiveClass]||{})[key] ? `<button onclick="resetColor('${key}')" style="background:none;border:none;color:var(--text3);font-size:var(--fs-xs);cursor:pointer">↺</button>` : ''}
       </div>`).join('')}
     </details>`).join('')}`;
+}
+
+// Paket W: Regler Leder / Prägung / Einlage (je Klasse, nur Design Leather). Schieben = Vorschau, Loslassen = Panel neu
+function wtPanel(){
+  const sp=willowSpec(settingsActiveClass,loadThemeOverrides()[settingsActiveClass]),mode=willowMode(),t=themeBase(settingsActiveClass);
+  const own=WILLOW_THEME_KEYS.some(k=>(loadThemeOverrides()[settingsActiveClass]||{})[k]!==undefined);
+  const hue=okHex(.62,.12,sp.lederHue);
+  return `<div class="wt" id="wtBox">
+    <div class="wt-r"><label class="wt-l" for="wtHue">Leather Color</label>
+      <input type="range" id="wtHue" class="wt-hue" min="0" max="359" step="1" value="${Math.round(sp.lederHue)}" oninput="wtSet('lederHue',+this.value,1)" onchange="wtSet('lederHue',+this.value)"></div>
+    <div class="wt-r"><label class="wt-l" for="wtSat">Leather Tint</label>
+      <input type="range" id="wtSat" class="wt-sat" min="0" max="100" step="1" value="${Math.round(sp.lederSat)}" style="--wt-c:${hue}" oninput="wtSet('lederSat',+this.value,1)" onchange="wtSet('lederSat',+this.value)"></div>
+    <div class="wt-r"><span class="wt-l">Embossing</span><div class="wt-chips">${WILLOW_METAL_NAMES.map(([k,n])=>`<button class="fbtn${sp.metal===k?' on':''}" onclick="wtSet('metal','${k}')"><span class="wt-dot" style="background:${WILLOW_METAL[mode==='light'?'light':'dark'][k].gold}"></span>${n}</button>`).join('')}</div></div>
+    <div class="wt-r"><label class="wt-l" for="wtInlay">Inlay</label><div class="wt-in">
+      <input type="color" id="wtInlay" value="${sp.inlay&&sp.inlay!=='none'?sp.inlay:t.gold}" oninput="wtSet('inlay',this.value,1)" onchange="wtSet('inlay',this.value)">
+      <span class="wt-sw" style="background:${t.frame||t.gold}" title="as shown"></span>
+      <button class="fbtn${sp.inlay&&sp.inlay!=='none'?'':' on'}" onclick="wtSet('inlay','none')">Off</button>
+      ${own?`<button class="fbtn wt-rs" onclick="wtReset()">↺ ${settingsActiveClass?'Class':'Default'} theme</button>`:''}</div></div>
+    <div class="wt-note">Shades adjust themselves to stay readable. The single colors below still override them.</div>
+  </div>`;
+}
+function wtSet(k,v,live){
+  const ov=loadThemeOverrides();if(!ov[settingsActiveClass])ov[settingsActiveClass]={};
+  ov[settingsActiveClass][k]=v;saveThemeOverrides(ov);
+  const cls=document.getElementById('cls')?.value||'';
+  if(settingsActiveClass===cls)applyTheme(cls);
+  if(live){const s=document.getElementById('wtSat');if(s&&k==='lederHue')s.style.setProperty('--wt-c',okHex(.62,.12,v));return;}
+  buildColorPanel();
+}
+function wtReset(){
+  const ov=loadThemeOverrides();if(ov[settingsActiveClass])WILLOW_THEME_KEYS.forEach(k=>delete ov[settingsActiveClass][k]);
+  saveThemeOverrides(ov);buildSettingsUI();
+  const cls=document.getElementById('cls')?.value||'';if(settingsActiveClass===cls)applyTheme(cls);
 }
 
 function previewColor(key, val){
@@ -10877,7 +10964,7 @@ function applyThemeFrom(){
   const src = document.getElementById('copyThemeSel')?.value;
   if(src === undefined || src === null) return;
   const ov = loadThemeOverrides();
-  const srcTheme = willowDesign()==='klassisch' ? themeBase(src) : {...themeBase(src), ...(ov[src]||{})};   // Paket R1: bei Leder eigene Farben der Quelle (Grunddesign überall gleich)
+  const srcTheme = willowDesign()==='klassisch' ? themeBase(src) : (()=>{const sp=willowSpec(src,ov[src]);const o={};WILLOW_THEME_KEYS.forEach(k=>o[k]=sp[k]===''?'none':sp[k]);return {...o, ...(ov[src]||{})};})();   // Paket W: Regler der Quelle   // Paket R1: bei Leder eigene Farben der Quelle (Grunddesign überall gleich)
   ov[settingsActiveClass] = {...srcTheme};
   saveThemeOverrides(ov);
   buildColorPanel();

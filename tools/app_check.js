@@ -644,7 +644,7 @@ const REGRESSION = [
       if (v('muted') !== T.text3.toLowerCase()) return 'Classic: --muted ≠ alter text3';
       if (v('desc') !== w.hexMix(T.text, T.text2, .2)) return 'Classic: --desc falsch: ' + v('desc');
       w.setDesign('leder');
-      const L = w.eval('WILLOW_PAL.dark');
+      const L = w.eval("willowDerive(willowSpec('Barbarian',{}),'dark')");   // seit Paket W (06.10.2026): Klassen-Theme im Leder
       for (const k of ['purple', 'text3', 'muted', 'desc', 'gold', 'bg2']) if (v(k) !== L[k].toLowerCase()) return '--' + k + ' ≠ Leder-Palette: ' + v(k);
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
       for (const c of ['.ab-desc{', '.feat-desc{', '.desc-text{', '.bg-desc{']) { const i = css.indexOf(c); if (i < 0 || !css.slice(i, css.indexOf('}', i)).includes('var(--desc)')) return c + ' ohne --desc'; }
@@ -1497,9 +1497,10 @@ const REGRESSION = [
       const V = k => d.documentElement.style.getPropertyValue('--' + k).trim().toLowerCase();
       if (typeof w.willowMode !== 'function' || !w.eval('WILLOW_PAL.dark')) return 'WILLOW_PAL/willowMode fehlt';
       w.eval('saveThemeOverrides({})');
-      const seen = new Set();
-      for (const c of ['', 'Druid', 'Wizard', 'Barbarian', 'Artificer']) { w.applyTheme(c); seen.add(['bg0', 'bg2', 'gold', 'text', 'purple'].map(V).join()); }
-      if (seen.size !== 1) return 'Klassen haben noch eigene Grundfarben (CLASS_THEMES angewendet)';
+      // seit Paket W (06.10.2026, Simon): Klassen-Themes im Leder – nur ohne Klasse Leder pur, Klassen nie aus CLASS_THEMES
+      for (const c of ['Druid', 'Wizard', 'Barbarian', 'Artificer']) { w.applyTheme(c); if (V('gold') === w.eval(`CLASS_THEMES.${c}.gold`).toLowerCase()) return c + ': CLASS_THEMES im Leder angewendet'; }
+      w.applyTheme('');
+      if (['bg0', 'bg2', 'gold', 'text', 'purple'].some(k => V(k) !== w.eval(`WILLOW_PAL.dark.${k}`).toLowerCase())) return 'ohne Klasse nicht Leder pur';
       if (V('bg0') !== w.eval('WILLOW_PAL.dark.bg0')) return '--bg0 nicht Leder';
       if (d.documentElement.dataset.mode !== 'dark') return 'data-mode nicht dark';
       w.localStorage.setItem('willow_mode', 'unsinn'); if (w.willowMode() !== 'dark') return 'unbekannter Modus fällt nicht auf dark zurück'; w.localStorage.removeItem('willow_mode');
@@ -3076,7 +3077,7 @@ const REGRESSION = [
       // 6) Farbregler frame: ohne eigenen Wert = Accent, eigener Wert nur für --frame
       if (!/\.hx-rune\{[^}]*color:var\(--frame\)/.test(css) || !/--edge:color-mix\(in srgb,var\(--frame\)/.test(css)) return 'Kopf/Rahmen nicht an --frame';
       if (!E("COLOR_GROUPS.find(g=>g[0]==='Accents')[1].includes('frame')")) return 'Regler fehlt in ⚙';
-      E("const o=loadThemeOverrides();delete o['Druid'];saveThemeOverrides(o);applyTheme('Druid')");
+      E("const o=loadThemeOverrides();o['Druid']={inlay:'none'};saveThemeOverrides(o);applyTheme('Druid')");   // seit Paket W: Einlage aus = Accent
       const rs = d.documentElement.style; if (rs.getPropertyValue('--frame') !== rs.getPropertyValue('--gold')) return 'frame ≠ gold ohne eigene Farbe';
       E("const o=loadThemeOverrides();o['Druid']={frame:'#33aa55'};saveThemeOverrides(o);applyTheme('Druid')");
       if (rs.getPropertyValue('--frame') !== '#33aa55' || rs.getPropertyValue('--gold') === '#33aa55') return 'eigene frame-Farbe wirkt nicht getrennt';
@@ -3265,6 +3266,48 @@ const REGRESSION = [
       for (const m of css.matchAll(/[^{}]*\.hx-name\.name-in\{[^}]*background-clip:text[^}]*\}/g)) if (!m[0].includes('text-shadow:none')) return 'Name: text-shadow scheint durch die Schrift';
       const early = html.match(/<script>try\{var _md=localStorage\.getItem\('willow_mode'\);[^<]*<\/script>/);
       if (!early || !early[0].includes("_md==='auto'") || !early[0].includes("'klassisch'")) return 'Frühstart-Skript kennt Auto/Classic nicht';
+      return true;
+    } },
+  { name: 'Paket W: Klassen-Themes im Leder (Leder/Prägung/Einlage je Klasse aus WILLOW_CLS, ohne Klasse Leder pur), Kontrast aller Klassen und Regler-Extreme in Dark/Light, ⚙ Regler, Copy Theme, Classic unberührt', datum: '06.10.2026',
+    run: ({ w, d }) => {
+      const E = s => w.eval(s), V = k => d.documentElement.style.getPropertyValue('--' + k).trim().toLowerCase();
+      const miss = E('allClasses()').filter(c => !E('WILLOW_CLS')[c]); if (miss.length) return 'WILLOW_CLS fehlt für: ' + miss.join(', ') + ' (neue Klasse: Eintrag ergänzen, Anleitung A4 8a)';
+      const P = [], chk = (t, n) => {
+        for (const f of ['text', 'text2', 'text3', 'desc', 'muted', 'gold', 'gold2', 'purple', 'green', 'red', 'blue']) for (const s of ['bg0', 'bg1', 'bg2', 'bg3']) { const r = w.wcagRatio(t[f], t[s]); if (r < 4.5) P.push(`${n}: ${f}/${s} ${r.toFixed(2)}`); }
+        for (const f of ['text', 'gold', 'purple']) if (w.wcagRatio(t[f], t.purple3) < 4.5) P.push(`${n}: ${f}/purple3`);
+        if (w.wcagRatio(t.bg0, t.gold) < 4.5) P.push(`${n}: bg0/gold`);
+        if (t.frame && Math.min(w.wcagRatio(t.frame, t.bg1), w.wcagRatio(t.frame, t.bg2)) < 3.4) P.push(`${n}: frame ${t.frame}`);
+      };
+      for (const m of ['dark', 'light']) {
+        for (const c of E('allClasses()')) chk(E(`willowDerive(willowSpec(${JSON.stringify(c)},{}),'${m}')`), m + ' ' + c);
+        for (let h = 0; h < 360; h += 30) for (const met of E('WILLOW_METAL_NAMES.map(x=>x[0])')) chk(E(`willowDerive(willowSpec('',{lederHue:${h},lederSat:100,metal:'${met}',inlay:'#202020'}),'${m}')`), `${m} h${h} ${met}`);
+        for (const ink of ['#000000', '#ffffff', '#ffff00', '#0000ff']) chk(E(`willowDerive(willowSpec('',{inlay:'${ink}'}),'${m}')`), `${m} inlay ${ink}`);
+      }
+      if (P.length) return 'Kontrast: ' + P.slice(0, 8).join('; ') + (P.length > 8 ? ` … (+${P.length - 8})` : '');
+      const pure = E("willowDerive(willowSpec('',{}),'dark')"), pal = E('WILLOW_PAL.dark'); if (Object.keys(pal).some(k => pal[k] !== pure[k]) || pure.frame) return 'ohne Klasse ≠ WILLOW_PAL';
+      E('saveThemeOverrides({})'); E("document.getElementById('cls').value='Druid'"); w.applyTheme('Druid');
+      const dr = E("willowDerive(willowSpec('Druid',{}),'dark')"); if (V('bg2') !== dr.bg2 || V('frame') !== dr.frame || V('gold') !== dr.gold) return 'Druid-Theme nicht angewendet';
+      // ⚙ Regler
+      w.openSettings(); w.setSettingsClass('Druid');
+      for (const id of ['wtHue', 'wtSat', 'wtInlay']) if (!d.getElementById(id)) return '⚙: Regler #' + id + ' fehlt';
+      if (d.querySelectorAll('#wtBox .wt-chips .fbtn').length !== 8 || !d.querySelector('#wtBox .wt-chips .fbtn.on')) return '⚙: Metall-Auswahl fehlt';
+      w.wtSet('metal', 'silber'); if (V('gold') !== E('WILLOW_METAL.dark.silber.gold')) return 'Regler Prägung wirkt nicht';
+      w.wtSet('lederHue', 250, 1); w.wtSet('lederSat', 100); if (V('bg2') !== E("willowDerive(willowSpec('Druid',{lederHue:250,lederSat:100,metal:'silber'}),'dark')").bg2) return 'Regler Leder wirkt nicht';
+      w.wtSet('inlay', 'none'); if (V('frame') !== V('gold')) return 'Einlage aus ≠ Prägung';
+      w.wtSet('inlay', '#000080'); if (w.wcagRatio(V('frame'), V('bg2')) < 3.4) return 'Einlage nicht aufgehellt';
+      E("{const o=loadThemeOverrides();o.Druid.gold='#123456';saveThemeOverrides(o);applyTheme('Druid')}"); if (V('gold') !== '#123456') return 'eigene Einzelfarbe geht nicht vor';
+      w.setSettingsClass('Wizard'); d.getElementById('copyThemeSel').value = 'Druid'; w.applyThemeFrom();
+      const wz = E('loadThemeOverrides().Wizard'); if (wz.metal !== 'silber' || wz.lederHue !== 250 || wz.gold !== '#123456') return 'Copy Theme übernimmt Regler nicht: ' + JSON.stringify(wz);
+      w.setSettingsClass('Druid'); if (!d.querySelector('#wtBox .wt-rs')) return '↺ fehlt'; w.wtReset();
+      if (WILLOW_KEYS_LEFT()) return 'wtReset lässt Regler-Werte stehen';
+      function WILLOW_KEYS_LEFT() { const o = E('loadThemeOverrides().Druid') || {}; return ['lederHue', 'lederSat', 'metal', 'inlay'].some(k => k in o); }
+      // Light hat eigene Regler-Werte (getrennter Speicher)
+      w.setMode('light'); if (E('loadThemeOverrides().Wizard')) return 'Light liest Dark-Regler'; w.applyTheme('Druid');
+      if (V('frame') !== E("willowDerive(willowSpec('Druid',{}),'light')").frame) return 'Light: Druid-Einlage falsch';
+      w.setMode('dark');
+      // Classic unberührt, kein Regler-Block
+      E('saveThemeOverrides({})'); w.setDesign('klassisch'); w.buildSettingsUI(); if (d.getElementById('wtBox')) return 'Classic zeigt Regler'; w.applyTheme('Druid'); if (V('gold') !== E('CLASS_THEMES.Druid.gold').toLowerCase()) return 'Classic: Klassen-Farben verändert';
+      w.setDesign('leder'); w.closeSettings(); E('saveThemeOverrides({})'); w.applyTheme('Druid');
       return true;
     } },
   { name: 'Fix 06.10.2026: Suchfenster – Lupe überdeckt den Suchtext nicht (#webSearchIn mit Platz links), kein doppeltes ✕ (Browser-Knopf von type=search ausgeblendet, eigener .search-clear bleibt)', datum: '06.10.2026',
