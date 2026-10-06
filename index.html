@@ -10688,9 +10688,12 @@ document.getElementById('tabs').addEventListener('click',e=>{
 document.getElementById('prof').addEventListener('input',onPbInput); // Paket S2: Feld nur als Korrektur
 
 // EXPORT / IMPORT
+// Fix 06.10.2026 (Simon): Backup All nimmt eigene Farben (Leder + Pergament) und die Design-Wahl mit; Import übernimmt sie
+const BK_SETTINGS=['dnd5e_theme_overrides','dnd5e_theme_overrides_light','willow_design','willow_mode'];
+function bkSettings(){const o={};BK_SETTINGS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!==null)o[k]=v;}catch(e){}});return o;}
 function exportChars(){
   const chars = getAllChars();
-  const json = JSON.stringify(chars, null, 2);
+  const json = JSON.stringify({willow:'backup',v:1,app:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),chars,settings:bkSettings()}, null, 2);
   const blob = new Blob([json], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -10742,8 +10745,20 @@ function _parseImport(data){
     if(typeof data.name!=='string'||!data.name.trim()||!data.data||typeof data.data!=='object'||Array.isArray(data.data)) return null;
     return {[data.name.trim()]:data.data};
   }
+  if(data.willow==='backup') data=data.chars; // Fix 06.10.2026: Backup mit Einstellungen (ältere Backups = nur Charaktere)
+  if(!data||typeof data!=='object'||Array.isArray(data)) return null;
   const out={};
   Object.entries(data).forEach(([n,v])=>{ if(n.trim()&&v&&typeof v==='object'&&!Array.isArray(v)) out[n.trim()]=v; });
+  return Object.keys(out).length?out:null;
+}
+// Einstellungen aus einem Backup (nur bekannte Keys, Farben müssen gültiges JSON-Objekt sein), sonst null
+function _parseImpSettings(data){
+  const s=data&&data.willow==='backup'&&data.settings;
+  if(!s||typeof s!=='object'||Array.isArray(s)) return null;
+  const out={};
+  BK_SETTINGS.forEach(k=>{const v=s[k];if(typeof v!=='string')return;
+    if(k.startsWith('dnd5e_theme')){try{const o=JSON.parse(v);if(!o||typeof o!=='object'||Array.isArray(o))return;}catch(e){return;}}
+    out[k]=v;});
   return Object.keys(out).length?out:null;
 }
 function _copyName(name,taken){
@@ -10756,10 +10771,10 @@ function importChars(e){
   if(!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    let inc=null;
-    try { inc=_parseImport(JSON.parse(ev.target.result)); } catch(err) { inc=null; }
+    let inc=null,set=null;
+    try { const raw=JSON.parse(ev.target.result); inc=_parseImport(raw); set=_parseImpSettings(raw); } catch(err) { inc=null; }
     if(!inc){ showToast('Import failed: invalid file'); return; }
-    _impQ={list:Object.entries(inc),i:0,chars:getAllChars(),done:[],all:null};
+    _impQ={list:Object.entries(inc),i:0,chars:getAllChars(),done:[],all:null,set};
     _impNext();
   };
   reader.readAsText(file);
@@ -10797,9 +10812,11 @@ function impConfirm(choice){
 function _impFinish(){
   const q=_impQ; _impQ=null; if(!q) return;
   if(!q.done.length){ showToast('Nothing imported'); return; }
-  lsPut(q.chars);
+  if(!lsPut(q.chars)) return; // Speichern fehlgeschlagen: Warnung bleibt stehen, nichts als „importiert“ melden
+  if(q.set) Object.entries(q.set).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch(e){}}); // Fix 06.10.2026: Farben + Design aus dem Backup
   refreshCharSel(q.done[0]);
   loadChar(q.done[0]);
+  if(q.set) setDesign(willowDesign()); // Design, Farben und offenes ⚙ neu anwenden
   showToast(q.done.length===1?('⬆ '+q.done[0]+' imported'):(`Imported ${q.done.length} character(s)`));
 }
 
@@ -10827,7 +10844,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-06c';
+const APP_VERSION = 'willow-app-2026-10-06d';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = 'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -11499,7 +11516,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
           <button class="fbtn" data-ts="sehrgross" onclick="setTextSize('sehrgross')">X-Large</button>
         </div>
         <div class="set-h">Data</div>
-        <div class="set-p">Share the current character, back up all characters, or import a character or backup file.</div>
+        <div class="set-p">Share the current character, back up all characters (incl. your colors and design), or import a character or backup file.</div>
         <button class="char-btn btn-p set-btn set-wide" onclick="shareChar()"><i class="mi mi-share l"></i>Share Character</button>
         <div id="bkLast" class="set-last">Last backup: never</div>
         <div class="set-two">

@@ -1671,6 +1671,43 @@ const REGRESSION = [
       if (JSON.stringify(all().TestL) !== orig) return 'Backup: Abbrechen hat überschrieben';
       return true;
     } },
+  { name: 'Backup All: eigene Farben + Design kommen mit, Import (Overwrite) übernimmt sie; alte Backups gehen weiter', datum: '06.10.2026',
+    run: async ({w, d, sel}) => {
+      const LS = w.localStorage, all = () => JSON.parse(LS.getItem('dnd5e_chars') || '{}');
+      let txt = null; const oc = w.URL.createObjectURL, orv = w.URL.revokeObjectURL; w.URL.revokeObjectURL = () => {}; const ock = w.HTMLAnchorElement.prototype.click; w.HTMLAnchorElement.prototype.click = () => {};
+      w.URL.createObjectURL = b => { const r = new w.FileReader(); r.onload = () => { txt = r.result; }; r.readAsText(b); return 'blob:x'; };
+      sel('Druid', '', 5); d.getElementById('charName').textContent = 'TestBK'; w.eval('st.hpC=12'); w.saveChar();
+      LS.setItem('dnd5e_theme_overrides', JSON.stringify({Druid: {gold: '#123456'}}));
+      LS.setItem('dnd5e_theme_overrides_light', JSON.stringify({Druid: {gold: '#654321'}}));
+      LS.setItem('willow_design', 'leder'); LS.setItem('willow_mode', 'dark');
+      w.exportChars(); await new Promise(r => setTimeout(r, 200)); w.URL.createObjectURL = oc; w.URL.revokeObjectURL = orv; w.HTMLAnchorElement.prototype.click = ock;
+      if (!txt) return 'Backup-Datei nicht erzeugt';
+      const bk = JSON.parse(txt);
+      if (bk.willow !== 'backup' || !bk.chars || !bk.chars.TestBK) return 'Backup ohne Charaktere im neuen Format';
+      if (!bk.settings || !/123456/.test(bk.settings.dnd5e_theme_overrides || '') || !/654321/.test(bk.settings.dnd5e_theme_overrides_light || '')) return 'Eigene Farben fehlen im Backup';
+      // Stand ändern, dann Backup zurückholen
+      w.eval('st.hpC=3'); w.saveChar();
+      LS.setItem('dnd5e_theme_overrides', JSON.stringify({Druid: {gold: '#ffffff'}})); LS.removeItem('dnd5e_theme_overrides_light');
+      const imp = async obj => { const f = new w.File([JSON.stringify(obj)], 'x.json', {type: 'application/json'});
+        w.importChars({target: {files: [f], value: ''}}); await new Promise(r => setTimeout(r, 300)); };
+      await imp(bk);
+      if (d.getElementById('impConfModal').style.display !== 'flex') return 'Keine Rückfrage bei vorhandenem Namen';
+      d.getElementById('impConfAll').checked = true; w.impConfirm('over'); // Backup enthält auch die Figuren früherer Tests
+      if (all().TestBK.hpC !== 12) return 'Charakter nicht überschrieben';
+      if (!/123456/.test(LS.getItem('dnd5e_theme_overrides') || '') || !/654321/.test(LS.getItem('dnd5e_theme_overrides_light') || '')) return 'Farben aus dem Backup nicht übernommen';
+      w.loadChar('TestBK'); // Backup enthält mehrere Figuren, geladen wird die erste
+      const gold = d.documentElement.style.getPropertyValue('--gold').trim().toLowerCase();
+      if (gold !== '#123456') return 'Farbe nicht angewendet (--gold = ' + gold + ')';
+      // Abbrechen: Farben bleiben unverändert
+      LS.setItem('dnd5e_theme_overrides', '{}'); await imp(bk); d.getElementById('impConfAll').checked = true; w.impConfirm('skip');
+      if (LS.getItem('dnd5e_theme_overrides') !== '{}') return 'Abbrechen hat Farben übernommen';
+      // altes Backup (nur Charaktere) und kaputte Einstellungen
+      await imp({TestBK2: bk.chars.TestBK}); if (!all().TestBK2) return 'Altes Backup-Format geht nicht mehr';
+      await imp({willow: 'backup', chars: {TestBK3: bk.chars.TestBK}, settings: {dnd5e_theme_overrides: 'kaputt', fremd: 'x'}});
+      if (!all().TestBK3 || LS.getItem('dnd5e_theme_overrides') !== '{}' || LS.getItem('fremd') !== null) return 'Ungültige Einstellungen übernommen';
+      LS.removeItem('dnd5e_theme_overrides'); LS.removeItem('dnd5e_theme_overrides_light'); w.applyTheme('Druid');
+      return true;
+    } },
   { name: 'Paket K: Custom-Rasse – Werte wirken auf Skills, Attribut-Abzeichen, Actions-Tab, Waffen, Log und Laden', datum: '02.10.2026',
     run: ({w, d, sel}) => {
       sel('Druid', '', 5);
