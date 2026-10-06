@@ -3233,11 +3233,12 @@ const REGRESSION = [
       if (w.willowModeSet() !== 'dark' || w.willowMode() !== 'dark') return 'Standard nicht dark';
       const cls = () => d.getElementById('cls').value || '';
       w.openSettings();
-      if (!d.querySelector('#mdRow .fbtn.on[data-md="dark"]') || d.querySelectorAll('#mdRow .fbtn').length !== 3) return '⚙: Mode-Zeile fehlt/Dark nicht markiert';
-      w.setMode('light');
+      // seit 06.10.2026 (Simon): keine Mode-Zeile mehr, Design-Zeile Leather / Parchment / Classic (pickDesign)
+      if (d.getElementById('mdRow') || !d.querySelector('#dsRow .fbtn.on[data-ds="leder"]') || d.querySelectorAll('#dsRow .fbtn').length !== 3) return '⚙: Design-Zeile Leather/Parchment/Classic fehlt, Leather nicht markiert oder Mode-Zeile noch da';
+      w.pickDesign('pergament');
       if (w.localStorage.getItem('willow_mode') !== 'light' || d.documentElement.dataset.mode !== 'light') return 'Light nicht gesetzt/gespeichert';
       if (V('bg0') !== P.light.bg0 || V('text') !== P.light.text) return 'Light-Palette nicht angewendet: ' + V('bg0');
-      if (!d.querySelector('#mdRow .fbtn.on[data-md="light"]')) return '⚙: Light nicht markiert';
+      if (!d.querySelector('#dsRow .fbtn.on[data-ds="pergament"]')) return '⚙: Parchment nicht markiert';
       // eigene Farben je Modus getrennt
       w.eval(`saveThemeOverrides({['${cls()}']:{gold:'#123456'}})`); w.applyTheme(cls());
       if (V('gold') !== '#123456' || !w.localStorage.getItem('dnd5e_theme_overrides_light')) return 'eigene Farbe Light nicht unter dnd5e_theme_overrides_light';
@@ -3246,14 +3247,15 @@ const REGRESSION = [
       w.setMode('light'); w.resetAllThemes(); if (w.localStorage.getItem('dnd5e_theme_overrides_light')) return 'Reset All (Light) löscht nicht';
       // Auto folgt dem System (matchMedia)
       let sys = true; w.matchMedia = q => ({ matches: /light/.test(q) ? sys : !sys, addEventListener() {} });
-      w.setMode('auto'); if (d.documentElement.dataset.mode !== 'light' || !d.querySelector('#mdRow .fbtn.on[data-md="auto"]')) return 'Auto (System hell) nicht light';
+      w.setMode('auto'); if (d.documentElement.dataset.mode !== 'light' || !(w.markDesign(), d.querySelector('#dsRow .fbtn.on[data-ds="pergament"]'))) return 'Auto (System hell) nicht light / Parchment nicht markiert';
       sys = false; w.applyTheme(cls()); if (d.documentElement.dataset.mode !== 'dark' || V('bg0') !== P.dark.bg0) return 'Auto (System dunkel) nicht dark';
       sys = true; w.applyTheme(cls());
       // Classic: immer dark, Mode-Zeile aus
       w.setDesign('klassisch');
       if (w.willowMode() !== 'dark' || d.documentElement.dataset.mode !== 'dark') return 'Classic nicht dark';
-      if (d.getElementById('mdWrap').style.display !== 'none') return '⚙: Mode-Zeile bei Classic sichtbar';
-      w.setDesign('leder'); if (d.documentElement.dataset.mode !== 'light' || d.getElementById('mdWrap').style.display === 'none') return 'zurück zu Leather nicht wieder Light';
+      if (!d.querySelector('#dsRow .fbtn.on[data-ds="klassisch"]')) return '⚙: Classic nicht markiert';
+      w.setDesign('leder'); if (d.documentElement.dataset.mode !== 'light') return 'zurück aus Classic nicht wieder Light';
+      w.pickDesign('leder'); if (w.localStorage.getItem('willow_mode') !== 'dark' || d.documentElement.dataset.mode !== 'dark' || !d.querySelector('#dsRow .fbtn.on[data-ds="leder"]')) return 'Leather-Knopf setzt nicht Dark';
       w.setMode('dark'); w.closeSettings(); w.localStorage.removeItem('willow_mode'); delete w.matchMedia; w.applyTheme(cls());
       // CSS-Block + Frühstart
       const st = d.getElementById('willowPergament'), lb = d.getElementById('willowLeder');

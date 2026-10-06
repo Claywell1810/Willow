@@ -10559,7 +10559,12 @@ function themeBase(cls){
   }
   return willowDerive(willowSpec(cls,loadThemeOverrides()[cls]),willowMode());   // Paket W: Klassen-Theme (ohne Klasse = Leder pur)
 }
-function markDesign(){const v=willowDesign();document.querySelectorAll('#dsRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.ds===v));markMode();}
+// Wunsch Simon 06.10.2026: eine Zeile Leather / Parchment / Classic; intern weiter willow_design + willow_mode (gespeichertes „auto“ wirkt weiter, markiert dann den wirksamen Knopf)
+function designBtn(){return willowDesign()==='klassisch'?'klassisch':(willowMode()==='light'?'pergament':'leder');}
+function pickDesign(v){if(v==='klassisch'){setDesign('klassisch');return;}
+  try{localStorage.setItem('willow_mode',v==='pergament'?'light':'dark');}catch(e){}
+  setDesign('leder');}
+function markDesign(){const v=designBtn();document.querySelectorAll('#dsRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.ds===v));markMode();}
 function markMode(){const v=willowModeSet();document.querySelectorAll('#mdRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.md===v));
   const w=document.getElementById('mdWrap');if(w)w.style.display=willowDesign()==='klassisch'?'none':'';}
 function setMode(v){
@@ -10822,7 +10827,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-06b';
+const APP_VERSION = 'willow-app-2026-10-06c';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = 'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -11480,19 +11485,11 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
       </div>
       <div class="set-body">
         <div class="set-h">Design</div>
-        <div class="set-p">Leather = new design (one look for all classes). Classic = previous class colors. Saved on this device.</div>
-        <div class="ts-row" id="dsRow">
-          <button class="fbtn" data-ds="leder" onclick="setDesign('leder')">Leather</button>
-          <button class="fbtn" data-ds="klassisch" onclick="setDesign('klassisch')">Classic</button>
-        </div>
-        <div id="mdWrap"><!-- Paket R5: Mode nur im Design Leather -->
-        <div class="set-h">Mode</div>
-        <div class="set-p">Dark = leather, Light = parchment, Auto = follows your phone's setting. Saved on this device.</div>
-        <div class="ts-row" id="mdRow">
-          <button class="fbtn" data-md="dark" onclick="setMode('dark')">Dark</button>
-          <button class="fbtn" data-md="light" onclick="setMode('light')">Light</button>
-          <button class="fbtn" data-md="auto" onclick="setMode('auto')">Auto</button>
-        </div>
+        <div class="set-p">Leather = dark, with class colors. Parchment = light paper. Classic = previous class colors. Saved on this device.</div>
+        <div class="ts-row" id="dsRow"><!-- Wunsch Simon 06.10.2026: Pergament als Design-Knopf statt eigener Zeile Mode (Dark/Light/Auto) -->
+          <button class="fbtn" data-ds="leder" onclick="pickDesign('leder')">Leather</button>
+          <button class="fbtn" data-ds="pergament" onclick="pickDesign('pergament')">Parchment</button>
+          <button class="fbtn" data-ds="klassisch" onclick="pickDesign('klassisch')">Classic</button>
         </div>
         <div class="set-h">Text Size</div>
         <div class="set-p">Scales text, buttons and fields. Saved on this device.</div>
@@ -11510,7 +11507,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
           <label class="char-btn set-btn"><i class="mi mi-up l"></i>Import<input type="file" id="impFile" onchange="importChars(event)" style="display:none"></label>
         </div>
         <div class="set-h">Color Scheme</div>
-        <div class="set-p">Customize accent colors per class (Dark and Light each keep their own). Changes are saved automatically.</div>
+        <div class="set-p">Customize colors per class (Leather and Parchment each keep their own). Changes are saved automatically.</div>
         <div id="settingsClassPicker" class="set-cls"></div>
         <div id="settingsColorPanels"></div>
         <div class="set-h" style="margin-top:16px">Copy Theme From</div>
