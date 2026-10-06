@@ -3222,6 +3222,51 @@ const REGRESSION = [
       E("const c=getAllChars();delete c['R6 Test'];localStorage.setItem(LS_KEY,JSON.stringify(c))"); w.resetUI(); w.switchTab('info');
       return true;
     } },
+  { name: 'Paket R5: Pergament (Light) – ⚙ Mode Dark/Light/Auto pro Gerät (Standard Dark), Auto folgt dem System, Classic immer dark, eigene Farben je Modus getrennt, Frühstart, Name ohne Schatten durch die Schrift', datum: '06.10.2026',
+    run: ({ w, d }) => { const html = d.documentElement.outerHTML;
+      const V = k => d.documentElement.style.getPropertyValue('--' + k).trim().toLowerCase();
+      const P = w.eval('WILLOW_PAL'); if (!P.light) return 'WILLOW_PAL.light fehlt';
+      for (const k of Object.keys(P.dark)) if (!(k in P.light)) return 'light ohne ' + k;
+      if (typeof w.setMode !== 'function' || typeof w.willowModeSet !== 'function') return 'setMode/willowModeSet fehlt';
+      w.localStorage.removeItem('willow_mode'); w.eval('saveThemeOverrides({})');
+      if (w.willowModeSet() !== 'dark' || w.willowMode() !== 'dark') return 'Standard nicht dark';
+      const cls = () => d.getElementById('cls').value || '';
+      w.openSettings();
+      if (!d.querySelector('#mdRow .fbtn.on[data-md="dark"]') || d.querySelectorAll('#mdRow .fbtn').length !== 3) return '⚙: Mode-Zeile fehlt/Dark nicht markiert';
+      w.setMode('light');
+      if (w.localStorage.getItem('willow_mode') !== 'light' || d.documentElement.dataset.mode !== 'light') return 'Light nicht gesetzt/gespeichert';
+      if (V('bg0') !== P.light.bg0 || V('text') !== P.light.text) return 'Light-Palette nicht angewendet: ' + V('bg0');
+      if (!d.querySelector('#mdRow .fbtn.on[data-md="light"]')) return '⚙: Light nicht markiert';
+      // eigene Farben je Modus getrennt
+      w.eval(`saveThemeOverrides({['${cls()}']:{gold:'#123456'}})`); w.applyTheme(cls());
+      if (V('gold') !== '#123456' || !w.localStorage.getItem('dnd5e_theme_overrides_light')) return 'eigene Farbe Light nicht unter dnd5e_theme_overrides_light';
+      if (w.localStorage.getItem('dnd5e_theme_overrides') && JSON.parse(w.localStorage.getItem('dnd5e_theme_overrides'))[cls()]) return 'Light-Farbe landet bei Dark';
+      w.setMode('dark'); if (V('gold') === '#123456' || V('bg0') !== P.dark.bg0) return 'Dark übernimmt Light-Farben';
+      w.setMode('light'); w.resetAllThemes(); if (w.localStorage.getItem('dnd5e_theme_overrides_light')) return 'Reset All (Light) löscht nicht';
+      // Auto folgt dem System (matchMedia)
+      let sys = true; w.matchMedia = q => ({ matches: /light/.test(q) ? sys : !sys, addEventListener() {} });
+      w.setMode('auto'); if (d.documentElement.dataset.mode !== 'light' || !d.querySelector('#mdRow .fbtn.on[data-md="auto"]')) return 'Auto (System hell) nicht light';
+      sys = false; w.applyTheme(cls()); if (d.documentElement.dataset.mode !== 'dark' || V('bg0') !== P.dark.bg0) return 'Auto (System dunkel) nicht dark';
+      sys = true; w.applyTheme(cls());
+      // Classic: immer dark, Mode-Zeile aus
+      w.setDesign('klassisch');
+      if (w.willowMode() !== 'dark' || d.documentElement.dataset.mode !== 'dark') return 'Classic nicht dark';
+      if (d.getElementById('mdWrap').style.display !== 'none') return '⚙: Mode-Zeile bei Classic sichtbar';
+      w.setDesign('leder'); if (d.documentElement.dataset.mode !== 'light' || d.getElementById('mdWrap').style.display === 'none') return 'zurück zu Leather nicht wieder Light';
+      w.setMode('dark'); w.closeSettings(); w.localStorage.removeItem('willow_mode'); delete w.matchMedia; w.applyTheme(cls());
+      // CSS-Block + Frühstart
+      const st = d.getElementById('willowPergament'), lb = d.getElementById('willowLeder');
+      if (!st || !(lb.compareDocumentPosition(st) & 4)) return 'Block willowPergament fehlt oder steht nicht nach willowLeder';
+      const css = st.textContent;
+      if (!css.includes('html[data-mode="light"]{color-scheme:light;') || !/--tex:url\(/.test(css)) return 'Light-Tokens/Textur fehlen';
+      for (const [k, v] of Object.entries(P.light)) if (!css.includes(`--${k}:${v}`)) return 'CSS-Grundwert fehlt: --' + k;
+      if (!/\.bnav-btn\.on \.bnav-icon\{filter:none\}/.test(css)) return 'Leuchten der Leiste nicht aus (Tinte statt Leuchten)';
+      // Fehler 06.10.2026: Schatten unter dem Namen schien durch die transparente Schrift (Name fast weiß) → Regel mit background-clip:text braucht text-shadow:none
+      for (const m of css.matchAll(/[^{}]*\.hx-name\.name-in\{[^}]*background-clip:text[^}]*\}/g)) if (!m[0].includes('text-shadow:none')) return 'Name: text-shadow scheint durch die Schrift';
+      const early = html.match(/<script>try\{var _md=localStorage\.getItem\('willow_mode'\);[^<]*<\/script>/);
+      if (!early || !early[0].includes("_md==='auto'") || !early[0].includes("'klassisch'")) return 'Frühstart-Skript kennt Auto/Classic nicht';
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
