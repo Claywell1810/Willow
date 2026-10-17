@@ -565,6 +565,12 @@ Keine neuen Felder im Spielstand. Neu in localStorage (außerhalb `dnd5e_chars`)
 - **Speichern:** alle Schreibzugriffe auf `LS_KEY` über `lsPut(chars)` (try/catch → `false` + Warn-Toast höchstens alle 20 s, `console.warn`; `saveChar` bricht dann ab). `showToast(msg,ms)` mit Dauer. `storageInit()` nach `initApp()`: `navigator.storage.persist()`, Erinnerung „Last backup: …“ höchstens 1×/Woche, wenn Charaktere da und letztes Backup > 14 Tage/nie. ⚙ zeigt „Last backup: …“ (`bkLabel`).
 - **Englisch:** Actions-Gruppen/Tags über `AB_GRP_EN` (Keys `aktion`/`bonus`/… und Daten-Tags „Bonusaktion“ … bleiben deutsch, B1c), Feat-Kategorie „Other“, Platzhalter/Knöpfe/Toasts.
 
+## B29. Sammelfunde Z (Paket Z, seit 17.10.2026)
+
+- **Z1 Quellen-Filter (Spell List):** Zeile „Source“ (`#slSrcRow`, zugeklappt) unter School; Knöpfe in `slBuildFilters` aus `slSrcList()` (= `ZB_SPELLS[].src`, nach Anzahl sortiert, nicht fest). Zustand `slFSrc` (Set, leer = alle, Mehrfachauswahl), `slSrcSync()` setzt `.on`; Filter in `slRender` (mit Schule), Abzeichen `#slSrcBadge` + `slActiveFilters`, „Clear all“ und Suchsprung (`srFlt('slSrcRow','all')`) setzen zurück. Nicht gespeichert (wie die anderen Filter).
+- **Z2 Standardaktionen:** Daten `STD_ACTIONS=[{n,t,x,u?}]` zwischen `// STD_ACTIONS-START/-END` (vor `COND_DATA`), erzeugt von `tools/action_convert.py` aus `actions.json` (alle XPHB) + `variantrules.json` (Unarmed Strike, `u:1`); `t` = `aktion|bonus|reaktion|frei|varies`, Text über `class_extract.render`. Anzeige in `buildAbilities` als letzte Gruppe `standard` („Standard Actions“, `AB_GRP_EN.standard`), startet zugeklappt (`abGrpIsClosed`), Karten `.ab-std` mit `data-std`, id `std_<name>`, ohne Zähler. Unarmed Strike: `uaVals()` → Angriff STR + PB, Schaden `1+STR`; Monk (`clsLvlOf('Monk')`): Martial-Arts-Würfel aus `CLASS_TABLES.Monk` + besseres von STR/DEX (Hinweis „no armor/shield“); Tavern Brawler (Feat in `st.feats`): `1d4+STR`; Grapple/Shove DC 8 + Mod. + PB; Knöpfe `rlWpnBtns('rollUa',0,…)`, Wurf mit `wpn:1` (Krit-Features, Effekte B19).
+- **Z3 Spellbook:** `sbInfo()` zählt eigene Wizard-Zauber ab Grad 1 (`spClsOf`, ohne `auto`/`prep:'free'`), Richtwert 6 + 2 × (Wizard-Stufe − 1) aus dem XPHB-Text „Spellcasting“; Anzeige `sbTxt()` in `buildSpCount` (nur Wizard) und in der Multiclass-Zeile (`buildSpMc`), nie rot. `sbLvlHint(prev)` (Toast nach `chLvl(+1)`/`mcLv(+1)`, wenn die Wizard-Stufe stieg; Grad = höchster Platz der Wizard-Tabelle) – vorläufig, geht in Z4 Schritt 6 auf.
+
 ## B8. Prüfskript `tools/app_check.js`
 
 ```bash

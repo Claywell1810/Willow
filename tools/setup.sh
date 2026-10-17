@@ -6,7 +6,7 @@
 #   bash willow/tools/setup.sh zauber       # + spells/index.json, alle spells-*.json, gendata-Lookup nach src/
 #   bash willow/tools/setup.sh bestien      # + Bestiarium (+ objects.json) für BST_DATA, SPELL_STATBLOCKS, FEATURE_STATBLOCKS (+ spells)
 #   bash willow/tools/setup.sh rassen       # + races.json, spells-xphb/phb.json (race_convert.py, RACE_PICKS)
-#   bash willow/tools/setup.sh effekte      # + conditionsdiseases/variantrules/items-base.json (cond_convert.py, armor_convert.py, effect_convert.py, Paket E)
+#   bash willow/tools/setup.sh effekte      # + conditionsdiseases/variantrules/items-base/actions.json (cond_convert.py, armor_convert.py, effect_convert.py, Paket E; action_convert.py, Paket Z2)
 #   bash willow/tools/setup.sh neu          # + Quellen für neu_check.py (Paket N): alle Klassen aus class/index.json nach src/neu/, backgrounds.json, dazu klassen/zauber/rassen/bestien
 #   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen, echte Schriften (ui_shots.py, theme_shots.py)
 #   bash willow/tools/setup.sh alle         # alles
@@ -52,8 +52,8 @@ if has rassen; then
   echo "   Rassen-Quellen in src/ (races.json + spells-xphb/phb)"
 fi
 if has effekte; then
-  get conditionsdiseases.json; get variantrules.json; get items-base.json
-  echo "   Effekt-Quellen in src/ (conditionsdiseases.json, variantrules.json, items-base.json)"
+  get conditionsdiseases.json; get variantrules.json; get items-base.json; get actions.json   # actions.json: Standardaktionen (action_convert.py, Paket Z2)
+  echo "   Effekt-Quellen in src/ (conditionsdiseases.json, variantrules.json, items-base.json, actions.json)"
 fi
 if has bestien; then
   get bestiary/fluff-bestiary-xmm.json

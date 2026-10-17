@@ -509,7 +509,7 @@ const REGRESSION = [
       if (cs().style.display === 'none') return 'Kampfwerte-Karte unsichtbar';
       if (chip('Martial Arts') !== '1d8' || chip('Focus Points') !== '7' || chip('Unarmored Movement') !== '+15 ft.' || chip('Prof. Bonus') !== '+3') return 'Monk L7 Kampfwerte falsch: ' + cs().textContent;
       if (chip('Unarmored AC') !== '15') return 'Monk Unarmored AC ' + chip('Unarmored AC') + ' statt 15 (DEX 16, WIS 14)';
-      if (JSON.stringify(grps()) !== '["bonus","reaktion","passiv","weitere"]') return 'Monk-Gruppen: ' + JSON.stringify(grps());
+      if (JSON.stringify(grps().filter(k => k !== 'standard')) !== '["bonus","reaktion","passiv","weitere"]') return 'Monk-Gruppen: ' + JSON.stringify(grps()); // Paket Z2: „Standard Actions“ danach
       if (!inGrp('reaktion', 'Deflect Attacks') || !inGrp('passiv', 'Evasion') || !inGrp('passiv', 'Stunning Strike') || !inGrp('bonus', 'Martial Arts')) return 'Monk-Features fehlen/falsche Gruppe';
       if (cnt('Ability Score Improvement') || cnt('Monk Subclass') || cnt("Monk's Focus")) return 'Ausschlussliste/Tracker-Dopplung wirkt nicht (ASI, Monk Subclass, Monk\'s Focus)';
       if (cnt('Focus Points') !== 1) return 'Focus Points ' + cnt('Focus Points') + '× statt 1×';
@@ -557,7 +557,7 @@ const REGRESSION = [
       w.eval("st.abUses={};st.abGrpClosed={};document.getElementById('charName').textContent='Regressionstest'");
       // 1) „Weitere" am Ende, enthält die ausgeschlossenen Features, startet zugeklappt, Zustand wird gespeichert
       sel('Rogue', 'Thief (PHB)', 5);
-      const g = [...d.querySelectorAll('#abList .ab-grp')].map(x => x.dataset.grp);
+      const g = [...d.querySelectorAll('#abList .ab-grp')].map(x => x.dataset.grp).filter(k => k !== 'standard'); // Paket Z2: „Standard Actions“ steht dahinter
       if (g[g.length - 1] !== 'weitere') return 'Gruppe „Weitere" fehlt oder nicht am Ende: ' + JSON.stringify(g);
       for (const n of ["Thieves' Cant", 'Expertise', 'Ability Score Improvement']) if (!names('weitere').includes(n)) return n + ' fehlt in „Weitere"';
       if (names('passiv').includes('Expertise')) return 'Expertise noch in Passiv';
@@ -2496,6 +2496,12 @@ const REGRESSION = [
         if(['str','dex','con','int','wis','cha'].some(k=>typeof b[k]!=='number'))P.push(n+': Attribute');
         if(!Array.isArray(b.actions)||!Array.isArray(b.traits))P.push(n+': actions/traits');});
       Object.entries(SPELL_STATBLOCKS).concat(Object.entries(FEATURE_STATBLOCKS)).forEach(([k,L])=>(Array.isArray(L)?L:[L]).forEach(b=>{if(b&&b.n&&!b.type&&!b.ref&&!b.via)P.push('Stat-Block '+k+'|'+b.n+': type fehlt')}));`) },
+  { name: 'Paket N: Standardaktionen – STD_ACTIONS (action_convert.py): Pflichtfelder, Zeit, eindeutige Namen, XPHB-Pflichtliste, Unarmed Strike', datum: '17.10.2026',
+    run: ({ w }) => pflicht(w, `if(typeof STD_ACTIONS==='undefined'){P.push('STD_ACTIONS fehlt (action_convert.py --write)');return P;}const seen=new Set();
+      STD_ACTIONS.forEach(a=>{const n=a.n||'?';if(seen.has(n))P.push(n+': doppelt');seen.add(n);
+        if(!['aktion','bonus','reaktion','frei','varies'].includes(a.t))P.push(n+': Zeit '+a.t);if(!a.x||/\{@/.test(a.x))P.push(n+': Text');});
+      ['Attack','Dash','Disengage','Dodge','Help','Hide','Influence','Magic','Ready','Search','Study','Utilize','Opportunity Attack','Two-Weapon Fighting','Unarmed Strike'].forEach(n=>{if(!seen.has(n))P.push('fehlt: '+n);});
+      if(STD_ACTIONS.filter(a=>a.u).length!==1||!(STD_ACTIONS.find(a=>a.u)||{}).n==='Unarmed Strike')P.push('Unarmed Strike ohne u:1');`) },
   { name: 'Paket O1: Traglast – STR × 15 lb aus st.attrs, Größe, Powerful Build (Goliath, Custom), Anzeige lb statt kg', datum: '03.10.2026',
     run: ({w, d, sel}) => {
       sel('Fighter', '', 3); w.eval('hpAskSet(-1,0)'); // 04.10.2026: offene HP-Wahl erst auflösen
@@ -3356,6 +3362,77 @@ const REGRESSION = [
       if (!pl.length || pl[pl.length - 1] < 28) return 'Suchfeld ohne Platz für die Lupe (padding-left ' + pl + ')';
       if (!/\.search-wrap input\[type=search\]::-webkit-search-cancel-button[^{]*\{[^}]*display:none/.test(css)) return 'Browser-✕ von type=search nicht ausgeblendet';
       for (const id of ['webSearchIn', 'slQ', 'ftQ', 'bgQ', 'bstQ', 'ntQ']) { const i = d.getElementById(id); if (i && !d.getElementById(id + '-clear')) return id + ': eigenes ✕ fehlt'; }
+      return true;
+    } },
+  { name: 'Paket Z2: Actions-Tab – Gruppe „Standard Actions“ ganz unten (zugeklappt, st.abGrpClosed), alle STD_ACTIONS als Karten, Unarmed Strike: STR + PB / 1 + STR, Monk Martial Arts (DEX, Würfel), Tavern Brawler, Würfel-Knöpfe', datum: '17.10.2026',
+    run: ({ w, d, sel }) => {
+      if (w.eval('typeof STD_ACTIONS') === 'undefined' || w.eval('typeof uaVals') === 'undefined') return 'STD_ACTIONS/uaVals fehlt';
+      w.eval("st.mc=[];st.feats=[];st.abGrpClosed={};Object.assign(st.attrs,{STR:16,DEX:12,CON:14,INT:10,WIS:10,CHA:8})");
+      sel('Fighter', '', 5);
+      const grps = [...d.querySelectorAll('#abList .ab-grp')].map(g => g.dataset.grp);
+      if (grps[grps.length - 1] !== 'standard') return 'Gruppe „standard“ nicht ganz unten: ' + grps.join(',');
+      const box = d.querySelector('#abList .ab-grp-box[data-grp="standard"]');
+      if (!box || box.style.display !== 'none') return 'Standard-Gruppe nicht zugeklappt';
+      const n = w.eval('STD_ACTIONS.length'); if (box.querySelectorAll('.ab-std').length !== n) return box.querySelectorAll('.ab-std').length + ' Karten statt ' + n;
+      if (box.querySelector('.ab-uses,.ab-pip,.ab-pool')) return 'Standardaktion mit Zähler';
+      w.togAbGrp('standard'); if (w.eval('st.abGrpClosed.standard') !== false) return 'Zustand nicht in st.abGrpClosed';
+      const ua = () => d.querySelector('#abList .ab-std[data-std="Unarmed Strike"]');
+      const btn = k => (ua().querySelector('#rollUa' + k + '0') || {}).textContent || '';
+      if (!/Attack\s*\+6/.test(btn('A')) || !/Damage\s*1\+3/.test(btn('D'))) return 'Fighter 5 STR 16: ' + btn('A') + ' / ' + btn('D');
+      if (!/DC\s*14/.test(ua().textContent)) return 'Grapple/Shove DC nicht 14';
+      w.eval("st.feats=[{name:'Tavern Brawler',tag:'Feat',desc:''}]"); w.buildAbilities();
+      if (!/Damage\s*1d4\+3/.test(btn('D'))) return 'Tavern Brawler: ' + btn('D');
+      w.eval("st.feats=[];Object.assign(st.attrs,{STR:10,DEX:18})"); sel('Monk', '', 5);
+      const ma = w.eval("(CLASS_TABLES.Monk.rows.find(r=>+r.lvl===5)||{}).martial");
+      if (!new RegExp('Attack\\s*\\+7').test(btn('A')) || btn('D').indexOf(ma + '+4') < 0) return 'Monk 5 DEX 18: ' + btn('A') + ' / ' + btn('D') + ' (Martial Arts ' + ma + ')';
+      if (!/DEX/.test(ua().querySelector('.ua-vals').textContent)) return 'Monk-Basis ohne DEX';
+      w.rollUa(0, 0); const dl = d.getElementById('diceModal') || d.querySelector('.dice-modal,.rl-modal');
+      w.eval("Object.assign(st.attrs,{STR:10,DEX:10});st.abGrpClosed={}"); w.buildAbilities();
+      return true;
+    } },
+  { name: 'Paket Z3: Wizard-Spellbook – Zähler „Spellbook x/y“ (y = 6 + 2 × (Wizard-Stufe − 1), ohne Cantrips/Always Prepared/Free Casts, nie rot), Multiclass, Hinweis beim Stufenaufstieg', datum: '17.10.2026',
+    run: ({ w, d, sel }) => {
+      if (w.eval('typeof sbInfo') === 'undefined') return 'sbInfo fehlt';
+      w.eval('st.mc=[];st.mySpells=[]'); sel('Wizard', '', 5);
+      const W = JSON.parse(w.eval("JSON.stringify(ZB_SPELLS.filter(s=>(s.classes||[]).includes('Wizard')).map(s=>({name:s.name,grad:s.grad,school:s.school})))"));
+      const g1 = W.filter(s => s.grad > 0), c0 = W.find(s => s.grad === 0);
+      const add = (s, prep, x) => Object.assign({ name: s.name, grad: s.grad, school: s.school, prep, notes: '' }, x || {});
+      const box = () => { w.buildSpCount(); return d.getElementById('spCountBox').innerHTML; };
+      w.eval('st.mySpells=' + JSON.stringify([...g1.slice(0, 2).map(s => add(s, true)), ...g1.slice(2, 8).map(s => add(s, false)), add(c0, true), add(g1[8], true, { auto: 'Test' }), add(g1[9], 'free')]));
+      let h = box(); if (!/Spellbook <b>8\/14<\/b>/.test(h)) return 'Wizard 5: ' + h.replace(/<[^>]+>/g, '');
+      w.eval('st.mySpells=' + JSON.stringify(g1.slice(0, 20).map(s => add(s, false))));
+      h = box(); if (!/Spellbook <b>20\/14<\/b>/.test(h) || /spmc-over[^>]*>20\/14/.test(h)) return 'über Richtwert falsch dargestellt: ' + h;
+      sel('Cleric', '', 5); if (/Spellbook/.test(box())) return 'Spellbook beim Cleric';
+      // Multiclass: Cleric 3 + Wizard 2 → y = 8 in der Klassen-Zeile
+      w.eval("st.mySpells=[];st.mc=[{cls:'Wizard',sub:'',lvl:2}]"); sel('Cleric', '', 3); w.buildSpMc();
+      if (!/Spellbook\s*<b>0\/8<\/b>/.test(d.getElementById('spMcBox').innerHTML)) return 'Multiclass ohne Spellbook 0/8: ' + d.getElementById('spMcBox').textContent;
+      // Hinweis beim Aufstieg: Wizard 4 → 5 = Grad 3
+      w.eval('st.mc=[]'); sel('Wizard', '', 4); d.getElementById('toast').textContent = ''; w.chLvl(1);
+      if (!/Add 2 Wizard spells to your spellbook \(up to level 3\)/.test(d.getElementById('toast').textContent)) return 'kein Hinweis 4→5: ' + d.getElementById('toast').textContent;
+      d.getElementById('toast').textContent = ''; w.chLvl(-1); if (/spellbook/.test(d.getElementById('toast').textContent)) return 'Hinweis auch bei Stufe −1';
+      sel('Cleric', '', 4); d.getElementById('toast').textContent = ''; w.chLvl(1); if (/spellbook/.test(d.getElementById('toast').textContent)) return 'Hinweis beim Cleric';
+      w.eval('st.mySpells=[]');
+      return true;
+    } },
+  { name: 'Paket Z1: Spell List – Quellen-Filter (Knöpfe aus ZB_SPELLS[].src, Mehrfachauswahl, Abzeichen, Clear all)', datum: '17.10.2026',
+    run: ({ w, d, sel }) => {
+      if (w.eval('typeof slFSrc') === 'undefined') return 'slFSrc fehlt';
+      sel('Wizard', '', 20); w.eval("slFGrad='all';slFClass='all';slFSchool='all'"); const q = d.getElementById('slQ'); if (q) q.value = '';
+      const cnt = JSON.parse(w.eval('JSON.stringify(ZB_SPELLS.reduce((o,s)=>(o[s.src]=(o[s.src]||0)+1,o),{}))'));
+      const btn = [...d.querySelectorAll('#slSrcRow .fbtn')]; if (!btn.length) return 'keine Quellen-Knöpfe';
+      const vals = btn.map(b => b.dataset.val); if (vals[0] !== 'all') return 'erster Knopf nicht „All“';
+      const want = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || a.localeCompare(b));
+      if (JSON.stringify(vals.slice(1)) !== JSON.stringify(want)) return 'Knöpfe ≠ Quellen der Daten: ' + vals.slice(1).join(',');
+      const shown = () => { w.slRender(); return d.querySelectorAll('#slList .zb-card').length; };
+      const total = shown(); if (total !== w.eval('ZB_SPELLS.length')) return 'ohne Filter ' + total + ' Zauber';
+      const B = v => btn.find(b => b.dataset.val === v);
+      B('XGE').click(); if (shown() !== cnt.XGE) return 'XGE: ' + shown() + ' statt ' + cnt.XGE;
+      if (!/XGE/.test(d.getElementById('slSrcBadge').textContent) || !/XGE/.test(d.getElementById('slActiveFilters').textContent)) return 'Abzeichen ohne XGE';
+      if (!B('XGE').classList.contains('on') || B('all').classList.contains('on')) return 'Knopf-Zustand falsch';
+      B('TCE').click(); if (shown() !== cnt.XGE + cnt.TCE) return 'XGE+TCE: ' + shown();
+      B('XGE').click(); if (shown() !== cnt.TCE) return 'XGE abwählen: ' + shown();
+      w.slClearAllFilters(); if (w.eval('slFSrc.size') || !B('all').classList.contains('on') || d.getElementById('slSrcBadge').textContent) return 'Clear all setzt Quelle nicht zurück';
+      B('TCE').click(); B('all').click(); if (w.eval('slFSrc.size')) return '„All“ leert die Auswahl nicht';
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
