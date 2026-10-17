@@ -3435,6 +3435,58 @@ const REGRESSION = [
       B('TCE').click(); B('all').click(); if (w.eval('slFSrc.size')) return '„All“ leert die Auswahl nicht';
       return true;
     } },
+  { name: 'Paket Z4: Stufenaufstieg-Assistent – Knopf an der Charakterkarte, Schritte je Stufe (Subklasse, Features, ASI/Feat, Zauber, HP), Cancel stellt alles wieder her und speichert nichts, Apply = ein Undo-Schritt + ein Log-Eintrag, HP Average vorausgewählt, neue Klasse', datum: '17.10.2026',
+    run: async ({ w, d, sel }) => {
+      if (w.eval('typeof luOpen') === 'undefined') return 'luOpen fehlt';
+      const tick = () => new Promise(r => setTimeout(r, 0));
+      w.eval("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='Regressionstest'");
+      sel('Fighter', '', 3); w.eval("st.hpLv={Fighter:3};st.hpAsk=[];buildCharCard();autoSave()");
+      if (!d.querySelector('#ciCard .ci-lvup')) return 'Knopf „Level up“ fehlt an der Charakterkarte';
+      const saved0 = w.localStorage.getItem('dnd5e_chars'), hp0 = w.hpMaxVal();
+      w.luOpen(); if (!d.getElementById('luModal').classList.contains('on')) return 'Fenster nicht offen';
+      if (d.getElementById('lvl').value !== '4') return 'Stufe nicht +1: ' + d.getElementById('lvl').value;
+      const S = JSON.parse(w.eval('JSON.stringify(luSteps())'));
+      if (S.join() !== 'sub,asi,hp,sum') return 'Schritte Fighter 3→4 ohne Subklasse: ' + S.join();
+      if (w.hpMaxVal() !== hp0 + 6 + Math.floor((w.eval('st.attrs.CON') - 10) / 2)) return 'HP nicht mit Average: ' + hp0 + ' → ' + w.hpMaxVal();
+      if (w.eval('(st.hpAsk||[]).length')) return 'HP-Frage bleibt offen trotz Average';
+      w.luGo('asi'); w.luFtAsi(); await tick();
+      const c = () => [...d.querySelectorAll('#luBox .pk-chip')].find(b => b.dataset.o === 'STR');
+      c().click(); await tick(); c().click(); await tick();
+      if (w.eval("JSON.stringify(st.picks['fa:Ability Score Improvement'])") !== '["STR","STR"]') return 'ASI-Wahl im Assistenten fehlt';
+      if (w.localStorage.getItem('dnd5e_chars') !== saved0) return 'während des Assistenten gespeichert';
+      w.luCancel(1);
+      if (d.getElementById('lvl').value !== '3' || w.eval('st.feats.length') || w.eval("st.picks['fa:Ability Score Improvement']")) return 'Cancel stellt nicht wieder her';
+      if (w.localStorage.getItem('dnd5e_chars') !== saved0) return 'Cancel hat gespeichert';
+      // Apply: Subklasse + Feat → ein Undo-Schritt, ein Log-Eintrag
+      sel('Fighter', '', 2); w.eval("st.hpLv={Fighter:2};st.hpAsk=[];autoSave()");
+      const u0 = w.eval('_undo.length'), l0 = w.eval('(st.log||[]).length');
+      w.luOpen(); const sl = w.eval("CLASS_DATA.Fighter.subclassList"); w.luSub(0);
+      if (d.getElementById('subcls').value !== sl[0]) return 'Subklasse nicht gesetzt';
+      if (!JSON.parse(w.eval('JSON.stringify(luSteps())')).includes('feat')) return 'Features-Schritt fehlt nach Subklasse';
+      w.luGo('sum'); if (!/Fighter 2→3/.test(d.querySelector('#luBox .lu-big').textContent.replace(/\s/g, '').replace('Fighter2','Fighter 2'))) return 'Zusammenfassung: ' + d.querySelector('#luBox .lu-big').textContent;
+      w.luApply();
+      if (w.eval('_undo.length') !== u0 + 1) return 'Apply nicht genau ein Undo-Schritt: ' + (w.eval('_undo.length') - u0);
+      const L = JSON.parse(w.eval('JSON.stringify(st.log)')); const L1 = L.filter(x => /^⬆ Level up/.test(x.m)); if (L1.length !== 1 || L[L.length - 2] && /^⬆ Level up/.test(L[L.length - 2].m) || !/^⬆ Level up: Fighter 3/.test(L[L.length - 1].m) || !(L[L.length - 1].d && L[L.length - 1].d.list.length)) return 'Log-Eintrag falsch: ' + JSON.stringify(L.slice(-2)) + ' (l0 ' + l0 + ')';
+      const sv = JSON.parse(w.localStorage.getItem('dnd5e_chars')).Regressionstest; if (sv._f_lvl !== '3' || sv._f_subcls !== sl[0]) return 'Apply nicht gespeichert';
+      w.doUndo(); if (d.getElementById('lvl').value !== '2' || d.getElementById('subcls').value) return 'Undo nimmt den Aufstieg nicht zurück';
+      // Wizard: Zauber-Schritt, Spellbook, Zauber hinzufügen
+      w.eval('st.mySpells=[];st.zbAdded=new Set()'); sel('Wizard', 'School of Evocation (PHB)', 4); w.eval("st.hpLv={Wizard:4};st.hpAsk=[];autoSave()");
+      w.luOpen(); if (!JSON.parse(w.eval('JSON.stringify(luSteps())')).includes('spell')) return 'Wizard 4→5 ohne Zauber-Schritt';
+      w.luGo('spell'); if (!/Spellbook\s*0\/14/.test(d.querySelector('#luBox .lu-cnt').textContent) || !/level 3 spells/.test(d.querySelector('#luBox .lu-body').textContent)) return 'Zauber-Schritt: ' + d.querySelector('#luBox .lu-body').textContent.slice(0, 200);
+      w.luSpTab('3'); const r = d.querySelector('#luSpList .lu-add'); if (!r) return 'keine Grad-3-Zauber'; r.click(); await tick();
+      if (w.eval('st.mySpells.length') !== 1 || w.eval('st.mySpells[0].grad') !== 3) return 'Zauber nicht hinzugefügt';
+      if (w.eval("document.getElementById('toast').textContent").includes('spellbook')) return 'Z3-Toast im Assistenten';
+      w.luCancel(1); if (w.eval('st.mySpells.length')) return 'Cancel lässt Zauber stehen';
+      // Neue Klasse (Multiclass)
+      sel('Fighter', '', 3); w.eval("st.mc=[];st.hpLv={Fighter:3};st.hpAsk=[];autoSave()");
+      w.luOpen(); w.luOther(); w.luNew(); w.luPick('new', 'Rogue');
+      if (w.eval('JSON.stringify(st.mc)') !== '[{"cls":"Rogue","sub":"","lvl":1}]' || d.getElementById('lvl').value !== '3') return 'neue Klasse falsch: ' + w.eval('JSON.stringify(st.mc)');
+      w.luPick('start', 'Fighter'); if (w.eval('st.mc.length') || d.getElementById('lvl').value !== '4') return 'Wechsel zurück zur Startklasse falsch';
+      w.luCancel(1);
+      sel('Fighter', '', 20); w.buildCharCard(); if (!d.querySelector('#ciCard .ci-lvup').disabled) return 'Knopf bei Stufe 20 nicht gesperrt';
+      w.eval("st.feats=[];st.mySpells=[];st.picks={}");
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

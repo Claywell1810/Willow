@@ -168,6 +168,76 @@ input[type=number]{-moz-appearance:textfield}
 .ci-chip small{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);letter-spacing:.5px;margin-right:5px;text-transform:uppercase}
 .ci-chip.dim{color:var(--text3);border-style:dashed}
 .ci-warn{font-size:var(--fs-sm);color:var(--gold);margin-top:7px;line-height:1.4}
+/* Paket Z4: Stufenaufstieg-Assistent (Knopf an der Charakterkarte, Fenster von unten) */
+.ci-lvup{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;text-transform:uppercase;color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--bg3));border:1px solid var(--gold2);border-radius:10px;padding:6px 8px;min-width:60px;min-height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ci-lvup-i{font-size:18px;line-height:1;width:18px;height:18px}
+.ci-lvup:disabled{opacity:.35;cursor:default}
+.lu-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.72);align-items:flex-end;justify-content:center}
+.lu-modal.on{display:flex}
+.lu-sheet{display:flex;flex-direction:column;background:var(--bg1);background-image:var(--tex);background-size:var(--tex-size);border:1px solid var(--border);border-bottom:0;border-radius:16px 16px 0 0;width:100%;max-width:600px;height:calc(92vh / var(--zf,1));box-shadow:0 -6px 30px rgba(0,0,0,.6);overflow:hidden}
+.lu-head{display:flex;align-items:flex-start;gap:8px;padding:14px 16px 8px}
+.lu-ttl{flex:1;min-width:0}
+.lu-t{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.lu-cls{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);line-height:1.25;overflow-wrap:anywhere}
+.lu-cls b{color:var(--text);font-weight:700;margin-left:2px}
+.lu-sub{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-top:2px}
+.lu-arrow{color:var(--text3);margin:0 4px;font-weight:400}
+.lu-x{flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:16px;cursor:pointer}
+.lu-mini{flex:0 0 auto;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:6px 10px;min-height:34px;cursor:pointer;white-space:nowrap}
+.lu-mini.warn{color:var(--red);border-color:color-mix(in srgb,var(--red) 55%,transparent)}
+.lu-steps{display:flex;gap:6px;overflow-x:auto;padding:2px 16px 10px;scrollbar-width:none;border-bottom:1px solid var(--border2)}
+.lu-steps::-webkit-scrollbar{display:none}
+.lu-st{flex:0 0 auto;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;padding:5px 10px;border-radius:14px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap}
+.lu-st.done{color:var(--text2);border-color:var(--border)}
+.lu-st.on{color:var(--bg0);background:var(--gold);border-color:var(--gold)}
+.lu-st:disabled{opacity:.4}
+.lu-ask{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 16px 0;padding:8px 10px;border:1px solid var(--gold);border-radius:8px;background:var(--bg2);font-size:var(--fs-sm);color:var(--text)}
+.lu-ask span{flex:1 1 160px}
+.lu-body{flex:1;min-height:0;overflow-y:auto;padding:12px 16px 16px;-webkit-overflow-scrolling:touch}
+.lu-foot{display:flex;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border2)}
+.lu-b{flex:1;min-height:46px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:.5px;cursor:pointer}
+.lu-b.pri{background:color-mix(in srgb,var(--gold) 24%,var(--bg3));border-color:var(--gold);color:var(--text)}
+.lu-b:disabled{opacity:.4;cursor:default}
+.lu-h{font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:6px 0 8px}
+.lu-h2{margin-top:14px}
+.lu-txt{font-size:var(--fs-txt);color:var(--desc);line-height:1.5}
+.lu-note{font-size:var(--fs-sm);color:var(--text3);line-height:1.45;margin:6px 0}
+.lu-warn{font-size:var(--fs-sm);color:var(--gold);line-height:1.45;margin:6px 0}
+.lu-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:8px;color:var(--text);font-family:inherit;cursor:pointer;min-height:48px}
+.lu-opt.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--bg2))}
+.lu-opt:disabled:not(.on){opacity:.45;cursor:default}
+.lu-opt-n{flex:1;min-width:0;font-family:'Cinzel',serif;font-size:var(--fs-md);overflow-wrap:anywhere}
+.lu-opt-s{display:block;font-family:'Crimson Pro',serif;font-size:var(--fs-sm);color:var(--text2);margin-top:2px}
+.lu-opt-r{flex:0 0 auto;font-family:'Cinzel',serif;color:var(--gold);white-space:nowrap}
+.lu-ncls{margin:2px 0 8px}
+.lu-det{margin:4px 0 10px;font-size:var(--fs-sm);color:var(--text2)}
+.lu-det summary{cursor:pointer;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;padding:4px 0}
+.lu-chosen{border:1px solid var(--gold);border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--gold) 8%,var(--bg2))}
+.lu-chosen-h{display:flex;align-items:center;gap:8px;justify-content:space-between;font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:6px}
+.lu-chosen-h>span{min-width:0;overflow-wrap:anywhere}
+.lu-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.lu-q{width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:var(--fs-txt);padding:8px 10px;min-height:40px}
+.lu-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2)}
+.lu-row-n{flex:1;min-width:0;font-size:var(--fs-txt);color:var(--text);cursor:pointer;line-height:1.3;overflow-wrap:anywhere}
+.lu-row-n small{display:block;color:var(--text3);font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.3px;margin-top:1px}
+.lu-add{flex:0 0 auto;min-width:42px;min-height:36px;padding:0 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--green) 45%,transparent);background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green);font-family:'Cinzel',serif;font-size:var(--fs-sm);cursor:pointer}
+.lu-add.sym{font-family:inherit;font-size:20px;line-height:1;padding:0 8px}
+.lu-add.on{background:var(--green);color:var(--bg0);border-color:var(--green)}
+.lu-desc{font-size:var(--fs-sm);color:var(--desc);line-height:1.5;padding:4px 0 10px;border-bottom:1px solid var(--border2)}
+.lu-cnt{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
+.lu-cn{font-family:'Cinzel',serif;font-size:var(--fs-xs);padding:4px 10px;border-radius:12px;border:1px solid var(--border2);color:var(--text2)}
+.lu-cn b{color:var(--text)}
+.lu-cn.open{border-color:var(--gold);color:var(--gold)}
+.lu-cn.ok{border-color:color-mix(in srgb,var(--green) 60%,transparent);color:var(--green)}
+.lu-own{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text)}
+.lu-own span{flex:1}
+.lu-own.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--bg2))}
+.lu-hpres{font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text2);text-align:center;margin:14px 0 4px}
+.lu-hpres b{color:var(--text);font-size:22px}
+.lu-big{font-family:'Cinzel',serif;font-size:26px;color:var(--gold);text-align:center;margin:6px 0 2px}
+.lu-list{margin:0 0 6px;padding:0 0 0 18px;font-size:var(--fs-txt);color:var(--text2);line-height:1.55}
+.lu-open li{color:var(--gold)}
+.lu-gain{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;margin-bottom:8px}
 .mc-box{margin-top:12px;border-top:1px solid var(--border2);padding-top:10px}
 .mc-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:6px}
 .mc-head .mc-tot{color:var(--text3);letter-spacing:.5px}
@@ -4296,7 +4366,7 @@ function sbInfo(){const wl=clsLvlOf('Wizard');if(!wl)return null;const X=spMcX()
   return {n,y:6+2*(wl-1),wl};}
 function sbTxt(){const b=sbInfo();return b?'<span title="Spellbook: 6 + 2 per Wizard level after 1 (guideline, copied spells allowed)">Spellbook <b>'+b.n+'/'+b.y+'</b></span>':'';}
 // Hinweis beim Stufenaufstieg (vorläufig bis Z4): Wizard-Stufe gestiegen → +2 Zauber bis zum höchsten Grad mit Plätzen (Wizard-Tabelle)
-function sbLvlHint(prev){const wl=clsLvlOf('Wizard');if(!(wl>prev&&wl>1))return;
+function sbLvlHint(prev){if(_lu)return;const wl=clsLvlOf('Wizard');if(!(wl>prev&&wl>1))return; // Paket Z4: im Assistenten Schritt „Spells“
   const t=CLASS_TABLES.Wizard,r=t&&(t.rows||[]).find(x=>+x.lvl===wl);let X=0;((r&&r.slots)||[]).forEach((n,i)=>{if(n>0)X=i+1;});
   if(X)showToast('📘 Add 2 Wizard spells to your spellbook (up to level '+X+')',5000);}
 function buildSpCount(){const el=document.getElementById('spCountBox');if(!el)return;
@@ -7386,7 +7456,7 @@ function buildCharCard(){
     :'<div class="ci-cls ci-none">No class chosen</div>';
   h+='<div class="ci-lv">'+(multi?'Character Level <b>'+T+'</b>':'Level <b>'+T+'</b>')+' · PB <b>+'+prof()+'</b>'+((+st.profAdj||0)?' <span class="ci-src">adjusted</span>':'')+'</div>';
   C.filter(c=>c.sub).forEach(c=>{const s=mcSubParts(c.cls,c.sub);h+='<div class="ci-sub">'+(multi?'<span class="ci-sc">'+fdEsc(c.cls)+'</span>':'')+fdEsc(s.n)+(s.src?'<span class="ci-src">'+fdEsc(s.src)+'</span>':'')+'</div>';});
-  h+='</div></div>';   // ci-main, ci-top; Chips und Hinweise über die ganze Breite
+  h+='</div>'+luBtnHtml()+'</div>';   // ci-main, Paket Z4: Knopf „Level up“, ci-top; Chips und Hinweise über die ganze Breite
   const rn=mcRaceName(),bg=(document.getElementById('bg')?.value||'').trim(),al=document.getElementById('align')?.value||'';
   h+='<div class="ci-chips">'
     +(rn?'<button class="ci-chip" onclick="ciOpenEdit()"><small>Race</small>'+fdEsc(rn)+'</button>':'<button class="ci-chip dim" onclick="ciOpenEdit()">+ Race</button>')
@@ -10000,6 +10070,7 @@ function confirmNewChar(){
   }
 }
 function resetUI(){
+  if(typeof _lu!=='undefined'&&_lu){_lu=null;document.getElementById('luModal')?.classList.remove('on');} // Paket Z4
   _crEdit=null;
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
@@ -10541,6 +10612,7 @@ let _saving = false;
 document.addEventListener('input', autoSave);
 function autoSave(e){
   if(_saving) return;
+  if(_lu){if(apSync())buildMySpells();const t=e&&e.target;if(!(t&&t.closest&&t.closest('[data-luq]')))luSoon();return;} // Paket Z4: Assistent offen → nichts speichern, Fenster neu zeichnen (nicht beim Tippen in der Suche)
   if(apSync()) buildMySpells();   // Paket H: Always Prepared folgt Klasse/Subklasse/Stufe/Wahl im selben Schritt
   const ev=(e&&e.target)?e:(typeof window!=='undefined'?window.event:null); // auch oninput="…;autoSave()" kennt so das Feld
   const name = document.getElementById('charName')?.textContent.trim();
@@ -10747,6 +10819,294 @@ function ciGoChoice(wo){
   const el=document.getElementById(m[0]);if(el&&el.scrollIntoView)el.scrollIntoView({block:'start'});
 }
 
+// ===== Paket Z4 (17.10.2026): Stufenaufstieg-Assistent =====
+// Knopf „Level up“ an der Charakterkarte (Z4-E1) → Fenster mit Schritten, nur was auf dieser Stufe zu tun ist:
+// Klasse (bei Multiclass bzw. „Other class…“) → Subklasse → neue Features mit Wahlen → ASI/Feat → Zauber → Hit Points → Zusammenfassung.
+// Schreibt live in dieselben Felder wie Info-/Spells-/Feats-Tab (Z4-E3: st.picks, st.feats, st.mySpells, st.hpRoll …), speichert aber erst
+// beim Übernehmen: autoSave ist gesperrt, solange _lu gesetzt ist; „Cancel“ stellt den Stand vom Öffnen wieder her (applyState wie Undo).
+// Übernehmen = ein Undo-Schritt und ein Log-Eintrag „⬆ Level up: …“ (Änderungen aufklappbar). Nur je +1 (Z4-E4), HP: Average vorausgewählt (Z4-E2).
+var _lu=null,_luQ=0,_luR=false;
+const LU_STEP={cls:'Class',sub:'Subclass',feat:'Features',asi:'ASI / Feat',spell:'Spells',hp:'Hit Points',sum:'Summary'};
+function luBtnHtml(){return curCls()?'<button type="button" class="ci-lvup" onclick="luOpen()"'+(totLvl()>=20?' disabled':'')+' aria-label="Level up"><svg class="ci-lvup-i" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12 6-6 6 6"/><path d="m6 18 6-6 6 6"/></svg>Level up</button>':'';}
+function luSoon(){if(_luQ||_luR)return;_luQ=1;Promise.resolve().then(()=>{_luQ=0;if(_lu)luRender();});}
+function luRestore(S){
+  const y=window.scrollY||0,lg=st.log,t=JSON.parse(JSON.stringify(S));
+  _saving=true;
+  try{Object.keys(st).forEach(k=>{if(k!=='log'&&!(k in t))delete st[k];});applyState(t);}finally{st.log=lg;_saving=false;}
+  if(Math.abs((window.scrollY||0)-y)>1){try{window.scrollTo(0,y);}catch(e){}}
+}
+function luAutoNames(){return (st.mySpells||[]).filter(s=>s&&s.auto).map(s=>s.name);}
+function luOpen(){
+  if(_lu||!curCls()||totLvl()>=20)return;
+  hpSync();autoSave(); // Max HP aktuell, offene Eingaben vorher sichern
+  const hm=document.getElementById('hpM');
+  _lu={S0:_undoStrip(collectState()),C0:charClasses().map(c=>({cls:c.cls,sub:c.sub,lvl:c.lvl})),multi0:isMulti(),hp0:parseInt(hm&&hm.value)||0,
+    auto0:luAutoNames(),t:null,step:'',pickCls:false,hp:null,feat:null,sp:[],spTab:null,spOpen:-1,spQ:'',ftCat:null,ftQ:'',ftOpen:-1,ask:false};
+  luSet({kind:'start',cls:curCls()});
+  _lu.step=luSteps()[0];
+  document.getElementById('luModal').classList.add('on');
+  luRender();
+}
+// Ziel des Aufstiegs setzen: {kind:'start'|'mc'|'new', cls}; ein Wechsel stellt zuerst den Stand vom Öffnen wieder her
+function luSet(t){
+  const L=_lu;if(!L)return;
+  if(L.t)luRestore(L.S0);
+  Object.assign(L,{t,hp:null,feat:null,sp:[],spTab:null,spOpen:-1,spQ:'',ftCat:null,ftQ:'',ftOpen:-1,ask:false});
+  if(t.kind==='start')chLvl(1);
+  else if(t.kind==='mc'){const i=mcList().findIndex(m=>m.cls===t.cls);if(i>=0)mcLv(i,1);}
+  else if(t.cls){if(!Array.isArray(st.mc))st.mc=[];st.mc.push({cls:t.cls,sub:'',lvl:1});mcChanged();}
+  luHp('avg');
+}
+function luCur(){const t=_lu&&_lu.t;return t&&t.cls?charClasses().find(c=>c.cls===t.cls)||null:null;}
+function luSub0(cls){const c=(_lu.C0||[]).find(x=>x.cls===cls);return c?c.sub:'';}
+function luSubLvl(cls){const cd=CLASS_DATA[cls];if(!cd)return 0;const f=(cd.base||[]).find(x=>/ Subclass$/.test(x.name));if(f)return +f.lvl;
+  const L=Object.values(cd.subclass||{}).filter(a=>a&&a.length).map(a=>Math.min(...a.map(x=>+x.lvl)));return L.length?Math.min(...L):0;}
+function luFeats(c){
+  const cd=CLASS_DATA[c.cls]||{},skip=f=>/^(Ability Score Improvement|Epic Boon)$/.test(f.name)||/ Subclass$/.test(f.name);
+  const sk=c.sub?clsSubKey(cd.subclass,c.sub):null;
+  return {base:(cd.base||[]).filter(f=>+f.lvl===c.lvl&&!skip(f)),sub:sk?(cd.subclass[sk]||[]).filter(f=>+f.lvl===c.lvl):[],sk};
+}
+function luAsiF(c){return ((CLASS_DATA[c.cls]||{}).base||[]).find(f=>+f.lvl===c.lvl&&/^(Ability Score Improvement|Epic Boon)$/.test(f.name))||null;}
+function luMaxG(cls,sub,lvl){if(lvl<1)return 0;let g=0;clsSlotRow(cls,sub,lvl).forEach((n,i)=>{if(n>0)g=i+1;});
+  if(!g){const t=CLASS_TABLES[cls],r=t&&(t.rows||[]).find(x=>+x.lvl===lvl),e=t&&(t.extra||[]).find(x=>/slot level/i.test(String(x.l)));if(r&&e)g=parseInt(r[e.k])||0;}
+  return g;}
+function luSpInfo(c){
+  const X=spMcX(),n=spClsCounts(c,X),p=c.lvl>1?spClsCounts(Object.assign({},c,{lvl:c.lvl-1}),X):{prep:null,cant:null};
+  const g=luMaxG(c.cls,c.sub,c.lvl),g0=luMaxG(c.cls,c.sub,c.lvl-1),sb=c.cls==='Wizard'?sbInfo():null;
+  const a0=new Set(_lu.auto0),autos=luAutoNames().filter(x=>!a0.has(x));
+  const needC=n.cant!==null?Math.max(0,n.cant-n.cc):0,needP=n.prep!==null?Math.max(0,n.prep-n.pc):0,needB=sb?Math.max(0,sb.y-sb.n):0;
+  const caster=n.cant!==null||n.prep!==null||g>0;
+  const show=autos.length>0||caster&&(needC>0||needP>0||needB>0||g>g0||(n.cant||0)>(p.cant||0)||(n.prep||0)>(p.prep||0)||!!sb);
+  return {n,p,g,g0,sb,autos,needC,needP,needB,caster,show};
+}
+function luSteps(){
+  const L=_lu,c=luCur(),r=[];
+  if(L.multi0||L.pickCls||L.t.kind==='new')r.push('cls');
+  if(!c)return r.length?r:['cls'];
+  const sl=luSubLvl(c.cls);
+  if(sl&&c.lvl>=sl&&!luSub0(c.cls)&&((CLASS_DATA[c.cls]||{}).subclassList||[]).length)r.push('sub');
+  const F=luFeats(c);if(F.base.length||F.sub.length||L.t.kind==='new')r.push('feat');
+  if(luAsiF(c))r.push('asi');
+  if(luSpInfo(c).show)r.push('spell');
+  if(hdDieOf(c.cls))r.push('hp');
+  r.push('sum');return r;
+}
+function luGo(s){if(!_lu)return;_lu.step=s;_lu.ask=false;_lu.spOpen=-1;const b=document.querySelector('#luBox .lu-body');if(b)b.scrollTop=0;luRender();}
+function luNext(){const L=_lu;if(!L)return;const S=luSteps(),i=S.indexOf(L.step);
+  if(L.step==='sum'){luApply();return;}
+  if(!luCur()){showToast('Choose a class first');return;}
+  luGo(S[Math.min(S.length-1,i+1)]);}
+function luBack(){const L=_lu;if(!L)return;const S=luSteps(),i=S.indexOf(L.step);if(i>0)luGo(S[i-1]);}
+function luOther(){if(!_lu)return;_lu.pickCls=true;luGo('cls');}
+function luPick(kind,cls){const L=_lu;if(!L)return;if(L.t&&L.t.kind===kind&&L.t.cls===cls)return;luSet({kind,cls});luRender();}
+function luNew(){const L=_lu;if(!L)return;if(L.t.kind!=='new')luSet({kind:'new',cls:''});luRender();}
+// Subklasse (Startklasse: Feld #subcls, weitere Klasse: st.mc); erneut antippen = keine Wahl
+function luSub(i){const c=luCur();if(!c)return;const sl=(CLASS_DATA[c.cls]||{}).subclassList||[];let v=sl[i];if(v==null)return;if(v===c.sub)v='';
+  if(c.start){const el=document.getElementById('subcls');if(el){el.value=v;onSubclsChange();autoSave();}}
+  else{const j=mcList().findIndex(m=>m.cls===c.cls);if(j>=0)mcSet(j,'sub',v);}
+  luRender();}
+// Hit Points: Average (Vorauswahl), Wurf (einmal, danach fest) oder eigener Wurf; schreibt st.hpRoll wie der Kasten unter den HP
+function luHp(m,v){
+  const L=_lu,c=luCur();if(!L||!c)return;const d=hdDieOf(c.cls);if(!d)return;
+  if(L.hp&&L.hp.m==='roll')return;
+  const R=st.hpRoll||(st.hpRoll={});
+  if(m==='avg'){if(R[c.cls])delete R[c.cls][c.lvl];L.hp={m:'avg'};}
+  else{let r=m==='roll'?1+Math.floor(Math.random()*d):parseInt(v);if(!(r>=1)){luRender();return;}r=Math.min(d,r);(R[c.cls]||(R[c.cls]={}))[c.lvl]=r;L.hp={m,v:r};}
+  st.hpAsk=(st.hpAsk||[]).filter(x=>!(x.c===c.cls&&x.l===c.lvl));
+  hpSync();if(document.getElementById('luModal')?.classList.contains('on'))luRender();
+}
+// ASI / Feat: der Assistent fügt genau einen Feat hinzu (letztes Exemplar dieses Namens), „Change“ nimmt ihn wieder weg
+function luFtIdx(){const f=_lu&&_lu.feat;if(!f)return -1;for(let i=st.feats.length-1;i>=0;i--)if(st.feats[i].tag==='Feat'&&st.feats[i].name===f)return i;return -1;}
+function luFtDrop(){const L=_lu;if(!L||!L.feat)return;const i=luFtIdx(),n=L.feat;L.feat=null;if(i>=0){ftDropAt(i);ftAfter(n);}}
+function luFtPick(i){const L=_lu,ft=FT_FEATS[i];if(!L||!ft)return;luFtDrop();ftAddInst(ft.n,ft.d);L.feat=ft.n;L.ftOpen=-1;luRender();}
+function luFtAsi(){const i=FT_FEATS.findIndex(f=>f.n==='Ability Score Improvement'&&f.src==='XPHB');luFtPick(i>=0?i:FT_FEATS.findIndex(f=>f.n==='Ability Score Improvement'));}
+function luFtChange(){luFtDrop();luRender();}
+function luFtTog(i){if(!_lu)return;_lu.ftOpen=_lu.ftOpen===i?-1:i;luFtList();}
+function luFtCat(k){if(!_lu)return;_lu.ftCat=k;luRender();}
+function luFtList(){
+  const el=document.getElementById('luFtList'),L=_lu;if(!el||!L)return;
+  const T=totLvl(),q=L.ftQ.toLowerCase().trim(),cat=L.ftCat||'G',own=new Set(st.feats.filter(f=>f.tag==='Feat').map(f=>f.name));
+  const F=[];FT_FEATS.forEach((ft,i)=>{if(ft.n==='Ability Score Improvement'||(own.has(ft.n)&&!ft.rep)||ftMinLvl(ft)>T)return;
+    if(!(cat==='all'||ft.cat===cat||(cat==='FS'&&String(ft.cat).startsWith('FS'))))return;
+    if(q&&!ft.n.toLowerCase().includes(q))return;F.push(i);});
+  el.innerHTML=F.length?F.map(i=>{const ft=FT_FEATS[i],on=L.ftOpen===i;
+    return '<div class="lu-row"><div class="lu-row-n" onclick="luFtTog('+i+')">'+fdEsc(ft.n)+'<small>'+(ft.pre?fdEsc(ft.pre)+' · ':'')+fdEsc(ft.src)+'</small></div>'
+      +'<button type="button" class="lu-add" onclick="luFtPick('+i+')" aria-label="Choose '+pkEsc(ft.n)+'">Choose</button></div>'
+      +(on?'<div class="lu-desc">'+fmtDesc(faDesc(ft))+'</div>':'');}).join('')
+    :'<div class="lu-note">No matching feats.</div>';
+}
+// Zauber: Kandidaten = Liste der aufsteigenden Klasse, Cantrips bzw. Grad ≤ höchster eigener Platz, noch nicht in My Spells
+function luSpCands(c,I){
+  const base=CLASS_SPELL_MAP[c.cls]||[c.cls],L=_lu,mine=new Set((st.mySpells||[]).map(s=>String(s.name).toLowerCase())),add=new Set(L.sp),q=L.spQ.toLowerCase().trim();
+  const okG=g=>q?((g===0&&I.n.cant!==null)||(g>=1&&g<=I.g)):(L.spTab==='C'?g===0:g===+L.spTab);
+  return ZB_SPELLS.map((s,i)=>({s,i})).filter(({s})=>(s.classes||[]).some(x=>base.includes(x))&&okG(+s.grad)&&(add.has(s.name)||!mine.has(String(s.name).toLowerCase()))&&(!q||s.name.toLowerCase().includes(q)))
+    .sort((a,b)=>a.s.grad-b.s.grad||a.s.name.localeCompare(b.s.name));
+}
+function luSpTab(t){if(!_lu)return;_lu.spTab=t;_lu.spOpen=-1;luRender();}
+function luSpOpen(i){if(!_lu)return;_lu.spOpen=_lu.spOpen===i?-1:i;luSpList();}
+function luSpTog(i){
+  const L=_lu,c=luCur(),s=ZB_SPELLS[i];if(!L||!c||!s)return;
+  if(L.sp.includes(s.name)){const j=st.mySpells.findIndex(x=>x&&!x.auto&&x.name===s.name);if(j>=0)st.mySpells.splice(j,1);st.zbAdded.delete(i);L.sp=L.sp.filter(x=>x!==s.name);}
+  else{const I=luSpInfo(c),prep=+s.grad===0?true:(c.cls==='Wizard'?I.n.pc<(I.n.prep||0):true),o={name:s.name,grad:s.grad,school:s.school,prep,notes:''};
+    if(isMulti())o.cls=c.cls;st.mySpells.push(o);st.zbAdded.add(i);L.sp.push(s.name);}
+  buildMySpells();autoSave();
+}
+function luSpList(){
+  const el=document.getElementById('luSpList'),L=_lu,c=luCur();if(!el||!L||!c)return;
+  const C=luSpCands(c,luSpInfo(c));
+  el.innerHTML=C.length?C.map(({s,i})=>{const on=L.sp.includes(s.name);
+    return '<div class="lu-row"><div class="lu-row-n" onclick="luSpOpen('+i+')">'+fdEsc(s.name)+'<small>'+(+s.grad?'L'+s.grad+' · ':'')+fdEsc(s.school||'')+' · '+fdEsc(s.src||'')+'</small></div>'
+      +'<button type="button" class="lu-add sym'+(on?' on':'')+'" onclick="luSpTog('+i+')" aria-label="'+(on?'Remove ':'Add ')+pkEsc(s.name)+'">'+(on?'✓':'+')+'</button></div>'
+      +(L.spOpen===i?'<div class="lu-desc">'+fmtDesc(s.desc||'')+(s.higher?'\n'+fmtDesc(s.higher):'')+'</div>':'');}).join('')
+    :'<div class="lu-note">No more spells of this level on your list.</div>';
+}
+// Zusammenfassung: Änderungen gegenüber dem Stand vom Öffnen (wie Log), offene Wahlen
+function luMsgs(){try{return _diffSnaps(_lu.S0,collectState()).map(x=>typeof x==='string'?x:x.m).filter(Boolean);}catch(e){return [];}}
+function luOpenList(){
+  const c=luCur(),S=luSteps(),r=[];if(!c)return r;
+  if(S.includes('sub')&&!c.sub)r.push('Subclass not chosen');
+  if(S.includes('asi')){const a=luAsiF(c);if(!_lu.feat)r.push(a.name+': no feat chosen');
+    else{const n=_lu.feat,inst=st.feats.filter(f=>f.tag==='Feat'&&f.name===n).length-1;if(faPending(n,inst))r.push(n+': choose ability scores');if(fsPending(n))r.push(n+': choose spells');}}
+  try{pkOpen().forEach(x=>r.push(x.txt));}catch(e){}
+  if(S.includes('spell')){const I=luSpInfo(c);
+    if(I.needC)r.push('Cantrips '+I.n.cc+'/'+I.n.cant);if(I.needP)r.push('Prepared spells '+I.n.pc+'/'+I.n.prep);if(I.needB)r.push('Spellbook '+I.sb.n+'/'+I.sb.y);}
+  return r;
+}
+function luTitle(c){return c.cls+' '+c.lvl+(c.sub&&!luSub0(c.cls)?' ('+mcSubParts(c.cls,c.sub).n+')':'');}
+function luApply(){
+  const L=_lu,c=luCur();if(!L||!c)return;
+  const title=luTitle(c);
+  _lu=null;document.getElementById('luModal').classList.remove('on');
+  if(apSync())buildMySpells();
+  const name=document.getElementById('charName')?.textContent.trim();
+  if(name){
+    const snap=collectState();
+    if(_lastSnapName===name&&_lastSnap){
+      const msgs=_diffSnaps(_lastSnap,snap).map(x=>typeof x==='string'?x:x.m).filter(Boolean);
+      if(_undoSig(_lastSnap)!==_undoSig(snap))_undoRecord(_lastSnap,null);
+      if(msgs.length)_pushLog(name,[{m:'⬆ Level up: '+title,d:{list:msgs}}]);
+    }else _undoClear();
+    const chars=getAllChars();snap.log=(chars[name]&&chars[name].log)||snap.log||[];chars[name]=snap;lsPut(chars);
+    _lastSnap=JSON.parse(JSON.stringify(snap));_lastSnapName=name;
+  }
+  buildCharCard();showToast('⬆ '+title);
+}
+function luCancel(force){
+  const L=_lu;if(!L)return;
+  if(!force&&luSteps().indexOf(L.step)>0&&!L.ask){L.ask=true;luRender();return;}
+  _lu=null;document.getElementById('luModal').classList.remove('on');
+  luRestore(L.S0);showToast('Level up cancelled');
+}
+function luKeep(){if(!_lu)return;_lu.ask=false;luRender();}
+// ── Anzeige ──
+function luStepCls(L,c){
+  let h='<div class="lu-h">Which class gains a level?</div>';
+  L.C0.forEach(x=>{const on=L.t.kind!=='new'&&L.t.cls===x.cls,s=x.sub?mcSubParts(x.cls,x.sub).n:'';
+    h+='<button type="button" class="lu-opt'+(on?' on':'')+'" onclick="luPick(\''+(x.cls===L.C0[0].cls?'start':'mc')+'\',\''+pkEsc(x.cls)+'\')"><span class="lu-opt-n">'+fdEsc(x.cls)+(s?'<span class="lu-opt-s">'+fdEsc(s)+'</span>':'')+'</span><span class="lu-opt-r">'+x.lvl+' → '+(x.lvl+1)+'</span></button>';});
+  const nw=L.t.kind==='new';
+  h+='<button type="button" class="lu-opt'+(nw?' on':'')+'" onclick="luNew()"><span class="lu-opt-n">+ New class<span class="lu-opt-s">Multiclass: level 1 in another class</span></span></button>';
+  if(nw){const used=new Set(L.C0.map(x=>x.cls)),G=calcGrants();
+    h+='<div class="pk-chips lu-ncls">'+allClasses().filter(k=>!used.has(k)).map(k=>{const r=mcReq(k,G);
+      return '<button type="button" class="pk-chip'+(L.t.cls===k?' on':'')+'" onclick="luPick(\'new\',\''+pkEsc(k)+'\')">'+fdEsc(k)+(r&&!r.ok?'<small>⚠</small>':'')+'</button>';}).join('')+'</div>';
+    if(c){const bad=charClasses().map(x=>({x,r:mcReq(x.cls,G)})).filter(y=>y.r&&!y.r.ok);
+      h+=bad.length?'<div class="lu-warn">⚠ Multiclassing needs '+bad.map(y=>fdEsc(y.x.cls+': '+y.r.txt+' (you have '+y.r.have+')')).join('; ')+'.</div>'
+        :'<div class="lu-note">✓ Ability score requirements met.</div>';}
+    else h+='<div class="lu-note">Choose the new class.</div>';}
+  return h;
+}
+function luStepSub(L,c){
+  const sl=(CLASS_DATA[c.cls]||{}).subclassList||[];
+  let h='<div class="lu-h">Choose your '+fdEsc(c.cls)+' subclass</div><div class="lu-scl">'+sl.map((o,i)=>{const p=mcSubParts(c.cls,o);
+    return '<button type="button" class="lu-opt'+(o===c.sub?' on':'')+'" onclick="luSub('+i+')"><span class="lu-opt-n">'+fdEsc(p.n)+'</span>'+(p.src?'<span class="ci-src">'+fdEsc(p.src)+'</span>':'')+'</button>';}).join('')+'</div>';
+  if(c.sub){const F=luFeats(c);h+='<div class="lu-note">At level '+c.lvl+': '+(F.sub.length?fdEsc(F.sub.map(f=>f.name).join(', ')):'no subclass features')+' – shown on the next step.</div>';}
+  return h;
+}
+function luStepFeat(L,c){
+  const F=luFeats(c);let h='';
+  if(L.t.kind==='new'){const g=mcGainHtml(c.cls);if(g)h+='<div class="lu-h">Proficiencies</div><div class="lu-txt lu-gain">'+g+'</div>';}
+  if(F.base.length)h+='<div class="lu-h">'+fdEsc(c.cls)+' '+c.lvl+'</div>'+loreFeatHtml(c.cls,'base',{[c.lvl]:F.base},c.lvl,false);
+  if(F.sub.length)h+='<div class="lu-h">'+fdEsc(mcSubParts(c.cls,c.sub).n)+'</div>'+loreFeatHtml(c.cls,F.sk,{[c.lvl]:F.sub},c.lvl,true);
+  if(!F.base.length&&!F.sub.length&&L.t.kind!=='new')h+='<div class="lu-note">No new features at this level.</div>';
+  return h;
+}
+function luStepAsi(L,c){
+  const a=luAsiF(c),eb=a.name==='Epic Boon';
+  let h='<div class="lu-h">'+fdEsc(a.name)+'</div><details class="lu-det"><summary>What this level gives</summary><div class="lu-txt">'+fmtDesc(a.desc||'')+'</div></details>';
+  if(L.feat){const i=luFtIdx(),ft=FT_FEATS.find(f=>f.n===L.feat&&f.src==='XPHB')||FT_FEATS.find(f=>f.n===L.feat),inst=st.feats.filter(f=>f.tag==='Feat'&&f.name===L.feat).length-1;
+    h+='<div class="lu-chosen"><div class="lu-chosen-h"><span>✦ '+fdEsc(L.feat)+(ft?'<span class="ci-src">'+fdEsc(ft.src)+'</span>':'')+'</span><button type="button" class="lu-mini" onclick="luFtChange()">Change</button></div>'
+      +(i>=0?faHtml(L.feat,inst)+fsHtml(L.feat):'')+(ft?'<details class="lu-det"><summary>Description</summary><div class="lu-txt">'+fmtDesc(faDesc(ft))+'</div></details>':'')+'</div>';
+    return h;}
+  if(!eb)h+='<button type="button" class="lu-opt" onclick="luFtAsi()"><span class="lu-opt-n">Ability Score Improvement<span class="lu-opt-s">+2 to one ability or +1 to two (max 20)</span></span><span class="lu-opt-r">Choose</span></button>';
+  const cat=L.ftCat||(eb?'EB':'G');L.ftCat=cat;
+  h+='<div class="lu-h lu-h2">'+(eb?'Choose an Epic Boon or another feat':'Or another feat')+'</div><div class="lu-tabs">'
+    +[['G','General'],['EB','Epic Boon'],['O','Origin'],['FS','Fighting Style'],['all','All']].map(([k,l])=>'<button type="button" class="fbtn'+(cat===k?' on':'')+'" onclick="luFtCat(\''+k+'\')">'+l+'</button>').join('')
+    +'</div><input class="lu-q" type="search" data-luq="1" placeholder="Search feats…" value="'+pkEsc(L.ftQ)+'" oninput="_lu.ftQ=this.value;luFtList()" aria-label="Search feats">'
+    +'<div class="lu-note">Level '+totLvl()+' or lower; check other prerequisites yourself.</div><div id="luFtList"></div>';
+  if(eb)h+='<button type="button" class="lu-opt" onclick="luFtAsi()"><span class="lu-opt-n">Ability Score Improvement<span class="lu-opt-s">+2 to one ability or +1 to two</span></span><span class="lu-opt-r">Choose</span></button>';
+  return h;
+}
+function luStepSpell(L,c){
+  const I=luSpInfo(c),n=I.n,cn=(lbl,a,b,need)=>'<span class="lu-cn'+(need?' open':(a>=b?' ok':''))+'">'+lbl+' <b>'+a+'/'+b+'</b></span>';
+  let h='<div class="lu-h">Spells · '+fdEsc(c.cls)+' '+c.lvl+'</div><div class="lu-cnt">'
+    +(n.cant!==null?cn('Cantrips',n.cc,n.cant,I.needC):'')+(n.prep!==null?cn('Prepared',n.pc,n.prep,I.needP):'')+(I.sb?cn('📘 Spellbook',I.sb.n,I.sb.y,I.needB):'')+'</div>';
+  if(n.cant!==null&&n.cant>(I.p.cant||0))h+='<div class="lu-note">+'+(n.cant-(I.p.cant||0))+' cantrip'+(n.cant-(I.p.cant||0)>1?'s':'')+' known.</div>';
+  if(n.prep!==null&&n.prep>(I.p.prep||0))h+='<div class="lu-note">+'+(n.prep-(I.p.prep||0))+' prepared spell'+(n.prep-(I.p.prep||0)>1?'s':'')+'.</div>';
+  if(I.g>I.g0)h+='<div class="lu-warn">✦ New: level '+I.g+' spells</div>';
+  if(I.sb&&c.lvl>1)h+='<div class="lu-note">📘 Add 2 Wizard spells to your spellbook (up to level '+I.g+'). Spells you add beyond your prepared number go to the spellbook unprepared.</div>';
+  if(I.autos.length)h+='<div class="lu-note">✦ Always prepared now: '+fdEsc(I.autos.join(', '))+'</div>';
+  if(n.cant!==null||I.g>0){
+    const tabs=(n.cant!==null?['C']:[]).concat(Array.from({length:I.g},(_,k)=>String(k+1)));
+    if(!tabs.includes(String(L.spTab)))L.spTab=I.needC>0&&tabs.includes('C')?'C':(tabs.includes(String(I.g))?String(I.g):tabs[0]);
+    h+='<div class="lu-tabs">'+tabs.map(t=>'<button type="button" class="fbtn'+(String(L.spTab)===t?' on':'')+'" onclick="luSpTab(\''+t+'\')">'+(t==='C'?'Cantrips':'Level '+t)+'</button>').join('')+'</div>'
+      +'<input class="lu-q" type="search" data-luq="1" placeholder="Search your class list…" value="'+pkEsc(L.spQ)+'" oninput="_lu.spQ=this.value;luSpList()" aria-label="Search spells">'
+      +'<div id="luSpList"></div><div class="lu-note">Swap prepared spells later in the Spells tab.</div>';
+  }
+  return h;
+}
+function luStepHp(L,c){
+  const d=hdDieOf(c.cls),a=hpAvgOf(c.cls),con=md(st.attrs.CON||10),m=L.hp&&L.hp.m,rolled=m==='roll';
+  let h='<div class="lu-h">Hit Points</div><div class="lu-note">Hit Die d'+d+' · CON '+fmt(con)+' is added automatically.</div>';
+  h+='<button type="button" class="lu-opt'+(m==='avg'?' on':'')+'" onclick="luHp(\'avg\')"'+(rolled?' disabled':'')+'><span class="lu-opt-n">Average<span class="lu-opt-s">Fixed value of the class</span></span><span class="lu-opt-r">+'+a+'</span></button>';
+  h+='<button type="button" class="lu-opt'+(rolled?' on':'')+'" onclick="luHp(\'roll\')"'+(rolled?' disabled':'')+'><span class="lu-opt-n">'+(rolled?'Rolled':'Roll d'+d)+'<span class="lu-opt-s">'+(rolled?'The roll stays':'One roll, no re-rolls')+'</span></span><span class="lu-opt-r">'+(rolled?'+'+L.hp.v:'<i class="mi mi-dz" aria-hidden="true"></i>')+'</span></button>';
+  h+='<div class="lu-own'+(m==='own'?' on':'')+'"><span>Own roll</span><input class="hpa-in" type="number" inputmode="numeric" min="1" max="'+d+'" data-luq="1" placeholder="1–'+d+'" value="'+(m==='own'?L.hp.v:'')+'"'+(rolled?' disabled':'')+' onchange="luHp(\'own\',this.value)" aria-label="Own roll"></div>';
+  h+='<div class="lu-hpres">Max HP <b>'+L.hp0+'</b> <span class="lu-arrow">→</span> <b>'+hpMaxVal()+'</b></div>';
+  return h;
+}
+function luStepSum(L,c){
+  const M=luMsgs(),O=luOpenList();
+  const was=L.t.kind==='new'?0:c.lvl-1,sn=c.sub?mcSubParts(c.cls,c.sub).n:'';
+  let h='<div class="lu-big">'+fdEsc(c.cls)+' '+(was?was+'<span class="lu-arrow">→</span>':'')+c.lvl+'</div>'+(sn?'<div class="lu-note" style="text-align:center;color:var(--desc)">'+fdEsc(sn)+'</div>':'')
+    +'<div class="lu-note" style="text-align:center">Character level '+totLvl()+' · PB +'+prof()+' · Max HP '+hpMaxVal()+'</div>';
+  h+='<div class="lu-h">Changes</div>'+(M.length?'<ul class="lu-list">'+M.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul>':'<div class="lu-note">Only the level.</div>');
+  if(O.length)h+='<div class="lu-h">Still open</div><ul class="lu-list lu-open">'+O.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul><div class="lu-note">You can apply now and finish these later in the Info, Spells or Feats tab.</div>';
+  else h+='<div class="lu-note">✓ All choices made. Everything stays editable in the Info tab.</div>';
+  return h;
+}
+function luRender(){
+  const L=_lu,box=document.getElementById('luBox');if(!L||!box)return;
+  _luR=true;
+  try{
+    const S=luSteps();if(!S.includes(L.step))L.step=S[0];
+    const i=S.indexOf(L.step),c=luCur(),ob=box.querySelector('.lu-body'),keep=ob&&box.dataset.step===L.step,sc=ob?ob.scrollTop:0;
+    let h='<div class="lu-head"><div class="lu-ttl"><div class="lu-t">Level up</div>';
+    if(c){const was=L.t.kind==='new'?0:c.lvl-1;h+='<div class="lu-cls">'+fdEsc(c.cls)+' <b>'+(was?was+'<span class="lu-arrow">→</span>':'')+c.lvl+'</b></div>'
+      +'<div class="lu-sub">'+(L.t.kind==='new'?'New class · ':'')+'Character level '+totLvl()+'</div>';}
+    else h+='<div class="lu-cls">Choose a class</div>';
+    h+='</div>'+(!L.multi0&&!L.pickCls&&i===0?'<button type="button" class="lu-mini" onclick="luOther()">Other class…</button>':'')
+      +'<button type="button" class="lu-x" onclick="luCancel()" aria-label="Cancel level up">✕</button></div>';
+    h+='<div class="lu-steps">'+S.map((s,k)=>'<button type="button" class="lu-st'+(k===i?' on':k<i?' done':'')+'" onclick="luGo(\''+s+'\')"'+(!c&&s!=='cls'?' disabled':'')+'>'+(k+1)+' '+(s==='asi'&&c&&luAsiF(c)&&luAsiF(c).name==='Epic Boon'?'Epic Boon':LU_STEP[s])+'</button>').join('')+'</div>';
+    if(L.ask)h+='<div class="lu-ask"><span>Discard this level up? Nothing will be changed.</span><button type="button" class="lu-mini" onclick="luKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="luCancel(1)">Discard</button></div>';
+    const F={cls:luStepCls,sub:luStepSub,feat:luStepFeat,asi:luStepAsi,spell:luStepSpell,hp:luStepHp,sum:luStepSum}[L.step];
+    h+='<div class="lu-body">'+(F&&(c||L.step==='cls')?F(L,c):'')+'</div>';
+    h+='<div class="lu-foot"><button type="button" class="lu-b" onclick="luBack()"'+(i>0?'':' disabled')+'>← Back</button>'
+      +'<button type="button" class="lu-b pri" onclick="luNext()"'+(c?'':' disabled')+'>'+(L.step==='sum'?'✓ Apply':'Next →')+'</button></div>';
+    box.innerHTML=h;box.dataset.step=L.step;
+    const nb=box.querySelector('.lu-body');if(keep&&nb)nb.scrollTop=sc;
+    if(L.step==='spell')luSpList();if(L.step==='asi')luFtList();
+    const sr=box.querySelector('.lu-steps'),so=sr&&sr.querySelector('.lu-st.on');if(so&&so.offsetLeft+so.offsetWidth>sr.clientWidth)sr.scrollLeft=so.offsetLeft-16; // aktueller Schritt sichtbar
+  }finally{_luR=false;}
+}
+
 // TABS (Paket R2: #tabs = Kacheln im More-Fenster)
 document.getElementById('tabs').addEventListener('click',e=>{
   const btn=e.target.closest('.tab');if(!btn)return;
@@ -10912,7 +11272,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-17a';
+const APP_VERSION = 'willow-app-2026-10-17b';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = 'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -11527,6 +11887,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
 <div id="attrModal" class="ws-overlay" onclick="if(event.target===this)closeAttr()"><div class="ws-box rest-box" id="attrBox"></div></div>
 <div id="restModal" class="ws-overlay" onclick="if(event.target===this)restBackdrop()"><div class="ws-box rest-box" id="restBox"></div></div>
 <div id="fxModal" class="ws-overlay" onclick="if(event.target===this)closeFx()"><div class="ws-box rest-box" id="fxBox"></div></div>
+<div id="luModal" class="lu-modal"><div class="lu-sheet" id="luBox" role="dialog" aria-modal="true" aria-label="Level up"></div></div><!-- Paket Z4 -->
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:8px">Delete Character?</div>
