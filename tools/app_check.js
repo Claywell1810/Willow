@@ -3487,6 +3487,18 @@ const REGRESSION = [
       w.eval("st.feats=[];st.mySpells=[];st.picks={}");
       return true;
     } },
+  { name: 'My Spells: Knopf „Always“ setzt Always prepared (onclick-Anführungszeichen), zählt nicht bei Prepared', datum: '17.10.2026',
+    run: ({ w, d, sel }) => {
+      sel('Cleric', 'Life Domain (PHB)', 2);
+      w.eval("st.mySpells=['Bless','Cure Wounds','Guiding Bolt','Healing Word','Shield of Faith','Sanctuary','Command'].map(n=>({name:n,grad:1,school:'',prep:true,notes:''}));buildMySpells()");
+      const alw = () => [...d.querySelectorAll('#mySpells .ms-prep button')].filter(x => x.textContent === 'Always');
+      if (alw().length < 2) return 'Knopf „Always“ fehlt';
+      for (const n of ['Bless', 'Cure Wounds']) { const i = w.eval('st.mySpells.findIndex(x=>x.name===' + JSON.stringify(n) + ')'); const b = alw().find(x => (x.getAttribute('onclick') || '').includes('setPrep(' + i + ',')); if (!b) return 'Knopf für ' + n + ' fehlt'; b.click(); }
+      const p = w.eval("JSON.stringify(['Bless','Cure Wounds'].map(n=>st.mySpells.find(x=>x.name===n).prep))");
+      if (p !== '["free","free"]') return 'prep nach Klick: ' + p;
+      const c = d.getElementById('spCountBox')?.textContent || '';
+      return /Prepared 5\/5/.test(c) || 'Zähler: ' + c;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

@@ -4465,7 +4465,7 @@ function buildMySpells0(){
     <div class="spell-notes" id="msn_${i}" style="display:none">
       ${metaHtml}${descHtml}${higherHtml}${dbSpell?spellStatBlocks(dbSpell.name):''}
       ${mx.on&&!sp.auto?(C=>C.length>1?`<div class="ms-prep ms-cls"><span class="ms-prep-l">Class</span>${C.map(c=>`<button class="${spClsOf(sp,mx)===c?'on':''}" onclick="event.stopPropagation();setSpCls(${i},'${c}')">${c}</button>`).join('')}</div>`:'')(spCands(sp,mx)):''}
-      ${sp.auto?'':`<div class="ms-prep"><span class="ms-prep-l">Prepared</span>${[[true,'Prepared'],['free','Always'],[false,'Not prepared']].filter(([v])=>v!==false||+sp.grad).map(([v,l])=>`<button class="${(sp.prep||false)===v?'on':''}" onclick="event.stopPropagation();setPrep(${i},${JSON.stringify(v)})">${l}</button>`).join('')}${!sp.prep&&/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<button class="ms-rit" onclick="event.stopPropagation();openCast(${i})">Cast as Ritual</button>`:''}</div>`}
+      ${sp.auto?'':`<div class="ms-prep"><span class="ms-prep-l">Prepared</span>${[[true,'Prepared'],['free','Always'],[false,'Not prepared']].filter(([v])=>v!==false||+sp.grad).map(([v,l])=>`<button class="${(sp.prep||false)===v?'on':''}" onclick="event.stopPropagation();setPrep(${i},${v==='free'?"'free'":v})">${l}</button>`).join('')}${!sp.prep&&/ritual/i.test((dbSpell?dbSpell.school:sp.school)||'')?`<button class="ms-rit" onclick="event.stopPropagation();openCast(${i})">Cast as Ritual</button>`:''}</div>`}
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px">
         <span style="font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;color:var(--green);text-transform:uppercase">Free casts</span>
         <input type="number" min="0" max="10" value="${sp.freeMax||0}" oninput="setFreeMax(${i},this.value)" onclick="event.stopPropagation()" style="width:46px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:var(--fs-txt);padding:3px 6px;outline:none;font-family:'Cinzel',serif;text-align:center">
@@ -11272,7 +11272,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-17b';
+const APP_VERSION = 'willow-app-2026-10-17c';
 const SETTINGS_LS = 'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = 'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
