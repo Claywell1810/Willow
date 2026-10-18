@@ -1836,7 +1836,7 @@ const REGRESSION = [
       if (JSON.stringify(w.eval('attrSrcNew()').STR) !== '{"base":10}') return 'Neuer Charakter: Base 10';
       return true;
     } },
-  { name: 'Paket E1: AC/Initiative/Speed aus Quellen (Rüstung XPHB, Unarmored Defense, Shield, Fast/Unarmored Movement, Alert/Jack of All Trades), alte Werte von Hand, Log', datum: '02.10.2026',
+  { name: 'Paket E1: AC/Initiative/Speed aus Quellen (Rüstung XPHB, Unarmored Defense, Shield, Fast/Unarmored Movement, Alert/Jack of All Trades), alte Werte von Hand, Log', datum: '02.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       if (typeof w.openStat !== 'function' || !w.eval('typeof ARMOR_DATA==="object"&&ARMOR_DATA.length===13')) return 'openStat/ARMOR_DATA fehlen';
       const val = id => d.getElementById(id + 'V').textContent;
@@ -1965,7 +1965,7 @@ const REGRESSION = [
       w.eval('st.conditions=[];st.effects=[];st.exhaustion=0;st.mySpells=[]'); w.buildFx();
       return true;
     } },
-  { name: 'Paket E3: Würfeln mit Effekten – Chips (Bless, Exhaustion, Poisoned, Guidance per Note, Bardic Inspiration aus), Umschalten ohne Neuwurf, Vor-/Nachteil, Auto-fail, Kette Stunned → Incapacitated, Waffen/Attribut/Initiative/Zauberangriff, Crit-Schaden, Heroic Inspiration, Effekte auf AC/Speed, eigener Effekt', datum: '02.10.2026',
+  { name: 'Paket E3: Würfeln mit Effekten – Chips (Bless, Exhaustion, Poisoned, Guidance per Note, Bardic Inspiration aus), Umschalten ohne Neuwurf, Vor-/Nachteil, Auto-fail, Kette Stunned → Incapacitated, Waffen/Attribut/Initiative/Zauberangriff, Crit-Schaden, Heroic Inspiration, Effekte auf AC/Speed, eigener Effekt', datum: '02.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       if (typeof w.rollD20 !== 'function' || !w.eval('typeof ROLL_FX==="object"&&ROLL_FX.fx.Bless&&ROLL_FX.cond.Poisoned')) return 'rollD20/ROLL_FX fehlen';
       sel('Paladin', '', 7);
@@ -2063,7 +2063,7 @@ const REGRESSION = [
       w.eval('st.mySpells=[];st.conditions=[]');
       return true;
     } },
-  { name: 'War Caster: Vorteil auf Konzentrations-Saves (Knopf aus Paket P an, andere CON-Saves nur angeboten, ohne Feat kein Chip); HP-Felder ohne −/+, Current per Antippen korrigierbar', datum: '03.10.2026',
+  { name: 'War Caster: Vorteil auf Konzentrations-Saves (Knopf aus Paket P an, andere CON-Saves nur angeboten, ohne Feat kein Chip); HP-Felder ohne −/+, Current per Antippen korrigierbar', datum: '03.10.2026', r: '2024',
     run: ({w, d}) => {
       if (!w.eval('typeof ROLL_FX==="object"&&ROLL_FX.feat&&ROLL_FX.feat["War Caster"]')) return 'ROLL_FX.feat War Caster fehlt';
       w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 10, CHA: 10 }, _f_cls: 'Wizard', _f_lvl: '5', _f_hpM: '30', hpC: 30, feats: [], conditions: [], effects: [] });
@@ -2354,7 +2354,7 @@ const REGRESSION = [
       w.mcDel(0); w.mcDel(0);
       return true;
     } },
-  { name: 'Paket F5: Multiclass – Hit Dice je Würfelgröße (st.hdUsedBy, alter Save hdUsed → Würfel der Startklasse), Short Rest mit Würfelwahl, Long Rest alle zurück, Log, gleiche Größe zusammen', datum: '03.10.2026',
+  { name: 'Paket F5: Multiclass – Hit Dice je Würfelgröße (st.hdUsedBy, alter Save hdUsed → Würfel der Startklasse), Short Rest mit Würfelwahl, Long Rest alle zurück, Log, gleiche Größe zusammen', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       const ev = s => w.eval(s);
       w.resetUI(); ev("document.getElementById('charName').textContent='Regressionstest F5'");
@@ -2512,7 +2512,8 @@ const REGRESSION = [
     run: ({ w }) => pflicht(w, `if(typeof STD_ACTIONS==='undefined'){P.push('STD_ACTIONS fehlt (action_convert.py --write)');return P;}const seen=new Set();
       STD_ACTIONS.forEach(a=>{const n=a.n||'?';if(seen.has(n))P.push(n+': doppelt');seen.add(n);
         if(!['aktion','bonus','reaktion','frei','varies'].includes(a.t))P.push(n+': Zeit '+a.t);if(!a.x||/\{@/.test(a.x))P.push(n+': Text');});
-      ['Attack','Dash','Disengage','Dodge','Help','Hide','Influence','Magic','Ready','Search','Study','Utilize','Opportunity Attack','Two-Weapon Fighting','Unarmed Strike'].forEach(n=>{if(!seen.has(n))P.push('fehlt: '+n);});
+      (R14?['Attack','Cast a Spell','Dash','Disengage','Dodge','Escape a Grapple','Grapple','Help','Hide','Ready','Search','Shove','Use an Object','Opportunity Attack','Two-Weapon Fighting','Unarmed Strike'] // Paket T5: 2014 = SRD (action_convert.py --t14)
+        :['Attack','Dash','Disengage','Dodge','Help','Hide','Influence','Magic','Ready','Search','Study','Utilize','Opportunity Attack','Two-Weapon Fighting','Unarmed Strike']).forEach(n=>{if(!seen.has(n))P.push('fehlt: '+n);});
       if(STD_ACTIONS.filter(a=>a.u).length!==1||!(STD_ACTIONS.find(a=>a.u)||{}).n==='Unarmed Strike')P.push('Unarmed Strike ohne u:1');`) },
   { name: 'Paket O1: Traglast – STR × 15 lb aus st.attrs, Größe, Powerful Build (Goliath, Custom), Anzeige lb statt kg', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
@@ -3378,7 +3379,7 @@ const REGRESSION = [
       return true;
     } },
   { name: 'Paket Z2: Actions-Tab – Gruppe „Standard Actions“ ganz unten (zugeklappt, st.abGrpClosed), alle STD_ACTIONS als Karten, Unarmed Strike: STR + PB / 1 + STR, Monk Martial Arts (DEX, Würfel), Tavern Brawler, Würfel-Knöpfe', datum: '17.10.2026',
-    run: ({ w, d, sel }) => {
+    run: ({ w, d, sel, RULES }) => {
       if (w.eval('typeof STD_ACTIONS') === 'undefined' || w.eval('typeof uaVals') === 'undefined') return 'STD_ACTIONS/uaVals fehlt';
       w.eval("st.mc=[];st.feats=[];st.abGrpClosed={};Object.assign(st.attrs,{STR:16,DEX:12,CON:14,INT:10,WIS:10,CHA:8})");
       sel('Fighter', '', 5);
@@ -3392,7 +3393,8 @@ const REGRESSION = [
       const ua = () => d.querySelector('#abList .ab-std[data-std="Unarmed Strike"]');
       const btn = k => (ua().querySelector('#rollUa' + k + '0') || {}).textContent || '';
       if (!/Attack\s*\+6/.test(btn('A')) || !/Damage\s*1\+3/.test(btn('D'))) return 'Fighter 5 STR 16: ' + btn('A') + ' / ' + btn('D');
-      if (!/DC\s*14/.test(ua().textContent)) return 'Grapple/Shove DC nicht 14';
+      if (RULES !== '2014' && !/DC\s*14/.test(ua().textContent)) return 'Grapple/Shove DC nicht 14';
+      if (RULES === '2014' && /DC/.test(ua().querySelector('.ua-vals').textContent)) return '2014: Grapple/Shove-DC an Unarmed Strike (Weiche g: Athletics-Wettstreit)';
       w.eval("st.feats=[{name:'Tavern Brawler',tag:'Feat',desc:''}]"); w.buildAbilities();
       if (!/Damage\s*1d4\+3/.test(btn('D'))) return 'Tavern Brawler: ' + btn('D');
       w.eval("st.feats=[];Object.assign(st.attrs,{STR:10,DEX:18})"); sel('Monk', '', 5);
@@ -3799,7 +3801,109 @@ const REGRESSION = [
       w.seUnlock('cls', 'Fighter');
       if (!box().querySelector('.se-add')) return 'Allow again nach Startgold';
       return true;
-    } },];// ────────────────────────────────────────────────────────────────────────────
+    } },
+  { name: 'Paket T5: Willow 2014 – Regel-Weichen: Hit Dice (Long Rest Hälfte, mind. 1), Exhaustion-Tabelle (Nachteil Checks / Speed ½ / Nachteil Angriffe+Saves / HP-Max ½ / Speed 0 / Tod), Inspiration (Vorteil statt Neuwurf), Grapple/Shove als Athletics-Wettstreit, kein Bloodied, ASI als Klassen-Feature (+ Assistent), Texte (SRD), COND_DATA/STD_ACTIONS/EFFECT_*/ROLL_FX 2014, Hill Dwarf ohne Rüstungs-Speed-Abzug', datum: '19.10.2026',
+    run: async ({ w, d, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      const tick = () => new Promise(r => setTimeout(r, 0));
+      const parts = () => J('_rl.parts.map(p=>(p.l||"")+":"+p.m+(p.on?"+":"-"))');
+      const hd = (used) => { E(`st.hdUsedBy=${JSON.stringify(used)}`); E('doLongRest()'); return J('st.hdUsedBy'); };
+      w.resetUI();
+      w.applyState({ attrs: { STR: 10, DEX: 12, CON: 14, INT: 10, WIS: 10, CHA: 10 }, _f_lvl: '5', _f_hpM: '40' });
+      sel('Fighter', RULES === '2014' ? 'Champion (PHB)' : '', 5);
+      E("st.statSrc=null;st.conditions=[];st.effects=[];st.exhaustion=0;st.hpC=40;document.getElementById('hpM').value=40;updBar();document.getElementById('race').value='Human';onRaceChange()");
+      if (RULES !== '2014') {
+        E('st.exhaustion=4'); if (E('hpMaxVal()') !== E('hpMaxRaw()')) return '2024: HP-Max durch Exhaustion verändert';
+        E('st.exhaustion=2'); if (E("statCalc('spd').t") !== 20) return '2024: Exhaustion 2 nicht −10 ft: ' + E("statCalc('spd').t");
+        E('st.exhaustion=0;st.hpC=1;updBar()'); if (!E('fxBloodied()')) return '2024: Bloodied fehlt';
+        if (d.getElementById('insLbl').textContent !== 'Heroic Inspiration ⓘ') return '2024: Inspiration-Beschriftung ' + d.getElementById('insLbl').textContent;
+        if (JSON.stringify(hd({ 10: 4 })) !== '{}') return '2024: Long Rest gibt nicht alle Hit Dice zurück';
+        if (E('ftFind("Ability Score Improvement").src') !== 'XPHB') return '2024: ASI nicht aus FT_FEATS';
+        w.buildAbilities(); const g = d.querySelector('#abList .ab-std[data-std="Attack"] .ab-tag');
+        return (g && /XPHB/.test(g.textContent)) || '2024: Quelle der Standardaktion ' + (g && g.textContent);
+      }
+      // Daten 2014
+      const CN = J('Object.keys(COND_DATA).sort()');
+      if (CN.includes('Bloodied') || CN.length !== 16 || !CN.includes('Concentration')) return 'COND_DATA 2014: ' + CN.join();
+      if (!/• 4: Hit point maximum halved/.test(E('COND_DATA.Exhaustion'))) return 'Exhaustion-Tabelle 2014 fehlt';
+      if (/XPHB|PHB'24/.test(E('JSON.stringify([COND_DATA,STD_ACTIONS,EFFECT_DATA,EFFECT_RULES,ROLL_FX])'))) return '2024-Quelle in Zuständen/Aktionen/Effekten';
+      if (E('STD_ACTIONS.length') !== 21 || J('STD_ACTIONS.filter(a=>a.c).map(a=>a.n)').join() !== 'Grapple,Shove' || E('STD_ACTIONS.find(a=>a.u).n') !== 'Unarmed Strike') return 'STD_ACTIONS 2014';
+      if (J('Object.keys(EFFECT_RULES)').join() !== 'Inspiration' || !/advantage on that roll/.test(E('EFFECT_RULES.Inspiration'))) return 'EFFECT_RULES 2014';
+      if (!J('EFFECT_DATA.map(e=>e.n)').includes('Hideous Laughter') || J('EFFECT_DATA.filter(e=>e.k==="s"&&!ZB_SPELLS.some(s=>s.name===e.n))').length) return 'EFFECT_DATA 2014: Zauber nicht in ZB_SPELLS';
+      if (J('EFFECT_DATA.find(e=>e.n==="Bardic Inspiration").o').join() !== '+1d6,+1d8,+1d10,+1d12') return 'Bardic-Inspiration-Würfel 2014';
+      if (Object.keys(J('ROLL_FX.feat')).length || J('ROLL_FX.cond.Exhaustion.map(r=>r.ex)').join() !== '1,3' || J('ROLL_FX.cond.Grappled').length) return 'ROLL_FX 2014';
+      // (e) Exhaustion
+      E('st.exhaustion=1'); E("rollD20({k:'check',ab:'STR',l:'T'})"); if (!parts().includes('Exhaustion 1:dis+')) return 'Exhaustion 1: Check ohne Nachteil ' + parts();
+      E("rollD20({k:'atk',ab:'STR',l:'T'})"); if (parts().some(p => /^Exhaustion/.test(p))) return 'Exhaustion 1: Angriff mit Exhaustion-Chip ' + parts();
+      E('st.exhaustion=3'); E("rollD20({k:'save',ab:'DEX',l:'T'})"); if (!parts().includes('Exhaustion 3:dis+')) return 'Exhaustion 3: Save ohne Nachteil ' + parts();
+      if (parts().some(p => /:n/.test(p) && /^Exhaustion/.test(p))) return 'Exhaustion 2014 mit −2 × Stufe';
+      E('closeDice()');
+      const spd = ex => { E('st.exhaustion=' + ex); return E("statCalc('spd').t"); };
+      if (spd(1) !== 30 || spd(2) !== 15 || spd(4) !== 15 || spd(5) !== 0) return 'Exhaustion-Speed 2014: ' + [1, 2, 4, 5].map(spd).join('/');
+      E("st.exhaustion=0;st.conditions=['Grappled']"); if (E("statCalc('spd').t") !== 0) return 'Grappled 2014 („speed becomes 0“) nicht Speed 0';
+      E('st.conditions=[]');
+      E('st.exhaustion=0;st.hpC=hpMaxRaw();updBar()'); const m0 = E('hpMaxRaw()'), h2 = Math.floor(m0 / 2); w.fxSetEx(4);
+      if (m0 < 10 || E('hpMaxVal()') !== h2 || E('hpMaxRaw()') !== m0 || E('st.hpC') !== h2) return 'Exhaustion 4: HP-Max/aktuelle HP ' + E('hpMaxVal()') + '/' + E('st.hpC');
+      const ext = d.querySelector('#fxBody .fx-extxt').textContent;
+      if (!/Hit point maximum halved/.test(ext) || !/Speed halved/.test(ext) || /XPHB|−/.test(ext)) return 'Exhaustion-Text 2014: ' + ext;
+      E('st.exhaustion=6;buildFx()'); if (!/Level 6 · Death/.test(d.querySelector('#fxBody .fx-extxt').textContent)) return 'Exhaustion 6: ' + d.querySelector('#fxBody .fx-extxt').textContent;
+      E('st.exhaustion=0;buildFx();st.hpC=1;updBar()');
+      // (h) kein Bloodied
+      if (E('fxBloodied()') || /Bloodied/.test(d.getElementById('fxBody').textContent)) return 'Bloodied in Willow 2014';
+      // (f) Inspiration
+      if (d.getElementById('insLbl').textContent !== 'Inspiration ⓘ') return 'Inspiration-Beschriftung: ' + d.getElementById('insLbl').textContent;
+      E('st.ins=[1,0,0]'); E("rollD20({k:'check',ab:'STR',l:'T'})");
+      const mods = d.getElementById('diceMods').innerHTML;
+      if (!/rlInsp\(\)/.test(mods) || /rlHeroic/.test(mods)) return 'Würfel-Dialog: Inspiration-Knopf';
+      w.rlInsp(); if (!parts().includes(':adv+') || J('st.ins').some(Boolean)) return 'Inspiration: Vorteil/verbraucht ' + parts();
+      E('closeDice()');
+      E('st.exhaustion=4;st.hpC=1;updBar();doLongRest()');
+      if (E('st.exhaustion') !== 3 || E('st.hpC') !== E('hpMaxRaw()')) return 'Long Rest bei Exhaustion 4: HP ' + E('st.hpC') + '/' + E('hpMaxRaw()');
+      // (d) Hit Dice: Long Rest gibt die Hälfte zurück (mind. 1)
+      if (JSON.stringify(hd({ 10: 5 })) !== '{"10":3}') return 'Fighter 5: 5 verbraucht → ' + JSON.stringify(J('st.hdUsedBy'));
+      if (JSON.stringify(hd({ 10: 1 })) !== '{}') return 'Fighter 5: 1 verbraucht';
+      sel('Fighter', 'Champion (PHB)', 1);
+      if (JSON.stringify(hd({ 10: 1 })) !== '{}') return 'Fighter 1: mind. 1 Hit Die';
+      E("st.mc=[{cls:'Wizard',sub:'',lvl:4}]"); sel('Fighter', 'Champion (PHB)', 2);
+      if (JSON.stringify(hd({ 10: 2, 6: 4 })) !== '{"6":3}') return 'Multiclass d10/d6: ' + JSON.stringify(J('st.hdUsedBy'));
+      E("st.hdUsedBy={10:2,6:4};openRest('long')"); const rb = d.getElementById('restBox') || d.querySelector('.rest-box') || d.body;
+      if (!/Hit Dice d10 \(half, min\. 1\)0 → 2/.test(rb.textContent) || !/Hit Dice d6 \(half, min\. 1\)0 → 1/.test(rb.textContent)) return 'Long-Rest-Dialog: ' + (rb.textContent.match(/Hit Dice[^C]*/) || [''])[0];
+      E('closeRest();st.mc=[];st.hdUsedBy={}'); sel('Fighter', 'Champion (PHB)', 5);
+      // (g) Grapple/Shove: Athletics-Wettstreit
+      E("st.skillP={Athletics:'p'};Object.assign(st.attrs,{STR:16})"); w.buildAbilities();
+      const gr = d.querySelector('#abList .ab-std[data-std="Grapple"]'), ua = d.querySelector('#abList .ab-std[data-std="Unarmed Strike"]');
+      if (!gr || !/Athletics\s*\+6/.test(gr.textContent) || !/contest/i.test(gr.textContent)) return 'Grapple-Karte: ' + (gr && gr.textContent.slice(0, 120));
+      if (!ua || /DC/.test(ua.querySelector('.ua-vals').textContent)) return 'Unarmed Strike 2014 mit DC';
+      if (!/SRD/.test(gr.querySelector('.ab-tag').textContent)) return 'Standardaktion ohne Quelle SRD (Weiche m)';
+      w.rollContest('Shove'); if (E('_rl.sk') !== 'Athletics' || E('_rl.mod') !== 6) return 'Shove-Wurf: ' + E('_rl.sk') + ' ' + E('_rl.mod');
+      E('closeDice()');
+      // Hill Dwarf: Chain Mail (STR 13) ohne Speed −10 (Fund T4 b)
+      E("Object.assign(st.attrs,{STR:10});document.getElementById('race').value='Hill Dwarf';onRaceChange();st.statSrc={ac:{arm:'Chain Mail'}}");
+      if (E("statCalc('spd').t") !== 25 || /needs Strength/.test(J("statCalc('ac').warn").join())) return 'Hill Dwarf + Chain Mail: Speed ' + E("statCalc('spd').t") + ' ' + J("statCalc('ac').warn").join();
+      E("document.getElementById('race').value='Human';onRaceChange()");
+      if (E("statCalc('spd').t") !== 20 || !/needs Strength 13 – otherwise Speed −10 ft \(SRD\)/.test(J("statCalc('ac').warn").join())) return 'Human + Chain Mail: ' + E("statCalc('spd').t") + ' ' + J("statCalc('ac').warn").join();
+      E("st.statSrc=null;st.skillP={};document.getElementById('race').value='';onRaceChange()");
+      // (j) ASI als Klassen-Feature: Feats-Tab und Stufenaufstieg-Assistent
+      E("st.feats=[];st.picks={}"); w.switchTab('feats'); w.ftBuildFilters(); w.ftRender();
+      const ac = [...d.querySelectorAll('#ftList .zb-card')].find(c => /^Ability Score Improvement/.test(c.querySelector('.zb-name').textContent));
+      if (!ac || !/Class Feature/.test(ac.textContent) || !/PHB/.test(ac.textContent)) return 'ASI fehlt im Feats-Tab 2014';
+      if (J('FT_FEATS.map(f=>f.n)').includes('Ability Score Improvement')) return 'ASI als Feat in FT_FEATS 2014';
+      E("st.mc=[];st.mySpells=[];st.hpRoll={};document.getElementById('charName').textContent='Regressionstest'");
+      sel('Fighter', 'Champion (PHB)', 3); E("st.hpLv={Fighter:3};st.hpAsk=[];autoSave()");
+      w.luOpen(); if (J('luSteps()').join() !== 'feat,asi,hp,sum' && !J('luSteps()').includes('asi')) return 'Assistent 3→4 ohne ASI: ' + J('luSteps()').join();
+      w.luGo('asi'); const lb = d.getElementById('luBox');
+      if (lb.querySelector('.lu-tabs') || !/Grappler/.test(lb.textContent)) return 'Assistent 2014: Feat-Reiter/Grappler';
+      w.luFtAsi(); await tick();
+      const c = () => [...d.querySelectorAll('#luBox .pk-chip')].find(b => b.dataset.o === 'STR');
+      if (!c()) return 'ASI-Wahl im Assistenten fehlt';
+      c().click(); await tick(); c().click(); await tick();
+      if (E("JSON.stringify(st.picks['fa:Ability Score Improvement'])") !== '["STR","STR"]' || w.attrAuto('STR').feat !== 2) return 'ASI 2014: Wahl/Zählung ' + E("JSON.stringify(st.picks['fa:Ability Score Improvement'])");
+      if (!/When you reach 4th level/.test(E("st.feats[0].desc"))) return 'ASI-Text nicht aus dem Klassen-Feature (PHB)';
+      w.luCancel(1);
+      if (E('st.feats.length') || E("st.picks['fa:Ability Score Improvement']")) return 'Cancel stellt ASI nicht zurück';
+      return true;
+    } },
+];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
 async function load(p) {

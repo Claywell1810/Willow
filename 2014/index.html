@@ -1593,7 +1593,7 @@ html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,v
 </style>
 <!-- Paket T1 (18.10.2026): ein Code, zwei Builds – RULES setzt tools/build_2014.py auf '2014' (Ordner 2014/); Regel-Weichen mit if(R14).
      LS_PFX: gleiche Domain = gemeinsamer localStorage → Willow 2014 speichert alles unter 'w14_…' -->
-<script>const RULES='2014';const T14_BLOCKS=["ALWAYS_PREP", "BG_DATA", "BG_EXTRA", "BG_SPELLS", "BST_DATA", "CLASS_CORE_TRAITS", "CLASS_DATA", "CLASS_MC_GAINS", "CLASS_SPELL_EXTRA", "CLASS_SPELL_MAP", "CLASS_TABLES", "FEATURE_PICKS", "FEATURE_STATBLOCKS", "FEAT_SPELLS", "FT_FEATS", "ITEM_DATA", "ITEM_RULES", "MC_SLOTS", "RACE_DATA", "RACE_PICKS", "SPELL_CATS", "SPELL_ROLLS", "SPELL_STATBLOCKS", "START_EQUIP", "SUBCLASS_LABELS", "SUBCLASS_SPELLS", "SUBCLASS_TABLES", "ZB_SPELLS"];const R14=RULES==='2014';const LS_PFX=R14?'w14_':'';</script>
+<script>const RULES='2014';const T14_BLOCKS=["ALWAYS_PREP", "BG_DATA", "BG_EXTRA", "BG_SPELLS", "BST_DATA", "CLASS_CORE_TRAITS", "CLASS_DATA", "CLASS_MC_GAINS", "CLASS_SPELL_EXTRA", "CLASS_SPELL_MAP", "CLASS_TABLES", "COND_DATA", "EFFECT_DATA", "EFFECT_RULES", "FEATURE_PICKS", "FEATURE_STATBLOCKS", "FEAT_SPELLS", "FT_FEATS", "ITEM_DATA", "ITEM_RULES", "MC_SLOTS", "RACE_DATA", "RACE_PICKS", "ROLL_FX", "SPELL_CATS", "SPELL_ROLLS", "SPELL_STATBLOCKS", "START_EQUIP", "STD_ACTIONS", "SUBCLASS_LABELS", "SUBCLASS_SPELLS", "SUBCLASS_TABLES", "ZB_SPELLS"];const R14=RULES==='2014';const LS_PFX=R14?'w14_':'';const RQ=R14?'SRD':'XPHB';const INS_N=R14?'Inspiration':'Heroic Inspiration';</script>
 <script>try{if(localStorage.getItem(LS_PFX+'willow_design')==='klassisch'){document.documentElement.dataset.design='klassisch';document.getElementById('willowLeder').media='not all';}}catch(e){}</script>
 <script>try{var _md=localStorage.getItem(LS_PFX+'willow_mode');if(_md==='auto')_md=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';if(localStorage.getItem(LS_PFX+'willow_design')==='klassisch')_md='dark';document.documentElement.dataset.mode=_md==='light'?'light':'dark';}catch(e){document.documentElement.dataset.mode='dark';}</script>
 <script>try{var _ts=localStorage.getItem(LS_PFX+'willow_textsize');if(_ts==='gross'||_ts==='sehrgross')document.documentElement.dataset.ts=_ts;}catch(e){}</script>
@@ -1913,7 +1913,7 @@ html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,v
           </div>
         </div>
         <div class="ds-box ds-insp">
-          <div class="ds-lbl" onclick="openFxView('rule','Heroic Inspiration')">Heroic Inspiration ⓘ</div>
+          <div class="ds-lbl" id="insLbl" onclick="openFxView('rule',INS_N)">Heroic Inspiration ⓘ</div>
           <div class="ds-groups"><div><div class="ds-sub" aria-hidden="true">&nbsp;</div>
             <div class="ds-pips">
               <div class="inspip" id="ins0" onclick="togIns(0)"></div>
@@ -2577,7 +2577,7 @@ function stAcCalc(s){
   const a=s.arm||'',ar=stArmorOf(s),dex=getAbilityMod('DEX');
   if(ar){r.t=ar.ac;r.base=`${ar.ac} ${ar.n}`;
     if(ar.c==='L')add(dex,'DEX');else if(ar.c==='M')add(Math.min(2,dex),dex>2?'DEX (max 2)':'DEX');
-    if(ar.str&&(st.attrs.STR||10)<ar.str)r.warn.push(`${ar.n} needs Strength ${ar.str} – otherwise Speed −10 ft (XPHB).`);
+    if(ar.str&&(st.attrs.STR||10)<ar.str&&!rcNoArmorSlow())r.warn.push(`${ar.n} needs Strength ${ar.str} – otherwise Speed −10 ft (${RQ}).`);
     if(ar.st)r.warn.push(`${ar.n}: Disadvantage on Dexterity (Stealth) checks.`);}
   else if(a.startsWith('ud:')&&stUnarmored().some(u=>'ud:'+u.n===a)){const u=stUnarmored().find(x=>'ud:'+x.n===a);r.t=u.b;r.base=`${u.b} ${u.n}`;u.ab.forEach(x=>add(getAbilityMod(x),x,1));if(s.sh&&u.noSh)r.warn.push(`${u.n} doesn't work while wielding a Shield.`);}
   else if(a==='nat'&&rcRace()==='custom'&&rcP('custom').nac){const p=rcP('custom');r.t=p.nac.b;r.base=`${p.nac.b} Natural Armor`;if(p.nac.ab)add(getAbilityMod(p.nac.ab),p.nac.ab,1);}
@@ -2587,7 +2587,7 @@ function stAcCalc(s){
   const F=rlStatFx('ac'),ma=F.find(f=>f.m==='base13'); // Paket E3: Effekte (ROLL_FX) – Mage Armor, Shield of Faith, Barkskin …
   if(ma){if(!ar&&!a)/* nur „Unarmored (10 + DEX)“ */{r.t+=3;r.base=`13 ${ma.l}`;}else r.warn.push(`${ma.l}: not counted – armor or another base AC is selected (only one base AC applies).`);}
   F.filter(f=>f.m==='n'&&f.P&&f.P.k).forEach(f=>{r.t+=f.P.k;r.parts.push({v:f.P.k,l:f.l,fx:1});});
-  const bk=F.find(f=>f.m==='min17');if(bk&&r.t<17){r.parts.push({v:17-r.t,l:`${bk.l} (AC 17)`,fx:1});r.t=17;}
+  const bk=F.find(f=>/^min\d+$/.test(f.m)),bv=bk?+bk.m.slice(3):0;if(bk&&r.t<bv){r.parts.push({v:bv-r.t,l:`${bk.l} (AC ${bv})`,fx:1});r.t=bv;} // 2024 Barkskin 17, 2014 16
   return r;
 }
 function stIniCalc(s){
@@ -2609,14 +2609,15 @@ function stSpdCalc(s){
     if(/as shown (?:on|in) the/i.test(f.desc)){const row=(CLASS_TABLES[f._c]&&CLASS_TABLES[f._c].rows||[])[f._cl-1],c=row&&/(\d+)/.exec(row.unarmored||'');if(c)n=+c[1];}
     if(m[2]){const heavyOnly=/heavy/i.test(m[2]);if(ac&&((heavyOnly&&ar&&ar.c==='H')||(!heavyOnly&&(ar||(m[3]&&sh))))){r.warn.push(`${f.name}: no bonus while wearing ${heavyOnly?'Heavy armor':'armor'+(m[3]?' or a Shield':'')}.`);return;}}
     add(n,f.name,1);});
-  if(ar&&ar.str&&(st.attrs.STR||10)<ar.str)add(-10,`${ar.n} (Strength ${ar.str})`,1);
-  const ex=+st.exhaustion||0;if(ex)add(-5*ex,`Exhaustion ${ex}`,1);
+  if(ar&&ar.str&&(st.attrs.STR||10)<ar.str&&!rcNoArmorSlow())add(-10,`${ar.n} (Strength ${ar.str})`,1);
+  const ex=+st.exhaustion||0;if(ex&&!R14)add(-5*ex,`Exhaustion ${ex}`,1);
   add(+s.feat||0,'Feat / Feature');add(+s.item||0,'Item');add(+s.dm||0,'Other');
   const F=rlStatFx('spd'); // Paket E3: Longstrider +10, Haste verdoppelt, Slow halbiert
   F.filter(f=>f.m==='n'&&f.P).forEach(f=>add(f.P.k,f.l,1));
   F.filter(f=>f.m==='x2'||f.m==='half').forEach(f=>{const n=Math.max(0,r.t);add(f.m==='x2'?n:-Math.ceil(n/2),`${f.l} (${f.m==='x2'?'doubled':'halved'})`,1);});
+  if(R14&&ex>=2){const n=Math.max(0,r.t);add(ex>=5?-n:-Math.ceil(n/2),`Exhaustion ${ex} (${ex>=5?'Speed 0':'halved'})`,1);} // Paket T5 (Weiche e): 2014-Tabelle
   r.t=Math.max(0,r.t);
-  const z=(st.conditions||[]).filter(c=>/Speed 0\./.test(COND_DATA[c]||'')); // Paket E2: Grappled, Restrained … „Speed 0 and can't increase“
+  const z=(st.conditions||[]).filter(c=>/Speed 0\.|speed becomes 0\b/.test(COND_DATA[c]||'')); // Paket E2: Grappled, Restrained … „Speed 0 and can't increase“ (2014: „speed becomes 0“)
   if(z.length&&r.t>0)add(-r.t,`${z.join(', ')} (Speed 0)`,1);
   return r;
 }
@@ -2651,7 +2652,7 @@ function renderStat(){
     if(p&&p.nac)o+=opt('nat',`Natural Armor (${p.nac.b}${p.nac.ab?' + '+p.nac.ab:''})`);
     [['L','Light Armor',' + DEX'],['M','Medium Armor',' + DEX (max 2)'],['H','Heavy Armor','']].forEach(([c,l,x])=>{o+=`<optgroup label="${l}">`+ARMOR_DATA.filter(a=>a.c===c).map(a=>opt(a.n,`${a.n} (${a.ac}${x})`)).join('')+'</optgroup>';});
     const sh=ARMOR_DATA.find(x=>x.c==='S');
-    rows+=`<div class="at-row"><div class="at-l">Armor<small>5e.tools (XPHB)</small></div><select class="at-sel" onchange="statArm(this.value)">${o}</select></div>
+    rows+=`<div class="at-row"><div class="at-l">Armor<small>5e.tools (${RQ})</small></div><select class="at-sel" onchange="statArm(this.value)">${o}</select></div>
       <div class="at-row"><div class="at-l">Shield<small>+${sh?sh.ac:2} AC</small></div><button class="pk-chip${s.sh?' on':''}" onclick="statPut('sh',${s.sh?0:1});renderStat()">${s.sh?'✓ Shield':'No shield'}</button></div>`;
     rows+=r.parts.filter(x=>x.fx).map(x=>`<div class="at-row auto"><div class="at-l">${pkEsc(x.l)}<small>effect · automatic</small></div><div class="at-v">${fmt(x.v)}</div></div>`).join('');
   }else{
@@ -2981,7 +2982,7 @@ function pkOpen(){
 }
 function dupUI(G){
   return (G.dups||[]).map(d=>`<div class="pk-dup"><div style="font-size:var(--fs-txt);color:var(--text2);margin-bottom:4px"><b style="color:var(--gold)">${pkEsc(d.skill)}</b> twice (${d.quellen.join(' + ')}) – `+
-    (d.legacy?`you may choose another skill instead (PHB 2014 rule).</div>`+pickUI(d.key,d.opts,1,{head:'Replacement'}):`no replacement in the 2024 rules. Pick a different skill instead.</div>`)+'</div>').join('');
+    (d.legacy?`you may choose another skill instead${R14?'':' (PHB 2014 rule)'}.</div>`+pickUI(d.key,d.opts,1,{head:'Replacement'}):`no replacement in the 2024 rules. Pick a different skill instead.</div>`)+'</div>').join('');
 }
 function buildPkHints(G){
   const el=document.getElementById('pkHints');if(!el)return;
@@ -3028,6 +3029,8 @@ function crGet(){if(!st.customRace||typeof st.customRace!=='object'||Array.isArr
 function crEmpty(c){c=c||crGet();
   return !Object.keys(c).some(k=>{if(k==='nid'||k==='nacAb'||k==='spAb')return false;const v=c[k];
     return Array.isArray(v)?v.length:v&&typeof v==='object'?Object.values(v).some(x=>x):typeof v==='string'?v.trim():!!v;});}
+// Paket T5 (Fund T4 b): Rassen-Trait „Your speed is not reduced by wearing heavy armor“ (Dwarf 2014) – kein Speed −10 durch Rüstung
+function rcNoArmorSlow(){const r=rcRace();return !!r&&r!=='custom'&&typeof RACE_DATA!=='undefined'&&/speed is not reduced by wearing heavy armor/i.test((RACE_DATA[r]||{}).traits||'');}
 function rcName(race){return race==='custom'?((document.getElementById('raceCustom')?.value||'').trim()||'Custom'):race;}
 function rcP(race){
   if(race!=='custom')return RACE_PICKS[race];
@@ -3519,6 +3522,11 @@ function toggleSkEdit(){
   buildSkills();
 }
 
+// Skill-Bonus wie in der Skill-Liste (Attribut + Proficiency/Expertise/Jack of All Trades + Misc + automatische Boni)
+function skillBonus(n,G){const s=SKILLS.find(x=>x.n===n);if(!s)return 0;G=G||calcGrants();attrSync();
+  const man=st.skillP[s.n]||'',auto=grantLvl(G,'skill',s.n),p=PK_RANK[auto]>PK_RANK[man]?auto:man;
+  const autoB=G.filter(x=>x.art==='bonus'&&x.ziel===s.n).reduce((t,x)=>t+x.stufe,0),misc=parseInt(st.skillMisc&&st.skillMisc[s.n])||0;
+  return md(st.attrs[s.a])+(p==='half'?Math.floor(prof()/2):prof()*pkProfMul(p))+misc+autoB;}
 function buildSkills(){
   const g=document.getElementById('skillsGrid');if(!g)return;g.innerHTML='';attrSync();
   const G=calcGrants();buildPkHints(G);
@@ -3535,7 +3543,7 @@ function buildSkills(){
     const ab=G.filter(x=>x.art==='bonus'&&x.ziel===s.n),autoB=ab.reduce((t,x)=>t+x.stufe,0);
     const bd=grantSrc(G,'skill',s.n).map(q=>`<span class="sk-bdg">${q}</span>`).join('')+ab.map(x=>`<span class="sk-bdg">${pkEsc(x.quelle)} +${x.stufe}</span>`).join('');
     const misc=parseInt(st.skillMisc&&st.skillMisc[s.n])||0;
-    const b=md(st.attrs[s.a])+(p==='half'?Math.floor(prof()/2):prof()*pkProfMul(p))+misc+autoB;
+    const b=skillBonus(s.n,G);
     const r=document.createElement('div');r.className='sk-row sk-wrap';
     const miscStr=misc!==0?`<span class="sk-miscv ${misc>0?'pos':'neg'}">(${misc>0?'+':''}${misc})</span>`:'';
     r.innerHTML=`<div class="sk-pip${p==='e'?' e':p==='p'?' p':p==='half'?' h':''}"${p==='half'?' title="Half proficiency (Jack of All Trades)"':''}></div><span class="sk-name">${s.n}${miscStr}${bd}</span><span class="sk-attr">${s.a}</span><span class="sk-bon">${fmt(b)}</span><span class="sk-roll-ic" onclick="event.stopPropagation();rollD20({k:'check',ab:'${s.a}',sk:'${s.n}',l:'${s.n}',mod:${b}})"><i class="mi mi-dz"></i></span>`
@@ -3936,6 +3944,14 @@ function fsTog(el){
 // Ability Score Improvement (XPHB, zwei Alternativen): 2 Punkte, je Attribut höchstens 2 (+2 auf eins oder +1 auf zwei).
 const AB_K={str:'STR',dex:'DEX',con:'CON',int:'INT',wis:'WIS',cha:'CHA'};
 function faKey(name,n){return 'fa:'+name+(n?'#'+(n+1):'');}
+// Paket T5 (Weiche j): 2014 ist Ability Score Improvement ein Klassen-Feature, kein Feat (FT_FEATS 2014 = nur SRD-Feats).
+// asi14Ft() = Eintrag wie ein Feat aus dem Klassen-Feature (Text aus CLASS_DATA, PHB), damit Wahl (+2 / +1 +1, max 20), Zählung
+// in den Attributen und der Stufenaufstieg-Assistent wie in 2024 laufen; steht in „My Feats“ mit Abzeichen „Class Feature“.
+function asi14Ft(){const cs=[curCls()].concat(Object.keys(CLASS_DATA));let f=null;
+  for(const c of cs){f=c&&CLASS_DATA[c]&&(CLASS_DATA[c].base||[]).find(x=>x&&x.name==='Ability Score Improvement');if(f)break;}
+  const A=['str','dex','con','int','wis','cha'];
+  return {n:'Ability Score Improvement',src:'PHB',cat:'ASI',pre:'',d:f?f.desc:'',rep:1,ab:[{choose:{from:A,amount:2},hidden:true},{choose:{from:A,count:2},hidden:true}]};}
+function ftFind(n){return FT_FEATS.find(x=>x.n===n)||(R14&&n==='Ability Score Improvement'?asi14Ft():undefined);}
 function faInst(i){const f=st.feats[i];let n=0;for(let j=0;j<i;j++)if(st.feats[j].tag==='Feat'&&st.feats[j].name===f.name)n++;return n;}
 function faSpec(ft){
   const ab=ft&&ft.ab;if(!Array.isArray(ab)||!ab.length)return null;
@@ -3954,12 +3970,12 @@ function faSel(sp,key){
   return pkValid(key,sp.from,sp.cnt).map(k=>({k,v:sp.amt}));
 }
 function faCount(sp,key){return sp.pts?faSel(sp,key).reduce((t,x)=>t+x.v,0):faSel(sp,key).length;}
-function faPending(name,n){const sp=faSpec(FT_FEATS.find(x=>x.n===name));return !!sp&&faCount(sp,faKey(name,n))<faNeed(sp);}
+function faPending(name,n){const sp=faSpec(ftFind(name));return !!sp&&faCount(sp,faKey(name,n))<faNeed(sp);}
 function faGrants(g){
   const seen={};
   (st.feats||[]).forEach(f=>{
     if(!f||f.tag!=='Feat')return;const n=seen[f.name]||0;seen[f.name]=n+1;
-    const sp=faSpec(FT_FEATS.find(x=>x.n===f.name));if(!sp)return;
+    const sp=faSpec(ftFind(f.name));if(!sp)return;
     faSel(sp,faKey(f.name,n)).forEach(x=>g.push({art:'attr',ziel:x.k,stufe:x.v,quelle:f.name+(n?' ('+(n+1)+')':''),ft:1,max:sp.max}));
   });
 }
@@ -3980,7 +3996,7 @@ function faDesc(ft){
   return t+'\n'+(ft.d||'');
 }
 function faHtml(name,n){
-  const sp=faSpec(FT_FEATS.find(x=>x.n===name));if(!sp)return '';
+  const sp=faSpec(ftFind(name));if(!sp)return '';
   const key=faKey(name,n),sel=faSel(sp,key),need=faNeed(sp),have=faCount(sp,key),full=have>=need;
   const val=k=>{const x=sel.find(y=>y.k===k);return x?x.v:0;};
   const opts=sp.fix.length?sp.fix.map(x=>x.k):sp.from;
@@ -3994,7 +4010,7 @@ function faHtml(name,n){
   return `<div class="fs-box">${h}</div>`;
 }
 function faTog(el){
-  const k=el.dataset.k,x=el.dataset.o,name=el.dataset.f,sp=faSpec(FT_FEATS.find(y=>y.n===name));if(!sp)return;
+  const k=el.dataset.k,x=el.dataset.o,name=el.dataset.f,sp=faSpec(ftFind(name));if(!sp)return;
   if(!st.picks)st.picks={};
   let a=pkGet(k).slice();const need=faNeed(sp);
   if(sp.pts){const c=a.filter(y=>y===x).length,t=faCount(sp,k);
@@ -4382,7 +4398,7 @@ function onHpMChange(){
   autoSave();
 }
 function updBar(){
-  const m=parseInt(document.getElementById('hpM').value)||10;
+  const m=hpMaxVal();
   st.hpC=Math.min(st.hpC,m);document.getElementById('hpC').textContent=st.hpC;
   const p=Math.round(st.hpC/m*100);
   const b=document.getElementById('hpBar');b.style.width=p+'%';
@@ -4456,18 +4472,18 @@ function dmgRender(){
     h=R.n>0?`<b>−${R.n}</b> damage`+(R.half?` (${R.raw} halved · Resistance)`:''):`No damage (${R.raw} halved · Resistance)`;
     h+=` → `+(R.t0!==R.t1?`Temp ${R.t0} → ${R.t1} · `:'')+`HP ${R.hp0} → ${R.hp1}`;
     if(R.hp0>0&&R.hp1===0){
-      if(R.over>=R.m)h+=`<div class="dr-warn">Massive Damage: ${R.over} damage remains, equal to or more than your HP maximum (${R.m}) – the character dies (XPHB).</div>`;
+      if(R.over>=R.m)h+=`<div class="dr-warn">Massive Damage: ${R.over} damage remains, equal to or more than your HP maximum (${R.m}) – the character dies (${RQ}).</div>`;
       else{
-        h+=`<div class="dr-note">0 HP: you have the Unconscious condition until you regain any Hit Points, and you make Death Saving Throws (XPHB).</div>`;
+        h+=`<div class="dr-note">0 HP: you have the Unconscious condition until you regain any Hit Points, and you make Death Saving Throws (${RQ}).</div>`;
         const acts=[];if(!conds.includes('Unconscious'))acts.push(B('+ Unconscious','hpUnc(true)'));
         if(R.conc&&cn===R.conc)acts.push(B('End Concentration','hpEndConc()'));
         if(R.conc&&cn===R.conc)h+=`<div class="dr-warn">Concentration (${pkEsc(R.conc)}) ends: Unconscious includes Incapacitated.</div>`;
         if(acts.length)h+=`<div class="dr-acts">${acts.join('')}</div>`;
       }
     }else if(R.hp0===0&&R.n>0){
-      if(R.rest>=R.m)h+=`<div class="dr-warn">Damage at 0 HP equal to or more than your HP maximum (${R.m}): the character dies (XPHB).</div>`;
+      if(R.rest>=R.m)h+=`<div class="dr-warn">Damage at 0 HP equal to or more than your HP maximum (${R.m}): the character dies (${RQ}).</div>`;
       else{
-        h+=`<div class="dr-note">Damage at 0 HP: one Death Saving Throw failure, two if the damage is from a Critical Hit (XPHB).</div>`;
+        h+=`<div class="dr-note">Damage at 0 HP: one Death Saving Throw failure, two if the damage is from a Critical Hit (${RQ}).</div>`;
         if(!R.dsDone)h+=`<div class="dr-acts">${B('+1 Failure','hpDsFail(1)')}${B('+2 (Critical Hit)','hpDsFail(2)')}</div>`;
       }
     }else if(R.conc&&R.hp1>0){
@@ -4477,12 +4493,12 @@ function dmgRender(){
     }
   }else if(R.kind==='heal'){
     h=`<b>+${R.raw}</b> healing → HP ${R.hp0} → ${R.hp1}`+(R.lost?` · ${R.lost} over maximum lost`:'')+(R.hp0>=R.m?`<div class="dr-note">Already at your Hit Point maximum.</div>`:'');
-    if(R.ds)h+=`<div class="dr-note">Death Saves reset: successes and failures go back to zero when you regain any Hit Points (XPHB).</div>`;
-    if(R.unc&&conds.includes('Unconscious'))h+=`<div class="dr-note">Unconscious from 0 HP ends when you regain any Hit Points (XPHB).</div><div class="dr-acts">${B('Remove Unconscious','hpUnc(false)')}</div>`;
+    if(R.ds)h+=`<div class="dr-note">Death Saves reset: successes and failures go back to zero when you regain any Hit Points (${RQ}).</div>`;
+    if(R.unc&&conds.includes('Unconscious'))h+=`<div class="dr-note">Unconscious from 0 HP ends when you regain any Hit Points (${RQ}).</div><div class="dr-acts">${B('Remove Unconscious','hpUnc(false)')}</div>`;
   }else{
-    if(R.keep)h=`You have <b>${R.t0}</b> Temp HP. Temporary Hit Points don't stack: keep ${R.t0} or take ${R.raw} (XPHB).<div class="dr-acts">${B(`Take ${R.raw}`,'hpTakeTemp()')}${B(`Keep ${R.t0}`,'dmgClear()')}</div>`;
+    if(R.keep)h=`You have <b>${R.t0}</b> Temp HP. Temporary Hit Points don't stack: keep ${R.t0} or take ${R.raw} (${RQ}).<div class="dr-acts">${B(`Take ${R.raw}`,'hpTakeTemp()')}${B(`Keep ${R.t0}`,'dmgClear()')}</div>`;
     else h=`Temp HP ${R.t0} → <b>${R.t1}</b>`+(R.t0?` (they don't stack – the new ones replace the old)`:'');
-    if(R.hp0===0)h+=`<div class="dr-note">At 0 HP, Temporary Hit Points don't restore you to consciousness – only healing does (XPHB).</div>`;
+    if(R.hp0===0)h+=`<div class="dr-note">At 0 HP, Temporary Hit Points don't restore you to consciousness – only healing does (${RQ}).</div>`;
   }
   box.innerHTML=`<div class="dmg-res">${h}<button class="dmg-x" onclick="dmgClear()" aria-label="Close">×</button></div>`;
 }
@@ -4516,7 +4532,7 @@ function fxRef(e){ // Regeltext, Dauer, Konzentration, Untertitel
   return null;
 }
 function fxDice(v){const m=/(\d*)d(\d+)/i.exec(v||'');return m?(m[1]||1)+'d'+m[2]:null;}
-function fxBloodied(){return st.hpC<=hpMaxVal()/2;}
+function fxBloodied(){return !R14&&st.hpC<=hpMaxVal()/2;} // Paket T5 (Weiche h): kein 2014-Begriff
 function fxConcName(){
   if(st.concActive!=null&&st.mySpells&&st.mySpells[st.concActive])return st.mySpells[st.concActive].name;
   if(st.concActiveFeature)return _abLabel(st.concActiveFeature);
@@ -4534,7 +4550,7 @@ function buildFx(){
   if(fxBloodied())auto.push(fxChip('auto d','Bloodied',`${st.hpC} / ${hpMaxVal()} HP`,'',"openFxView('rule','Bloodied')"));
   if(cn)auto.push(fxChip('auto conc','◎ Concentration',cn,'',"openFxView('conc')"));
   if(inc.length&&cn)h+=`<div class="fx-warn">${pkEsc(inc.join(', '))}: Concentration ends (Incapacitated). <button class="fx-mini" onclick="fxEndConc()">End Concentration</button></div>`;
-  const exTxt=ex===0?'none':ex>=6?'Level 6 · you die (XPHB)':`Level ${ex} · D20 Tests −${2*ex} · Speed −${5*ex} ft`;
+  const exTxt=ex===0?'none':R14?fxEx14Txt(ex):ex>=6?'Level 6 · you die (XPHB)':`Level ${ex} · D20 Tests −${2*ex} · Speed −${5*ex} ft`;
   h+=`<div class="fx-ex"><button class="fx-lbl" onclick="openFxView('rule','Exhaustion')">Exhaustion ⓘ</button>
     <div class="fx-pips">${[1,2,3,4,5,6].map(i=>`<div class="fx-pip${i<=ex?' f':''}" onclick="fxSetEx(${i})"></div>`).join('')}</div>
     <div class="fx-extxt${ex?' on':''}">${exTxt}</div></div>`;
@@ -4546,7 +4562,11 @@ function buildFx(){
   box.innerHTML=h;
   statRender(); // Paket E3: Effekte wirken auf AC/Speed
 }
-function fxSetEx(i){const ex=fxEx();st.exhaustion=i===ex?i-1:i;buildFx();statRender();autoSave();}
+function fxSetEx(i){const ex=fxEx();st.exhaustion=i===ex?i-1:i;if(R14)updBar();buildFx();statRender();autoSave();} // 2014: HP-Max halbiert ab Stufe 4 → aktuelle HP kappen
+// Paket T5 (Weiche e): 2014-Exhaustion = Tabelle aus COND_DATA („• 1: …“ … „• 6: Death“), Wirkung aller Stufen bis zur aktuellen
+function fxEx14Tab(){return [...String(COND_DATA.Exhaustion||'').matchAll(/^• (\d): (.+)$/gm)].map(m=>({l:+m[1],t:m[2]}));}
+function fxEx14Txt(ex){const T=fxEx14Tab().filter(x=>x.l<=ex);if(ex>=6)return 'Level 6 · '+((T.find(x=>x.l===6)||{}).t||'Death');
+  return `Level ${ex} · `+T.map(x=>x.t).join(' · ')+(ex>=4?` (${hpMaxRaw()} → ${hpMaxVal()})`:'');}
 function fxEndConc(){st.concActive=null;st.concActiveFeature=null;buildMySpells();buildAbilities();buildFx();autoSave();if(_fxView)closeFx();}
 function fxTogCond(c){const a=fxConds(),i=a.indexOf(c);if(i>=0)a.splice(i,1);else a.push(c);_fxInfo=c;buildFx();statRender();autoSave();}
 function fxNewId(){return 'fx'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);}
@@ -4955,17 +4975,17 @@ const START_EQUIP={"cls":{"Barbarian":[{"k":"choice","o":{"a":[{"i":"Greataxe|PH
 const ARMOR_DATA=[{"n":"Leather Armor","c":"L","ac":11},{"n":"Padded Armor","c":"L","ac":11,"st":1},{"n":"Studded Leather Armor","c":"L","ac":12},{"n":"Hide Armor","c":"M","ac":12},{"n":"Chain Shirt","c":"M","ac":13},{"n":"Breastplate","c":"M","ac":14},{"n":"Scale Mail","c":"M","ac":14,"st":1},{"n":"Half Plate Armor","c":"M","ac":15,"st":1},{"n":"Ring Mail","c":"H","ac":14,"st":1},{"n":"Chain Mail","c":"H","ac":16,"str":13,"st":1},{"n":"Splint Armor","c":"H","ac":17,"str":15,"st":1},{"n":"Plate Armor","c":"H","ac":18,"str":15,"st":1},{"n":"Shield","c":"S","ac":2}];
 // ARMOR_DATA-END
 // STD_ACTIONS-START (tools/action_convert.py, 5e.tools actions.json + variantrules.json XPHB)
-const STD_ACTIONS=[{"n":"Attack","t":"aktion","x":"When you take the Attack action, you can make one attack roll with a weapon or an Unarmed Strike.\nEquipping and Unequipping Weapons. You can either equip or unequip one weapon when you make an attack as part of this action. You do so either before or after the attack. If you equip a weapon before an attack, you don't need to use it for that attack. Equipping a weapon includes drawing it from a sheath or picking it up. Unequipping a weapon includes sheathing, stowing, or dropping it.\nMoving Between Attacks. If you move on your turn and have a feature, such as Extra Attack, that gives you more than one attack as part of the Attack action, you can use some or all of that movement to move between those attacks."},{"n":"Unarmed Strike","t":"aktion","x":"Instead of using a weapon to make a melee attack, you can use a punch, kick, head-butt, or similar forceful blow. In game terms, this is an Unarmed Strike—a melee attack that involves you using your body to damage, grapple, or shove a target within 5 feet of you.\nWhenever you use your Unarmed Strike, choose one of the following options for its effect.\nDamage. You make an attack roll against the target. Your bonus to the roll equals your Strength modifier plus your Proficiency Bonus. On a hit, the target takes Bludgeoning damage equal to 1 plus your Strength modifier.\nGrapple. The target must succeed on a Strength or Dexterity saving throw (it chooses which), or it has the Grappled condition. The DC for the saving throw and any escape attempts equals 8 plus your Strength modifier and Proficiency Bonus. This grapple is possible only if the target is no more than one size larger than you and if you have a hand free to grab it.\nShove. The target must succeed on a Strength or Dexterity saving throw (it chooses which), or you either push it 5 feet away or cause it to have the Prone condition. The DC for the saving throw equals 8 plus your Strength modifier and Proficiency Bonus. This shove is possible only if the target is no more than one size larger than you.","u":1},{"n":"Dash","t":"aktion","x":"When you take the Dash action, you gain extra movement for the current turn. The increase equals your Speed after applying any modifiers. With a Speed of 30 feet, for example, you can move up to 60 feet on your turn if you Dash. If your Speed of 30 feet is reduced to 15 feet, you can move up to 30 feet this turn if you Dash.\nIf you have a special speed, such as a Fly Speed or Swim Speed, you can use that speed instead of your Speed when you take this action. You choose which speed to use each time you take it."},{"n":"Disengage","t":"aktion","x":"If you take the Disengage action, your movement doesn't provoke Opportunity Attacks for the rest of the current turn."},{"n":"Dodge","t":"aktion","x":"If you take the Dodge action, you gain the following benefits: until the start of your next turn, any attack roll made against you has Disadvantage if you can see the attacker, and you make Dexterity saving throws with Advantage.\nYou lose these benefits if you have the Incapacitated condition or if your Speed is 0."},{"n":"Don or Doff a Shield","t":"aktion","x":"A Shield can be donned or doffed as an action."},{"n":"Escape a Grapple","t":"aktion","x":"A Grappled creature can use its action to make a Strength (Athletics) or Dexterity (Acrobatics) check against the grapple's escape DC, ending the condition on itself on a success. The condition also ends if the grappler has the Incapacitated condition or if the distance between the Grappled target and the grappler exceeds the grapple's range."},{"n":"Help","t":"aktion","x":"When you take the Help action, you do one of the following.\nAssist an Ability Check. Choose one of your skill or tool proficiencies and one ally who is near enough for you to assist verbally or physically when they make an ability check. That ally has Advantage on the next ability check they make with the chosen skill or tool. This benefit expires if the ally doesn't use it before the start of your next turn. The DM has final say on whether your assistance is possible.\nAssist an Attack Roll. You momentarily distract an enemy within 5 feet of you, giving Advantage to the next attack roll by one of your allies against that enemy. This benefit expires at the start of your next turn.\nAdditionally, the Help action may be used to stabilize a creature."},{"n":"Hide","t":"aktion","x":"With the Hide action, you try to conceal yourself. To do so, you must succeed on a DC 15 Dexterity (Stealth) check while you're Heavily Obscured or behind Three-Quarters Cover or Total Cover, and you must be out of any enemy's line of sight; if you can see a creature, you can discern whether it can see you.\nOn a successful check, you have the Invisible condition while hidden. Make note of your check's total, which is the DC for a creature to find you with a Wisdom (Perception) check.\nYou stop being hidden immediately after any of the following occurs: you make a sound louder than a whisper, an enemy finds you, you make an attack roll, or you cast a spell with a Verbal component."},{"n":"Influence","t":"aktion","x":"With the Influence action, you urge a monster to do something. Describe or roleplay how you're communicating with the monster. Are you trying to deceive, intimidate, amuse, or gently persuade? The DM then determines whether the monster feels willing, unwilling, or hesitant due to your interaction; this determination establishes whether an ability check is necessary, as explained below.\nWilling. If your urging aligns with the monster's desires, no ability check is necessary; the monster fulfills your request in a way it prefers.\nUnwilling. If your urging is repugnant to the monster or counter to its alignment, no ability check is necessary; it doesn't comply.\nHesitant. If you urge the monster to do something that it is hesitant to do, you must make an ability check, which is affected by the monster's attitude: Indifferent, Friendly, or Hostile, each of which is defined in this glossary. The Influence Checks table suggests which ability check to make based on how you're interacting with the monster. The DM chooses the check, which has a default DC equal to 15 or the monster's Intelligence score, whichever is higher. On a successful check, the monster does as urged. On a failed check, you must wait 24 hours (or a duration set by the DM) before urging it in the same way again.\nInfluence Checks:\n• Charisma (Deception): Deceiving a monster that understands you\n• Charisma (Intimidation): Intimidating a monster\n• Charisma (Performance): Amusing a monster\n• Charisma (Persuasion): Persuading a monster that understands you\n• Wisdom (Animal Handling): Gently coaxing a Beast or Monstrosity"},{"n":"Magic","t":"aktion","x":"When you take the Magic action, you cast a spell that has a casting time of an action or use a feature or magic item that requires a Magic action to be activated.\nIf you cast a spell that has a casting time of 1 minute or longer, you must take the Magic action on each turn of that casting, and you must maintain Concentration while you do so. If your Concentration is broken, the spell fails, but you don't expend a spell slot."},{"n":"Ready","t":"aktion","x":"You take the Ready action to wait for a particular circumstance before you act. To do so, you take this action on your turn, which lets you act by taking a Reaction before the start of your next turn.\nFirst, you decide what perceivable circumstance will trigger your Reaction. Then, you choose the action you will take in response to that trigger, or you choose to move up to your Speed in response to it. Examples include \"If the cultist steps on the trapdoor, I'll pull the lever that opens it,\" and \"If the zombie steps next to me, I move away.\"\nWhen the trigger occurs, you can either take your Reaction right after the trigger finishes or ignore the trigger.\nWhen you Ready a spell, you cast it as normal (expending any resources used to cast it) but hold its energy, which you release with your Reaction when the trigger occurs. To be readied, a spell must have a casting time of an action, and holding on to the spell's magic requires Concentration, which you can maintain up to the start of your next turn. If your Concentration is broken, the spell dissipates without taking effect."},{"n":"Search","t":"aktion","x":"When you take the Search action, you make a Wisdom check to discern something that isn't obvious. The Search table suggests which skills are applicable when you take this action, depending on what you're trying to detect.\nSearch:\n• Insight: Creature's state of mind\n• Medicine: Creature's ailment or cause of death\n• Perception: Concealed creature or object\n• Survival: Tracks or food"},{"n":"Study","t":"aktion","x":"When you take the Study action, you make an Intelligence check to study your memory, a book, a clue, or another source of knowledge and call to mind an important piece of information about it.\nThe Areas of Knowledge table suggests which skills are applicable to various areas of knowledge.\nAreas of Knowledge:\n• Arcana: Spells, magic items, eldritch symbols, magical traditions, planes of existence, and certain creatures (Aberrations, Constructs, Elementals, Fey, and Monstrosities)\n• History: Historic events and people, ancient civilizations, wars, and certain creatures (Giants and Humanoids)\n• Investigation: Traps, ciphers, riddles, and gadgetry\n• Nature: Terrain, flora, weather, and certain creatures (Beasts, Dragons, Oozes, and Plants)\n• Religion: Deities, religious hierarchies and rites, holy symbols, cults, and certain creatures (Celestials, Fiends, and Undead)"},{"n":"Utilize","t":"aktion","x":"You normally interact with an object while doing something else, such as when you draw a sword as part of the Attack action. When an object requires an action for its use, you take the Utilize action."},{"n":"Two-Weapon Fighting","t":"bonus","x":"When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative."},{"n":"Opportunity Attack","t":"reaktion","x":"You can make an Opportunity Attack when a creature that you can see leaves your reach using its action, its Bonus Action, its Reaction, or one of its speeds. To make the Opportunity Attack, take a Reaction to make one melee attack with a weapon or an Unarmed Strike against the provoking creature. The attack occurs right before the creature leaves your reach."},{"n":"End Concentration","t":"frei","x":"Some spells and other effects require Concentration to remain active, as specified in their descriptions. You can end Concentration at any time (no action required)."},{"n":"Improvising an Action","t":"varies","x":"Player characters and monsters can also do things not covered by other actions. Many class features and other abilities provide additional action options, and you can improvise other actions. When you describe an action not detailed elsewhere in the rules, the Dungeon Master tells you whether that action is possible and what kind of D20 Test you need to make, if any."}];
+const STD_ACTIONS=[{"n":"Activate an Item","t":"aktion","x":"Activating some magic items requires a user to do something in particular, such as holding the item and uttering a command word, reading the item if it is a scroll, or drinking it if it is a potion. The description of each item category or individual item details how an item is activated. Certain items use one or more of the following rules related to their activation.\nIf an item requires an action to activate, that action isn't a function of the Use an Object action, so a feature such as the rogue's Fast Hands can't be used to activate the item.\nCommand Word. A command word is a word or phrase that must be spoken audibly for the item to operate. A magic item that requires the user to speak a command word can't be activated in the area of any effect that prevents sound, such as the area created by the silence spell.\nConsumables. Some items are used up when they are activated. A potion or elixir must be swallowed, or an oil applied to the body. The writing vanishes from a scroll when it is read. Once used, a consumable item loses its magic and no longer functions.\nSpells. Some magic items allow the user to cast a spell from the item, often by expending charges from it. The spell is cast at the lowest possible spell and caster level, doesn't expend any of the user's spell slots, and requires no components unless the item's description says otherwise. The spell uses its normal casting time, range, and duration, and the user of the item must concentrate if the spell requires concentration. Certain items make exceptions to these rules, changing the casting time, duration, or other parts of a spell.\nMany items, such as potions, bypass the casting of the spell and confer the spell's effects. Such an item still uses the spell's duration unless the item's description says otherwise.\nA magic item, such as certain staffs, may require you to use your own spellcasting ability when you cast a spell from the item. If you have more than one spellcasting ability, you choose which one to use with the item. If you don't have a spellcasting ability—perhaps you're a rogue with the Use Magic Device feature—your spellcasting ability modifier is +0 for the item, and your proficiency bonus does apply.\nCharges. Some magic items have charges that you expend to activate its properties. The number of charges an item has remaining is revealed when an identify spell is cast on the item, or when a creature attunes to the item. Additionally, when an item regains charges, the creature attuned to that item learns how many charges it regained."},{"n":"Attack","t":"aktion","x":"The most common action to take in combat is the Attack action, whether you are swinging a sword, firing an arrow from a bow, or brawling with your fists.\nWith this action, you make one melee or ranged attack. See the \"Making an Attack\" section for the rules that govern attacks.\nCertain features, such as the Extra Attack feature of the fighter, allow you to make more than one attack with this action."},{"n":"Unarmed Strike","t":"aktion","x":"Instead of using a weapon to make a melee weapon attack, you can use an unarmed strike: a punch, kick, head-butt, or similar forceful blow (none of which count as weapons). On a hit, an unarmed strike deals bludgeoning damage equal to 1 + your Strength modifier. You are proficient with your unarmed strikes.","u":1},{"n":"Dash","t":"aktion","x":"When you take the Dash action, you gain extra movement for the current turn. The increase equals your speed, after applying any modifiers. With a speed of 30 feet, for example, you can move up to 60 feet on your turn if you dash.\nAny increase or decrease to your speed changes this additional movement by the same amount. If your speed of 30 feet is reduced to 15 feet, for instance, you can move up to 30 feet this turn if you dash."},{"n":"Disengage","t":"aktion","x":"If you take the Disengage action, your movement doesn't provoke opportunity attacks for the rest of the turn."},{"n":"Dodge","t":"aktion","x":"When you take the Dodge action, you focus entirely on avoiding attacks. Until the start of your next turn, any attack roll made against you has disadvantage if you can see the attacker, and you make Dexterity saving throws with advantage. You lose this benefit if you are incapacitated (as explained in the appendix) or if your speed drops to 0."},{"n":"Don or Doff a Shield","t":"aktion","x":"The time it takes to don or doff armor depends on the armor's category. A shield can be donned or doffed as an action."},{"n":"Escape a Grapple","t":"aktion","x":"A grappled creature can use its action to escape. To do so, it must succeed on a Strength (Athletics) or Dexterity (Acrobatics) check contested by your Strength (Athletics) check."},{"n":"Grapple","t":"aktion","x":"When you want to grab a creature or wrestle with it, you can use the Attack action to make a special melee attack, a grapple. If you're able to make multiple attacks with the Attack action, this attack replaces one of them. The target of your grapple must be no more than one size larger than you, and it must be within your reach.\nUsing at least one free hand, you try to seize the target by making a grapple check, a Strength (Athletics) check contested by the target's Strength (Athletics) or Dexterity (Acrobatics) check (the target chooses the ability to use). You succeed automatically if the target is incapacitated. If you succeed, you subject the target to the grappled condition (see the appendix). The condition specifies the things that end it, and you can release the target whenever you like (no action required).\nMoving a Grappled Target. When you move, you can drag or carry the grappled creature with you, but your speed is halved, unless the creature is two or more sizes smaller than you.","c":1},{"n":"Help","t":"aktion","x":"You can lend your aid to another creature in the completion of a task. When you take the Help action, the creature you aid gains advantage on the next ability check it makes to perform the task you are helping with, provided that it makes the check before the start of your next turn.\nAlternatively, you can aid a friendly creature in attacking a creature within 5 feet of you. You feint, distract the target, or in some other way team up to make your ally's attack more effective. If your ally attacks the target before your next turn, the first attack roll is made with advantage."},{"n":"Hide","t":"aktion","x":"When you take the Hide action, you make a Dexterity (Stealth) check in an attempt to hide, following the rules in chapter 7 for hiding. If you succeed, you gain certain benefits, as described in the \"Unseen Attackers and Targets\" section in the Player's Handbook."},{"n":"Ready","t":"aktion","x":"Sometimes you want to get the jump on a foe or wait for a particular circumstance before you act. To do so, you can take the Ready action on your turn, which lets you act using your reaction before the start of your next turn.\nFirst, you decide what perceivable circumstance will trigger your reaction. Then, you choose the action you will take in response to that trigger, or you choose to move up to your speed in response to it. Examples include \"If the cultist steps on the trapdoor, I'll pull the lever that opens it,\" and \"If the goblin steps next to me, I move away.\"\nWhen the trigger occurs, you can either take your reaction right after the trigger finishes or ignore the trigger. Remember that you can take only one reaction per round.\nWhen you ready a spell, you cast it as normal but hold its energy, which you release with your reaction when the trigger occurs. To be readied, a spell must have a casting time of 1 action, and holding onto the spell's magic requires concentration (explained in chapter 10). If your concentration is broken, the spell dissipates without taking effect. For example, if you are concentrating on the web spell and ready magic missile, your web spell ends, and if you take damage before you release magic missile with your reaction, your concentration might be broken.\nYou have until the start of your next turn to use a readied action."},{"n":"Search","t":"aktion","x":"When you take the Search action, you devote your attention to finding something. Depending on the nature of your search, the DM might have you make a Wisdom (Perception) check or an Intelligence (Investigation) check."},{"n":"Shove","t":"aktion","x":"Using the Attack action, you can make a special melee attack to shove a creature, either to knock it prone or push it away from you. If you're able to make multiple attacks with the Attack action, this attack replaces one of them.\nThe target of your shove must be no more than one size larger than you, and it must be within your reach. You make a Strength (Athletics) check contested by the target's Strength (Athletics) or Dexterity (Acrobatics) check (the target chooses the ability to use). You succeed automatically if the target is incapacitated. If you succeed, you either knock the target prone or push it 5 feet away from you.","c":1},{"n":"Stabilize a Creature","t":"aktion","x":"You can use your action to administer first aid to an unconscious creature and attempt to stabilize it, which requires a successful DC 10 Wisdom (Medicine) check.\nA stable creature doesn't make death saving throws, even though it has 0 hit points, but it does remain unconscious. The creature stops being stable, and must start making death saving throws again, if it takes any damage. A stable creature that isn't healed regains 1 hit point after 1d4 hours."},{"n":"Use an Object","t":"aktion","x":"You normally interact with an object while doing something else, such as when you draw a sword as part of an attack. When an object requires your action for its use, you take the Use an Object action. This action is also useful when you want to interact with more than one object on your turn."},{"n":"Two-Weapon Fighting","t":"bonus","x":"When you take the Attack action and attack with a light melee weapon that you're holding in one hand, you can use a bonus action to attack with a different light melee weapon that you're holding in the other hand. You don't add your ability modifier to the damage of the bonus attack, unless that modifier is negative.\nIf either weapon has the thrown property, you can throw the weapon, instead of making a melee attack with it."},{"n":"Opportunity Attack","t":"reaktion","x":"In a fight, everyone is constantly watching for enemies to drop their guard. You can rarely move heedlessly past your foes without putting yourself in danger; doing so provokes an opportunity attack.\nYou can make an opportunity attack when a hostile creature that you can see moves out of your reach. To make the opportunity attack, you use your reaction to make one melee attack against the provoking creature. The attack interrupts the provoking creature's movement, occurring right before the creature leaves your reach.\nYou can avoid provoking an opportunity attack by taking the Disengage action. You also don't provoke an opportunity attack when you teleport or when someone or something moves you without using your movement, action, or reaction. For example, you don't provoke an opportunity attack if an explosion hurls you out of a foe's reach or if gravity causes you to fall past an enemy."},{"n":"End Concentration","t":"frei","x":"If a spell must be maintained with concentration, that fact appears in its Duration entry, and the spell specifies how long you can concentrate on it. You can end concentration at any time (no action required)."},{"n":"Cast a Spell","t":"varies","x":"Spellcasters such as wizards and clerics, as well as many monsters, have access to spells and can use them to great effect in combat. Each spell has a casting time, which specifies whether the caster must use an action, a reaction, minutes, or even hours to cast the spell. Casting a spell is, therefore, not necessarily an action. Most spells do have a casting time of 1 action, so a spellcaster often uses his or her action in combat to cast such a spell. See chapter 10 for the rules on spellcasting."},{"n":"Other Activity","t":"varies","x":"Your turn can include a variety of flourishes that require neither your action nor your move.\nYou can communicate however you are able, through brief utterances and gestures, as you take your turn.\nYou can also interact with one object or feature of the environment for free, during either your move or your action. For example, you could open a door during your move as you stride toward a foe, or you could draw your weapon as part of the same action you use to attack.\nIf you want to interact with a second object, you need to use your action. Some magic items and other special objects always require an action to use, as stated in their descriptions.\nThe DM might require you to use an action for any of these activities when it needs special care or when it presents an unusual obstacle. For instance, the DM could reasonably expect you to use an action to open a stuck door or turn a crank to lower a drawbridge.\nInteracting with Objects Around You. Here are a few examples of the sorts of thing you can do in tandem with your movement and action:\n• draw or sheathe a sword\n• open or close a door\n• withdraw a potion from your backpack\n• pick up a dropped axe\n• take a bauble from a table\n• remove a ring from your finger\n• stuff some food into your mouth\n• plant a banner in the ground\n• fish a few coins from your belt pouch\n• drink all the ale in a flagon\n• throw a lever or a switch\n• pull a torch from a sconce\n• take a book from a shelf you can reach\n• extinguish a small flame\n• don a mask\n• pull the hood of your cloak up and over your head\n• put your ear to a door\n• kick a small stone\n• turn a key in a lock\n• tap the floor with a 10-foot pole\n• hand an item to another character"}];
 // STD_ACTIONS-END
 // COND_DATA-START (tools/cond_convert.py, 5e.tools conditionsdiseases.json XPHB)
-const COND_DATA={"Blinded":"While you have the Blinded condition, you experience the following effects.\nCan't See. You can't see and automatically fail any ability check that requires sight.\nAttacks Affected. Attack rolls against you have Advantage, and your attack rolls have Disadvantage.","Charmed":"While you have the Charmed condition, you experience the following effects.\nCan't Harm the Charmer. You can't attack the charmer or target the charmer with damaging abilities or magical effects.\nSocial Advantage. The charmer has Advantage on any ability check to interact with you socially.","Deafened":"While you have the Deafened condition, you experience the following effect.\nCan't Hear. You can't hear and automatically fail any ability check that requires hearing.","Exhaustion":"While you have the Exhaustion condition, you experience the following effects.\nExhaustion Levels. This condition is cumulative. Each time you receive it, you gain 1 Exhaustion level. You die if your Exhaustion level is 6.\nD20 Tests Affected. When you make a D20 Test, the roll is reduced by 2 times your Exhaustion level.\nSpeed Reduced. Your Speed is reduced by a number of feet equal to 5 times your Exhaustion level.\nRemoving Exhaustion Levels. Finishing a Long Rest removes 1 of your Exhaustion levels. When your Exhaustion level reaches 0, the condition ends.","Frightened":"While you have the Frightened condition, you experience the following effects.\nAbility Checks and Attacks Affected. You have Disadvantage on ability checks and attack rolls while the source of fear is within line of sight.\nCan't Approach. You can't willingly move closer to the source of fear.","Grappled":"While you have the Grappled condition, you experience the following effects.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. You have Disadvantage on attack rolls against any target other than the grappler.\nMovable. The grappler can drag or carry you when it moves, but every foot of movement costs it 1 extra foot unless you are Tiny or two or more sizes smaller than it.","Incapacitated":"While you have the Incapacitated condition, you experience the following effects.\nInactive. You can't take any action, Bonus Action, or Reaction.\nNo Concentration. Your Concentration is broken.\nSpeechless. You can't speak.\nSurprised. If you're Incapacitated when you roll Initiative, you have Disadvantage on the roll.","Invisible":"While you have the Invisible condition, you experience the following effects.\nSurprise. If you're Invisible when you roll Initiative, you have Advantage on the roll.\nConcealed. You aren't affected by any effect that requires its target to be seen unless the effect's creator can somehow see you. Any equipment you are wearing or carrying is also concealed.\nAttacks Affected. Attack rolls against you have Disadvantage, and your attack rolls have Advantage. If a creature can somehow see you, you don't gain this benefit against that creature.","Paralyzed":"While you have the Paralyzed condition, you experience the following effects.\nIncapacitated. You have the Incapacitated condition.\nSpeed 0. Your Speed is 0 and can't increase.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAttacks Affected. Attack rolls against you have Advantage.\nAutomatic Critical Hits. Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.","Petrified":"While you have the Petrified condition, you experience the following effects.\nTurned to Inanimate Substance. You are transformed, along with any nonmagical objects you are wearing and carrying, into a solid inanimate substance (usually stone). Your weight increases by a factor of ten, and you cease aging.\nIncapacitated. You have the Incapacitated condition.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nResist Damage. You have Resistance to all damage.\nPoison Immunity. You have Immunity to the Poisoned condition.","Poisoned":"While you have the Poisoned condition, you experience the following effect.\nAbility Checks and Attacks Affected. You have Disadvantage on attack rolls and ability checks.","Prone":"While you have the Prone condition, you experience the following effects.\nRestricted Movement. Your only movement options are to crawl or to spend an amount of movement equal to half your Speed (round down) to right yourself and thereby end the condition. If your Speed is 0, you can't right yourself.\nAttacks Affected. You have Disadvantage on attack rolls. An attack roll against you has Advantage if the attacker is within 5 feet of you. Otherwise, that attack roll has Disadvantage.","Restrained":"While you have the Restrained condition, you experience the following effects.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage, and your attack rolls have Disadvantage.\nSaving Throws Affected. You have Disadvantage on Dexterity saving throws.","Stunned":"While you have the Stunned condition, you experience the following effects.\nIncapacitated. You have the Incapacitated condition.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAttacks Affected. Attack rolls against you have Advantage.","Unconscious":"While you have the Unconscious condition, you experience the following effects.\nInert. You have the Incapacitated and Prone conditions, and you drop whatever you're holding. When this condition ends, you remain Prone.\nSpeed 0. Your Speed is 0 and can't increase.\nAttacks Affected. Attack rolls against you have Advantage.\nSaving Throws Affected. You automatically fail Strength and Dexterity saving throws.\nAutomatic Critical Hits. Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.\nUnaware. You're unaware of your surroundings.","Bloodied":"A creature is Bloodied while it has half its Hit Points or fewer remaining.","Concentration":"Some spells and other effects require Concentration to remain active, as specified in their descriptions. If the effect's creator loses Concentration, the effect ends. If the effect has a maximum duration, the effect's description specifies how long the creator can concentrate on it: up to 1 minute, 1 hour, or some other duration. The creator can end Concentration at any time (no action required). The following factors break Concentration.\nAnother Concentration Effect. You lose Concentration on an effect the moment you start casting a spell that requires Concentration or activate another effect that requires Concentration.\nDamage. If you take damage, you must succeed on a Constitution saving throw to maintain Concentration. The DC equals 10 or half the damage taken (round down), whichever number is higher, up to a maximum DC of 30.\nIncapacitated or Dead. Your Concentration ends if you have the Incapacitated condition or you die."};
+const COND_DATA={"Blinded":"• A blinded creature can't see and automatically fails any ability check that requires sight.\n• Attack rolls against the creature have advantage, and the creature's attack rolls have disadvantage.","Charmed":"• A charmed creature can't attack the charmer or target the charmer with harmful abilities or magical effects.\n• The charmer has advantage on any ability check to interact socially with the creature.","Deafened":"• A deafened creature can't hear and automatically fails any ability check that requires hearing.","Exhaustion":"Some special abilities and environmental hazards, such as starvation and the long-term effects of freezing or scorching temperatures, can lead to a special condition called exhaustion. Exhaustion is measured in six levels. An effect can give a creature one or more levels of exhaustion, as specified in the effect's description.\n• 1: Disadvantage on ability checks\n• 2: Speed halved\n• 3: Disadvantage on attack rolls and saving throws\n• 4: Hit point maximum halved\n• 5: Speed reduced to 0\n• 6: Death\nIf an already exhausted creature suffers another effect that causes exhaustion, its current level of exhaustion increases by the amount specified in the effect's description.\nA creature suffers the effect of its current level of exhaustion as well as all lower levels. For example, a creature suffering level 2 exhaustion has its speed halved and has disadvantage on ability checks.\nAn effect that removes exhaustion reduces its level as specified in the effect's description, with all exhaustion effects ending if a creature's exhaustion level is reduced below 1.\nFinishing a long rest reduces a creature's exhaustion level by 1, provided that the creature has also ingested some food and drink. Also, being raised from the dead reduces a creature's exhaustion level by 1.","Frightened":"• A frightened creature has disadvantage on ability checks and attack rolls while the source of its fear is within line of sight.\n• The creature can't willingly move closer to the source of its fear.","Grappled":"• A grappled creature's speed becomes 0, and it can't benefit from any bonus to its speed.\n• The condition ends if the grappler is incapacitated.\n• The condition also ends if an effect removes the grappled creature from the reach of the grappler or grappling effect, such as when a creature is hurled away by the thunderwave spell.","Incapacitated":"• An incapacitated creature can't take actions or reactions.","Invisible":"• An invisible creature is impossible to see without the aid of magic or a special sense. For the purpose of hiding, the creature is heavily obscured. The creature's location can be detected by any noise it makes or any tracks it leaves.\n• Attack rolls against the creature have disadvantage, and the creature's attack rolls have advantage.","Paralyzed":"• A paralyzed creature is incapacitated and can't move or speak.\n• The creature automatically fails Strength and Dexterity saving throws.\n• Attack rolls against the creature have advantage.\n• Any attack that hits the creature is a critical hit if the attacker is within 5 feet of the creature.","Petrified":"• A petrified creature is transformed, along with any nonmagical object it is wearing or carrying, into a solid inanimate substance (usually stone). Its weight increases by a factor of ten, and it ceases aging.\n• The creature is incapacitated, can't move or speak, and is unaware of its surroundings.\n• Attack rolls against the creature have advantage.\n• The creature automatically fails Strength and Dexterity saving throws.\n• The creature has resistance to all damage.\n• The creature is immune to poison and disease, although a poison or disease already in its system is suspended, not neutralized.","Poisoned":"• A poisoned creature has disadvantage on attack rolls and ability checks.","Prone":"• A prone creature's only movement option is to crawl, unless it stands up and thereby ends the condition.\n• The creature has disadvantage on attack rolls.\n• An attack roll against the creature has advantage if the attacker is within 5 feet of the creature. Otherwise, the attack roll has disadvantage.","Restrained":"• A restrained creature's speed becomes 0, and it can't benefit from any bonus to its speed.\n• Attack rolls against the creature have advantage, and the creature's attack rolls have disadvantage.\n• The creature has disadvantage on Dexterity saving throws.","Stunned":"• A stunned creature is incapacitated, can't move, and can speak only falteringly.\n• The creature automatically fails Strength and Dexterity saving throws.\n• Attack rolls against the creature have advantage.","Unconscious":"• An unconscious creature is incapacitated, can't move or speak, and is unaware of its surroundings.\n• The creature drops whatever it's holding and falls prone.\n• The creature automatically fails Strength and Dexterity saving throws.\n• Attack rolls against the creature have advantage.\n• Any attack that hits the creature is a critical hit if the attacker is within 5 feet of the creature.","Concentration":"Some spells require you to maintain concentration in order to keep their magic active. If you lose concentration, such a spell ends.\nIf a spell must be maintained with concentration, that fact appears in its Duration entry, and the spell specifies how long you can concentrate on it. You can end concentration at any time (no action required).\nNormal activity, such as moving and attacking, doesn't interfere with concentration. The following factors can break concentration:\n• Casting another spell that requires concentration. You lose concentration on a spell if you cast another spell that requires concentration. You can't concentrate on two spells at once.\n• Taking damage. Whenever you take damage while you are concentrating on a spell, you must make a Constitution saving throw to maintain your concentration. The DC equals 10 or half the damage you take, whichever number is higher. If you take damage from multiple sources, such as an arrow and a dragon's breath, you make a separate saving throw for each source of damage.\n• Being incapacitated or killed. You lose concentration on a spell if you are incapacitated or if you die.\nThe DM might also decide that certain environmental phenomena, such as a wave crashing over you while you're on a storm-tossed ship, require you to succeed on a DC 10 Constitution saving throw to maintain concentration on a spell."};
 // COND_DATA-END
 // EFFECT_DATA-START (tools/effect_convert.py; Texte zur Laufzeit aus ZB_SPELLS/CLASS_DATA, Regeln aus 5e.tools variantrules.json)
-const EFFECT_DATA=[{"n":"Bless","k":"s","t":"b","s":"PHB'24","v":"+1d4 attacks & saves"},{"n":"Guidance","k":"s","t":"b","s":"PHB'24","v":"+1d4 checks (chosen skill)"},{"n":"Resistance","k":"s","t":"b","s":"PHB'24","v":"−1d4 damage (chosen type)"},{"n":"Shield of Faith","k":"s","t":"b","s":"PHB'24","v":"+2 AC"},{"n":"Haste","k":"s","t":"b","s":"PHB'24","v":"+2 AC · Speed ×2"},{"n":"Aid","k":"s","t":"b","s":"PHB'24","v":"+5 HP max"},{"n":"Heroism","k":"s","t":"b","s":"PHB'24","v":"Temp HP each turn"},{"n":"Longstrider","k":"s","t":"b","s":"PHB'24","v":"+10 ft Speed"},{"n":"Barkskin","k":"s","t":"b","s":"PHB'24","v":"AC at least 17"},{"n":"Warding Bond","k":"s","t":"b","s":"PHB'24","v":"+1 AC & saves"},{"n":"Mage Armor","k":"s","t":"b","s":"PHB'24","v":"AC 13 + DEX"},{"n":"Pass without Trace","k":"s","t":"b","s":"PHB'24","v":"+10 Stealth"},{"n":"Enhance Ability","k":"s","t":"b","s":"PHB'24","v":"Advantage (chosen ability)"},{"n":"Beacon of Hope","k":"s","t":"b","s":"PHB'24"},{"n":"Protection from Evil and Good","k":"s","t":"b","s":"PHB'24"},{"n":"Death Ward","k":"s","t":"b","s":"PHB'24"},{"n":"Freedom of Movement","k":"s","t":"b","s":"PHB'24"},{"n":"Fly","k":"s","t":"b","s":"PHB'24","v":"Fly Speed 60 ft"},{"n":"Invisibility","k":"s","t":"b","s":"PHB'24"},{"n":"Greater Invisibility","k":"s","t":"b","s":"PHB'24"},{"n":"Darkvision","k":"s","t":"b","s":"PHB'24","v":"Darkvision 150 ft"},{"n":"Spider Climb","k":"s","t":"b","s":"PHB'24"},{"n":"Water Breathing","k":"s","t":"b","s":"PHB'24"},{"n":"Stoneskin","k":"s","t":"b","s":"PHB'24","v":"Resistance B/P/S"},{"n":"Protection from Energy","k":"s","t":"b","s":"PHB'24","v":"Resistance (chosen type)"},{"n":"Magic Weapon","k":"s","t":"b","s":"PHB'24","v":"+1 attack & damage"},{"n":"Elemental Weapon","k":"s","t":"b","s":"PHB'24","v":"+1 attack · +1d4 damage"},{"n":"Crusader's Mantle","k":"s","t":"b","s":"PHB'24","v":"+1d4 Radiant on hit"},{"n":"Circle of Power","k":"s","t":"b","s":"PHB'24"},{"n":"Aura of Life","k":"s","t":"b","s":"PHB'24"},{"n":"Aura of Purity","k":"s","t":"b","s":"PHB'24"},{"n":"Heroes' Feast","k":"s","t":"b","s":"PHB'24"},{"n":"Sanctuary","k":"s","t":"b","s":"PHB'24"},{"n":"Foresight","k":"s","t":"b","s":"PHB'24"},{"n":"Holy Aura","k":"s","t":"b","s":"PHB'24"},{"n":"Mind Blank","k":"s","t":"b","s":"PHB'24"},{"n":"Shield","k":"s","t":"b","s":"PHB'24","v":"+5 AC"},{"n":"Blur","k":"s","t":"b","s":"PHB'24","v":"Attacks vs you: Disadvantage"},{"n":"Divine Favor","k":"s","t":"b","s":"PHB'24","v":"+1d4 Radiant on hit"},{"n":"Armor of Agathys","k":"s","t":"b","s":"PHB'24","v":"5 Temp HP"},{"n":"Bardic Inspiration","k":"f","t":"b","c":"Bard","d":60,"v":"+1d6","o":["+1d6","+1d8","+1d10","+1d12"]},{"n":"Aura of Protection","k":"f","t":"b","c":"Paladin","v":"+CHA mod to saves"},{"n":"Aura of Courage","k":"f","t":"b","c":"Paladin","v":"Immune to Frightened"},{"n":"Emboldening Bond","k":"f","t":"b","c":"Cleric","d":10,"v":"+1d4 once per turn"},{"n":"Bane","k":"s","t":"d","s":"PHB'24","v":"−1d4 attacks & saves"},{"n":"Slow","k":"s","t":"d","s":"PHB'24","v":"−2 AC & DEX saves · Speed ½"},{"n":"Faerie Fire","k":"s","t":"d","s":"PHB'24","v":"Attacks vs you: Advantage"},{"n":"Hex","k":"s","t":"d","s":"PHB'24","v":"Disadvantage (chosen ability checks)"},{"n":"Bestow Curse","k":"s","t":"d","s":"PHB'24"},{"n":"Ray of Enfeeblement","k":"s","t":"d","s":"PHB'24","v":"−1d8 damage rolls"},{"n":"Mind Sliver","k":"s","t":"d","s":"PHB'24","v":"−1d4 next save"},{"n":"Vicious Mockery","k":"s","t":"d","s":"PHB'24","v":"Disadvantage next attack"},{"n":"Guiding Bolt","k":"s","t":"d","s":"PHB'24","v":"Next attack vs you: Advantage"},{"n":"Shining Smite","k":"s","t":"d","s":"PHB'24","v":"Attacks vs you: Advantage"},{"n":"Starry Wisp","k":"s","t":"d","s":"PHB'24","v":"Can't be Invisible"},{"n":"Chill Touch","k":"s","t":"d","s":"PHB'24","v":"Can't regain HP"},{"n":"Frostbite","k":"s","t":"d","s":"XGE","v":"Disadvantage next weapon attack"},{"n":"Blindness/Deafness","k":"s","t":"d","s":"PHB'24"},{"n":"Hold Person","k":"s","t":"d","s":"PHB'24"},{"n":"Tasha's Hideous Laughter","k":"s","t":"d","s":"PHB'24"},{"n":"Contagion","k":"s","t":"d","s":"PHB'24"},{"n":"Polymorph","k":"s","t":"d","s":"PHB'24"}];
-const EFFECT_RULES={"Heroic Inspiration":"If you (a player character) have Heroic Inspiration, you can expend it to reroll any die immediately after rolling it, and you must use the new roll.\nIf you gain Heroic Inspiration but already have it, it's lost unless you give it to a player character who lacks it."};
+const EFFECT_DATA=[{"n":"Bless","k":"s","t":"b","s":"PHB","v":"+1d4 attacks & saves"},{"n":"Guidance","k":"s","t":"b","s":"PHB","v":"+1d4 one ability check"},{"n":"Resistance","k":"s","t":"b","s":"PHB","v":"+1d4 one save"},{"n":"Shield of Faith","k":"s","t":"b","s":"PHB","v":"+2 AC"},{"n":"Haste","k":"s","t":"b","s":"PHB","v":"+2 AC · Speed ×2"},{"n":"Aid","k":"s","t":"b","s":"PHB","v":"+5 HP max"},{"n":"Heroism","k":"s","t":"b","s":"PHB","v":"Temp HP each turn"},{"n":"Longstrider","k":"s","t":"b","s":"PHB","v":"+10 ft Speed"},{"n":"Barkskin","k":"s","t":"b","s":"PHB","v":"AC at least 16"},{"n":"Warding Bond","k":"s","t":"b","s":"PHB","v":"+1 AC & saves"},{"n":"Mage Armor","k":"s","t":"b","s":"PHB","v":"AC 13 + DEX"},{"n":"Pass without Trace","k":"s","t":"b","s":"PHB","v":"+10 Stealth"},{"n":"Enhance Ability","k":"s","t":"b","s":"PHB","v":"Advantage (chosen ability checks)"},{"n":"Beacon of Hope","k":"s","t":"b","s":"PHB"},{"n":"Protection from Evil and Good","k":"s","t":"b","s":"PHB"},{"n":"Death Ward","k":"s","t":"b","s":"PHB"},{"n":"Freedom of Movement","k":"s","t":"b","s":"PHB"},{"n":"Fly","k":"s","t":"b","s":"PHB","v":"Flying speed 60 ft"},{"n":"Invisibility","k":"s","t":"b","s":"PHB"},{"n":"Greater Invisibility","k":"s","t":"b","s":"PHB"},{"n":"Darkvision","k":"s","t":"b","s":"PHB","v":"Darkvision 60 ft"},{"n":"Spider Climb","k":"s","t":"b","s":"PHB"},{"n":"Water Breathing","k":"s","t":"b","s":"PHB"},{"n":"Stoneskin","k":"s","t":"b","s":"PHB","v":"Resistance nonmagical B/P/S"},{"n":"Protection from Energy","k":"s","t":"b","s":"PHB","v":"Resistance (chosen type)"},{"n":"Magic Weapon","k":"s","t":"b","s":"PHB","v":"+1 attack & damage"},{"n":"Heroes' Feast","k":"s","t":"b","s":"PHB"},{"n":"Sanctuary","k":"s","t":"b","s":"PHB"},{"n":"Foresight","k":"s","t":"b","s":"PHB"},{"n":"Holy Aura","k":"s","t":"b","s":"PHB"},{"n":"Mind Blank","k":"s","t":"b","s":"PHB"},{"n":"Shield","k":"s","t":"b","s":"PHB","v":"+5 AC"},{"n":"Blur","k":"s","t":"b","s":"PHB","v":"Attacks vs you: Disadvantage"},{"n":"Divine Favor","k":"s","t":"b","s":"PHB","v":"+1d4 radiant on hit"},{"n":"Bardic Inspiration","k":"f","t":"b","c":"Bard","d":10,"v":"+1d6","o":["+1d6","+1d8","+1d10","+1d12"]},{"n":"Aura of Protection","k":"f","t":"b","c":"Paladin","v":"+CHA mod to saves"},{"n":"Aura of Courage","k":"f","t":"b","c":"Paladin","v":"Can't be frightened"},{"n":"Bane","k":"s","t":"d","s":"PHB","v":"−1d4 attacks & saves"},{"n":"Slow","k":"s","t":"d","s":"PHB","v":"−2 AC & DEX saves · Speed ½"},{"n":"Faerie Fire","k":"s","t":"d","s":"PHB","v":"Attacks vs you: Advantage"},{"n":"Bestow Curse","k":"s","t":"d","s":"PHB"},{"n":"Ray of Enfeeblement","k":"s","t":"d","s":"PHB","v":"½ damage (STR weapon attacks)"},{"n":"Vicious Mockery","k":"s","t":"d","s":"PHB","v":"Disadvantage next attack"},{"n":"Guiding Bolt","k":"s","t":"d","s":"PHB","v":"Next attack vs you: Advantage"},{"n":"Chill Touch","k":"s","t":"d","s":"PHB","v":"Can't regain HP"},{"n":"Blindness/Deafness","k":"s","t":"d","s":"PHB"},{"n":"Hold Person","k":"s","t":"d","s":"PHB"},{"n":"Hideous Laughter","k":"s","t":"d","s":"PHB"},{"n":"Contagion","k":"s","t":"d","s":"PHB"},{"n":"Polymorph","k":"s","t":"d","s":"PHB"}];
+const EFFECT_RULES={"Inspiration":"Inspiration is a rule the Dungeon Master can use to reward you for playing your character in a way that's true to his or her personality traits, ideal, bond, and flaw. By using inspiration, you can draw on your personality trait of compassion for the downtrodden to give you an edge in negotiating with the Beggar Prince. Or inspiration can let you call on your bond to the defense of your home village to push past the effect of a spell that has been laid on you.\nGaining Inspiration. Your DM can choose to give you inspiration for a variety of reasons. Typically, DMs award it when you play out your personality traits, give in to the drawbacks presented by a flaw or bond, and otherwise portray your character in a compelling way. Your DM will tell you how you can earn inspiration in the game. You either have inspiration or you don't—you can't stockpile multiple \"inspirations\" for later use.\nUsing Inspiration. If you have inspiration, you can expend it when you make an attack roll, saving throw, or ability check. Spending your inspiration gives you advantage on that roll. Additionally, if you have inspiration, you can reward another player for good roleplaying, clever thinking, or simply doing something exciting in the game.\nWhen another player character does something that really contributes to the story in a fun and interesting way, you can give up your inspiration to give that character inspiration."};
 // EFFECT_DATA-END
 // ROLL_FX-START (tools/roll_fx.py; Würfel-Regeln für Zustände/Effekte/Feats, Belege aus COND_DATA/ZB_SPELLS/CLASS_DATA/FT_FEATS)
-const ROLL_FX={"cond":{"Blinded":[{"w":"atk","m":"dis"},{"w":"check","m":"fail","on":0,"note":"requires sight"}],"Deafened":[{"w":"check","m":"fail","on":0,"note":"requires hearing"}],"Exhaustion":[{"w":"d20","m":"ex"}],"Frightened":[{"w":"check atk","m":"dis","note":"source of fear in sight"}],"Grappled":[{"w":"atk","m":"dis","on":0,"note":"target other than the grappler"}],"Incapacitated":[{"w":"init","m":"dis"}],"Invisible":[{"w":"init","m":"adv"},{"w":"atk","m":"adv","note":"unless the target can see you"}],"Paralyzed":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Petrified":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Poisoned":[{"w":"atk check","m":"dis"}],"Prone":[{"w":"atk","m":"dis"}],"Restrained":[{"w":"atk","m":"dis"},{"w":"save","m":"dis","ab":["DEX"]}],"Stunned":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Unconscious":[{"c":"Incapacitated"},{"c":"Prone"},{"w":"save","m":"fail","ab":["STR","DEX"]}]},"fx":{"Bless":[{"w":"atk save","m":"+1d4"}],"Bane":[{"w":"atk save","m":"-1d4"}],"Guidance":[{"w":"check","m":"+1d4","sk":"*","note":"chosen skill"}],"Enhance Ability":[{"w":"check","m":"adv","ab":"*","note":"chosen ability"}],"Hex":[{"w":"check","m":"dis","ab":"*","note":"chosen ability"}],"Warding Bond":[{"w":"save","m":"+1"},{"w":"ac","m":"+1"}],"Pass without Trace":[{"w":"check","m":"+10","sk":"Stealth"}],"Magic Weapon":[{"w":"watk","m":"v","d":"+1"},{"w":"wdmg","m":"v","d":"+1"}],"Elemental Weapon":[{"w":"watk","m":"+1"},{"w":"wdmg","m":"+1d4"}],"Crusader's Mantle":[{"w":"wdmg","m":"+1d4"}],"Divine Favor":[{"w":"wdmg","m":"+1d4"}],"Haste":[{"w":"save","m":"adv","ab":["DEX"]},{"w":"ac","m":"+2"},{"w":"spd","m":"x2"}],"Slow":[{"w":"save","m":"-2","ab":["DEX"]},{"w":"ac","m":"-2"},{"w":"spd","m":"half"}],"Ray of Enfeeblement":[{"w":"d20","m":"dis","ab":["STR"]},{"w":"dmg","m":"-1d8"}],"Mind Sliver":[{"w":"save","m":"-1d4","once":1}],"Vicious Mockery":[{"w":"atk","m":"dis","once":1}],"Frostbite":[{"w":"watk","m":"dis","once":1}],"Beacon of Hope":[{"w":"save","m":"adv","ab":["WIS"]}],"Holy Aura":[{"w":"save","m":"adv"}],"Foresight":[{"w":"d20","m":"adv"}],"Circle of Power":[{"w":"save","m":"adv","on":0,"note":"vs. spells and magical effects"}],"Aura of Purity":[{"w":"save","m":"adv","on":0,"note":"vs. Blinded, Charmed, Deafened, Frightened, Paralyzed, Poisoned, Stunned"}],"Invisibility":[{"c":"Invisible"}],"Greater Invisibility":[{"c":"Invisible"}],"Hold Person":[{"c":"Paralyzed"}],"Tasha's Hideous Laughter":[{"c":"Prone"},{"c":"Incapacitated"}],"Shield of Faith":[{"w":"ac","m":"+2"}],"Shield":[{"w":"ac","m":"+5"}],"Barkskin":[{"w":"ac","m":"min17"}],"Mage Armor":[{"w":"ac","m":"base13"}],"Longstrider":[{"w":"spd","m":"+10"}],"Bardic Inspiration":[{"w":"d20","m":"v","on":0,"once":1,"note":"after a failed D20 Test"}],"Emboldening Bond":[{"w":"d20","m":"+1d4","on":0,"note":"once per turn"}],"Aura of Protection":[{"w":"save","m":"v"}]},"feat":{"War Caster":[{"w":"conc","m":"adv","ab":["CON"],"note":"to maintain Concentration"}]}};
+const ROLL_FX={"cond":{"Blinded":[{"w":"atk","m":"dis"},{"w":"check","m":"fail","on":0,"note":"requires sight"}],"Deafened":[{"w":"check","m":"fail","on":0,"note":"requires hearing"}],"Exhaustion":[{"w":"check","m":"dis","ex":1},{"w":"atk save","m":"dis","ex":3}],"Frightened":[{"w":"check atk","m":"dis","note":"source of fear in sight"}],"Grappled":[],"Incapacitated":[],"Invisible":[{"w":"atk","m":"adv","note":"unless the target can see you"}],"Paralyzed":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Petrified":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Poisoned":[{"w":"atk check","m":"dis"}],"Prone":[{"w":"atk","m":"dis"}],"Restrained":[{"w":"atk","m":"dis"},{"w":"save","m":"dis","ab":["DEX"]}],"Stunned":[{"c":"Incapacitated"},{"w":"save","m":"fail","ab":["STR","DEX"]}],"Unconscious":[{"c":"Incapacitated"},{"c":"Prone"},{"w":"save","m":"fail","ab":["STR","DEX"]}]},"fx":{"Bless":[{"w":"atk save","m":"+1d4"}],"Bane":[{"w":"atk save","m":"-1d4"}],"Guidance":[{"w":"check","m":"+1d4","once":1}],"Resistance":[{"w":"save","m":"+1d4","once":1}],"Enhance Ability":[{"w":"check","m":"adv","ab":"*","note":"chosen ability"}],"Warding Bond":[{"w":"save","m":"+1"},{"w":"ac","m":"+1"}],"Pass without Trace":[{"w":"check","m":"+10","sk":"Stealth"}],"Magic Weapon":[{"w":"watk","m":"v","d":"+1"},{"w":"wdmg","m":"v","d":"+1"}],"Divine Favor":[{"w":"wdmg","m":"+1d4"}],"Haste":[{"w":"save","m":"adv","ab":["DEX"]},{"w":"ac","m":"+2"},{"w":"spd","m":"x2"}],"Slow":[{"w":"save","m":"-2","ab":["DEX"]},{"w":"ac","m":"-2"},{"w":"spd","m":"half"}],"Vicious Mockery":[{"w":"atk","m":"dis","once":1}],"Beacon of Hope":[{"w":"save","m":"adv","ab":["WIS"]}],"Holy Aura":[{"w":"save","m":"adv"}],"Foresight":[{"w":"d20","m":"adv"}],"Invisibility":[{"c":"Invisible"}],"Greater Invisibility":[{"c":"Invisible"}],"Hold Person":[{"c":"Paralyzed"}],"Hideous Laughter":[{"c":"Prone"},{"c":"Incapacitated"}],"Shield of Faith":[{"w":"ac","m":"+2"}],"Shield":[{"w":"ac","m":"+5"}],"Barkskin":[{"w":"ac","m":"min16"}],"Mage Armor":[{"w":"ac","m":"base13"}],"Longstrider":[{"w":"spd","m":"+10"}],"Bardic Inspiration":[{"w":"d20","m":"v","on":0,"once":1,"note":"before the DM says whether the roll succeeds"}],"Aura of Protection":[{"w":"save","m":"v"}]},"feat":{}};
 // ROLL_FX-END
 // RACE_PICKS-START
 const RACE_PICKS={"Dragonborn":{"src":"PHB","size":["M"],"speed":30,"asi":{"fix":{"STR":2,"CHA":1}},"ch":[{"t":"Draconic Ancestry","o":[{"n":"Black","dmg":"Acid","res":["Acid"]},{"n":"Blue","dmg":"Lightning","res":["Lightning"]},{"n":"Brass","dmg":"Fire","res":["Fire"]},{"n":"Bronze","dmg":"Lightning","res":["Lightning"]},{"n":"Copper","dmg":"Acid","res":["Acid"]},{"n":"Gold","dmg":"Fire","res":["Fire"]},{"n":"Green","dmg":"Poison","res":["Poison"]},{"n":"Red","dmg":"Fire","res":["Fire"]},{"n":"Silver","dmg":"Cold","res":["Cold"]},{"n":"White","dmg":"Cold","res":["Cold"]}],"lk":["Breath Weapon","Damage Resistance"]}],"tr":[{"id":"rc_breathweapon","t":"Breath Weapon","tag":"aktion","uses":1,"restore":"short","ic":"🐉"}]},"Half-Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Skill Versatility","any":2},"asi":{"fix":{"CHA":2},"ch":{"f":["STR","DEX","CON","INT","WIS"],"n":2,"v":1}},"adv":[{"t":"Fey Ancestry","c":"Charmed"}]},"Half-Orc":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Menacing","fix":["Intimidation"]},"asi":{"fix":{"STR":2,"CON":1}},"tr":[{"id":"rc_relentlessendurance","t":"Relentless Endurance","tag":"passiv","uses":1,"restore":"long","ic":"🩸"}]},"High Elf":{"src":"PHB","size":["M"],"speed":30,"dv":60,"sk":{"t":"Keen Senses","fix":["Perception"]},"asi":{"fix":{"DEX":2,"INT":1}},"ch":[{"t":"Cantrip","o":[{"n":"Acid Splash","sp":{"1":["Acid Splash"]}},{"n":"Chill Touch","sp":{"1":["Chill Touch"]}},{"n":"Dancing Lights","sp":{"1":["Dancing Lights"]}},{"n":"Fire Bolt","sp":{"1":["Fire Bolt"]}},{"n":"Light","sp":{"1":["Light"]}},{"n":"Mage Hand","sp":{"1":["Mage Hand"]}},{"n":"Mending","sp":{"1":["Mending"]}},{"n":"Message","sp":{"1":["Message"]}},{"n":"Minor Illusion","sp":{"1":["Minor Illusion"]}},{"n":"Poison Spray","sp":{"1":["Poison Spray"]}},{"n":"Prestidigitation","sp":{"1":["Prestidigitation"]}},{"n":"Ray of Frost","sp":{"1":["Ray of Frost"]}},{"n":"Shocking Grasp","sp":{"1":["Shocking Grasp"]}},{"n":"True Strike","sp":{"1":["True Strike"]}}],"fab":"INT"}],"adv":[{"t":"Fey Ancestry","c":"Charmed"}],"more":["Elf Weapon Training","Extra Language","Trance"]},"Hill Dwarf":{"src":"PHB","size":["M"],"speed":25,"dv":60,"res":["Poison"],"asi":{"fix":{"CON":2,"WIS":1}},"adv":[{"t":"Dwarven Resilience","c":"Poisoned"}],"hp":{"t":"Dwarven Toughness","per":1},"more":["Dwarven Combat Training","Speed","Stonecunning","Tool Proficiency"]},"Human":{"src":"PHB","size":["M"],"speed":30,"asi":{"fix":{"STR":1,"DEX":1,"CON":1,"INT":1,"WIS":1,"CHA":1}}},"Lightfoot Halfling":{"src":"PHB","size":["S"],"speed":25,"asi":{"fix":{"DEX":2,"CHA":1}},"adv":[{"t":"Brave","c":"Frightened"}]},"Rock Gnome":{"src":"PHB","size":["S"],"speed":25,"dv":60,"asi":{"fix":{"INT":2,"CON":1}},"adv":[{"t":"Gnome Cunning","s":["INT","WIS","CHA"]}],"more":["Artificer's Lore","Tinker"]},"Tiefling":{"src":"PHB","size":["M"],"speed":30,"dv":60,"res":["Fire"],"asi":{"fix":{"CHA":2,"INT":1}},"ch":[{"t":"Infernal Legacy","o":[{"n":"Infernal Legacy","sp":{"1":["Thaumaturgy"],"3":["Hellish Rebuke"],"5":["Darkness"]},"inn":[{"s":"Hellish Rebuke","l":3,"u":1},{"s":"Darkness","l":5,"u":1}]}],"fab":"CHA"}]}};
@@ -5307,7 +5327,7 @@ function buildMcBox(){
   });
   const full=T>=20||!start||M.length>=all.length-1;
   h+='<button class="mc-add" onclick="mcAdd()"'+(full?' disabled':'')+'>+ Add class</button>';
-  if(M.length) h+='<div class="pk-note">Saving throws come from the first class only (PHB 2024).</div>';
+  if(M.length) h+='<div class="pk-note">Saving throws come from the first class only ('+(R14?'SRD':'PHB 2024')+').</div>';
   box.innerHTML=h;
 }
 function mcChanged(){_mcDelAsk=-1;buildCharCard();buildMcLore();buildClassTable();buildAbilities();buildCoreTraits();buildSaves();buildSkills();buildMySpells();autoSave();} // Paket F4: My Spells (Klasse je Zauber) // Paket F3: Skills/Saves/Core Traits // Paket F2: Actions/Class Table
@@ -5901,7 +5921,7 @@ function buildAbilities(){
     const fid='f_'+x.grp+'_'+(c.start?'':mcSlug(cls)+'_')+x.f.name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
     const isOpen=openIds.includes('ab_'+fid);
     const fpF=fpHtml(cls,x.grp==='s'?skOf(c):'base',x.f,{cls,lvl},lvl);
-    if(EA.length>1&&x===EA[0])fpF.body=`<div class="ab-note">Extra Attack from ${EA.map(y=>pkEsc(y.c.cls)).join(' and ')} doesn't stack: two attacks with the Attack action (PHB 2024 multiclassing).</div>`+fpF.body;
+    if(EA.length>1&&x===EA[0])fpF.body=`<div class="ab-note">Extra Attack from ${EA.map(y=>pkEsc(y.c.cls)).join(' and ')} doesn't stack: two attacks with the Attack action (${R14?'SRD':'PHB 2024'} multiclassing).</div>`+fpF.body;
     const card=document.createElement('div');
     card.className='ab-card ab-feat'+(isOpen?' open':'');
     card.innerHTML=`
@@ -5943,7 +5963,9 @@ function buildAbilities(){
     const SI={aktion:'⚔️',bonus:'⚡',reaktion:'🛡️',frei:'✧',varies:'✧'},SL={frei:'Free',varies:'Varies'};
     let extra='';
     if(a.u){const V=uaVals();
-      extra=`<div class="ua-vals"><span>${pkEsc(V.basis)}</span><span>Grapple/Shove DC <b>${V.dc}</b></span></div>`+rlWpnBtns('rollUa',0,fmt(V.atk),V.dmg);}
+      extra=`<div class="ua-vals"><span>${pkEsc(V.basis)}</span>${R14?'':`<span>Grapple/Shove DC <b>${V.dc}</b></span>`}</div>`+rlWpnBtns('rollUa',0,fmt(V.atk),V.dmg);}
+    if(a.c){const v=skillBonus('Athletics'); // Paket T5 (Weiche g): 2014 Grapple/Shove = Athletics-Wettstreit
+      extra=`<div class="ua-vals"><span>Contest: your Athletics vs. the target's Athletics or Acrobatics</span></div><div class="rl-wbtns"><button class="rl-wbtn" id="rollCt_${fid}" onclick="rollContest('${pkEsc(a.n)}')"><i class="mi mi-dz l"></i>Athletics <b>${fmt(v)}</b></button></div>`;}
     const card=document.createElement('div');
     card.className='ab-card ab-feat ab-std'+(isOpen?' open':'');card.dataset.std=a.n;
     card.innerHTML=`
@@ -5951,7 +5973,7 @@ function buildAbilities(){
         <div class="ab-icon ${a.t}">${SI[a.t]}</div>
         <div class="ab-title">
           <div class="ab-name">${pkEsc(a.n)}</div>
-          <div class="ab-tag">${AB_GRP_EN[a.t]||SL[a.t]} · XPHB</div>
+          <div class="ab-tag">${AB_GRP_EN[a.t]||SL[a.t]} · ${RQ}</div>
         </div>
       </div>${extra?`<div onclick="event.stopPropagation()" style="padding:0 12px 8px">${extra}</div>`:''}
       <div class="ab-body${isOpen?' on':''}" id="ab_${fid}">
@@ -6105,6 +6127,10 @@ function hdInfo(){
   const sum=k=>pools.reduce((a,p)=>a+p[k],0);
   return {pools,multi:pools.length>1,die:pools[0].die,max:sum('max'),used:sum('used'),left:sum('left')};
 }
+// Paket T5 (Weiche d): 2014 „regains spent Hit Dice, up to a number of dice equal to half of the character's total number
+// of them“, mindestens 1; bei mehreren Würfelgrößen zuerst die größten. Ergebnis = verbrauchte Würfel je Größe danach ({} = alle zurück, 2024).
+function hdLongPlan(){const h=hdInfo();if(!R14||!h)return {};let n=Math.max(1,Math.floor(h.max/2));const o={};
+  h.pools.forEach(p=>{const g=Math.min(p.used,n);n-=g;if(p.used-g)o[p.die]=p.used-g;});return o;}
 function hdPipsHtml(p,multi){return Array.from({length:p.max},(_,i)=>`<div class="slpip hdpip${i<p.left?' av':' u'}" onclick="togHD(${i}${multi?','+p.die:''})"></div>`).join('')+`<span class="hd-n">${p.left}/${p.max}</span>`;}
 function buildHitDice(){
   const box=document.getElementById('hdBox');if(!box)return;
@@ -6118,7 +6144,8 @@ function buildHitDice(){
 }
 function hdPool(h,die){return die?h.pools.find(x=>x.die===+die):(h.pools.find(x=>x.left>0)||h.pools[0]);}
 function togHD(i,die){const h=hdInfo();if(!h)return;const p=hdPool(h,die||h.die);if(!p)return;hdSetUsed(p.die,i<p.left?p.used+1:Math.max(0,p.used-1));buildHitDice();autoSave();}
-function hpMaxVal(){return parseInt(document.getElementById('hpM')?.value)||10;}
+function hpMaxRaw(){return parseInt(document.getElementById('hpM')?.value)||10;}
+function hpMaxVal(){const m=hpMaxRaw();return R14&&fxEx()>=4?Math.floor(m/2):m;} // Paket T5 (Weiche e): 2014 Exhaustion 4 „Hit point maximum halved“
 function restLog(m){const n=document.getElementById('charName')?.textContent.trim();if(n)_pushLog(n,[m]);}
 function resetDeathSaves(){st.dsS=[0,0,0];st.dsF=[0,0,0];['dsS','dsF'].forEach(id=>document.getElementById(id)?.querySelectorAll('.dspip').forEach(p=>p.classList.remove('f')));}
 let _restMode=null,_restLast='',_castIdx=null;
@@ -6174,7 +6201,9 @@ function renderRest(){
     const li=[];
     if(st.hpC<m)li.push(`<li>Hit Points<span>${st.hpC} → ${m}</span></li>`);
     if((parseInt(document.getElementById('hpT')?.value)||0)>0)li.push(`<li>Temporary Hit Points end<span>→ 0</span></li>`);
-    if(h&&h.used){if(h.multi)h.pools.forEach(p=>{if(p.used)li.push(`<li>Hit Dice d${p.die}<span>${p.left} → ${p.max}</span></li>`);});else li.push(`<li>Hit Dice<span>${h.left} → ${h.max}</span></li>`);}
+    if(h&&h.used){const L=hdLongPlan(),to=p=>p.max-(+L[p.die]||0);
+      const hl=R14?' (half, min. 1)':''; // 2014: höchstens die Hälfte aller Hit Dice
+      if(h.multi)h.pools.forEach(p=>{if(p.used&&to(p)>p.left)li.push(`<li>Hit Dice d${p.die}${hl}<span>${p.left} → ${to(p)}</span></li>`);});else li.push(`<li>Hit Dice${hl}<span>${h.left} → ${to(h.pools[0])}</span></li>`);}
     syncSlotMax();
     const su=st.slotMax.reduce((a,_,i)=>a+slotUsedEff(i),0);if(su)li.push(`<li>Spell slots<span>+${su}</span></li>`);
     restTrackers().forEach(({ab,lvl})=>{if(restIds(ab,lvl).some(id=>getAbUses(id)>0))li.push(`<li>${ab.name}<span>full</span></li>`);});
@@ -6194,9 +6223,12 @@ function doShortRest(){
 function doLongRest(){
   st.hpC=hpMaxVal();document.getElementById('hpC').textContent=st.hpC;
   const t=document.getElementById('hpT');if(t)t.value=0;
-  st.hdUsed=0;st.hdUsedBy={};st.slotUsed=[0,0,0,0,0,0,0,0,0];st.abUses={};
+  {const L=hdLongPlan(),d=hdDieOf(curCls());st.hdUsedBy=L;st.hdUsed=d?(+L[d]||0):0;} // Paket T5: 2014 nur die Hälfte, 2024 alle
+  st.slotUsed=[0,0,0,0,0,0,0,0,0];st.abUses={};
   (st.mySpells||[]).forEach(x=>{if(x.freeUsed)x.freeUsed=0;});
-  resetDeathSaves();const fxn=fxRestDo('long');updBar();
+  resetDeathSaves();const fxn=fxRestDo('long');
+  if(R14){st.hpC=hpMaxVal();document.getElementById('hpC').textContent=st.hpC;} // Paket T5: 2014 HP-Max nach gesenkter Exhaustion (Stufe 4 → 3)
+  updBar();
   closeRest();buildAbilities();buildMySpells();autoSave();
   restLog('Long Rest'+(fxn.length?': '+fxn.join(', '):''));showToast('☀ Long Rest finished');
 }
@@ -6776,7 +6808,7 @@ function renderBgCard(name){
 const FT_FEATS=[{"n":"Grappler","src":"PHB","cat":"","pre":"STR 13+","d":"You've developed the skills necessary to hold your own in close-quarters grappling. You gain the following benefits:\n• You have advantage on attack rolls against a creature you are grappling.\n• You can use your action to try to pin a creature grappled by you. To do so, make another grapple check. If you succeed, you and the creature are both restrained until the grapple ends."}];
 // Paket S3: Anzeige-Namen der Actions-Gruppen (Keys aktion/bonus/… und Daten-Tags „Bonusaktion“ … bleiben, B1c)
 const AB_GRP_EN={aktion:'Action',bonus:'Bonus Action',reaktion:'Reaction',passiv:'Passive',weitere:'Other',standard:'Standard Actions'};
-const FT_CATS={'O':'Origin','G':'General','FS':'Fighting Style','FS:P':'Fighting Style (Paladin)','FS:R':'Fighting Style (Ranger)','EB':'Epic Boon','D':'Dragonmark','DG':'Dark Gift','':'Other'};
+const FT_CATS={'ASI':'Class Feature','O':'Origin','G':'General','FS':'Fighting Style','FS:P':'Fighting Style (Paladin)','FS:R':'Fighting Style (Ranger)','EB':'Epic Boon','D':'Dragonmark','DG':'Dark Gift','':'Other'};
 let ftFCat='all';
 // Paket S3: Vorauswahl „My level“ – Feats mit Voraussetzung „Level N“ (bei mehreren die kleinste) erst ab dieser Charakterstufe
 let ftFLvl=true;
@@ -6807,14 +6839,15 @@ function ftBuildFilters(){
 function ftRender(){
   const q=document.getElementById('ftQ')?.value.toLowerCase().trim()||'';
   const list=document.getElementById('ftList');if(!list)return;
-  const f=FT_FEATS.filter(ft=>{
+  const ALL=R14?[asi14Ft()].concat(FT_FEATS):FT_FEATS; // Paket T5 (Weiche j): 2014 ASI als Klassen-Feature wählbar
+  const f=ALL.filter(ft=>{
     const cOk=ftFCat==='all'||ft.cat===ftFCat||(ftFCat==='FS'&&ft.cat.startsWith('FS:'));
     const qOk=!q||ft.n.toLowerCase().includes(q)||(ft.pre&&ft.pre.toLowerCase().includes(q))||ft.d.toLowerCase().includes(q);
     return cOk&&qOk&&ftLvlOk(ft);
   });
   const lb=document.getElementById('ftLvlBtn');if(lb){lb.classList.toggle('on',ftFLvl);lb.textContent='Level ≤ '+totLvl();}
   if(lb&&lb.nextSibling)lb.nextSibling.classList.toggle('on',!ftFLvl);
-  document.getElementById('ftCount').textContent=f.length+' of '+FT_FEATS.length+' Feats'+(ftFLvl?' · level '+totLvl()+' or lower':'');
+  document.getElementById('ftCount').textContent=f.length+' of '+ALL.length+' Feats'+(ftFLvl?' · level '+totLvl()+' or lower':'');
   list.innerHTML='';
   f.forEach(ft=>list.appendChild(ftMakeCard(ft)));
 }
@@ -6865,7 +6898,7 @@ function ftAfter(name){
 function ftAddInst(name,desc,quiet){
   const n=st.feats.filter(f=>f.name===name&&f.tag==='Feat').length;
   st.feats.push({name,tag:'Feat',desc});
-  const sp=faSpec(FT_FEATS.find(x=>x.n===name));
+  const sp=faSpec(ftFind(name));
   if(sp&&sp.fix.length){if(!st.picks)st.picks={};st.picks[faKey(name,n)]=sp.fix.map(x=>x.k);}
   else if(st.picks&&n)delete st.picks[faKey(name,n)];
   showToast(name+(n?' added again ('+(n+1)+')':' added'));
@@ -6886,7 +6919,7 @@ function ftRenderMy(){
   list.innerHTML='';
   const seen={};
   myFeats.forEach(f=>{
-    const ft=FT_FEATS.find(x=>x.n===f.name);
+    const ft=ftFind(f.name);
     const n=seen[f.name]||0;seen[f.name]=n+1;
     if(ft){
       const card=ftMakeCard(ft,true,n);
@@ -7395,7 +7428,7 @@ function applyState(snap){
   const raceCustom=document.getElementById('raceCustom');
   if(raceCustom) raceCustom.style.display=raceVal==='custom'?'':'none';
   // Trigger dependent UI (skip onClsChange - already called)
-  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxVal();
+  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxRaw();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();mcRefresh();
   const raceNotesEl=document.getElementById('n_race_custom');
@@ -7412,7 +7445,7 @@ function applyState(snap){
   document.getElementById('ins0')?.classList.toggle('f',(st.ins||[]).some(Boolean)); // Heroic Inspiration (Paket E2; alte Saves: einer der drei Kreise)
   document.getElementById('hpC').textContent=st.hpC;
   _hpLast=null; // Paket P: Ergebnis von Schaden/Heilung gehört zum vorigen Stand
-  _hpMPrev=hpMaxVal(); // Maximum vor der nächsten Änderung (onHpMChange)
+  _hpMPrev=hpMaxRaw(); // Maximum vor der nächsten Änderung (onHpMChange)
   updBar();
   if(typeof dmgRender==='function') dmgRender();
   ntRender(); // Paket V
@@ -7508,7 +7541,7 @@ function resetUI(){
     }
   });
   onClsChange();
-  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxVal();
+  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxRaw();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();buildCoreTraits();buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();_ciEdit=null;_mcDelAsk=-1;mcRefresh();
   const skillNotesEl=document.getElementById('skillNotes');if(skillNotesEl)skillNotesEl.value='';
@@ -7542,7 +7575,7 @@ function _doNewChar(name){
     }
   });
   onClsChange(); // also calls applyTheme
-  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxVal();
+  buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxRaw();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();ntRender(); // Paket V
   const chars = getAllChars();
@@ -7606,6 +7639,7 @@ function refreshCharSel(active){
 // sonst zeigt das Attribut-Fenster den Umstellungs-Dialog für alte Spielstände. resetUI selbst bleibt unverändert (Prüfskript).
 function blankSheetNew(){st.attrSrc=attrSrcNew();st.statSrc=statSrcNew();buildAttrs();}
 function initApp(){
+  if(R14){const l=document.getElementById('insLbl');if(l)l.textContent=INS_N+' ⓘ';} // Paket T5 (Weiche f): 2014 „Inspiration“
   const chars = getAllChars();
   const names = Object.keys(chars);
   if(names.length){
@@ -7804,7 +7838,7 @@ function _diffSnaps(a,b){
   });
   done.add('hpC');if(a.hpC!==b.hpC && (a.hpC!=null||b.hpC!=null)) out.push(`HP: ${a.hpC??'?'} → ${b.hpC}`);
   done.add('ins');const iA=(a.ins||[]).some(Boolean), iB=(b.ins||[]).some(Boolean);
-  if(iA!==iB) out.push(`Heroic Inspiration: ${iA?'yes':'no'} → ${iB?'yes':'no'}`);
+  if(iA!==iB) out.push(`${INS_N}: ${iA?'yes':'no'} → ${iB?'yes':'no'}`);
   done.add('conditions');{const ca=a.conditions||[],cb=b.conditions||[];cb.filter(x=>!ca.includes(x)).forEach(x=>out.push(`+ Condition: ${x}`));ca.filter(x=>!cb.includes(x)).forEach(x=>out.push(`− Condition removed: ${x}`));}
   done.add('exhaustion');if((a.exhaustion||0)!==(b.exhaustion||0)) out.push(`Exhaustion: ${a.exhaustion||0} → ${b.exhaustion||0}`);
   done.add('effects');_logList(out,a.effects,b.effects,'Effect',x=>x&&x.id,{name:x=>x&&(x.n+(x.v?' ('+x.v+')':'')),skip:['id','k','s','c','t','dur'],fl:{v:'Value',from:'From',note:'Note',conc:'Concentration'}});
@@ -8338,7 +8372,8 @@ function luHp(m,v){
 function luFtIdx(){const f=_lu&&_lu.feat;if(!f)return -1;for(let i=st.feats.length-1;i>=0;i--)if(st.feats[i].tag==='Feat'&&st.feats[i].name===f)return i;return -1;}
 function luFtDrop(){const L=_lu;if(!L||!L.feat)return;const i=luFtIdx(),n=L.feat;L.feat=null;if(i>=0){ftDropAt(i);ftAfter(n);}}
 function luFtPick(i){const L=_lu,ft=FT_FEATS[i];if(!L||!ft)return;luFtDrop();ftAddInst(ft.n,ft.d);L.feat=ft.n;L.ftOpen=-1;luRender();}
-function luFtAsi(){const i=FT_FEATS.findIndex(f=>f.n==='Ability Score Improvement'&&f.src==='XPHB');luFtPick(i>=0?i:FT_FEATS.findIndex(f=>f.n==='Ability Score Improvement'));}
+function luFtAsi(){if(R14){const L=_lu,f=asi14Ft();if(!L)return;luFtDrop();ftAddInst(f.n,f.d);L.feat=f.n;L.ftOpen=-1;luRender();return;} // Paket T5 (Weiche j)
+  const i=FT_FEATS.findIndex(f=>f.n==='Ability Score Improvement'&&f.src==='XPHB');luFtPick(i>=0?i:FT_FEATS.findIndex(f=>f.n==='Ability Score Improvement'));}
 function luFtChange(){luFtDrop();luRender();}
 function luFtTog(i){if(!_lu)return;_lu.ftOpen=_lu.ftOpen===i?-1:i;luFtList();}
 function luFtCat(k){if(!_lu)return;_lu.ftCat=k;luRender();}
@@ -8451,15 +8486,15 @@ function luStepFeat(L,c){
 function luStepAsi(L,c){
   const a=luAsiF(c),eb=a.name==='Epic Boon';
   let h='<div class="lu-h">'+fdEsc(a.name)+'</div><details class="lu-det"><summary>What this level gives</summary><div class="lu-txt">'+fmtDesc(a.desc||'')+'</div></details>';
-  if(L.feat){const i=luFtIdx(),ft=FT_FEATS.find(f=>f.n===L.feat&&f.src==='XPHB')||FT_FEATS.find(f=>f.n===L.feat),inst=st.feats.filter(f=>f.tag==='Feat'&&f.name===L.feat).length-1;
+  if(L.feat){const i=luFtIdx(),ft=FT_FEATS.find(f=>f.n===L.feat&&f.src==='XPHB')||ftFind(L.feat),inst=st.feats.filter(f=>f.tag==='Feat'&&f.name===L.feat).length-1;
     h+='<div class="lu-chosen"><div class="lu-chosen-h"><span>✦ '+fdEsc(L.feat)+(ft?'<span class="ci-src">'+fdEsc(ft.src)+'</span>':'')+'</span><button type="button" class="lu-mini" onclick="luFtChange()">Change</button></div>'
       +(i>=0?faHtml(L.feat,inst)+fsHtml(L.feat):'')+(ft?'<details class="lu-det"><summary>Description</summary><div class="lu-txt">'+fmtDesc(faDesc(ft))+'</div></details>':'')+'</div>';
     return h;}
   if(!eb)h+='<button type="button" class="lu-opt" onclick="luFtAsi()"><span class="lu-opt-n">Ability Score Improvement<span class="lu-opt-s">+2 to one ability or +1 to two (max 20)</span></span><span class="lu-opt-r">Choose</span></button>';
-  const cat=L.ftCat||(eb?'EB':'G');L.ftCat=cat;
-  h+='<div class="lu-h lu-h2">'+(eb?'Choose an Epic Boon or another feat':'Or another feat')+'</div><div class="lu-tabs">'
+  const cat=R14?'all':L.ftCat||(eb?'EB':'G');L.ftCat=cat; // Paket T5: 2014 nur SRD-Feats ohne Kategorien → keine Reiter
+  h+='<div class="lu-h lu-h2">'+(eb?'Choose an Epic Boon or another feat':'Or another feat')+'</div>'+(R14?'':'<div class="lu-tabs">'
     +[['G','General'],['EB','Epic Boon'],['O','Origin'],['FS','Fighting Style'],['all','All']].map(([k,l])=>'<button type="button" class="fbtn'+(cat===k?' on':'')+'" onclick="luFtCat(\''+k+'\')">'+l+'</button>').join('')
-    +'</div><input class="lu-q" type="search" data-luq="1" placeholder="Search feats…" value="'+pkEsc(L.ftQ)+'" oninput="_lu.ftQ=this.value;luFtList()" aria-label="Search feats">'
+    +'</div>')+'<input class="lu-q" type="search" data-luq="1" placeholder="Search feats…" value="'+pkEsc(L.ftQ)+'" oninput="_lu.ftQ=this.value;luFtList()" aria-label="Search feats">'
     +'<div class="lu-note">Level '+totLvl()+' or lower; check other prerequisites yourself.</div><div id="luFtList"></div>';
   if(eb)h+='<button type="button" class="lu-opt" onclick="luFtAsi()"><span class="lu-opt-n">Ability Score Improvement<span class="lu-opt-s">+2 to one ability or +1 to two</span></span><span class="lu-opt-r">Choose</span></button>';
   return h;
@@ -8488,14 +8523,14 @@ function luStepHp(L,c){
   h+='<button type="button" class="lu-opt'+(m==='avg'?' on':'')+'" onclick="luHp(\'avg\')"'+(rolled?' disabled':'')+'><span class="lu-opt-n">Average<span class="lu-opt-s">Fixed value of the class</span></span><span class="lu-opt-r">+'+a+'</span></button>';
   h+='<button type="button" class="lu-opt'+(rolled?' on':'')+'" onclick="luHp(\'roll\')"'+(rolled?' disabled':'')+'><span class="lu-opt-n">'+(rolled?'Rolled':'Roll d'+d)+'<span class="lu-opt-s">'+(rolled?'The roll stays':'One roll, no re-rolls')+'</span></span><span class="lu-opt-r">'+(rolled?'+'+L.hp.v:'<i class="mi mi-dz" aria-hidden="true"></i>')+'</span></button>';
   h+='<div class="lu-own'+(m==='own'?' on':'')+'"><span>Own roll</span><input class="hpa-in" type="number" inputmode="numeric" min="1" max="'+d+'" data-luq="1" placeholder="1–'+d+'" value="'+(m==='own'?L.hp.v:'')+'"'+(rolled?' disabled':'')+' onchange="luHp(\'own\',this.value)" aria-label="Own roll"></div>';
-  h+='<div class="lu-hpres">Max HP <b>'+L.hp0+'</b> <span class="lu-arrow">→</span> <b>'+hpMaxVal()+'</b></div>';
+  h+='<div class="lu-hpres">Max HP <b>'+L.hp0+'</b> <span class="lu-arrow">→</span> <b>'+hpMaxRaw()+'</b></div>';
   return h;
 }
 function luStepSum(L,c){
   const M=luMsgs(),O=luOpenList();
   const was=L.t.kind==='new'?0:c.lvl-1,sn=c.sub?mcSubParts(c.cls,c.sub).n:'';
   let h='<div class="lu-big">'+fdEsc(c.cls)+' '+(was?was+'<span class="lu-arrow">→</span>':'')+c.lvl+'</div>'+(sn?'<div class="lu-note" style="text-align:center;color:var(--desc)">'+fdEsc(sn)+'</div>':'')
-    +'<div class="lu-note" style="text-align:center">Character level '+totLvl()+' · PB +'+prof()+' · Max HP '+hpMaxVal()+'</div>';
+    +'<div class="lu-note" style="text-align:center">Character level '+totLvl()+' · PB +'+prof()+' · Max HP '+hpMaxRaw()+'</div>';
   h+='<div class="lu-h">Changes</div>'+(M.length?'<ul class="lu-list">'+M.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul>':'<div class="lu-note">Only the level.</div>');
   if(O.length)h+='<div class="lu-h">Still open</div><ul class="lu-list lu-open">'+O.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul><div class="lu-note">You can apply now and finish these later in the Info, Spells or Feats tab.</div>';
   else h+='<div class="lu-note">✓ All choices made. Everything stays editable in the Info tab.</div>';
@@ -8695,7 +8730,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow14-app-2026-10-19b';
+const APP_VERSION = 'willow14-app-2026-10-19c';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -8990,6 +9025,8 @@ function rlParts(R){
   const push=(r,e,lbl)=>{
     const h=rlHit(r,R);if(h<0)return;
     let on=h===1&&r.on!==0&&(r.ab!=='*'&&r.sk!=='*'||rlChosen(r,e,R)),m=r.m,P=null;
+    if(r.ex&&fxEx()<r.ex)return; // Paket T5 (Weiche e): 2014-Exhaustion gilt erst ab der Stufe der Tabelle
+    if(r.ex)lbl=`Exhaustion ${fxEx()}`;
     if(m==='ex'){const ex=fxEx();if(!ex)return;P={d:[],k:-2*ex};m='n';lbl=`Exhaustion ${ex}`;}
     else if(m==='v'){P=rlParse(e&&e.v);if(!P||(!P.d.length&&!P.k))P=r.d?rlParse(r.d):null;m='n';}
     else if(!['adv','dis','fail'].includes(m)){P=rlParse(m);m='n';}
@@ -9069,7 +9106,9 @@ function rlModsHtml(){
   const acts=[];
   acts.push(`<button class="rl-act" onclick="rlReroll()">↻ Roll again</button>`);
   if(R.k==='atk'&&R.dmg){const P=rlParse(R.dmg);if(P)acts.push(`<button class="rl-act go" onclick="rlDmgFromAtk()"><i class="mi mi-dz l"></i>${rlCrit(R)?'Critical damage':'Damage'}</button>`);}
-  if(R.k!=='dmg'&&R.k!=='heal'&&(st.ins||[]).some(Boolean)&&!R.hi)acts.push(`<button class="rl-act" onclick="rlHeroic()" title="Reroll the lowest d20, you must use the new roll (XPHB)">✦ Heroic Inspiration: reroll</button>`);
+  if(R.k!=='dmg'&&R.k!=='heal'&&(st.ins||[]).some(Boolean)&&!R.hi)acts.push(R14 // Paket T5 (Weiche f): 2014 Inspiration = Vorteil auf diesen Wurf
+    ?`<button class="rl-act" onclick="rlInsp()" title="Spend your inspiration: advantage on this attack roll, saving throw or ability check (SRD)">✦ Inspiration: advantage</button>`
+    :`<button class="rl-act" onclick="rlHeroic()" title="Reroll the lowest d20, you must use the new roll (XPHB)">✦ Heroic Inspiration: reroll</button>`);
   R.parts.forEach((p,i)=>{if(p.on&&p.once&&p.fx&&fxGet(p.fx))acts.push(`<button class="rl-act" onclick="rlUsed(${i})">${pkEsc(p.l)} used · remove</button>`);});
   const hint=R.parts.some(p=>!p.man)?'':`<div class="rl-hint">${R.k==='dmg'?'Damage effects (Divine Favor …) appear here when active.':'Conditions and effects (Bless, Poisoned …) appear here when active.'}</div>`;
   return `<div class="rl-chips">${chips}</div>${hint}<div class="rl-acts">${acts.join('')}</div>`;
@@ -9104,13 +9143,17 @@ function rlHeroic(){const R=_rl;if(!R||R.k==='dmg'||R.k==='heal'||R.k==='free'||
   const a=rlDice('d20',1,20),i=R.mode==='adv'||R.mode==='dis'?(a[0]<=a[1]?0:1):0,old=a[i];a[i]=1+Math.floor(Math.random()*20);
   R.hi=1;st.ins=[0,0,0];const el=document.getElementById('ins0');if(el)el.classList.remove('f');autoSave();
   showToast(`✦ Heroic Inspiration used: d20 ${old} → ${a[i]}`);rlShow(false);}
+function rlInsp(){const R=_rl;if(!R||R.k==='dmg'||R.k==='heal'||R.k==='free'||!(st.ins||[]).some(Boolean))return;
+  const p=R.parts.find(x=>x.man&&x.m==='adv');if(p)p.on=true;
+  R.hi=1;st.ins=[0,0,0];const el=document.getElementById('ins0');if(el)el.classList.remove('f');autoSave();
+  showToast('✦ Inspiration used: advantage');rlShow(false);}
 function rlUsed(i){const R=_rl,p=R&&R.parts[i];if(!p||!p.fx)return;const a=fxList(),j=a.findIndex(e=>e.id===p.fx);if(j<0)return;
   const n=a[j].n;a.splice(j,1);buildFx();autoSave();showToast('✕ '+n+' removed');rlShow(false);}
 function rlDmgFromAtk(){const R=_rl;if(!R||!R.dmg)return;rollDmg({l:R.dl||R.l,spec:R.dmg,wpn:R.wpn,dt:R.dt,crit:rlCrit(R),ab:R.ab});}
 const RL_W={d20:'D20 Tests',atk:'attack rolls',watk:'weapon attacks',save:'saving throws',check:'ability checks',init:'Initiative',dmg:'damage',wdmg:'weapon damage',ac:'AC',spd:'Speed'};
 function rlRulesTxt(rs,e){ // Kurzbeschreibung der Regeln eines Effekts (Fenster „Effects & Conditions“)
-  const M={adv:'Advantage',dis:'Disadvantage',fail:'automatic failure',ex:'−2 × level',min17:'at least 17',base13:'13 + DEX (no armor)',x2:'doubled',half:'halved'};
-  return rs.map(r=>r.c?`${r.c} condition`:`${r.w.split(' ').map(x=>RL_W[x]||x).join(', ')}${Array.isArray(r.ab)?' ('+r.ab.join('/')+')':r.ab==='*'?' (chosen ability)':''}${r.sk&&r.sk!=='*'?' ('+r.sk+')':r.sk==='*'?' (chosen skill)':''}: ${M[r.m]||(r.m==='v'?((e&&e.v)||r.d||'value'):r.m)}${r.on===0?' (optional)':''}`).join(' · ');
+  const M={adv:'Advantage',dis:'Disadvantage',fail:'automatic failure',ex:'−2 × level',base13:'13 + DEX (no armor)',x2:'doubled',half:'halved'};
+  return rs.map(r=>r.c?`${r.c} condition`:`${r.ex?'Exhaustion '+r.ex+'+: ':''}${r.w.split(' ').map(x=>RL_W[x]||x).join(', ')}${Array.isArray(r.ab)?' ('+r.ab.join('/')+')':r.ab==='*'?' (chosen ability)':''}${r.sk&&r.sk!=='*'?' ('+r.sk+')':r.sk==='*'?' (chosen skill)':''}: ${M[r.m]||(/^min\d+$/.test(r.m)?'at least '+r.m.slice(3):r.m==='v'?((e&&e.v)||r.d||'value'):r.m)}${r.on===0?' (optional)':''}`).join(' · ');
 }
 function rlClear(){_rl=null;const m=document.getElementById('diceMods');if(m)m.innerHTML='';}
 // Aufrufe aus der Oberfläche
@@ -9130,6 +9173,7 @@ function uaVals(){if(typeof attrSync==='function')attrSync();
     return {ab,atk:m+pb,dmg:die+(m?fmt(m):''),dc:8+m+pb,basis:'Martial Arts '+die+' + '+ab+' (no armor/shield)'};}
   if(tb)return {ab:'STR',atk:s+pb,dmg:'1d4'+(s?fmt(s):''),dc:8+s+pb,basis:'Tavern Brawler 1d4 + STR'};
   return {ab:'STR',atk:s+pb,dmg:'1'+(s?fmt(s):''),dc:8+s+pb,basis:'1 + STR'};}
+function rollContest(n){rollD20({k:'check',ab:'STR',sk:'Athletics',l:n+' (Athletics)',mod:skillBonus('Athletics')});} // Paket T5: 2014 Grapple/Shove
 function rollUa(i,dmg){const V=uaVals();
   if(dmg)rollDmg({l:'Unarmed Strike Damage',spec:V.dmg,wpn:1,dt:'Bludgeoning',ab:V.ab});
   else rollD20({k:'atk',wpn:1,ab:V.ab,l:'Unarmed Strike Attack',mod:V.atk,dmg:V.dmg,dt:'Bludgeoning',dl:'Unarmed Strike Damage'});}

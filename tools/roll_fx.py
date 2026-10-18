@@ -17,8 +17,15 @@ Erzeugt den Block zwischen `// ROLL_FX-START` und `// ROLL_FX-END` (erstes Einf�
     on = 0: nur angeboten (Chip aus), z. B. Bedingung im Text („while the source of fear is within line of sight“)
     once = 1: Einmal-Effekt (Knopf „used – remove“ im Würfel-Dialog)
     c  = Zustand mit eigenen Regeln (Paralyzed → Incapacitated; Hold Person → Paralyzed)
+    ex = (Paket T5) Regel gilt erst ab dieser Exhaustion-Stufe (2014-Tabelle: 1 Nachteil Checks, 3 Nachteil Angriffe/Saves)
+    ac: 'minN' (AC mindestens N; 2024 Barkskin 17, 2014 Barkskin 16)
 Keine Daten erfinden: jede Regel braucht einen Beleg, der wörtlich im Regeltext der App steht (COND_DATA, ZB_SPELLS
 in der Fassung aus EFFECT_DATA, CLASS_DATA, FT_FEATS); fehlt er, bricht das Skript ab. Neue Einträge: Zeile in COND/FX/FEAT ergänzen.
+
+Willow 2014 (Paket T5, 19.10.2026):  python3 willow/tools/roll_fx.py 2014/index.html --t14 [--write]
+  (Arbeits-Build mit COND_DATA/EFFECT_DATA 2014 aus cond_convert.py/effect_convert.py --t14). Regeln COND14/FX14/FEAT14
+  mit Belegen im 2014-Text; Exhaustion nach Stufe (`ex`), Grappled/Incapacitated ohne Würfel-Regel (2014-Text).
+  Schreibt tools/t14/ROLL_FX.js.
 """
 import json, os, re, subprocess, sys
 
@@ -107,6 +114,71 @@ FEAT = {
 }
 
 
+T14 = '--t14' in sys.argv
+# Willow 2014: Zustände (Text: COND_DATA 2014, PHB/SRD)
+COND14 = {
+    'Blinded': [R('atk', 'dis', "the creature's attack rolls have disadvantage"),
+                R('check', 'fail', 'automatically fails any ability check that requires sight', on=0, note='requires sight')],
+    'Deafened': [R('check', 'fail', 'automatically fails any ability check that requires hearing', on=0, note='requires hearing')],
+    'Exhaustion': [R('check', 'dis', '1: Disadvantage on ability checks', ex=1),
+                   R('atk save', 'dis', '3: Disadvantage on attack rolls and saving throws', ex=3)],
+    'Frightened': [R('check atk', 'dis', 'disadvantage on ability checks and attack rolls while the source of its fear is within line of sight',
+                     note='source of fear in sight')],
+    'Grappled': [],
+    'Incapacitated': [],
+    'Invisible': [R('atk', 'adv', "the creature's attack rolls have advantage", note='unless the target can see you')],
+    'Paralyzed': [C('Incapacitated', 'A paralyzed creature is incapacitated'),
+                  R('save', 'fail', 'automatically fails Strength and Dexterity saving throws', ab=['STR', 'DEX'])],
+    'Petrified': [C('Incapacitated', 'The creature is incapacitated'),
+                  R('save', 'fail', 'automatically fails Strength and Dexterity saving throws', ab=['STR', 'DEX'])],
+    'Poisoned': [R('atk check', 'dis', 'disadvantage on attack rolls and ability checks')],
+    'Prone': [R('atk', 'dis', 'The creature has disadvantage on attack rolls')],
+    'Restrained': [R('atk', 'dis', "the creature's attack rolls have disadvantage"),
+                   R('save', 'dis', 'disadvantage on Dexterity saving throws', ab=['DEX'])],
+    'Stunned': [C('Incapacitated', 'A stunned creature is incapacitated'),
+                R('save', 'fail', 'automatically fails Strength and Dexterity saving throws', ab=['STR', 'DEX'])],
+    'Unconscious': [C('Incapacitated', 'An unconscious creature is incapacitated'),
+                    C('Prone', 'falls prone'),
+                    R('save', 'fail', 'automatically fails Strength and Dexterity saving throws', ab=['STR', 'DEX'])],
+}
+# Willow 2014: Effekte (Namen wie EFFECT_DATA 2014; Text: ZB_SPELLS/CLASS_DATA 2014)
+FX14 = {
+    'Bless': [R('atk save', '+1d4', 'roll a d4 and add the number rolled to the attack roll or saving throw')],
+    'Bane': [R('atk save', '-1d4', 'roll a d4 and subtract the number rolled from the attack roll or saving throw')],
+    'Guidance': [R('check', '+1d4', 'add the number rolled to one ability check', once=1)],
+    'Resistance': [R('save', '+1d4', 'add the number rolled to one saving throw', once=1)],
+    'Enhance Ability': [R('check', 'adv', 'has advantage on Constitution checks', ab='*', note='chosen ability')],
+    'Warding Bond': [R('save', '+1', '+1 bonus to AC and saving throws'), R('ac', '+1', '+1 bonus to AC and saving throws')],
+    'Pass without Trace': [R('check', '+10', '+10 bonus to Dexterity (Stealth) checks', sk='Stealth')],
+    'Magic Weapon': [R('watk', 'v', '+1 bonus to attack rolls and damage rolls', d='+1'),
+                     R('wdmg', 'v', '+1 bonus to attack rolls and damage rolls', d='+1')],
+    'Divine Favor': [R('wdmg', '+1d4', 'your weapon attacks deal an extra 1d4 radiant damage on a hit')],
+    'Haste': [R('save', 'adv', 'advantage on Dexterity saving throws', ab=['DEX']), R('ac', '+2', 'gains a +2 bonus to AC'),
+              R('spd', 'x2', "the target's speed is doubled")],
+    'Slow': [R('save', '-2', '−2 penalty to AC and Dexterity saving throws', ab=['DEX']),
+             R('ac', '-2', '−2 penalty to AC and Dexterity saving throws'), R('spd', 'half', "affected target's speed is halved")],
+    'Vicious Mockery': [R('atk', 'dis', 'disadvantage on the next attack roll it makes', once=1)],
+    'Beacon of Hope': [R('save', 'adv', 'advantage on Wisdom saving throws', ab=['WIS'])],
+    'Holy Aura': [R('save', 'adv', 'have advantage on all saving throws')],
+    'Foresight': [R('d20', 'adv', 'has advantage on attack rolls, ability checks, and saving throws')],
+    'Invisibility': [C('Invisible', 'becomes invisible')],
+    'Greater Invisibility': [C('Invisible', 'becomes invisible')],
+    'Hold Person': [C('Paralyzed', 'be paralyzed')],
+    'Hideous Laughter': [C('Prone', 'fall prone'), C('Incapacitated', 'becoming incapacitated')],
+    'Shield of Faith': [R('ac', '+2', '+2 bonus to AC')],
+    'Shield': [R('ac', '+5', '+5 bonus to AC')],
+    'Barkskin': [R('ac', 'min16', "AC can't be less than 16")],
+    'Mage Armor': [R('ac', 'base13', 'base AC becomes 13 + its Dexterity modifier')],
+    'Longstrider': [R('spd', '+10', 'speed increases by 10 feet')],
+    'Bardic Inspiration': [R('d20', 'v', 'add the number rolled to one ability check, attack roll, or saving throw', on=0, once=1,
+                             note='before the DM says whether the roll succeeds')],
+    'Aura of Protection': [R('save', 'v', 'bonus to the saving throw equal to your Charisma modifier')],
+}
+FEAT14 = {}
+if T14:
+    COND, FX, FEAT = COND14, FX14, FEAT14
+
+
 def dump(html):
     out = 'roll_fx_dump.json'
     subprocess.check_call(['node', os.path.join(TOOLS, 'dump.js'), html,
@@ -121,7 +193,7 @@ def dump(html):
 
 
 W_OK = {'d20', 'atk', 'watk', 'save', 'check', 'init', 'dmg', 'wdmg', 'ac', 'spd', 'conc'}
-M_OK = re.compile(r"^([+-]\d*d?\d+|v|adv|dis|fail|ex|min17|base13|x2|half)$")
+M_OK = re.compile(r"^([+-]\d*d?\d+|v|adv|dis|fail|ex|min\d+|base13|x2|half)$")
 
 
 def build(html):
@@ -192,6 +264,15 @@ def main():
             sys.exit(f'Anker // EFFECT_DATA-END {k}x gefunden')
         i = s.index('// EFFECT_DATA-END\n') + len('// EFFECT_DATA-END\n')
         neu = s[:i] + block + s[i:]
+    if T14:
+        p = os.path.join(TOOLS, 't14', 'ROLL_FX.js')
+        line = 'const ROLL_FX=' + json.dumps(daten, ensure_ascii=False, separators=(',', ':')) + ';\n'
+        alt = open(p, encoding='utf-8').read() if os.path.exists(p) else ''
+        print(f"{len(daten['cond'])} Zustände, {len(daten['fx'])} Effekte, tools/t14/ROLL_FX.js {len(line)} Bytes", '– unverändert' if alt == line else '')
+        if write and alt != line:
+            open(p, 'w', encoding='utf-8').write(line)
+            print('geschrieben')
+        return
     print(f"{len(daten['cond'])} Zustände, {len(daten['fx'])} Effekte, {len(daten['feat'])} Feats, Block {len(block)} Bytes", '– unverändert' if neu == s else '')
     if write and neu != s:
         open(html, 'w', encoding='utf-8').write(neu)
