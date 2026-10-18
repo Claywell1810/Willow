@@ -9,6 +9,8 @@
 #   bash willow/tools/setup.sh effekte      # + conditionsdiseases/variantrules/items-base/actions.json (cond_convert.py, armor_convert.py, effect_convert.py, Paket E; action_convert.py, Paket Z2)
 #   bash willow/tools/setup.sh neu          # + Quellen für neu_check.py (Paket N): alle Klassen aus class/index.json nach src/neu/, backgrounds.json, dazu klassen/zauber/rassen/bestien
 #   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen, echte Schriften (ui_shots.py, theme_shots.py)
+#   bash willow/tools/setup.sh t14          # + Willow 2014 (Paket T): Quellen aus 5etools-2014-src nach src14/ (12 Klassen, spells-phb, races, backgrounds, feats, items, optionalfeatures,
+#                                             conditionsdiseases, actions, variantrules, bestiary-mm, magicvariants, gendata-Lookup) + Cinzel für tools/t14_icon.py
 #   bash willow/tools/setup.sh alle         # alles
 # Mehrere Angaben gehen zusammen: bash willow/tools/setup.sh klassen zauber
 set -e
@@ -16,7 +18,7 @@ W="$(cd "$(dirname "$0")/.." && pwd)"          # Klon (…/willow)
 A="$(dirname "$W")"                             # Arbeitsordner (Eltern des Klons)
 cd "$A"
 B=https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data
-has() { for x in "$@"; do for a in $ARGS; do [ "$a" = "$x" ] || [ "$a" = alle ] || { [ "$a" = neu ] && [ "$x" != fotos ] && [ "$x" != effekte ]; } && return 0; done; done; return 1; }   # neu = alle Datenquellen außer effekte/fotos
+has() { for x in "$@"; do for a in $ARGS; do [ "$a" = "$x" ] || [ "$a" = alle ] || { [ "$a" = neu ] && [ "$x" != fotos ] && [ "$x" != effekte ] && [ "$x" != t14 ]; } && return 0; done; done; return 1; }   # neu = alle Datenquellen außer effekte/fotos/t14
 ARGS="$*"
 
 echo "== Willow: $(git -C "$W" log -1 --format='%h %ci %s')"
@@ -74,5 +76,17 @@ if has fotos; then
   # echte App-Schriften für die Fotos (Google Fonts ist hier nicht erreichbar; Ersatzschrift ist schmaler → Überstände unsichtbar, 02.10.2026)
   [ -d node_modules/@fontsource/cinzel ] && [ -d node_modules/@fontsource/crimson-pro ] || npm i @fontsource/cinzel @fontsource/crimson-pro --silent >/dev/null 2>&1
   echo "   Playwright bereit, Schriften: $([ -d node_modules/@fontsource/cinzel ] && echo 'Cinzel + Crimson Pro' || echo 'FEHLEN')"
+fi
+if has t14; then
+  # Paket T (18.10.2026): Willow 2014 – nur SRD 5.1 (Einträge mit srd:true), Quelle 5etools-2014-src, eigener Ordner src14/
+  B14=https://raw.githubusercontent.com/5etools-mirror-3/5etools-2014-src/main/data
+  get14() { mkdir -p src14; [ -s "src14/$(basename "$1")" ] || curl -sSf -o "src14/$(basename "$1")" "$B14/$1"; }
+  echo "== 5etools-2014-src main: $(git ls-remote https://github.com/5etools-mirror-3/5etools-2014-src refs/heads/main | cut -c1-8)"
+  for k in barbarian bard cleric druid fighter monk paladin ranger rogue sorcerer warlock wizard; do get14 "class/class-$k.json"; done
+  get14 spells/spells-phb.json; get14 generated/gendata-spell-source-lookup.json
+  for f in races backgrounds fluff-backgrounds feats items items-base magicvariants optionalfeatures conditionsdiseases actions variantrules; do get14 "$f.json"; done
+  get14 bestiary/bestiary-mm.json
+  [ -d node_modules/@fontsource/cinzel ] || npm i @fontsource/cinzel --silent >/dev/null 2>&1
+  echo "   2014-Quellen in src14/ ($(ls src14 | wc -l) Dateien) → Build: python3 $W/tools/build_2014.py DnD_Character_App.html --out 2014"
 fi
 echo "== Prüfskript: node $W/tools/app_check.js DnD_Character_App.html ALT.html"

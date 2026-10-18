@@ -1,11 +1,16 @@
 // app_check.js — Prüfskript für DnD_Character_App.html
-// Aufruf:  node app_check.js NEU.html [ALT.html]
+// Aufruf:  node app_check.js NEU.html [ALT.html] [--rules 2024|2014]
+//   --rules: erwartetes Regelwerk (Paket T1, 18.10.2026); ohne Angabe gilt RULES aus der Datei. Willow 2014: node app_check.js 2014/index.html willow/2014/index.html --rules 2014
+//   Tests mit r:'2024' laufen nur für 2024, r:'2014' nur für 2014, ohne r für beide. Im 2014-Build sehen die Tests localStorage ohne Präfix (w14_ ergänzt die Prüfung).
 // Voraussetzung: npm i jsdom@24  (einmalig pro Sitzung)
 // Prüft: 1) JS-Syntax  2) App lädt ohne Fehler, jede Klasse/Subklasse/Stufe rendert
 //        2b) Regressionstests (Liste REGRESSION unten erweitern)
 //        3) (mit ALT) Datenblöcke: nichts gelöscht, Änderungen aufgelistet
 const fs = require('fs'), vm = require('vm');
-const [, , NEW, OLD] = process.argv;
+const ARGV = process.argv.slice(2), RI = ARGV.indexOf('--rules'), RULES_ARG = RI >= 0 ? ARGV[RI + 1] : null;
+if (RI >= 0) ARGV.splice(RI, 2);
+const [NEW, OLD] = ARGV;
+if (RULES_ARG && !['2024', '2014'].includes(RULES_ARG)) { console.log('--rules: 2024 oder 2014'); process.exit(2); }
 if (!NEW) { console.log('Aufruf: node app_check.js NEU.html [ALT.html]'); process.exit(2); }
 let fail = 0;
 const bad = m => { fail++; console.log('  ✘ ' + m); };
@@ -569,7 +574,7 @@ const REGRESSION = [
       w.togAbGrp('passiv');
       sv = JSON.parse(w.localStorage.getItem('dnd5e_chars') || '{}').Regressionstest;
       if (sv.abGrpClosed?.passiv !== true) return 'Zuklappen „Passiv" nicht gespeichert';
-      w.eval('applyState(JSON.parse(localStorage.getItem("dnd5e_chars")).Regressionstest)'); w.buildAbilities();
+      w.eval('applyState(JSON.parse(localStorage.getItem(LS_KEY)).Regressionstest)'); w.buildAbilities();
       if (box('passiv').style.display !== 'none' || box('weitere').style.display === 'none') return 'Gruppen-Zustand nach Laden nicht übernommen';
       w.togAbGrp('passiv');
       // 2) Reihenfolge: Class Features vor Spellcasting
@@ -627,7 +632,7 @@ const REGRESSION = [
       if (d.documentElement.dataset.ts !== 'gross' || w.localStorage.getItem('willow_textsize') !== 'gross' || !d.querySelector('#tsRow .fbtn.on[data-ts="gross"]')) return 'Stufe „Large" nicht gesetzt/gespeichert';
       w.setTextSize('normal'); if ('ts' in d.documentElement.dataset || w.localStorage.getItem('willow_textsize') !== 'normal') return 'Zurück auf „Normal" klappt nicht';
       w.closeSettings && w.closeSettings();
-      if (!/data-ts="sehrgross"\]\{zoom:1\.3/.test(html) || !html.includes("localStorage.getItem('willow_textsize')")) return 'Zoom-CSS oder Frühstart-Skript fehlt';
+      if (!/data-ts="sehrgross"\]\{zoom:1\.3/.test(html) || !html.includes("localStorage.getItem(LS_PFX+'willow_textsize')")) return 'Zoom-CSS oder Frühstart-Skript fehlt';
       if (/id="hp[MT]"[^>]*width:44px/.test(html)) return 'HP-Eingabe mit fester Breite (Temp ragt über den Rand)';
       w.eval('slotEdit=true'); w.buildSlots(); if (d.querySelectorAll('#spSlots .slbtn').length !== 18) return 'Zauberplatz-Knöpfe ohne .slbtn (Modus ✎ Adjust, Paket D)'; w.eval('slotEdit=false'); w.buildSlots();
       return true;
@@ -1513,7 +1518,7 @@ const REGRESSION = [
       if (/Crimson Text/.test(html)) return 'Crimson Text noch im Einsatz (nicht geladen)';
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('');
       for (const s of ['--tex:url(', '.act-panel::after{', '.act-panel::before{', '.btn-p,', '.btn-d,', '.btn-q{', '.btn-s,', '--inp:']) if (!css.includes(s)) return 'CSS fehlt: ' + s;
-      if (!html.includes("localStorage.getItem('willow_mode')")) return 'Frühstart-Skript Modus fehlt';
+      if (!html.includes("localStorage.getItem(LS_PFX+'willow_mode')")) return 'Frühstart-Skript Modus fehlt';
       return true;
     } },
   { name: 'Paket R1: ⚙ Design „Leather / Classic“ pro Gerät – Classic = alte Klassen-Farben ohne Leder-CSS, Wechsel zurück, Frühstart', datum: '04.10.2026',
@@ -1533,7 +1538,7 @@ const REGRESSION = [
       if (st.media === 'not all' || 'design' in d.documentElement.dataset || V('gold') !== w.eval('WILLOW_PAL.dark.gold').toLowerCase()) return 'Zurück zu Leder klappt nicht';
       w.closeSettings();
       const html = d.documentElement.outerHTML;
-      if (!html.includes("localStorage.getItem('willow_design')==='klassisch'")) return 'Frühstart-Skript Design fehlt';
+      if (!html.includes("localStorage.getItem(LS_PFX+'willow_design')==='klassisch'")) return 'Frühstart-Skript Design fehlt';
       const root = [...d.querySelectorAll('style')][0].textContent;
       if (!root.includes('--bg0:#0d0b14')) return 'Haupt-:root nicht mehr die alten Grundwerte';
       return true;
@@ -1636,11 +1641,13 @@ const REGRESSION = [
       return true;
     } },
   { name: 'Paket L: Charakter teilen/importieren – gleicher Zustand, kein stilles Überschreiben', datum: '02.10.2026',
-    run: async ({w, d, sel}) => {
+    run: async ({w, d, sel, RULES}) => {
       const imp = async obj => { const f = new w.File([JSON.stringify(obj)], 'x.json', {type: 'application/json'});
         w.importChars({target: {files: [f], value: ''}}); await new Promise(r => setTimeout(r, 300)); };
       const all = () => JSON.parse(w.localStorage.getItem('dnd5e_chars') || '{}');
       const modal = () => d.getElementById('impConfModal').style.display === 'flex';
+      // Paket T1: Gesamt-Backup im alten Format (ohne Kennung rules) stammt aus Willow 2024 → im 2014-Build als Backup mit Kennung
+      const bk = o => RULES === '2014' ? {willow: 'backup', rules: '2014', chars: o} : o;
       sel('Druid', '', 5);
       d.getElementById('charName').textContent = 'TestL';
       w.eval("st.hpC=17; st.log=[{t:1,x:'Testeintrag'}]"); w.saveChar();
@@ -1664,7 +1671,7 @@ const REGRESSION = [
       await imp(obj); w.impConfirm('over');
       if (JSON.stringify(all().TestL) !== orig) return 'Überschreiben ergibt nicht den exportierten Zustand';
       // Gesamt-Backup: neuer Name direkt, vorhandener mit Rückfrage
-      await imp({TestL: obj.data, NeuL: obj.data});
+      await imp(bk({TestL: obj.data, NeuL: obj.data}));
       if (!modal()) return 'Backup: keine Rückfrage bei vorhandenem Namen';
       w.impConfirm('skip');
       if (!all().NeuL) return 'Backup: neuer Charakter fehlt';
@@ -1672,7 +1679,7 @@ const REGRESSION = [
       return true;
     } },
   { name: 'Backup All: eigene Farben + Design kommen mit, Import (Overwrite) übernimmt sie; alte Backups gehen weiter', datum: '06.10.2026',
-    run: async ({w, d, sel}) => {
+    run: async ({w, d, sel, RULES}) => {
       const LS = w.localStorage, all = () => JSON.parse(LS.getItem('dnd5e_chars') || '{}');
       let txt = null; const oc = w.URL.createObjectURL, orv = w.URL.revokeObjectURL; w.URL.revokeObjectURL = () => {}; const ock = w.HTMLAnchorElement.prototype.click; w.HTMLAnchorElement.prototype.click = () => {};
       w.URL.createObjectURL = b => { const r = new w.FileReader(); r.onload = () => { txt = r.result; }; r.readAsText(b); return 'blob:x'; };
@@ -1702,8 +1709,9 @@ const REGRESSION = [
       LS.setItem('dnd5e_theme_overrides', '{}'); await imp(bk); d.getElementById('impConfAll').checked = true; w.impConfirm('skip');
       if (LS.getItem('dnd5e_theme_overrides') !== '{}') return 'Abbrechen hat Farben übernommen';
       // altes Backup (nur Charaktere) und kaputte Einstellungen
-      await imp({TestBK2: bk.chars.TestBK}); if (!all().TestBK2) return 'Altes Backup-Format geht nicht mehr';
-      await imp({willow: 'backup', chars: {TestBK3: bk.chars.TestBK}, settings: {dnd5e_theme_overrides: 'kaputt', fremd: 'x'}});
+      // Paket T1: altes Format (ohne Kennung rules) = 2024 → nur in Willow 2024; Willow 2014 lehnt es ab (Test „Paket T1“)
+      if (RULES !== '2014') { await imp({TestBK2: bk.chars.TestBK}); if (!all().TestBK2) return 'Altes Backup-Format geht nicht mehr'; }
+      await imp({willow: 'backup', rules: RULES, chars: {TestBK3: bk.chars.TestBK}, settings: {dnd5e_theme_overrides: 'kaputt', fremd: 'x'}});
       if (!all().TestBK3 || LS.getItem('dnd5e_theme_overrides') !== '{}' || LS.getItem('fremd') !== null) return 'Ungültige Einstellungen übernommen';
       LS.removeItem('dnd5e_theme_overrides'); LS.removeItem('dnd5e_theme_overrides_light'); w.applyTheme('Druid');
       return true;
@@ -2913,8 +2921,8 @@ const REGRESSION = [
       try { r = E('lsPut({})'); E("_lsErrAt=0;st.hpC=(st.hpC||0)+1;autoSave()"); } catch (e) { thr = e.message; }
       E("Storage.prototype.setItem=window._svSet");
       if (r !== false || thr || !/Could not save/.test(d.getElementById('toast').textContent)) return 'lsPut-Fehler: ' + r + ' ' + thr + ' ' + d.getElementById('toast').textContent;
-      E("localStorage.removeItem('willow_lastBackup');openSettings()"); if (d.getElementById('bkLast').textContent !== 'Last backup: never') return 'Backup-Anzeige never';
-      E("bkMark();bkLabel()"); if (d.getElementById('bkLast').textContent !== 'Last backup: today') return 'Backup-Anzeige today'; E("closeSettings();localStorage.removeItem('willow_lastBackup')");
+      E("localStorage.removeItem(BK_KEY);openSettings()"); if (d.getElementById('bkLast').textContent !== 'Last backup: never') return 'Backup-Anzeige never';
+      E("bkMark();bkLabel()"); if (d.getElementById('bkLast').textContent !== 'Last backup: today') return 'Backup-Anzeige today'; E("closeSettings();localStorage.removeItem(BK_KEY)");
       // 6) englische Texte
       E("switchTabAll('zauber');buildAbilities()");
       const g = [...d.querySelectorAll('.ab-grp, .ab-tag')].map(x => x.textContent).join('|');
@@ -3309,7 +3317,7 @@ const REGRESSION = [
       if (!/\.bnav-btn\.on \.bnav-icon\{filter:none\}/.test(css)) return 'Leuchten der Leiste nicht aus (Tinte statt Leuchten)';
       // Fehler 06.10.2026: Schatten unter dem Namen schien durch die transparente Schrift (Name fast weiß) → Regel mit background-clip:text braucht text-shadow:none
       for (const m of css.matchAll(/[^{}]*\.hx-name\.name-in\{[^}]*background-clip:text[^}]*\}/g)) if (!m[0].includes('text-shadow:none')) return 'Name: text-shadow scheint durch die Schrift';
-      const early = html.match(/<script>try\{var _md=localStorage\.getItem\('willow_mode'\);[^<]*<\/script>/);
+      const early = html.match(/<script>try\{var _md=localStorage\.getItem\(LS_PFX\+'willow_mode'\);[^<]*<\/script>/);
       if (!early || !early[0].includes("_md==='auto'") || !early[0].includes("'klassisch'")) return 'Frühstart-Skript kennt Auto/Classic nicht';
       return true;
     } },
@@ -3499,6 +3507,60 @@ const REGRESSION = [
       const c = d.getElementById('spCountBox')?.textContent || '';
       return /Prepared 5\/5/.test(c) || 'Zähler: ' + c;
     } },
+  { name: 'Paket T1: zwei Builds – RULES/LS_PFX, getrennter Speicher, Kennung rules in Teilen/Backup, Import lehnt fremde Ausgabe ab, Service Worker räumt nur eigene Caches, Kopf (Name/Manifest)', datum: '18.10.2026',
+    run: async ({ w, d, sel, RULES }) => {
+      const E = s => w.eval(s), P = E('LS_PFX'), raw = k => E('localStorage.getItem(' + JSON.stringify(k) + ')');
+      if (E('RULES') !== RULES || E('R14') !== (RULES === '2014') || P !== (RULES === '2014' ? 'w14_' : '')) return 'RULES/R14/LS_PFX passen nicht zusammen';
+      const keys = { LS_KEY: 'dnd5e_chars', BK_KEY: 'willow_lastBackup', BK_REMIND: 'willow_bkRemind', WS_KEY: 'willow_websearch', SR_MODE_KEY: 'willow_search_mode', SETTINGS_LS: 'dnd5e_theme_overrides', SETTINGS_LS_LIGHT: 'dnd5e_theme_overrides_light' };
+      for (const [c, k] of Object.entries(keys)) if (E(c) !== P + k) return `${c} = ${E(c)} statt ${P + k}`;
+      // Speicher getrennt: fremde (2024-)Charaktere unter dem Namen ohne Präfix sieht Willow 2014 nicht, eigene landen unter dem Präfix
+      if (P) E("localStorage.setItem('dnd5e_chars',JSON.stringify({'Fremd 2024':{_f_cls:'Druid'}}))");
+      sel('Druid', '', 5); d.getElementById('charName').textContent = 'T1 Test'; E('saveChar()');
+      if (!JSON.parse(raw(P + 'dnd5e_chars') || '{}')['T1 Test']) return 'Charakter nicht unter ' + P + 'dnd5e_chars gespeichert';
+      if (P && E('Object.keys(getAllChars())').includes('Fremd 2024')) return 'Willow 2014 liest die 2024-Charaktere';
+      if (P && JSON.parse(raw('dnd5e_chars'))['T1 Test']) return 'Willow 2014 schreibt in den 2024-Speicher';
+      E("setTextSize('gross')"); if (raw(P + 'willow_textsize') !== 'gross' || (P && raw('willow_textsize') === 'gross')) return 'Textgröße nicht unter dem Präfix'; E("setTextSize('normal')");
+      E("ntSetSort('az')"); if (raw(P + 'willow_note_sort') !== 'az') return 'Notiz-Sortierung nicht unter dem Präfix'; E("ntSetSort('edit')");
+      // Kennung rules
+      const obj = E("charExportObj('T1 Test')"); if (!obj || obj.rules !== RULES) return 'Teilen-Datei ohne rules=' + RULES;
+      let txt = null; const oc = w.URL.createObjectURL, orv = w.URL.revokeObjectURL, ock = w.HTMLAnchorElement.prototype.click;
+      w.URL.revokeObjectURL = () => {}; w.HTMLAnchorElement.prototype.click = () => {};
+      w.URL.createObjectURL = b => { const r = new w.FileReader(); r.onload = () => { txt = r.result; }; r.readAsText(b); return 'blob:x'; };
+      E('exportChars()'); await new Promise(r => setTimeout(r, 200)); w.URL.createObjectURL = oc; w.URL.revokeObjectURL = orv; w.HTMLAnchorElement.prototype.click = ock;
+      if (!txt || JSON.parse(txt).rules !== RULES) return 'Backup ohne rules=' + RULES;
+      const fr = o => E('_fileRules(' + JSON.stringify(o) + ')');
+      if (fr({}) !== '2024' || fr({ rules: '2014' }) !== '2014' || fr({ rules: 'x' }) !== '2024' || fr([]) !== '2024') return '_fileRules falsch';
+      // Import: falsche Ausgabe abgelehnt (mit Hinweis), eigene angenommen
+      const imp = async o => { const f = new w.File([JSON.stringify(o)], 'x.json', { type: 'application/json' }); w.importChars({ target: { files: [f], value: '' } }); await new Promise(r => setTimeout(r, 300)); };
+      const other = RULES === '2014' ? '2024' : '2014', all = () => E('getAllChars()');
+      await imp({ willow: 'char', v: 1, rules: other, name: 'T1 Fremd', data: obj.data });
+      if (all()['T1 Fremd']) return 'Datei aus Willow ' + other + ' wurde importiert';
+      if (!d.getElementById('toast').textContent.includes('Willow ' + other)) return 'kein Hinweis auf Willow ' + other + ': ' + d.getElementById('toast').textContent;
+      if (RULES === '2014') { await imp({ 'T1 Alt': obj.data }); if (all()['T1 Alt']) return 'altes Backup ohne Kennung (= 2024) in Willow 2014 importiert'; }
+      await imp({ willow: 'char', v: 1, rules: RULES, name: 'T1 Eigen', data: obj.data });
+      if (!all()['T1 Eigen']) return 'Datei aus der eigenen Ausgabe nicht importiert';
+      E("const c=getAllChars();delete c['T1 Test'];delete c['T1 Eigen'];localStorage.setItem(LS_KEY,JSON.stringify(c))"); if (P) E("localStorage.removeItem('dnd5e_chars')");
+      // Kopf: Name auf dem Home-Bildschirm, Manifest, Icon
+      const nm = d.querySelector('meta[name="apple-mobile-web-app-title"]')?.content;
+      if (nm !== (RULES === '2014' ? 'Willow 2014' : 'Willow')) return 'Home-Name ' + nm;
+      if (d.querySelector('link[rel="manifest"]')?.getAttribute('href') !== 'manifest.json' || !d.querySelector('link[rel="apple-touch-icon"]')) return 'Manifest/Icon-Link fehlt';
+      // Service Worker (Datei neben der App, sonst willow/service-worker.js): nur eigene Caches löschen, nur aus dem eigenen lesen
+      const path = require('path'), swp = [path.join(path.dirname(path.resolve(NEW)), 'service-worker.js'), path.join(__dirname, '..', 'service-worker.js')].find(p => fs.existsSync(p));
+      const sw = fs.readFileSync(swp, 'utf8'), name = (sw.match(/const CACHE_NAME = "([^"]*)";/) || [])[1];
+      if (!name || (RULES === '2014') !== name.startsWith('willow14-app-')) return 'CACHE_NAME ' + name + ' passt nicht zu ' + RULES;
+      const H = {}, deleted = [], opened = [];
+      const ctx = { self: { registration: { scope: 'http://localhost/' }, addEventListener: (t, f) => { H[t] = f; }, skipWaiting() {}, clients: { claim: async () => {} } }, URL,
+        caches: { keys: async () => ['willow-app-2026-01-01a', 'willow14-app-2026-01-01a', name], delete: async k => { deleted.push(k); return true; },
+          open: async k => { opened.push(k); return { match: async () => undefined, put: async () => {}, addAll: async () => {} }; }, match: async () => { throw new Error('caches.match über alle Caches'); } },
+        fetch: async () => ({ ok: true, clone() { return this; } }), Request: function (u) { this.url = u; } };
+      require('vm').runInNewContext(sw, ctx);
+      let wait; H.activate({ waitUntil: p => { wait = p; } }); await wait;
+      const own = RULES === '2014' ? 'willow14-app-2026-01-01a' : 'willow-app-2026-01-01a';
+      if (deleted.length !== 1 || deleted[0] !== own) return 'activate löscht ' + JSON.stringify(deleted) + ' statt nur ' + own;
+      let resp; H.fetch({ request: { url: 'http://localhost/index.html', method: 'GET' }, respondWith: p => { resp = p; } }); await resp;
+      if (!opened.includes(name)) return 'fetch liest nicht aus dem eigenen Cache';
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
@@ -3514,12 +3576,17 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
 (async () => {
   // 2) Laufzeittest
   const { w, d, errs } = await load(NEW);
+  // Paket T1: Regelwerk der Datei (RULES), muss zu --rules passen
+  const RULES = JSON.parse(get(w, 'RULES') || '"2024"'), PFX = JSON.parse(get(w, 'LS_PFX') || '""');
+  console.log(`   Regelwerk: ${RULES}${PFX ? ' (Speicher-Präfix ' + PFX + ')' : ''}`);
+  if (RULES_ARG && RULES !== RULES_ARG) bad(`RULES ist '${RULES}', erwartet '${RULES_ARG}' (--rules)`);
+  if ((RULES === '2014') !== (PFX === 'w14_')) bad(`LS_PFX '${PFX}' passt nicht zu RULES '${RULES}'`);
   const CD = JSON.parse(get(w, 'CLASS_DATA') || '{}');
   const CT = JSON.parse(get(w, 'CLASS_TABLES') || '{}'), TR = JSON.parse(get(w, 'CLASS_CORE_TRAITS') || '{}');
   console.log('2) Laufzeit: Klasse | Subkl. | Features L20 | Karten L20 | Class Table | Traits | Beasts-Tab');
   const set = (id, v) => { const el = d.getElementById(id); if (el) el.value = v; };
   const vis = id => { const el = d.getElementById(id); return !!el && el.style.display !== 'none'; };
-  for (const cls of Object.keys(CD)) {
+  for (const cls of process.env.AC_NUR ? [] : Object.keys(CD)) {
     set('lvl', '20'); set('cls', cls); w.onClsChange && w.onClsChange();
     const opts = [...d.getElementById('subcls').options].map(o => o.value).filter(Boolean);
     let subsWithFeat = 0;
@@ -3538,8 +3605,21 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
   if (errs.length) errs.forEach(e => bad('JS-Fehler: ' + e)); else console.log('   JS-Fehler: keine');
 
   // 2b) Regressionstests (frisch geladene App, damit kein Zustand aus Schritt 2 stört)
-  console.log(`2b) Regressionstests (${REGRESSION.length})`);
+  // AC_NUR=Text: nur Regressionstests, deren Name den Text enthält (schnelle Fehlersuche; ERGEBNIS gilt dann nicht als Gesamtprüfung)
+  const RT = REGRESSION.filter(t => (!t.r || t.r === 'beide' || t.r === RULES) && (!process.env.AC_NUR || t.name.includes(process.env.AC_NUR)));
+  console.log(`2b) Regressionstests (${RT.length}${RT.length < REGRESSION.length ? ' von ' + REGRESSION.length + ', Regelwerk ' + RULES : ''})`);
   const R = await load(NEW);
+  // Paket T1: Im 2014-Build speichert die App unter 'w14_…'. Die Tests lesen/schreiben w.localStorage mit den 2024-Namen →
+  // eigene Sicht auf window, deren localStorage den Präfix ergänzt (App-Code selbst bleibt unberührt).
+  let RW = R.w;
+  if (PFX) {
+    const ls = R.w.localStorage, k = x => String(x).startsWith(PFX) ? String(x) : PFX + x;
+    const pls = { getItem: x => ls.getItem(k(x)), setItem: (x, v) => ls.setItem(k(x), v), removeItem: x => ls.removeItem(k(x)),
+      clear: () => ls.clear(), key: i => ls.key(i), get length() { return ls.length; } };
+    const nat = f => /\[native code\]/.test(Function.prototype.toString.call(f));
+    RW = new Proxy(R.w, { get: (t, p) => { if (p === 'localStorage') return pls; const v = Reflect.get(t, p); return typeof v === 'function' && nat(v) && !/^[A-Z]/.test(String(p)) ? v.bind(t) : v; },
+      set: (t, p, v) => Reflect.set(t, p, v), has: (t, p) => Reflect.has(t, p), deleteProperty: (t, p) => Reflect.deleteProperty(t, p) });
+  }
   // Paket S1 (04.10.2026): das leere Blatt startet jetzt mit Grundwerten (attrSrc/statSrc); die älteren Tests setzen st.attrs/AC direkt
   // (Altmodus) → für sie zurückstellen. Das leere Blatt selbst prüft der Test „Paket S1“ (blankSheetNew).
   try { R.w.eval('st.attrSrc=null;st.statSrc=null'); } catch (e) {}
@@ -3549,8 +3629,8 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
     rset('lvl', String(lvl)); rset('cls', cls); R.w.onClsChange && R.w.onClsChange();
     rset('subcls', sub || ''); R.w.onSubclsChange ? R.w.onSubclsChange() : (R.w.buildAbilities && R.w.buildAbilities());
   };
-  for (const t of REGRESSION) {
-    let res; try { res = await t.run({ w: R.w, d: R.d, set: rset, vis: rvis, CD, sel }); } catch (e) { res = 'Ausnahme: ' + e.message + ' ' + (e.stack||'').split('\n').slice(1,5).join(' | '); }
+  for (const t of RT) {
+    let res; try { res = await t.run({ w: RW, d: R.d, set: rset, vis: rvis, CD, sel, RULES }); } catch (e) { res = 'Ausnahme: ' + e.message + ' ' + (e.stack||'').split('\n').slice(1,5).join(' | '); }
     if (res === true) console.log(`   ✔ ${t.name}`); else bad(`${t.name} (${t.datum}): ${res}`);
   }
   if (R.errs.length) R.errs.forEach(e => bad('JS-Fehler in Regressionstests: ' + e));
@@ -3611,6 +3691,7 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
       }
     }
   }
-  console.log(fail ? `\nERGEBNIS: ${fail} Problem(e)` : '\nERGEBNIS: alles OK');
+  if (process.env.AC_NUR) console.log('\n(AC_NUR gesetzt: nur Teilprüfung – vor dem Veröffentlichen ohne AC_NUR laufen lassen)');
+  console.log(fail ? `\nERGEBNIS: ${fail} Problem(e)` : (process.env.AC_NUR ? '\nERGEBNIS: Teilprüfung OK' : '\nERGEBNIS: alles OK'));
   process.exit(fail ? 1 : 0);
 })();

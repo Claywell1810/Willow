@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>D&D 5e Character Sheet</title>
+<meta name="apple-mobile-web-app-title" content="Willow">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="willow-icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -1587,9 +1590,12 @@ html[data-mode="light"] .sp-conc.active{box-shadow:0 1px 2px rgba(90,58,18,.3)}
 html[data-mode="light"] .die-shape.crit{box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 40%,transparent)}
 html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,var(--red) 40%,transparent)}
 </style>
-<script>try{if(localStorage.getItem('willow_design')==='klassisch'){document.documentElement.dataset.design='klassisch';document.getElementById('willowLeder').media='not all';}}catch(e){}</script>
-<script>try{var _md=localStorage.getItem('willow_mode');if(_md==='auto')_md=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';if(localStorage.getItem('willow_design')==='klassisch')_md='dark';document.documentElement.dataset.mode=_md==='light'?'light':'dark';}catch(e){document.documentElement.dataset.mode='dark';}</script>
-<script>try{var _ts=localStorage.getItem('willow_textsize');if(_ts==='gross'||_ts==='sehrgross')document.documentElement.dataset.ts=_ts;}catch(e){}</script>
+<!-- Paket T1 (18.10.2026): ein Code, zwei Builds – RULES setzt tools/build_2014.py auf '2014' (Ordner 2014/); Regel-Weichen mit if(R14).
+     LS_PFX: gleiche Domain = gemeinsamer localStorage → Willow 2014 speichert alles unter 'w14_…' -->
+<script>const RULES='2024';const R14=RULES==='2014';const LS_PFX=R14?'w14_':'';</script>
+<script>try{if(localStorage.getItem(LS_PFX+'willow_design')==='klassisch'){document.documentElement.dataset.design='klassisch';document.getElementById('willowLeder').media='not all';}}catch(e){}</script>
+<script>try{var _md=localStorage.getItem(LS_PFX+'willow_mode');if(_md==='auto')_md=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';if(localStorage.getItem(LS_PFX+'willow_design')==='klassisch')_md='dark';document.documentElement.dataset.mode=_md==='light'?'light':'dark';}catch(e){document.documentElement.dataset.mode='dark';}</script>
+<script>try{var _ts=localStorage.getItem(LS_PFX+'willow_textsize');if(_ts==='gross'||_ts==='sehrgross')document.documentElement.dataset.ts=_ts;}catch(e){}</script>
 </head>
 <body>
 <div class="app">
@@ -2217,7 +2223,7 @@ function onPbInput(){
 // (Spell List, Info-Tab, Feats, Items, Background, Beasts, Notes; Filter nur zurückgesetzt, wenn die Karte sonst verborgen wäre); ohne Karte
 // (Features fremder Klassen, Katalog-Items) klappt der Treffer im Fenster auf, Items mit „Add to Items“. Web: Startpage mit „D&D 5e“ wie bisher.
 // Letzte Suchen (beide Modi, nur wenn gesprungen/gesucht wurde) pro Gerät in willow_websearch. Nur Anzeige: Charakterdaten ändert nur „Add to Items“.
-const WS_KEY='willow_websearch',SR_MODE_KEY='willow_search_mode';
+const WS_KEY=LS_PFX+'willow_websearch',SR_MODE_KEY=LS_PFX+'willow_search_mode';
 function wsRecent(){try{const a=JSON.parse(localStorage.getItem(WS_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
 function wsRemember(q){try{const r=wsRecent().filter(x=>x.toLowerCase()!==q.toLowerCase());r.unshift(q);localStorage.setItem(WS_KEY,JSON.stringify(r.slice(0,8)));}catch(e){}}
 // Startpage statt google.com (01.10.2026): iOS öffnet google.com-Links in der Google-App; Startpage liefert Google-Ergebnisse und öffnet wie der 5e.tools-Link im Browser-Fenster der App
@@ -2461,7 +2467,7 @@ function lsPut(chars){
   catch(e){const now=Date.now();if(now-_lsErrAt>20000){_lsErrAt=now;showToast('⚠ Could not save! Storage is full or blocked – make a backup now (⚙ → Backup All).',8000);}
     try{console.warn('Willow: save failed',e);}catch(_){}return false;}
 }
-const BK_KEY='willow_lastBackup',BK_REMIND='willow_bkRemind',BK_DAYS=14;
+const BK_KEY=LS_PFX+'willow_lastBackup',BK_REMIND=LS_PFX+'willow_bkRemind',BK_DAYS=14;
 function bkLast(){try{return +localStorage.getItem(BK_KEY)||0;}catch(e){return 0;}}
 function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){}}
 function bkAgeTxt(){const t=bkLast();if(!t)return 'never';const d=Math.floor((Date.now()-t)/864e5);return d<1?'today':d===1?'yesterday':d+' days ago';}
@@ -9761,8 +9767,8 @@ function ntMigrate(old){
   return n;
 }
 function ntCatsAll(){const o=(st.noteCats||[]).slice();(st.notes||[]).forEach(n=>(n.c||[]).forEach(c=>{if(!o.includes(c))o.push(c);}));return o;}
-function ntSort(){let v='edit';try{v=localStorage.getItem('willow_note_sort')||'edit';}catch(e){}return NT_SORTS[v]?v:'edit';}
-function ntSetSort(v){try{localStorage.setItem('willow_note_sort',v);}catch(e){}ntRender();}
+function ntSort(){let v='edit';try{v=localStorage.getItem(LS_PFX+'willow_note_sort')||'edit';}catch(e){}return NT_SORTS[v]?v:'edit';}
+function ntSetSort(v){try{localStorage.setItem(LS_PFX+'willow_note_sort',v);}catch(e){}ntRender();}
 function ntTerms(q){return String(q||'').toLowerCase().split(/\s+/).filter(Boolean);}
 function ntMatch(n,terms){const h=(n.t+'\n'+n.x+'\n'+(n.c||[]).join(' ')).toLowerCase();return terms.every(t=>h.includes(t));}
 function ntHi(s,terms){
@@ -9916,7 +9922,7 @@ function ntCatDel(i){
 function ntReset(){_ntOpen=null;_ntCat='';_ntDelAsk=null;_ntCatEdit=false;_ntCatIn=null;_ntCatDelAsk=null;}
 
 // LOCALSTORAGE / MEHRCHARAKTERE
-const LS_KEY = 'dnd5e_chars';
+const LS_KEY = LS_PFX+'dnd5e_chars';   // Paket T1: Willow 2014 = 'w14_dnd5e_chars'
 const TEXT_IDS = ['cls','race','raceCustom','lvl','bg','subcls','align','prof','hpM','hpT','ac','ini','spd','spAttr','n_bg_notes','n_bst_notes','n_ft_notes','n_class_traits','n_bg_feature','n_bg_extra','n_equip','n_equip_notes','cur_pp','cur_gp','cur_ep','cur_sp','cur_cp'];
 
 function getAllChars(){
@@ -10685,12 +10691,12 @@ function willowDerive(sp,mode){
   if(sp.inlay&&sp.inlay!=='none')t.frame=willowInlay(sp.inlay,[t.bg1,t.bg2],mode);
   return t;}
 // Paket R5 (06.10.2026): ⚙ „Mode“ pro Gerät – willow_mode = dark (Standard) | light (Pergament) | auto (folgt dem System); im Design Classic immer dark
-function willowModeSet(){let m='dark';try{m=localStorage.getItem('willow_mode')||'dark'}catch(e){}return (m==='light'||m==='auto')?m:'dark';}
+function willowModeSet(){let m='dark';try{m=localStorage.getItem(LS_PFX+'willow_mode')||'dark'}catch(e){}return (m==='light'||m==='auto')?m:'dark';}
 function willowMode(){if(willowDesign()==='klassisch')return 'dark';let m=willowModeSet();
   if(m==='auto'){try{m=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}catch(e){m='dark'}}
   return WILLOW_PAL[m]?m:'dark';}
 // Nachtrag 04.10.2026 (Simon): ⚙ „Design“ pro Gerät (willow_design) – 'klassisch' = alte Klassen-Farben (CLASS_THEMES) ohne Leder-Optik, bis das neue Design passt.
-function willowDesign(){let v='leder';try{v=localStorage.getItem('willow_design')||'leder'}catch(e){}return v==='klassisch'?'klassisch':'leder';}
+function willowDesign(){let v='leder';try{v=localStorage.getItem(LS_PFX+'willow_design')||'leder'}catch(e){}return v==='klassisch'?'klassisch':'leder';}
 function themeBase(cls){
   if(willowDesign()==='klassisch'){
     const t=CLASS_THEMES[cls]||CLASS_THEMES[''];
@@ -10702,14 +10708,14 @@ function themeBase(cls){
 // Wunsch Simon 06.10.2026: eine Zeile Leather / Parchment / Classic; intern weiter willow_design + willow_mode (gespeichertes „auto“ wirkt weiter, markiert dann den wirksamen Knopf)
 function designBtn(){return willowDesign()==='klassisch'?'klassisch':(willowMode()==='light'?'pergament':'leder');}
 function pickDesign(v){if(v==='klassisch'){setDesign('klassisch');return;}
-  try{localStorage.setItem('willow_mode',v==='pergament'?'light':'dark');}catch(e){}
+  try{localStorage.setItem(LS_PFX+'willow_mode',v==='pergament'?'light':'dark');}catch(e){}
   setDesign('leder');}
 function markDesign(){const v=designBtn();document.querySelectorAll('#dsRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.ds===v));markMode();}
 function markMode(){const v=willowModeSet();document.querySelectorAll('#mdRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.md===v));
   const w=document.getElementById('mdWrap');if(w)w.style.display=willowDesign()==='klassisch'?'none':'';}
 function setMode(v){
   v=(v==='light'||v==='auto')?v:'dark';
-  try{localStorage.setItem('willow_mode',v);}catch(e){}
+  try{localStorage.setItem(LS_PFX+'willow_mode',v);}catch(e){}
   applyTheme(document.getElementById('cls')?.value||'');
   markMode();
   if(document.getElementById('settingsModal')?.style.display==='flex')buildSettingsUI();
@@ -10717,7 +10723,7 @@ function setMode(v){
 try{window.matchMedia&&matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(willowModeSet()==='auto'&&willowDesign()!=='klassisch'){applyTheme(document.getElementById('cls')?.value||'');if(document.getElementById('settingsModal')?.style.display==='flex')buildSettingsUI();}});}catch(e){}
 function setDesign(v){
   v=v==='klassisch'?'klassisch':'leder';
-  try{localStorage.setItem('willow_design',v);}catch(e){}
+  try{localStorage.setItem(LS_PFX+'willow_design',v);}catch(e){}
   if(v==='klassisch')document.documentElement.dataset.design='klassisch';else delete document.documentElement.dataset.design;
   const st_=document.getElementById('willowLeder');if(st_)st_.media=v==='klassisch'?'not all':'all';
   applyTheme(document.getElementById('cls')?.value||'');
@@ -11118,15 +11124,15 @@ document.getElementById('prof').addEventListener('input',onPbInput); // Paket S2
 // EXPORT / IMPORT
 // Fix 06.10.2026 (Simon): Backup All nimmt eigene Farben (Leder + Pergament) und die Design-Wahl mit; Import übernimmt sie
 const BK_SETTINGS=['dnd5e_theme_overrides','dnd5e_theme_overrides_light','willow_design','willow_mode'];
-function bkSettings(){const o={};BK_SETTINGS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!==null)o[k]=v;}catch(e){}});return o;}
+function bkSettings(){const o={};BK_SETTINGS.forEach(k=>{try{const v=localStorage.getItem(LS_PFX+k);if(v!==null)o[k]=v;}catch(e){}});return o;}
 function exportChars(){
   const chars = getAllChars();
-  const json = JSON.stringify({willow:'backup',v:1,app:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),chars,settings:bkSettings()}, null, 2);
+  const json = JSON.stringify({willow:'backup',v:1,rules:RULES,app:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),chars,settings:bkSettings()}, null, 2);
   const blob = new Blob([json], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'dnd5e_characters_' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = (R14?'willow2014_characters_':'dnd5e_characters_') + new Date().toISOString().slice(0,10) + '.json';
   a.click();
   URL.revokeObjectURL(url);
   bkMark();bkLabel();
@@ -11144,7 +11150,7 @@ function _dlFile(text,fname){
 function charExportObj(name){
   const data=getAllChars()[name];
   if(!data) return null;
-  return {willow:'char',v:1,app:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),name,data};
+  return {willow:'char',v:1,rules:RULES,app:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),name,data};
 }
 function shareChar(){
   const name=document.getElementById('charName')?.textContent.trim();
@@ -11154,10 +11160,10 @@ function shareChar(){
   if(!obj){showToast('Export fehlgeschlagen');return;}
   const json=JSON.stringify(obj);
   const base=name.replace(/[\\/:*?"<>|\x00-\x1f]+/g,'_').trim()||'Charakter';
-  const fname=base+'.willow.json';
+  const fext=R14?'.willow2014':'.willow',fname=base+fext+'.json';
   const tryFiles=[];
   try{tryFiles.push(new File([json],fname,{type:'application/json'}));}catch(err){}
-  try{tryFiles.push(new File([json],base+'.willow.txt',{type:'text/plain'}));}catch(err){}
+  try{tryFiles.push(new File([json],base+fext+'.txt',{type:'text/plain'}));}catch(err){}
   const f=(navigator.share&&navigator.canShare)?tryFiles.find(x=>{try{return navigator.canShare({files:[x]});}catch(err){return false;}}):null;
   if(f){
     navigator.share({files:[f],title:name}).then(()=>showToast('📤 '+name+' shared')).catch(err=>{
@@ -11166,6 +11172,8 @@ function shareChar(){
     });
   } else {_dlFile(json,fname);showToast('⬇ '+fname);}
 }
+// Paket T1: Regelwerk einer Datei (Kennung rules; ohne Kennung = 2024, alle älteren Dateien stammen aus Willow 2024)
+function _fileRules(data){return data&&typeof data==='object'&&!Array.isArray(data)&&(data.rules==='2014'||data.rules==='2024')?data.rules:'2024';}
 // Datei → {Name: Zustand} (Einzel-Datei oder Gesamt-Backup), sonst null
 function _parseImport(data){
   if(!data||typeof data!=='object'||Array.isArray(data)) return null;
@@ -11200,8 +11208,10 @@ function importChars(e){
   const reader = new FileReader();
   reader.onload = ev => {
     let inc=null,set=null;
-    try { const raw=JSON.parse(ev.target.result); inc=_parseImport(raw); set=_parseImpSettings(raw); } catch(err) { inc=null; }
+    let fr=RULES;
+    try { const raw=JSON.parse(ev.target.result); inc=_parseImport(raw); set=_parseImpSettings(raw); fr=_fileRules(raw); } catch(err) { inc=null; }
     if(!inc){ showToast('Import failed: invalid file'); return; }
+    if(fr!==RULES){ showToast('⚠ This file is from Willow '+fr+(fr==='2014'?' (2014 rules)':' (2024 rules)')+' – import it there.',6000); return; }
     _impQ={list:Object.entries(inc),i:0,chars:getAllChars(),done:[],all:null,set};
     _impNext();
   };
@@ -11241,7 +11251,7 @@ function _impFinish(){
   const q=_impQ; _impQ=null; if(!q) return;
   if(!q.done.length){ showToast('Nothing imported'); return; }
   if(!lsPut(q.chars)) return; // Speichern fehlgeschlagen: Warnung bleibt stehen, nichts als „importiert“ melden
-  if(q.set) Object.entries(q.set).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch(e){}}); // Fix 06.10.2026: Farben + Design aus dem Backup
+  if(q.set) Object.entries(q.set).forEach(([k,v])=>{try{localStorage.setItem(LS_PFX+k,v);}catch(e){}}); // Fix 06.10.2026: Farben + Design aus dem Backup
   refreshCharSel(q.done[0]);
   loadChar(q.done[0]);
   if(q.set) setDesign(willowDesign()); // Design, Farben und offenes ⚙ neu anwenden
@@ -11252,11 +11262,11 @@ function _impFinish(){
 // App-Version = CACHE_NAME in service-worker.js (bei jeder Veröffentlichung beide hochzählen)
 // Textgröße (UI/Lesbarkeit 27.09.2026): normal | gross (115 %) | sehrgross (130 %), pro Gerät
 const TEXT_SIZES=['normal','gross','sehrgross'];
-function getTextSize(){try{const v=localStorage.getItem('willow_textsize');return TEXT_SIZES.includes(v)?v:'normal';}catch(e){return 'normal';}}
+function getTextSize(){try{const v=localStorage.getItem(LS_PFX+'willow_textsize');return TEXT_SIZES.includes(v)?v:'normal';}catch(e){return 'normal';}}
 function markTextSize(){const v=getTextSize();document.querySelectorAll('#tsRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.ts===v));}
 function setTextSize(v){
   if(!TEXT_SIZES.includes(v))v='normal';
-  try{localStorage.setItem('willow_textsize',v);}catch(e){}
+  try{localStorage.setItem(LS_PFX+'willow_textsize',v);}catch(e){}
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
   markTextSize();measureNav();
 }
@@ -11272,9 +11282,9 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-17c';
-const SETTINGS_LS = 'dnd5e_theme_overrides';
-const SETTINGS_LS_LIGHT = 'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
+const APP_VERSION = 'willow-app-2026-10-18a';
+const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
+const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
 const COLOR_LABELS = {icoAct:'Action',icoBonus:'Bonus Action',icoReact:'Reaction',icoPass:'Passive',icoOther:'Other (1 min, ritual …)',gold:'Accent / Gold',frame:'Header Art & Frames',gold2:'Section Headers',purple:'Highlight',purple2:'Subclass Accent',bg0:'Background',bg1:'Header BG',bg2:'Card BG',bg3:'Input Field BG',text:'Text',desc:'Description Text',text2:'Secondary Text',text3:'Small Labels',muted:'Muted (Nav, Placeholders)',red:'Danger / Delete',green:'Health / Positive',blue:'Info / Tags'};
 let settingsActiveClass = '';
