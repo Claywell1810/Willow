@@ -30,7 +30,7 @@ catch (e) { console.log('1) Syntax: FEHLER – ' + e.message); process.exit(1); 
 const abAmt = (d, n) => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); if (!c) return 0; const m = c.querySelector('.ab-pmax'); return m ? parseInt(m.textContent.replace(/\D/g, '')) : c.querySelectorAll('.ab-pip').length; };
 // Paket N (03.10.2026): Pflichtfeld-Prüfung – js läuft im App-Fenster und schreibt Fundstellen in P; true = alles da
 // Paket T2: Willow 2014 – Block schon aus tools/t14 (T14_BLOCKS)? Pflichttests eines noch nicht umgestellten Blocks warten auf sein Teilpaket.
-// Tests mit r: '2024' prüfen Daten/Verhalten der 2024-Fassung (XPHB); die 2014-Gegenstücke stehen im Test „Paket T2“.
+// Tests mit r: '2024' prüfen Daten/Verhalten der 2024-Fassung (XPHB); die 2014-Gegenstücke stehen in den Tests „Paket T2“ … „Paket T4“.
 const t14 = (w, b) => !!w.eval("typeof T14_BLOCKS!=='undefined'&&T14_BLOCKS.includes(" + JSON.stringify(b) + ")");
 const pflicht = (w, js) => { const P = w.eval('(()=>{const P=[];' + js + '\nreturn P;})()'); return P.length ? `${P.length}: ` + P.slice(0, 8).join('; ') + (P.length > 8 ? ' …' : '') : true; };
 const REGRESSION = [
@@ -830,7 +830,7 @@ const REGRESSION = [
       w.closeWebSearch();
       return true;
     } },
-  { name: 'Text-Formatierer auch für Rassen-Traits und Background-Texte (Aasimar-Verwandlungen als Liste in Celestial Revelation, keine **-Reste)', datum: '28.09.2026',
+  { name: 'Text-Formatierer auch für Rassen-Traits und Background-Texte (Aasimar-Verwandlungen als Liste in Celestial Revelation, keine **-Reste)', datum: '28.09.2026', r: '2024',
     run: ({ w, d, set }) => {
       set('race', 'Aasimar'); w.onRaceChange && w.onRaceChange(); w.buildRaceLore();
       const body = d.getElementById('raceLoreBody');
@@ -910,7 +910,7 @@ const REGRESSION = [
       w.resetUI();
       return true;
     } },
-  { name: 'Background-Text nur aus derselben Quelle: XPHB-Sage ohne 2014-„Feature: Researcher“, PHB-Backgrounds behalten ihr Feature', datum: '28.09.2026',
+  { name: 'Background-Text nur aus derselben Quelle: XPHB-Sage ohne 2014-„Feature: Researcher“, PHB-Backgrounds behalten ihr Feature', datum: '28.09.2026', r: '2024',
     run: ({ w, d }) => {
       const body = d.getElementById('bgLoreBody');
       w.eval("st.bg='Sage'"); w.buildBgLore();
@@ -957,7 +957,7 @@ const REGRESSION = [
       w.eval("st.mySpells=[]"); w.buildBgLore(); w.resetUI();
       return true;
     } },
-  { name: 'Feats-Filter: jede Kategorie der Daten hat einen Knopf und findet ihre Feats (Fighting Style inkl. FS:P/FS:R, Epic Boon, Dragonmark, Dark Gift)', datum: '01.10.2026',
+  { name: 'Feats-Filter: jede Kategorie der Daten hat einen Knopf und findet ihre Feats (Fighting Style inkl. FS:P/FS:R, Epic Boon, Dragonmark, Dark Gift)', datum: '01.10.2026', r: '2024',
     run: ({ w, d }) => {
       w.switchTabAll && w.switchTabAll('feats'); w.ftBuildFilters(); w.eval('ftFLvl=false'); // Paket S3: Stufen-Vorauswahl aus
       const btns = [...d.querySelectorAll('#ftCatFilters .fbtn')];
@@ -968,7 +968,7 @@ const REGRESSION = [
       cnt('all'); w.eval('ftFLvl=true');
       return true;
     } },
-  { name: 'Backgrounds und Feats aus AU/RHW/EFA ergänzt: 12 neue Backgrounds, 4 durch Nachdruck ersetzt (Name gleich), 40 Feats inkl. Dark Gift, Origin Feat findbar', datum: '01.10.2026',
+  { name: 'Backgrounds und Feats aus AU/RHW/EFA ergänzt: 12 neue Backgrounds, 4 durch Nachdruck ersetzt (Name gleich), 40 Feats inkl. Dark Gift, Origin Feat findbar', datum: '01.10.2026', r: '2024',
     run: ({ w, d }) => {
       const bg = n => w.eval(`BG_DATA.find(b=>b.n===${JSON.stringify(n)})`), ft = n => w.eval(`FT_FEATS.find(f=>f.n===${JSON.stringify(n)})`);
       if (w.eval('BG_DATA.length') !== 132 || w.eval('new Set(BG_DATA.map(b=>b.n)).size') !== 132) return 'BG_DATA nicht 132 eindeutige Namen';
@@ -1049,7 +1049,7 @@ const REGRESSION = [
       w.resetUI();
       return true;
     } },
-  { name: 'Paket C3: Rassen – Wahl (Elven Lineage mit Tabelle, Keen Senses, Draconic Ancestry, Size, Half-Elf-Boni) in st.picks, Werte-Zeile (Speed/Size/Darkvision/Resistenz), Rassen-Skills mit Abzeichen, Vorteile an Saves, Dwarven Toughness, RACE_DATA-Fehler behoben', datum: '29.09.2026',
+  { name: 'Paket C3: Rassen – Wahl (Elven Lineage mit Tabelle, Keen Senses, Draconic Ancestry, Size, Half-Elf-Boni) in st.picks, Werte-Zeile (Speed/Size/Darkvision/Resistenz), Rassen-Skills mit Abzeichen, Vorteile an Saves, Dwarven Toughness, RACE_DATA-Fehler behoben', datum: '29.09.2026', r: '2024',
     run: ({ w, d, set }) => {
       if (!w.eval('typeof RACE_PICKS==="object"&&Object.keys(RACE_PICKS).length===12') || typeof w.rcCard !== 'function') return 'RACE_PICKS/rcCard fehlen';
       const sk = n => [...d.querySelectorAll('#skillsGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === n);
@@ -1109,7 +1109,7 @@ const REGRESSION = [
       w.resetUI();
       return true;
     } },
-  { name: 'Paket C4: Rassen im Actions-Tab – Tracker (rc_-ids, PB/1×, ab Stufe, Aktionsart je Giant-Ancestry-Boon), Lineage-Zauber 1×/Long Rest ab L3/L5, Passiv/Weitere-Karten, Werte aus dem Text (DC, Schaden), Spell-List ★ mit Rassen-Zaubern, Verbrauch gespeichert; Aasimar-Optionsnamen (Heavenly Wings …)', datum: '29.09.2026',
+  { name: 'Paket C4: Rassen im Actions-Tab – Tracker (rc_-ids, PB/1×, ab Stufe, Aktionsart je Giant-Ancestry-Boon), Lineage-Zauber 1×/Long Rest ab L3/L5, Passiv/Weitere-Karten, Werte aus dem Text (DC, Schaden), Spell-List ★ mit Rassen-Zaubern, Verbrauch gespeichert; Aasimar-Optionsnamen (Heavenly Wings …)', datum: '29.09.2026', r: '2024',
     run: ({ w, d, set, sel }) => {
       if (typeof w.rcTrackers !== 'function' || !w.eval('RACE_PICKS.Orc.tr&&RACE_PICKS.Elf.ch[0].o[0].inn')) return 'Rassen-Tracker fehlen (rcTrackers/RACE_PICKS.tr)';
       const race = r => { set('race', r); w.onRaceChange(); };
@@ -1397,7 +1397,7 @@ const REGRESSION = [
       if (M().filter(x => x.name === "Hunter's Mark").length !== 1 || F("Hunter's Mark").auto !== 'Ranger') return 'Alter Spielstand: ' + JSON.stringify(M());
       w.eval('st.mySpells=[];st.picks={}'); w.resetUI(); return true;
     } },
-  { name: 'Paket H2: Feat-Zauber (feste automatisch, Wahl im Feats-Tab, Variante, Stufe, Entfernen, Log)', datum: '01.10.2026',
+  { name: 'Paket H2: Feat-Zauber (feste automatisch, Wahl im Feats-Tab, Variante, Stufe, Entfernen, Log)', datum: '01.10.2026', r: '2024',
     run: ({ w, d, sel }) => {
       w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest H2'");
       const M = () => w.eval('st.mySpells'), F = n => M().find(x => x.name === n), L = () => w.eval('st.log').map(e => e.m);
@@ -1445,7 +1445,7 @@ const REGRESSION = [
       if (c.querySelector('.spell-tags .sp-cast, .spell-tags .spell-prep')) return 'Cast/✦ in der Abzeichen-Zeile';
       w.eval('apSync=window._apS;st.mySpells=[]'); w.buildMySpells(); return true;
     } },
-  { name: 'Feats: Tabellen aus 5e.tools im Text (Strixhaven Spells, Fast Crafting, Mythal-Touched Magic, Dragonmark-Zauber …)', datum: '01.10.2026',
+  { name: 'Feats: Tabellen aus 5e.tools im Text (Strixhaven Spells, Fast Crafting, Mythal-Touched Magic, Dragonmark-Zauber …)', datum: '01.10.2026', r: '2024',
     run: ({ w, d }) => {
       const tb = (n, src) => { const x = d.createElement('div'); x.innerHTML = w.eval(`fmtDesc(FT_FEATS.find(f=>f.n===${JSON.stringify(n)}&&f.src===${JSON.stringify(src)}).d)`); return x; };
       const sx = tb('Strixhaven Initiate', 'SCC'), t = sx.querySelector('table.fd-tbl');
@@ -1789,7 +1789,7 @@ const REGRESSION = [
       if (!d.getElementById('weaponList').textContent.includes('set dice')) return 'Leerer Würfel nicht als „set dice“ markiert';
       return true;
     } },
-  { name: 'Paket E1: Attribute – Grundwert + Boni (Background/Rasse eingerechnet), Fenster mit Quellen, Umstellung alter Charaktere, Log, Laden', datum: '02.10.2026',
+  { name: 'Paket E1: Attribute – Grundwert + Boni (Background/Rasse eingerechnet), Fenster mit Quellen, Umstellung alter Charaktere, Log, Laden', datum: '02.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       if (typeof w.openAttr !== 'function' || typeof w.attrCalc !== 'function') return 'openAttr/attrCalc fehlen';
       sel('Wizard', '', 4);
@@ -1872,7 +1872,7 @@ const REGRESSION = [
       w.eval('st.exhaustion=0'); w.buildAttrs();
       return true;
     } },
-  { name: 'Feat-Attributsbonus: Textzeile aus 5e.tools, Wahl in der Feat-Karte, feste Boni, ASI mehrfach (+2 / +1+1), Entfernen rückt nach, Log', datum: '02.10.2026',
+  { name: 'Feat-Attributsbonus: Textzeile aus 5e.tools, Wahl in der Feat-Karte, feste Boni, ASI mehrfach (+2 / +1+1), Entfernen rückt nach, Log', datum: '02.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       if (typeof w.faSpec !== 'function' || !w.eval('FT_FEATS.find(f=>f.n==="Telepathic").ab')) return 'faSpec/FT_FEATS.ab fehlen';
       w.applyState({ attrs: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }, _f_cls: 'Fighter', _f_lvl: '8', _f_race: '', bg: '' });
@@ -2514,7 +2514,7 @@ const REGRESSION = [
         if(!['aktion','bonus','reaktion','frei','varies'].includes(a.t))P.push(n+': Zeit '+a.t);if(!a.x||/\{@/.test(a.x))P.push(n+': Text');});
       ['Attack','Dash','Disengage','Dodge','Help','Hide','Influence','Magic','Ready','Search','Study','Utilize','Opportunity Attack','Two-Weapon Fighting','Unarmed Strike'].forEach(n=>{if(!seen.has(n))P.push('fehlt: '+n);});
       if(STD_ACTIONS.filter(a=>a.u).length!==1||!(STD_ACTIONS.find(a=>a.u)||{}).n==='Unarmed Strike')P.push('Unarmed Strike ohne u:1');`) },
-  { name: 'Paket O1: Traglast – STR × 15 lb aus st.attrs, Größe, Powerful Build (Goliath, Custom), Anzeige lb statt kg', datum: '03.10.2026',
+  { name: 'Paket O1: Traglast – STR × 15 lb aus st.attrs, Größe, Powerful Build (Goliath, Custom), Anzeige lb statt kg', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       sel('Fighter', '', 3); w.eval('hpAskSet(-1,0)'); // 04.10.2026: offene HP-Wahl erst auflösen
       d.getElementById('race').value = ''; w.onRaceChange();
@@ -2537,7 +2537,7 @@ const REGRESSION = [
       return true;
     } },
   // ── Paket O2 (03.10.2026): Gegenstände + Startausrüstung als Daten (tools/item_convert.py); Pflichtfelder wie Paket N
-  { name: 'Paket O2: Items – ITEM_DATA Pflichtfelder (Kategorie aus ITEM_CATS, Waffe/Rüstung/Pack/Gruppe auflösbar), START_EQUIP je Klasse und Background, alle Verweise in ITEM_MAP', datum: '03.10.2026',
+  { name: 'Paket O2: Items – ITEM_DATA Pflichtfelder (Kategorie aus ITEM_CATS, Waffe/Rüstung/Pack/Gruppe auflösbar), START_EQUIP je Klasse und Background, alle Verweise in ITEM_MAP', datum: '03.10.2026', r: '2024',
     run: ({ w, RULES }) => (RULES === '2014' && !t14(w, 'START_EQUIP')) || pflicht(w, `const seen=new Set(),K=new Set(Object.keys(ITEM_CATS)),ok=r=>!!ITEM_MAP[r],D=/^\\d+d\\d+$|^1$/;
       if(ITEM_DATA.length<500)P.push('nur '+ITEM_DATA.length+' Gegenstände (item_convert.py --write)');
       ITEM_DATA.forEach(i=>{const k=(i.n||'?')+'|'+i.s;if(seen.has(k))P.push(k+': doppelt');seen.add(k);
@@ -2605,7 +2605,7 @@ const REGRESSION = [
       if (!tx.includes('19 GP') || !tx.includes('(B) 90 GP') || !tx.includes('9 GP') || !tx.includes('(B) 50 GP') || /Rapier|2d4/.test(tx)) return 'Bard/Druid-Text nicht XPHB: ' + tx;
       return true;
     } },
-  { name: 'Paket O4: Items-Tab – Suche aus ITEM_DATA füllt Name/Gewicht/Kategorie + ref, freie Items bleiben, Karte mit Schaden/AC/Eigenschaften/Herkunft, Pack „Unpack“, „Link“ für alte Items, offene Karte bleibt offen', datum: '03.10.2026',
+  { name: 'Paket O4: Items-Tab – Suche aus ITEM_DATA füllt Name/Gewicht/Kategorie + ref, freie Items bleiben, Karte mit Schaden/AC/Eigenschaften/Herkunft, Pack „Unpack“, „Link“ für alte Items, offene Karte bleibt offen', datum: '03.10.2026', r: '2024',
     run: ({ w, d }) => {
       if (typeof w.itSearch !== 'function') return 'itSearch fehlt (Item-Suche)';
       w.eval("st.items=[];itemFilter='all';renderItems()");
@@ -2663,7 +2663,7 @@ const REGRESSION = [
       w.eval("st.items=[];renderItems()");
       return true;
     } },
-  { name: 'Paket O5: Rüstung/Schild „Equip“ setzt den AC-Rechner (eq, arm/sh, beide Richtungen, Hand-AC nur Entwurf), Waffe „→ Weapons“ mit Angriff/Schaden live (STR/DEX, Finesse, PB abschaltbar, Two-handed, Eingabe überschreibt), alte Text-Waffen unverändert, Log', datum: '03.10.2026',
+  { name: 'Paket O5: Rüstung/Schild „Equip“ setzt den AC-Rechner (eq, arm/sh, beide Richtungen, Hand-AC nur Entwurf), Waffe „→ Weapons“ mit Angriff/Schaden live (STR/DEX, Finesse, PB abschaltbar, Two-handed, Eingabe überschreibt), alte Text-Waffen unverändert, Log', datum: '03.10.2026', r: '2024',
     run: ({ w, d }) => {
       if (typeof w.itEquip !== 'function' || typeof w.wpnVals !== 'function') return 'itEquip/wpnVals fehlen (Paket O5)';
       const bak = w.eval('JSON.stringify({a:st.attrs,as:st.attrSrc,ss:st.statSrc,we:st.weapons,it:st.items})'), pf = w.eval('+st.profAdj||0');
@@ -2761,7 +2761,7 @@ const REGRESSION = [
       // Level −/+ speichert sofort
       E('chLvl(1);chLvl(1)'); if (String(E("getAllChars()['S1 Test']._f_lvl")) !== '3') return 'Level +: nicht gespeichert';
       // BG-Hinweis
-      if (!/automatically/.test(E('bgAbilityUI(BG_DATA.find(b=>bgAbOpts(b).length===3))'))) return 'Background-Hinweis veraltet';
+      if (E('!R14') && !/automatically/.test(E('bgAbilityUI(BG_DATA.find(b=>bgAbOpts(b).length===3))'))) return 'Background-Hinweis veraltet';   // Willow 2014: kein Background mit Attributswahl (Paket T4)
       // Krit-Schwelle
       const s = d.getElementById('subcls'); s.value = 'Champion (PHB)'; s.dispatchEvent(new w.Event('change'));
       if (E('stCritMin()') !== 19) return 'Improved Critical: Schwelle ' + E('stCritMin()');
@@ -2868,7 +2868,7 @@ const REGRESSION = [
       E("const c2=getAllChars();delete c2['HP Wahl Test'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
       return r;
     } },
-  { name: 'Waffe aus dem Inventar als Karte wie die natürliche Waffe (Werte als Text, ✎ öffnet die Felder, ✓ schließt)', datum: '04.10.2026',
+  { name: 'Waffe aus dem Inventar als Karte wie die natürliche Waffe (Werte als Text, ✎ öffnet die Felder, ✓ schließt)', datum: '04.10.2026', r: '2024',
     run: ({ w, d }) => {
       const E = js => w.eval(js);
       E("st.items=[{id:77,name:'Testkampfstab',qty:1,wt:4,cat:'Weapon',note:'',ref:'Quarterstaff|XPHB'}];st.weapons=[{name:'Eigene',atk:'+1',dmg:'1d4',type:'Piercing'}];itToWpn(77)");
@@ -3452,7 +3452,7 @@ const REGRESSION = [
       B('TCE').click(); B('all').click(); if (w.eval('slFSrc.size')) return '„All“ leert die Auswahl nicht';
       return true;
     } },
-  { name: 'Paket Z4: Stufenaufstieg-Assistent – Knopf an der Charakterkarte, Schritte je Stufe (Subklasse, Features, ASI/Feat, Zauber, HP), Cancel stellt alles wieder her und speichert nichts, Apply = ein Undo-Schritt + ein Log-Eintrag, HP Average vorausgewählt, neue Klasse', datum: '17.10.2026',
+  { name: 'Paket Z4: Stufenaufstieg-Assistent – Knopf an der Charakterkarte, Schritte je Stufe (Subklasse, Features, ASI/Feat, Zauber, HP), Cancel stellt alles wieder her und speichert nichts, Apply = ein Undo-Schritt + ein Log-Eintrag, HP Average vorausgewählt, neue Klasse', datum: '17.10.2026', r: '2024',
     run: async ({ w, d, sel }) => {
       if (w.eval('typeof luOpen') === 'undefined') return 'luOpen fehlt';
       const tick = () => new Promise(r => setTimeout(r, 0));
@@ -3691,6 +3691,113 @@ const REGRESSION = [
       if (list().length !== 96) return 'Filter „All“ zeigt ' + list().length;
       const card = [...d.querySelectorAll('#bstList .zb-card')].find(c => c.querySelector('.zb-name').textContent === 'Wolf');
       if (!card || !card.innerHTML.includes('#wolf_mm,')) return '5e.tools-Link nicht auf MM (2014)';
+      return true;
+    } },
+  { name: 'Paket T4: Willow 2014 – Herkunft und Ausrüstung: 9 SRD-Rassen (Unterrassen zusammengeführt, Attributsboni der Rasse, Dragonborn-Ahnen, Half-Elf-Wahl, Infernal Legacy, High-Elf-Cantrip, Breath Weapon 2014), Acolyte ohne Origin Feat/Attributswahl, Grappler ohne Kategorien, Items SRD ohne Mastery, Startausrüstung (a)/(b)/(c) je Zeile + Startgold; 2024: Feats-Filter und Ausrüstungs-Schlüssel unverändert', datum: '19.10.2026',
+    run: ({ w, d, set, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      const cf = () => d.getElementById('ftCatFilters');
+      if (RULES !== '2014') {
+        w.switchTab('feats'); w.ftBuildFilters();
+        if (cf().style.display === 'none' || cf().querySelectorAll('.fbtn').length !== 8) return '2024: Feats-Filter ' + cf().querySelectorAll('.fbtn').length;
+        if (E("seGKey('cls','Bard',0)") !== 'cls:Bard:equip' || E("seGKey('bg','Sage',1)") !== 'bg:Sage:equip:1') return '2024: Ausrüstungs-Schlüssel geändert';
+        return E("rcOpt(RACE_PICKS.Elf.ch[0])") === null || '2024: Elf-Lineage ohne Wahl gesetzt';
+      }
+      // Daten: nur SRD, keine 2024-Quelle
+      const RN = ['Dragonborn', 'Half-Elf', 'Half-Orc', 'High Elf', 'Hill Dwarf', 'Human', 'Lightfoot Halfling', 'Rock Gnome', 'Tiefling'];
+      if (J('Object.keys(RACE_DATA).sort()').join() !== RN.join() || J('Object.keys(RACE_PICKS).sort()').join() !== RN.join()) return 'Rassen: ' + J('Object.keys(RACE_DATA)');
+      if (/XPHB|EFA|PHB'24/.test(E('JSON.stringify([RACE_DATA,RACE_PICKS,BG_DATA,BG_EXTRA,FT_FEATS,ITEM_DATA,START_EQUIP])'))) return '2024-Quelle in Herkunft/Items';
+      if (J('BG_DATA.map(b=>b.n)').join() !== 'Acolyte,Custom Background' || J('FT_FEATS.map(f=>f.n+"|"+f.src+"|"+f.cat)').join() !== 'Grappler|PHB|') return 'BG_DATA/FT_FEATS 2014';
+      if (E('Object.keys(FEAT_SPELLS).length+Object.keys(BG_SPELLS).length')) return 'FEAT_SPELLS/BG_SPELLS nicht leer';
+      if (E('ITEM_DATA.some(i=>i.m)||Object.keys(ITEM_RULES.m).length')) return 'Mastery in Willow 2014 (Weiche c)';
+      if (E("ARMOR_DATA.some(a=>{const i=ITEM_MAP[a.n+'|PHB'];return !i||i.ac!==a.ac||i.at!==a.c})")) return 'ARMOR_DATA ≠ ITEM_DATA (PHB)';
+      const SE = J('START_EQUIP'), CL = J('Object.keys(CLASS_DATA).sort()');
+      if (Object.keys(SE.cls).sort().join() !== CL.join() || Object.keys(SE.gold || {}).sort().join() !== CL.join()) return 'START_EQUIP/gold nicht für alle Klassen';
+      if (SE.gold.Fighter.n !== 5 || SE.gold.Fighter.m !== 10 || SE.gold.Monk.m !== 1) return 'Startgold Fighter/Monk';
+      const bad = J(`(()=>{const P=[],ok=r=>!!ITEM_MAP[r];Object.entries(START_EQUIP.cls).concat(Object.entries(START_EQUIP.bg)).forEach(([n,G])=>G.forEach((g,gi)=>Object.entries(g.o).forEach(([o,L])=>L.forEach(e=>{
+        const t=e.wc?seVarOpts(e).length>3:e.i?ok(e.i):e.ch?e.ch.length&&e.ch.every(c=>ok(c)&&(ITEM_MAP[c].gv||[]).length):e.sp?true:e.cp>0;if(!t)P.push(n+' '+gi+o+' '+JSON.stringify(e));}))));return P;})()`);
+      if (bad.length) return 'START_EQUIP-Verweise: ' + bad.slice(0, 3).join(' · ');
+      // Rassen
+      const race = r => { set('race', r); w.onRaceChange(); };
+      const body = d.getElementById('raceLoreBody'), stats = () => d.getElementById('raceStats').textContent;
+      const rcard = n => [...body.children].find(c => { const h = c.querySelector('div[style*="Cinzel"]'); return h && h.textContent.split(' · ')[0] === n; });
+      const chip = (root, o) => root && [...root.querySelectorAll('.pk-chip')].find(c => c.dataset.o === o);
+      const card = n => [...d.querySelectorAll('#abList .ab-card')].find(c => c.querySelector('.ab-name').firstChild.textContent === n);
+      const grp = c => c && c.closest('.ab-grp-box').dataset.grp, pips = c => c ? c.querySelectorAll('.ab-top .ab-pip').length : -1;
+      w.resetUI();
+      w.applyState({ attrs: { STR: 14, DEX: 12, CON: 14, INT: 10, WIS: 10, CHA: 12 }, _f_lvl: '5' });
+      sel('Fighter', 'Champion (PHB)', 5);
+      race('Hill Dwarf');
+      if (!/Speed 25 ft/.test(stats()) || !/Darkvision 60 ft/.test(stats()) || !/Poison/.test(stats())) return 'Hill Dwarf Werte: ' + stats();
+      if (E("attrAuto('CON').race") !== 2 || E("attrAuto('WIS').race") !== 1) return 'Hill Dwarf Attributsboni (Weiche a)';
+      if (E('rcP("Hill Dwarf").hp.per') !== 1 || !rcard('Dwarven Toughness') || !rcard('Stonecunning')) return 'Hill Dwarf Traits/HP';
+      if (grp(card('Stonecunning')) !== 'weitere' || grp(card('Dwarven Resilience')) !== 'passiv') return 'Hill Dwarf Actions-Gruppen';
+      if (/Legacy rule/.test(body.textContent)) return 'Hinweis „Legacy rule“ in Willow 2014';
+      w.eval("st.attrSrc=attrSrcNew();st.attrSrc.CON.base=19");
+      if (E("attrCalc('CON').total") !== 21 || E("attrCalc('CON').cap")) return 'Grenze 20 gilt in 2014 nicht für Rassenboni';
+      w.eval("st.attrSrc.CON.asi=2");
+      if (!E("attrCalc('CON').cap")) return 'Grenze 20 für ASI fehlt';
+      w.eval("st.attrSrc=null");
+      race('Half-Elf');
+      const hb = rcard('Ability Score Increase');
+      if (!hb || !chip(hb, 'DEX') || chip(hb, 'CHA')) return 'Half-Elf: Wahl +1 fehlt';
+      chip(hb, 'DEX').click(); chip(rcard('Ability Score Increase'), 'CON').click();
+      if (E("attrAuto('CHA').race") !== 2 || E("attrAuto('DEX').race") !== 1 || E("attrAuto('CON').race") !== 1) return 'Half-Elf Attributsboni';
+      if (E('rcP("Half-Elf").sk.any') !== 2) return 'Half-Elf Skill Versatility';
+      race('Dragonborn');
+      chip(rcard('Draconic Ancestry'), 'Red').click();
+      if (!/Fire/.test(stats())) return 'Dragonborn Rot: Resistenz ' + stats();
+      const bw = () => card('Breath Weapon'), dc = 8 + E('prof()') + E("getAbilityMod('CON')");
+      if (!bw() || grp(bw()) !== 'aktion' || pips(bw()) !== 1 || !bw().textContent.includes('Short/Long Rest')) return 'Breath Weapon 2014: ' + (bw() ? grp(bw()) + ' ' + pips(bw()) : 'fehlt');
+      if (!bw().querySelector('.rc-dc') || bw().querySelector('.rc-dc').textContent !== `Save DC ${dc} (CON) · Damage 2d6`) return 'Breath Weapon DC/Schaden: ' + (bw().querySelector('.rc-dc') || {}).textContent;
+      sel('Fighter', 'Champion (PHB)', 11); race('Dragonborn');
+      if (!/Damage 4d6/.test(bw().querySelector('.rc-dc').textContent)) return 'Breath Weapon L11 nicht 4d6';
+      race('Half-Orc');
+      if (pips(card('Relentless Endurance')) !== 1 || grp(card('Relentless Endurance')) !== 'passiv') return 'Half-Orc Relentless Endurance';
+      sel('Fighter', 'Champion (PHB)', 5); race('Tiefling');
+      if (J('rcOpen()').length) return 'Tiefling: offene Wahl ' + J('rcOpen()').map(x => x.txt);
+      const il = card('Infernal Legacy');
+      if (!il || il.querySelectorAll('.ab-sub, .ab-pip').length < 2 || !il.textContent.includes('Hellish Rebuke') || !il.textContent.includes('Darkness')) return 'Infernal Legacy L5: ' + (il ? il.textContent.slice(0, 120) : 'fehlt');
+      if (J('rcSpells(5)').flatMap(x => x.spells).join() !== 'Thaumaturgy,Hellish Rebuke,Darkness' || J('rcSpells(1)').flatMap(x => x.spells).join() !== 'Thaumaturgy') return 'Tiefling-Zauber nach Stufe';
+      if (!/Spell save DC/.test(rcard('Infernal Legacy').textContent) || rcard('Infernal Legacy').querySelector('.pk-chip')) return 'Infernal Legacy: DC (CHA) ohne Wahl';
+      race('High Elf');
+      if (!J('rcOpen()').some(x => x.txt === 'Cantrip')) return 'High Elf: Cantrip-Wahl nicht offen';
+      chip(rcard('Cantrip'), 'Fire Bolt').click();
+      if (!J('rcSpells(5)').some(x => x.spells.includes('Fire Bolt')) || !/\(INT\)/.test(rcard('Cantrip').textContent)) return 'High Elf: Cantrip/INT';
+      if (!E('rcP("High Elf").sk.fix').includes('Perception')) return 'High Elf Keen Senses';
+      // Background Acolyte (Weiche b)
+      w.eval("st.bg='Acolyte';buildBgLore()");
+      const bl = d.getElementById('bgLoreBody').textContent;
+      if (/Origin Feat|Ability Scores/.test(bl) || !/Shelter of the Faithful/.test(bl) || !/Personality Trait/.test(bl)) return 'Acolyte 2014: ' + bl.slice(0, 160);
+      // Feats-Tab (Weiche k)
+      w.switchTab('feats'); w.ftBuildFilters();
+      if (cf().style.display !== 'none') return 'Feats-Filter mit Kategorien in 2014';
+      if (![...d.querySelectorAll('#ftList .zb-name, #ftList .ft-name')].some(x => /Grappler/.test(x.textContent)) && !/Grappler/.test(d.getElementById('ftList').textContent)) return 'Grappler fehlt im Feats-Tab';
+      // Startausrüstung: Wahl je Zeile, zwei Waffen, Startgold
+      w.eval("st.items=[];st.equipDone={};st.picks={};['cur_gp','cur_sp','cur_cp'].forEach(i=>document.getElementById(i).value=0);document.getElementById('cls').value='Fighter';onClsChange()");
+      const box = () => d.getElementById('coreTraitsList').querySelector('.se');
+      const heads = [...box().querySelectorAll('.pk-h')].map(h => h.textContent);
+      if (heads.slice(0, 4).join('|') !== 'Choose (a) or (b) (0/1)|Choose (a) or (b) (0/1)|Choose (a) or (b) (0/1)|Choose (a) or (b) (0/1)') return 'Fighter: Zeilen ' + heads.join('|');
+      const opt = (gi, o) => box().querySelector(`.se-opt[data-k="${gi ? 'cls:Fighter:equip:' + gi : 'cls:Fighter:equip'}"][data-o="${o}"]`);
+      opt(0, 'a').click(); opt(1, 'b').click(); opt(2, 'b').click();
+      if (!box().querySelector('.se-add').disabled) return 'Add ohne alle Zeilen nicht gesperrt';
+      opt(3, 'b').click();
+      const sl = [...box().querySelectorAll('.se-var select')];
+      if (sl.length !== 2 || !sl[0].innerHTML.includes('Longsword|PHB') || sl[0].innerHTML.includes('Dagger|PHB')) return 'zwei Martial-Waffen-Wahlen fehlen';
+      sl[0].value = 'Longsword|PHB'; sl[0].dispatchEvent(new w.Event('change'));
+      const s2 = box().querySelectorAll('.se-var select')[1]; s2.value = 'Battleaxe|PHB'; s2.dispatchEvent(new w.Event('change'));
+      if (box().querySelector('.se-add').disabled) return 'Add trotz vollständiger Wahl gesperrt: ' + box().textContent.slice(-160);
+      box().querySelector('.se-add').click();
+      const I = J('st.items').map(x => x.ref + '×' + x.qty).sort().join();
+      if (I !== "Battleaxe|PHB×1,Chain Mail|PHB×1,Explorer's Pack|PHB×1,Handaxe|PHB×2,Longsword|PHB×1") return 'Fighter Ausrüstung: ' + I;
+      w.eval("st.equipDone={};st.picks={};onClsChange()");
+      if (!/starting gold 5d4 × 10 GP/.test(box().textContent)) return 'Startgold-Zeile fehlt';
+      w.seGoldRoll('Fighter'); const g = +E("st.picks['cls:Fighter:gold'][0]");
+      if (!(g >= 50 && g <= 200 && g % 10 === 0)) return 'Startgold-Wurf ' + g;
+      w.seGoldAdd('Fighter');
+      if (+d.getElementById('cur_gp').value !== g || E("st.equipDone['cls:Fighter']") !== 'gold' || !/Starting gold added/.test(box().textContent) || box().querySelector('.se-add')) return 'Startgold nicht eingetragen/gesperrt';
+      w.seUnlock('cls', 'Fighter');
+      if (!box().querySelector('.se-add')) return 'Allow again nach Startgold';
       return true;
     } },];// ────────────────────────────────────────────────────────────────────────────
 

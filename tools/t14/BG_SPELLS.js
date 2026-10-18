@@ -1,0 +1,1 @@
+const BG_SPELLS={};

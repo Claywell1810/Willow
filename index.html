@@ -308,6 +308,7 @@ input[type=number]{-moz-appearance:textfield}
 .rc-sp{display:flex;gap:8px;font-size:var(--fs-txt);color:var(--desc);line-height:1.5}
 .rc-sp.off{opacity:.5}
 .rc-spl{font-family:'Cinzel',serif;font-size:var(--fs-2xs);color:var(--text3);min-width:52px;padding-top:2px}
+.se-gold{margin-top:10px;padding-top:8px;border-top:1px solid var(--border2)}
 .rc-dc{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:var(--purple);margin-top:4px}
 .cr-mc{font-size:var(--fs-xs);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;color:var(--text2)}
 .cr-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
@@ -2514,6 +2515,7 @@ function attrCalc(k,G){
   r.setWins=r.set>0&&r.set>r.sum;
   r.total=Math.max(1,Math.min(30,r.setWins?r.set:r.sum));
   r.cap=(r.bg>0||r.race>0||r.asi>0||au.feat20>0)&&r.base+r.bg+r.race+r.asi+au.feat20>20; // XPHB: Background-Boni, ASI und Feats (außer Boons) nicht über 20
+  if(R14)r.cap=(r.asi>0||au.feat20>0)&&r.base+r.bg+r.race+r.asi+au.feat20>20; // Paket T4 (PHB 2014): nur ASI/Feats begrenzt, Rassenboni nicht
   return r;
 }
 function attrSync(){if(!attrOn())return;const G=calcGrants();ATTRS.forEach(a=>{st.attrs[a.k]=attrCalc(a.k,G).total;});}
@@ -2735,7 +2737,7 @@ function renderAttr(){
     <div class="at-form" id="atForm">= ${form}</div>
     <button type="button" class="se-add" style="margin:6px 0 2px" onclick="agOpen()">Standard Array / Point Buy</button>
     <div class="at-rows">${rows}</div>
-    <div class="rest-note warn" id="atCap"${r.cap?'':' style="display:none"'}>XPHB: Background increases and Ability Score Improvements can't raise a score above 20.</div>
+    <div class="rest-note warn" id="atCap"${r.cap?'':' style="display:none"'}>${R14?'Ability Score Improvements can\'t raise a score above 20.':'XPHB: Background increases and Ability Score Improvements can\'t raise a score above 20.'}</div>
     <div class="rest-foot"><button class="ws-btn" onclick="closeAttr()">Done</button></div>`;
 }
 // Paket S3: Grundwerte aller sechs Attribute auf einmal – XPHB „Standard Array“ und „Point Cost“ (book-xphb.json, S. 38;
@@ -2999,7 +3001,7 @@ const RC_SIZE={S:'Small',M:'Medium',L:'Large'};
 function rcRace(){const r=document.getElementById('race')?.value||'';if(r==='custom')return 'custom';return typeof RACE_PICKS!=='undefined'&&RACE_PICKS[r]?r:'';}
 function rcKey(t){return 'race:'+t;}
 function rcLegacy(){const r=rcRace();return !!r&&rcP(r).src==='PHB';}
-function rcOpt(c){const n=pkValid(rcKey(c.t),c.o.map(x=>x.n),1)[0];return n?c.o.find(x=>x.n===n):null;}
+function rcOpt(c){if(c.o.length===1)return c.o[0];const n=pkValid(rcKey(c.t),c.o.map(x=>x.n),1)[0];return n?c.o.find(x=>x.n===n):null;} // Paket T4: eine Option = ohne Wahl
 function rcSkOpts(sk){return sk.fix||sk.f||SKILLS.map(x=>x.n);}
 function rcSkN(sk){return sk.fix?0:(sk.n||sk.any||0);}
 function rcAsiOpts(a){return a&&a.ch?a.ch.f.filter(x=>!(x in a.fix)):[];}
@@ -3225,6 +3227,11 @@ function rcCard(race,g){
     const key=rcKey(c.t),o=rcOpt(c),marks={};c.o.forEach(x=>{if(x.dmg)marks[x.n]=x.dmg;});
     const chips=pickUI(key,c.o.map(x=>x.n),1,{head:'Choose 1',marks}),full=fmtDesc(g.desc+(c.tbl?'\n'+c.tbl:''));
     if(!o)return {suf:'',body:chips+full};
+    if(c.o.length===1||c.fab){ // Paket T4 (Willow 2014): Zauber-Trait ohne Wahl bzw. mit festem Zauberattribut (fab)
+      const m=md(st.attrs[c.fab]||10),dc=c.fab?`<div class="rc-dc">Spell save DC ${8+prof()+m} · Spell attack ${fmt(prof()+m)} (${c.fab})</div>`:'';
+      if(c.o.length===1)return {suf:'',body:(o.sp?`<div style="margin:2px 0 6px">${rcSpellsHtml(o.sp)}</div>`:'')+dc+desc};
+      return {suf:' · '+o.n,body:dc+more('Other options / change',chips+full)};
+    }
     let h='';
     if(o.txt)h+=`<div class="fp-sel">${fmtDesc(o.txt)}</div>`;
     if(o.dmg)h+=`<div class="fp-sel">${fmtDesc('Damage type: '+o.dmg)}</div>`;
@@ -3279,7 +3286,7 @@ function rcTrackers(race,lvl){
     out.push({id:'rc_cu_sp',name:'Innate Spellcasting',tag:'passiv',icon:'📖',uses:sub.length?1:null,restore:sub.length?'long':null,sub:sub.length?sub:undefined,desc:crSpellTxt(rp,lvl),rc:race});
   }
   (rp.ch||[]).forEach(c=>{
-    if(!c.ab)return;
+    if(!c.ab&&!(c.fab&&c.o.some(x=>x.inn)))return; // Paket T4: Willow 2014 Infernal Legacy (festes Attribut)
     const o=rcOpt(c),sub=o?(o.inn||[]).filter(x=>lvl>=x.l).map(x=>({k:'l'+x.l,l:x.s,uses:x.u})):[];
     out.push({id:'rc_lineage',name:c.t,tag:'passiv',icon:'📖',uses:sub.length?1:null,restore:sub.length?'long':null,sub:sub.length?sub:undefined,desc:txt(c.t),rc:race});
   });
@@ -3296,9 +3303,12 @@ function rcFeatures(race,trs){
 function rcCalc(desc){
   const pb=prof(),lvl=fpLvl(),r=[];
   const dc=/\((?:DC )?8 plus your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) modifier and Proficiency(?: Bonus)?\)/.exec(desc);
-  if(dc){const a=AB_FULL[dc[1]];r.push(`Save DC ${8+pb+getAbilityMod(a)} (${a})`);}
+  const dc14=!dc&&/equals 8 \+ your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) modifier \+ your proficiency bonus/.exec(desc); // Paket T4: PHB 2014
+  if(dc||dc14){const a=AB_FULL[(dc||dc14)[1]];r.push(`Save DC ${8+pb+getAbilityMod(a)} (${a})`);}
   const dm=/takes (\d+d\d+) damage[\s\S]*?increases by \d+d\d+ when you reach character levels? ([^.]+)/.exec(desc);
   if(dm){let d=dm[1];(dm[2].match(/\d+ \(\d+d\d+\)/g)||[]).forEach(x=>{const m=/(\d+) \((\d+d\d+)\)/.exec(x);if(lvl>=+m[1])d=m[2];});r.push('Damage '+d);}
+  const dm14=!dm&&/takes (\d+d\d+) [a-z ]*damage[^.]*\.\s*The damage increases to ([^.]+level)\./.exec(desc); // Paket T4: PHB 2014 „increases to 3d6 at 6th level, …“
+  if(dm14){let d=dm14[1];(dm14[2].match(/\d+d\d+ at \d+\w\w level/g)||[]).forEach(x=>{const m=/(\d+d\d+) at (\d+)/.exec(x);if(lvl>=+m[2])d=m[1];});r.push('Damage '+d);}
   const dd=/roll a number of (d\d+)s equal to your Proficiency/.exec(desc);
   if(dd)r.push(`Roll ${pb}${dd[1]}`);
   if(/Temporary Hit Points equal to your Proficiency/.test(desc))r.push(`Temp HP ${pb}`);
@@ -7336,7 +7346,7 @@ function buildRaceLore(){
     const a=rp.asi, fx=Object.keys(a.fix).map(k=>'+'+a.fix[k]+' '+k).join(', ');
     top.push({name:'Ability Score Increase', body:`<div class="fd"><p>${fx}${a.ch?` (fixed), +${a.ch.v} to ${a.ch.n} others of your choice`:''}.</p></div>`
       +(a.ch?pickUI(rcKey('Ability Score Increase'),rcAsiOpts(a),a.ch.n,{head:`+${a.ch.v}: choose ${a.ch.n}`}):'')
-      +`<div class="pk-note">Legacy rule (PHB 2014) – in the 2024 rules ability boosts come from the background. Shown as a badge (“+1 Race”) on the ability, not added to the score.</div>`});
+      +(R14?'':`<div class="pk-note">Legacy rule (PHB 2014) – in the 2024 rules ability boosts come from the background. Shown as a badge (“+1 Race”) on the ability, not added to the score.</div>`)});
   }
 
   body.innerHTML =
@@ -7703,9 +7713,12 @@ function buildBgLore(){
 // (Entscheidung Paket C): Gegenstände mit Feld `from` (Quelle) und `ref` ("Name|Quelle"), Geld in die Münzfelder.
 // Merker st.equipDone['cls:<K>'|'bg:<B>'] = gewählte Optionen → kein zweites Eintragen („Allow again“ löscht nur den Merker).
 function seGroups(src,name){const d=typeof START_EQUIP!=='undefined'&&START_EQUIP[src];return (d&&name&&d[name])||[];}
-function seGKey(src,name,gi){return src==='cls'?'cls:'+name+':equip':'bg:'+name+':equip:'+gi;}
+// Paket T4: Klasse mit mehreren Wahl-Zeilen (Willow 2014, (a)/(b)/(c) je Zeile) → ab Zeile 2 'cls:<K>:equip:<Zeile>' (Zeile 0 wie bisher)
+function seGKey(src,name,gi){return src==='cls'?'cls:'+name+':equip'+(gi?':'+gi:''):'bg:'+name+':equip:'+gi;}
+function seOptL(x){return R14&&x===x.toLowerCase()?'('+x+')':x.toUpperCase();} // Paket T4: 2014 „(a)“, 2024 „A“
 function seOptOf(src,name,g,gi){return g.k==='_'?'_':(pkValid(seGKey(src,name,gi),Object.keys(g.o),1)[0]||'');}
 function seVarOpts(e){
+  if(e.wc)return ITEM_DATA.filter(i=>i.c==='Weapon'&&i.wc===e.wc&&i.d&&(!e.mel||/Melee/.test(i.t||''))).map(i=>i.n+'|'+i.s); // Paket T4: „a martial weapon“
   if(e.ch)return [].concat(...e.ch.map(r=>(ITEM_MAP[r]&&ITEM_MAP[r].gv)||[]));
   const it=e.i&&ITEM_MAP[e.i];return it&&it.gv?it.gv:null;
 }
@@ -7719,9 +7732,13 @@ function seTxt(e){
   const q=e.q>1?e.q+'× ':'';
   if(e.cp!=null)return seMoney(e.cp);
   if(e.sp!=null){const t=e.sp.charAt(0).toUpperCase()+e.sp.slice(1);return q+t+(e.wv?' (worth '+seMoney(e.wv)+')':'')+(e.cv?' (with '+seMoney(e.cv)+')':'');}
+  if(e.wc)return q+e.dn+' of your choice'; // Paket T4
   if(e.ch)return q+(e.dn||e.ch.map(seItemN).join(' or ')+' of your choice');
   return q+(e.dn||seItemN(e.i))+(e.cv?' (with '+seMoney(e.cv)+')':'');
 }
+// Paket T4: gleiche Einträge nacheinander zusammenfassen („2× Martial weapon of your choice“) und Hinweise ohne Wiederholung
+function seJoin(L){const t=L.map(seTxt),o=[];t.forEach(x=>{const l=o[o.length-1];if(l&&l.t===x)l.n++;else o.push({t:x,n:1});});return o.map(x=>(x.n>1?x.n+'× ':'')+x.t).join(', ');}
+function seMiss(L){const c={};L.forEach(x=>c[x]=(c[x]||0)+1);return Object.keys(c).map(x=>c[x]>1?x+' ('+c[x]+' rows)':x);}
 function seVarUI(k,e,lock){
   const o=seVarOpts(e);if(!o||!o.length)return '';
   const v=seVar(k,e),lbl=e.ch?(e.dn||e.ch.map(seItemN).join(' / ')):(e.dn||seItemN(e.i));
@@ -7736,16 +7753,18 @@ function seHtml(src,name){
   gs.forEach((g,gi)=>{
     const gk=seGKey(src,name,gi),opt=seOptOf(src,name,g,gi);
     const vars=o=>(g.o[o]||[]).map((e,ei)=>seVarUI(gk+':v:'+o+':'+ei,e,!!done)).join('');
-    if(g.k==='_'){h+=`<div class="se-fix">${g.o._.map(seTxt).join(', ')}</div>`+vars('_');return;}
-    const ks=Object.keys(g.o),L=ks.map(x=>x.toUpperCase());
+    if(g.k==='_'){h+=`<div class="se-fix">${seJoin(g.o._)}</div>`+vars('_');return;}
+    const ks=Object.keys(g.o),L=ks.map(seOptL);
     h+=`<div class="pk-h${opt?'':' open'}">Choose ${L.slice(0,-1).join(', ')} or ${L[L.length-1]} (${opt?1:0}/1)</div>`;
-    ks.forEach((o,i)=>{h+=`<button type="button" class="se-opt${o===opt?' on':''}${opt&&o!==opt?' dim':''}" data-k="${pkEsc(gk)}" data-o="${pkEsc(o)}" data-src="${src}"${done?' disabled':''} onclick="seSetOpt(this)"><b>${L[i]}</b>${pkEsc(g.o[o].map(seTxt).join(', '))}</button>`;});
+    ks.forEach((o,i)=>{h+=`<button type="button" class="se-opt${o===opt?' on':''}${opt&&o!==opt?' dim':''}" data-k="${pkEsc(gk)}" data-o="${pkEsc(o)}" data-src="${src}"${done?' disabled':''} onclick="seSetOpt(this)"><b>${L[i]}</b>${pkEsc(seJoin(g.o[o]))}</button>`;});
     if(opt)h+=vars(opt);
   });
   const n=src==='cls'?'class':'background';
+  if(done==='gold')return h+seGoldHtml(name,done)+'</div>'; // Paket T4: Startgold statt Ausrüstung
   if(done)h+=`<div class="se-done"><span>✓ Added to Items${done&&done!=='_'?' (option '+pkEsc(done)+')':''}</span><button type="button" class="se-again" onclick="seUnlock('${src}',this.dataset.n)" data-n="${pkEsc(name)}">Allow again</button></div>`+seLinkHtml(src,name);
   else h+=`<button type="button" class="se-add" data-n="${pkEsc(name)}"${r.miss.length?' disabled':''} onclick="seAdd('${src}',this.dataset.n)"><i class="mi mi-plus l"></i>Add to Items</button>`+
-    `<div class="pk-note">${r.miss.length?pkEsc(r.miss.join(' · '))+' first. ':''}Adds the items (Items tab) and the money (Currency) of this ${n} once.</div>`;
+    `<div class="pk-note">${r.miss.length?pkEsc(seMiss(r.miss).join(' · '))+' first. ':''}Adds the items (Items tab) and the money (Currency) of this ${n} once.</div>`;
+  if(src==='cls'&&!done)h+=seGoldHtml(name,done);
   return h+'</div>';
 }
 // Was „Add to Items“ eintragen würde: {items:[{name,qty,wt,cat,note,from,ref}], cp, opt:"A"|"a, b", miss:[…]}
@@ -7754,8 +7773,8 @@ function seCollect(src,name){
   const push=(x)=>{const d=out.items.find(y=>y.ref===x.ref&&y.name===x.name);if(d)d.qty+=x.qty;else out.items.push(x);};
   gs.forEach((g,gi)=>{
     const gk=seGKey(src,name,gi),opt=seOptOf(src,name,g,gi);
-    if(!opt){out.miss.push('Choose '+Object.keys(g.o).map(x=>x.toUpperCase()).join(' or '));return;}
-    if(opt!=='_')out.opt.push(opt.toUpperCase());
+    if(!opt){out.miss.push('Choose '+Object.keys(g.o).map(seOptL).join(' or '));return;}
+    if(opt!=='_')out.opt.push(seOptL(opt));
     (g.o[opt]||[]).forEach((e,ei)=>{
       const q=e.q||1,vk=gk+':v:'+opt+':'+ei,v=seVar(vk,e);
       if(e.cp!=null){out.cp+=e.cp;return;}
@@ -7809,6 +7828,26 @@ function seLinkAll(src,name){const L=seLinkList(name),eqA=new Set();
   L.forEach(x=>{if(x.k==='w')itToWpn(x.i.id);});
   seRefresh(src);showToast('✓ Equipped / linked · AC '+(document.getElementById('ac')?.value||''));}
 function seLinkNo(src,name){(st.seLinkOff||(st.seLinkOff={}))[src+':'+name]=1;seRefresh(src);}
+// ── Paket T4 (Willow 2014): Startgold statt Ausrüstung (PHB „Starting Wealth by Class“, START_EQUIP.gold = {n,d,m}) ──
+// Wurf in st.picks['cls:<K>:gold'] = [Summe in GP]; „Add“ trägt das Gold ein und setzt st.equipDone['cls:<K>']='gold'.
+function seGold(name){const g=typeof START_EQUIP!=='undefined'&&START_EQUIP.gold&&START_EQUIP.gold[name];return g||null;}
+function seGoldTxt(g){return g.n+'d'+g.d+(g.m>1?' × '+g.m:'')+' GP';}
+function seGoldHtml(name,done){
+  const g=seGold(name);if(!g)return '';const v=parseInt(pkGet('cls:'+name+':gold')[0])||0,N=pkEsc(name);
+  if(done==='gold')return `<div class="se-done"><span>✓ Starting gold added (${v} GP)</span><button type="button" class="se-again" data-n="${N}" onclick="seUnlock('cls',this.dataset.n)">Allow again</button></div>`;
+  return `<div class="se-gold"><div class="pk-h">Or: starting gold ${seGoldTxt(g)}</div>`
+    +`<div class="se-done" style="color:var(--text2)"><button type="button" class="se-again" data-n="${N}" onclick="seGoldRoll(this.dataset.n)"><i class="mi mi-dz l"></i>Roll ${seGoldTxt(g)}</button>`
+    +(v?`<span>= <b>${v} GP</b></span><button type="button" class="se-again" data-n="${N}" onclick="seGoldAdd(this.dataset.n)">Add ${v} GP</button>`:'')+`</div>`
+    +`<div class="pk-note">Instead of the equipment from your class and background, you buy your equipment with this gold (PHB).</div></div>`;
+}
+function seGoldRoll(name){const g=seGold(name);if(!g)return;let t=0;for(let i=0;i<g.n;i++)t+=1+Math.floor(Math.random()*g.d);
+  if(!st.picks)st.picks={};st.picks['cls:'+name+':gold']=[String(t*g.m)];seRefresh('cls');}
+function seGoldAdd(name){
+  const key='cls:'+name,v=parseInt(pkGet(key+':gold')[0])||0;st.equipDone=st.equipDone||{};
+  if(!v||st.equipDone[key])return;
+  const el=document.getElementById('cur_gp');if(el)el.value=(parseInt(el.value)||0)+v;
+  st.equipDone[key]='gold';seRefresh('cls');showToast(`Added ${v} GP (starting gold)`);
+}
 function seUnlock(src,name){
   if(!st.equipDone)return;delete st.equipDone[src+':'+name];
   seRefresh(src);showToast('Can be added again – items already added stay in the Items tab');
@@ -9403,7 +9442,11 @@ function ftBuildFilters(){
   allB.className='fbtn on';allB.textContent='All';allB.dataset.val='all';
   allB.onclick=()=>{ftFCat='all';cf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val==='all'));ftRender()};
   cf.appendChild(allB);
-  [['O','Origin'],['G','General'],['FS','Fighting Style'],['EB','Epic Boon'],['D','Dragonmark'],['DG','Dark Gift'],['','Other']].forEach(([k,l])=>{
+  // Paket T4 (Weiche k): nur Kategorien, die in FT_FEATS vorkommen (Willow 2014: SRD-Feat ohne Kategorie → keine Filterleiste)
+  const has=k=>FT_FEATS.some(f=>k==='FS'?String(f.cat).startsWith('FS'):f.cat===k);
+  const C=[['O','Origin'],['G','General'],['FS','Fighting Style'],['EB','Epic Boon'],['D','Dragonmark'],['DG','Dark Gift'],['','Other']].filter(([k])=>has(k));
+  if(C.length<2)cf.style.display='none';
+  C.forEach(([k,l])=>{
     const b=document.createElement('button');
     b.className='fbtn';b.textContent=l;b.dataset.val=k;
     b.onclick=()=>{ftFCat=k;cf.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.val===k));ftRender()};
@@ -10266,7 +10309,8 @@ function _pickVal(v){
 function _pickLabel(k){
   let m;
   if((m=/^(cls|bg):(.+?):equip(?::\d+)?:v:/.exec(k)))return 'Starting equipment item '+m[2];   // Paket O3
-  if((m=/^cls:(.+):equip$/.exec(k)))return 'Starting equipment '+m[1];
+  if((m=/^cls:(.+?):equip(?::\d+)?$/.exec(k)))return 'Starting equipment '+m[1]; // Paket T4: Zeile 2… (Willow 2014)
+  if((m=/^cls:(.+):gold$/.exec(k)))return 'Starting gold '+m[1]; // Paket T4
   if((m=/^bg:(.+):equip:\d+$/.exec(k)))return 'Starting equipment Background '+m[1];
   if((m=/^cls:(.+):skills$/.exec(k)))return 'Skill choice '+m[1];
   if((m=/^bg:(.+):skills(?::\d+)?$/.exec(k)))return 'Skill choice Background '+m[1];
@@ -11303,7 +11347,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-19a';
+const APP_VERSION = 'willow-app-2026-10-19b';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}

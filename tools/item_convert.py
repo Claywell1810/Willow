@@ -30,6 +30,15 @@ START_EQUIP = {cls:{"Wizard":[Gruppe…]}, bg:{"Acolyte":[Gruppe…]}} – Klass
 Geld je Wahl A/B wird gegen den 5e.tools-Text („… 7 GP; or (B) 110 GP“) geprüft; bei Abweichung gilt der Text
 (Meldung KORREKTUR; Stand 03.10.2026: Cleric A 7000 cp → 700 cp, Mulhorandi Tomb Raider A „Waterskin 26 GP“ → +26 GP).
 Ohne --write nur Bericht. Unbekannte Felder/Typen → Abbruch mit FEHLER (nichts erfinden).
+
+Willow 2014 (Paket T4, 19.10.2026):  python3 willow/tools/item_convert.py 2014/index.html src14 --t14 [--write]
+  Quelle src14/ (5etools-2014-src), Klassen und Backgrounds aus dem 2014-Build (Arbeits-Build nach t14_herkunft.py),
+  PHB-Klassen (main_class nach t14_setup). Katalog = nicht-magische Gegenstände mit `srd` (Nachdruck-Verweise auf XPHB
+  zählen nicht) + alles, was START_EQUIP/Packs/Gruppen nennen; Namen = SRD-Namen (T-E1). Keine Mastery (Weiche c).
+  Startausrüstung 2014 = mehrere Gruppen mit Wahl (a)/(b)/(c) je Zeile (App: eigene Wahl je Zeile, Paket T4);
+  Waffen-Wahl {ch:[], wc:"simple"|"martial", mel:1, dn} (App listet die Waffen aus ITEM_DATA), „zwei Waffen“ = zwei
+  Einträge; START_EQUIP.gold = {Klasse: {n, d, m}} aus `goldAlternative` (n d d × m GP statt Klassen- und Background-
+  Ausrüstung). Schreibt tools/t14/ITEM_DATA.js, ITEM_RULES.js, START_EQUIP.js (build_2014.py ersetzt damit die Blöcke).
 """
 import json, os, re, sys
 
@@ -37,6 +46,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from class_extract import main_class, text, clean, render  # noqa: E402
 from klassen import app_classes  # noqa: E402
 from bg_convert import grab  # noqa: E402
+import class_extract as CE  # noqa: E402
+
+T14 = '--t14' in sys.argv
 
 CAT = {'M': 'Weapon', 'R': 'Weapon',
        'LA': 'Armor', 'MA': 'Armor', 'HA': 'Armor', 'S': 'Armor',
@@ -48,6 +60,12 @@ DMG = {'A': 'Acid', 'B': 'Bludgeoning', 'C': 'Cold', 'F': 'Fire', 'O': 'Force', 
 # 5e.tools equipmentType → Gruppe, aus der gewählt wird (XPHB-Fassung, 2024 bevorzugt)
 ETYPE = {'toolArtisan': "Artisan's Tools|XPHB", 'instrumentMusical': 'Musical Instrument|XPHB',
          'setGaming': 'Gaming Set|XPHB'}
+if T14:  # PHB-Gruppen; Waffen-Wahl über die Waffenkategorie (WTYPE)
+    ETYPE = {'toolArtisan': "Artisan's Tools|PHB", 'instrumentMusical': 'Musical Instrument|PHB', 'setGaming': 'Gaming Set|PHB',
+             'focusSpellcastingArcane': 'Arcane Focus|PHB', 'focusSpellcastingHoly': 'Holy Symbol|PHB',
+             'focusSpellcastingDruidic': 'Druidic Focus|PHB'}
+WTYPE = {'weaponSimple': ('simple', 0, 'Simple weapon'), 'weaponMartial': ('martial', 0, 'Martial weapon'),
+         'weaponSimpleMelee': ('simple', 1, 'Simple melee weapon'), 'weaponMartialMelee': ('martial', 1, 'Martial melee weapon')}
 MAGIC = ('bonusWeapon', 'bonusAc', 'bonusSpellAttack', 'reqAttune', 'charges', 'attachedSpells', 'wondrous')
 
 
@@ -67,18 +85,21 @@ class Items:
             k = (i['name'].lower(), i['source'].lower())
             assert k not in self.all, ('doppelt', k)
             self.all[k] = i
+        # Willow 2014: Schlüssel tragen den SRD-Namen (key) → Rückweg SRD-Name → Gegenstand
+        self.alias = {(CE.srd_name(i['name']).lower(), s): i for (n, s), i in self.all.items() if CE.srd_name(i['name']).lower() != n}
         self.tname = {}
         for t in b['itemType']:  # XPHB-Namen bevorzugt
             if t['abbreviation'] not in self.tname or t['source'] == 'XPHB': self.tname[t['abbreviation']] = t.get('name')
 
     def get(self, ref):
         k = src_of(ref)
+        if k not in self.all and k in self.alias: return self.alias[k]
         if k not in self.all: sys.exit(f'FEHLER: Gegenstand {ref} nicht in items(-base).json')
         return self.all[k]
 
     @staticmethod
     def key(i):
-        return i['name'] + '|' + i['source']
+        return CE.srd_name(i['name']) + '|' + i['source']   # Willow 2014: SRD-Name (T-E1); 2024 unverändert
 
 
 def mundane(i):
@@ -90,7 +111,7 @@ def mundane(i):
 def conv(i, I):
     """5e.tools-Gegenstand → ITEM_DATA-Eintrag."""
     t = str(i.get('type', '')).split('|')[0]
-    e = {'n': i['name'], 's': i['source'], 'c': CAT.get(t) or ('Consumable' if i.get('poison') else 'Misc')}
+    e = {'n': CE.srd_name(i['name']), 's': i['source'], 'c': CAT.get(t) or ('Consumable' if i.get('poison') else 'Misc')}
     if t:
         if t not in I.tname: sys.exit(f'FEHLER: Typ {t} ({I.key(i)}) unbekannt')
         if I.tname[t]: e['t'] = I.tname[t]
@@ -154,6 +175,11 @@ def equip_entry(x, I, need):
     elif 'special' in x:
         e = {'sp': x['special']}
         if 'worthValue' in x: e['wv'] = x['worthValue']
+    elif x.get('equipmentType') in WTYPE:   # Willow 2014: „a martial weapon“ → Wahl aus ITEM_DATA (App: seVarOpts)
+        wc, mel, dn = WTYPE[x['equipmentType']]
+        e = {'ch': [], 'wc': wc, 'dn': dn}
+        if mel: e['mel'] = 1
+        return e
     elif 'equipmentType' in x or 'equipmentTypes' in x:
         ts = [x['equipmentType']] if 'equipmentType' in x else x['equipmentTypes']
         if set(ts) - set(ETYPE): sys.exit(f'FEHLER: equipmentType {ts} ohne Zuordnung (ETYPE)')
@@ -213,7 +239,15 @@ def equip(blocks, I, need):
         if keys == ['_']: k = '_'
         elif len(keys) >= 2 and '_' not in keys: k = 'choice'
         else: sys.exit(f'FEHLER: Gruppe mit Keys {keys}')
-        out.append({'k': k, 'o': {o: [equip_entry(x, I, need) for x in blk[o]] for o in keys}})
+        o_ = {}
+        for o in keys:
+            L = []
+            for x in blk[o]:
+                if isinstance(x, dict) and x.get('equipmentType') in WTYPE and x.get('quantity', 1) > 1:
+                    L += [equip_entry(dict(x, quantity=1), I, need) for _ in range(x['quantity'])]   # „zwei Waffen“ = zwei Wahlen
+                else: L.append(equip_entry(x, I, need))
+            o_[o] = L
+        out.append({'k': k, 'o': o_})
     return out
 
 
@@ -229,6 +263,10 @@ def build(html, src):
         dd = (m.get('startingEquipment') or {}).get('defaultData')
         if not dd: sys.exit(f'FEHLER: {c} ({m["source"]}) ohne startingEquipment.defaultData')
         se['cls'][c] = equip(dd, I, need)
+        if T14:   # goldAlternative „{@dice 5d4 × 10|…}“ → {n, d, m}
+            g = re.match(r'\{@dice (\d+)d(\d+)(?: × (\d+))?\|', m['startingEquipment'].get('goldAlternative', ''))
+            if not g: sys.exit(f'FEHLER: {c} ohne goldAlternative')
+            se.setdefault('gold', {})[c] = {'n': int(g.group(1)), 'd': int(g.group(2)), 'm': int(g.group(3) or 1)}
         fix_money(c, se['cls'][c], ' '.join(clean(x) for x in m['startingEquipment'].get('entries', []) if isinstance(x, str)))
     a, z = grab(s, 'BG_DATA'); bgd = json.loads(s[a:z])
     bgs = {(b['name'], b['source']): b for b in json.load(open(os.path.join(src, 'backgrounds.json'), encoding='utf-8'))['background']}
@@ -241,7 +279,8 @@ def build(html, src):
         if not se['bg'][d['n']]: ohne.append(d['n'])
 
     # Umfang: Katalog (nicht-magisch, ohne Nachdrucke) + alles, was START_EQUIP/Packs/Gruppen nennen (rekursiv)
-    keys = {I.key(i) for i in I.all.values() if mundane(i) and not i.get('reprintedAs')}
+    keys = {I.key(i) for i in I.all.values() if mundane(i) and not i.get('reprintedAs')} if not T14 else \
+        {I.key(i) for i in I.all.values() if mundane(i) and i.get('srd')}   # 2014: SRD, reprintedAs (→ XPHB) zählt nicht
     todo = list(need | keys); data = {}
     while todo:
         k = todo.pop()
@@ -264,7 +303,7 @@ def build(html, src):
         rp[k] = {'n': nm, 't': body}
     used_m = {m for e in items for m in e.get('m', [])}
     rm = {}
-    for m in I.base['itemMastery']:
+    for m in I.base.get('itemMastery', []):
         if m['name'] in used_m and m['source'] == 'XPHB': rm[m['name']] = text(m['entries'], None)
     if used_m - set(rm): sys.exit(f'FEHLER: Mastery ohne Text: {used_m - set(rm)}')
     return items, {'p': rp, 'm': rm}, se, ohne, need
@@ -272,6 +311,7 @@ def build(html, src):
 
 def main():
     html, src = sys.argv[1], sys.argv[2]
+    if T14: CE.t14_setup(src)
     items, rules, se, ohne, need = build(html, src)
     J = lambda o: json.dumps(o, ensure_ascii=False, separators=(',', ':'))
     block = ('// ITEM_DATA-START (tools/item_convert.py, 5e.tools items-base.json/items.json, class-*.json, backgrounds.json; Paket O2)\n'
@@ -290,6 +330,15 @@ def main():
     print(f'START_EQUIP: {len(se["cls"])} Klassen, {len(se["bg"])} Backgrounds (ohne Ausrüstung: {", ".join(ohne) or "keine"}), '
           f'{len(need)} verschiedene Gegenstände/Gruppen ({len(J(se)) // 1024} KB)')
     for w in WARN: print('  KORREKTUR', w)
+    if T14:
+        print('  Startgold:', ', '.join(f'{k} {v["n"]}d{v["d"]}' + (f' × {v["m"]}' if v['m'] > 1 else '') for k, v in se.get('gold', {}).items()))
+        t14 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14')
+        for k, v in (('ITEM_DATA', items), ('ITEM_RULES', rules), ('START_EQUIP', se)):
+            p = os.path.join(t14, k + '.js'); line = f'const {k}=' + J(v) + ';\n'
+            alt = open(p, encoding='utf-8').read() if os.path.exists(p) else None
+            print(f'  tools/t14/{k}.js {len(line) // 1024} KB', '– unverändert' if alt == line else '')
+            if '--write' in sys.argv and alt != line: open(p, 'w', encoding='utf-8').write(line)
+        return
     s = open(html, encoding='utf-8').read()
     m = re.search(r'// ITEM_DATA-START.*?// ITEM_DATA-END\n', s, re.S)
     if m:

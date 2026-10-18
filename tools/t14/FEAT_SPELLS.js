@@ -1,0 +1,1 @@
+const FEAT_SPELLS={};

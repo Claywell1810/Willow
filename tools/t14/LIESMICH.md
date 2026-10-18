@@ -8,4 +8,5 @@ Mehrzeilige 2024-Blöcke (CLASS_TABLES …) ersetzt der Build ebenso; `CLASS_DAT
 Stand T2 (18.10.2026): Klassen – `CLASS_DATA`, `CLASS_TABLES`, `CLASS_CORE_TRAITS`, `SUBCLASS_LABELS`, `FEATURE_PICKS`, `SUBCLASS_SPELLS`, `CLASS_SPELL_EXTRA`, `ALWAYS_PREP`, `CLASS_MC_GAINS`, `MC_SLOTS`, `SUBCLASS_TABLES`, `FEATURE_STATBLOCKS`. Neu erzeugen: `bash willow/tools/t14_klassen.sh`.
 `<k>_config.py` = Klassen-Configs 2014 für `build_class.py --t14` (Tracker aus dem PHB-Text, `feature_tags`, `special`, `append_optf`).
 Stand T3 (18.10.2026): Zauber und Bestien – `ZB_SPELLS`, `CLASS_SPELL_MAP` (`{}`), `SPELL_CATS`, `SPELL_ROLLS`, `SPELL_STATBLOCKS`, `BST_DATA`. Neu erzeugen: `bash willow/tools/t14_zauber.sh`.
-Übrige Blöcke (Rassen, Backgrounds, Feats, Items, Zustände, Aktionen, Effekte) noch 2024 → T4/T5.
+Stand T4 (19.10.2026): Herkunft und Ausrüstung – `RACE_DATA`, `RACE_PICKS`, `BG_DATA`, `BG_EXTRA`, `BG_SPELLS` (`{}`), `FT_FEATS`, `FEAT_SPELLS` (`{}`) aus `python3 willow/tools/t14_herkunft.py DnD_Character_App.html src14 --write`; `ITEM_DATA`, `ITEM_RULES`, `START_EQUIP` aus `python3 willow/tools/item_convert.py 2014/index.html src14 --t14 --write` (nach einem Arbeits-Build).
+Übrige Blöcke (Zustände, Aktionen, Effekte) noch 2024 → T5.
