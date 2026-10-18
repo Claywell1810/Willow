@@ -22,6 +22,11 @@ Typen (Feld t):
   save  Saving-Throw-Übung: fix (Attribut-Kürzel)
   half  Jack of All Trades: halber Übungsbonus (abgerundet) auf nicht geübte Skills
 Erzeugt je Eintrag zusätzlich l (Stufe des Features).
+n darf bei opt auch {Stufe: Anzahl} sein (Paket T2: Invocations, Metamagic, Favored Enemy …; App: fpN()).
+
+Willow 2014 (Paket T2, 18.10.2026):  python3 feature_picks.py 2014/index.html src14 --t14 [--write]
+  liest die Klassen aus dem 2014-Build (python3 willow/tools/build_2014.py DnD_Character_App.html --out 2014), nimmt SPEC14
+  und schreibt mit --write tools/t14/FEATURE_PICKS.js (eine Zeile, build_2014.py ersetzt damit FEATURE_PICKS).
 """
 import json, re, sys, os, subprocess, tempfile
 
@@ -92,6 +97,42 @@ SPEC = {
     'Ranger|Gloom Stalker|Iron Mind': {'t': 'save', 'fix': ['WIS']},
     'Rogue|base|Slippery Mind': {'t': 'save', 'fix': ['WIS', 'CHA']},
 }
+# ── Willow 2014 (Paket T2): Wahl-Features der SRD-Klassen (PHB 2014), gleiche Typen wie SPEC ──
+LANDS14 = ['Arctic', 'Coast', 'Desert', 'Forest', 'Grassland', 'Mountain', 'Swamp', 'Underdark']
+SPEC14 = {
+    'Fighter|base|Fighting Style': {'t': 'opt'},
+    # „You can choose a second option from the Fighting Style class feature.“ → Optionen der Klasse, Text dort
+    'Fighter|Champion|Additional Fighting Style': {'t': 'opt', 'o': ['Archery', 'Defense', 'Dueling', 'Great Weapon Fighting', 'Protection', 'Two-Weapon Fighting'], 'nt': 1},
+    'Paladin|base|Fighting Style': {'t': 'opt'},
+    'Ranger|base|Fighting Style': {'t': 'opt'},
+    'Warlock|base|Pact Boon': {'t': 'opt'},
+    # Invocations Known (Class Table): 2 (L2), 3 (L5), 4 (L7), 5 (L9), 6 (L12), 7 (L15), 8 (L18)
+    'Warlock|base|Eldritch Invocations': {'t': 'opt', 'n': {'2': 2, '5': 3, '7': 4, '9': 5, '12': 6, '15': 7, '18': 8}, 'sw': 'Level up (one)'},
+    # „You gain two of the following Metamagic options … another one at 10th and 17th level“
+    'Sorcerer|base|Metamagic@3': {'t': 'opt', 'n': {'3': 2, '10': 3, '17': 4}},
+    'Sorcerer|Draconic Bloodline|Dragon Ancestor': {'t': 'opt', 'lk': ['Elemental Affinity']},
+    # Landtyp → Circle Spells (ALWAYS_PREP koppelt an die Wahl, subclass_spells.py --t14)
+    'Druid|Circle of the Land|Circle Spells': {'t': 'opt', 'o': LANDS14},
+    "Ranger|Hunter|Hunter's Prey": {'t': 'opt'},
+    'Ranger|Hunter|Defensive Tactics': {'t': 'opt'},
+    'Ranger|Hunter|Multiattack': {'t': 'opt'},
+    "Ranger|Hunter|Superior Hunter's Defense": {'t': 'opt'},
+    # Typen/Gelände stehen im Fließtext (keine eigenen Zeilen) → nt; weitere Wahl auf L6/L14 bzw. L6/L10
+    'Ranger|base|Favored Enemy': {'t': 'opt', 'nt': 1, 'n': {'1': 1, '6': 2, '14': 3},
+                                  'o': ['Aberrations', 'Beasts', 'Celestials', 'Constructs', 'Dragons', 'Elementals', 'Fey', 'Fiends',
+                                        'Giants', 'Monstrosities', 'Oozes', 'Plants', 'Undead', 'Humanoid (two races)']},
+    'Ranger|base|Natural Explorer': {'t': 'opt', 'nt': 1, 'n': {'1': 1, '6': 2, '10': 3}, 'o': LANDS14},
+    'Bard|College of Lore|Bonus Proficiencies': {'t': 'skill', 'n': 3, 'f': 'any'},
+    'Rogue|base|Expertise@1': {'t': 'exp', 'n': 2},
+    'Rogue|base|Expertise@6': {'t': 'exp', 'n': 2},
+    'Bard|base|Expertise@3': {'t': 'exp', 'n': 2},
+    'Bard|base|Expertise@10': {'t': 'exp', 'n': 2},
+    'Bard|base|Jack of All Trades': {'t': 'half'},
+    'Monk|base|Diamond Soul': {'t': 'save', 'fix': ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']},
+    'Rogue|base|Slippery Mind': {'t': 'save', 'fix': ['WIS']},
+}
+T14 = '--t14' in sys.argv
+if T14: SPEC = SPEC14
 SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation',
           'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion',
           'Sleight of Hand', 'Stealth', 'Survival']
@@ -147,6 +188,8 @@ for key, e in SPEC.items():
     # 5e.tools-Text aller gleichnamigen Features der Klasse
     j = json.load(open(os.path.join(SRC, f'class-{cls.lower()}.json')))
     src_txt = ' '.join(json.dumps(x) for x in j.get('classFeature', []) + j.get('subclassFeature', []) if x.get('name') == name)
+    if T14:   # Paket T2: Optionen aus optionalfeatures (Invocations) bzw. einem anderen Feature der Klasse (Champion → Fighting Style)
+        src_txt += ' ' + json.dumps(j) + ' ' + json.dumps([o for o in json.load(open(os.path.join(SRC, 'optionalfeatures.json')))['optionalfeature'] if o.get('srd')])
     if e['t'] == 'opt':
         if 'o' not in e: e['o'] = parse_opts(f['desc'])
         if len(e['o']) < 2: print('zu wenige Optionen:', key, e['o']); err += 1
@@ -170,6 +213,11 @@ for key, e in SPEC.items():
     print(f"{key:62s} L{e['l']:<2} {e['t']:5s} {e.get('o') or e.get('fix') or e.get('f') or ''}")
 
 print(f'\n{len(out)} Einträge, Fehler {err}, Hinweise {warn}')
+if WRITE and T14:
+    if err: sys.exit('Nicht geschrieben (Fehler).')
+    p = os.path.join(HERE, 't14', 'FEATURE_PICKS.js')
+    open(p, 'w', encoding='utf-8').write('const FEATURE_PICKS=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n')
+    print('geschrieben:', p); sys.exit(0)
 if WRITE:
     if err: sys.exit('Nicht geschrieben (Fehler).')
     s = open(HTML, encoding='utf-8').read()

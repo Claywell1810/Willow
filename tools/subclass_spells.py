@@ -12,6 +12,11 @@ von build_class.py in der HTML (gleiche Fassung wie die Features).
 additionalSpells: prepared / known / expanded / innate → feste Zauber (Name) und Filter
 ('choose'/'all': level=…|class=…|school=…) → zur Laufzeit gegen ZB_SPELLS ausgewertet.
 Zauber, die nicht in ZB_SPELLS stehen (andere Quellen, B5), werden gemeldet, nicht erfunden.
+
+Willow 2014 (Paket T2, 18.10.2026):  python3 subclass_spells.py 2014/index.html src14 --t14 [--write]
+  cd.json vorher aus dem 2014-Build (dump.js); Klassen = PHB-Fassung, Subklasse = die SRD-Subklasse, Zaubernamen =
+  SRD-Namen aus src14/spells-phb.json (T-E1, „Melf's Acid Arrow“ → „Acid Arrow“; ZB_SPELLS 2014 folgt in T3).
+  Schreibt mit --write tools/t14/SUBCLASS_SPELLS.js, CLASS_SPELL_EXTRA.js, ALWAYS_PREP.js (FEAT_SPELLS 2014 erst mit den Feats, T4).
 """
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -20,14 +25,27 @@ from klassen import app_classes        # Paket N: Klassen aus der App
 
 HTML, SRC = sys.argv[1], sys.argv[2]
 WRITE = '--write' in sys.argv
+T14 = '--t14' in sys.argv   # Paket T2: Willow 2014
+if T14:
+    from class_extract import t14_setup
+    RN14 = t14_setup(SRC)
 CLASSES = app_classes(HTML)   # Paket N (03.10.2026): alle CLASS_DATA-Klassen der HTML statt fester Liste
 SCHOOL = {'A': 'Abjuration', 'C': 'Conjuration', 'D': 'Divination', 'E': 'Enchantment', 'V': 'Evocation', 'I': 'Illusion', 'N': 'Necromancy', 'T': 'Transmutation'}
 # Fighting-Style-Feats, die Cantrips einer anderen Klasse geben (zählen als Klassenzauber)
-FEAT_EXTRA = {'Paladin': 'Blessed Warrior', 'Ranger': 'Druidic Warrior'}
+FEAT_EXTRA = {'Paladin': 'Blessed Warrior', 'Ranger': 'Druidic Warrior'} if not T14 else {}
 
 html = open(HTML, encoding='utf-8').read()
 cd = json.load(open('cd.json'))
 zb_names = {s['name'].lower(): s['name'] for s in cd['ZB']}
+if T14:   # Paket T2: Namensraum = SRD-Zauber 2014 (SRD-Namen, alte Namen werden umgeleitet)
+    SP14 = [s for s in json.load(open(os.path.join(SRC, 'spells-phb.json')))['spell'] if s.get('srd')]
+    zb_names = {}
+    for s in SP14:
+        nm = s['srd'] if isinstance(s['srd'], str) else s['name']
+        zb_names[s['name'].lower()] = nm; zb_names[nm.lower()] = nm
+    LK14 = json.load(open(os.path.join(SRC, 'gendata-spell-source-lookup.json'))).get('phb', {})
+    cd['ZB'] = [{'name': zb_names[s['name'].lower()], 'grad': s['level'],
+                 'classes': sorted(((LK14.get(s['name'].lower()) or {}).get('class') or {}).get('PHB', {}).keys())} for s in SP14]
 
 
 def canon(ref):
@@ -115,11 +133,18 @@ def find_sub(subs, key, src):
     return None
 
 
+def src_pairs(cls):
+    """[(Subklassen-Key, Quelle)] wie in der Kommentarzeile von build_class.py; Willow 2014: die SRD-Subklasse (PHB)."""
+    if T14:
+        return [(re.sub(r'\s*\([^)]+\)\s*$', '', k), 'PHB') for k in cd['SUBS'][cls]['keys']]
+    m = re.search(r'// Quelle: 5e\.tools class-' + cls.lower() + r'\.json[^\n]*?neueste Fassung: ([^\n]*)', html)
+    return [p.rsplit('=', 1) for p in m.group(1).split(', ')] if m else None
+
+
 result, report_missing, total = {}, {}, 0
 for cls in CLASSES:
-    m = re.search(r'// Quelle: 5e\.tools class-' + cls.lower() + r'\.json[^\n]*?neueste Fassung: ([^\n]*)', html)
-    if not m: print('!! keine Quellzeile für', cls); continue
-    pairs = [p.rsplit('=', 1) for p in m.group(1).split(', ')]
+    pairs = src_pairs(cls)
+    if not pairs: print('!! keine Quellzeile für', cls); continue
     subs = json.load(open(os.path.join(SRC, f'class-{cls.lower()}.json')))['subclass']
     keys = cd['SUBS'][cls]['keys']
     for key, src in pairs:
@@ -155,6 +180,7 @@ for cls, d in result.items():
 
 # Klassen-Ebene: Fighting-Style-Feats (Blessed/Druidic Warrior) und additionalSpells der XPHB-Klasse
 feats = {f['name']: f for f in json.load(open(os.path.join(SRC, 'feats.json')))['feat'] if f['source'] == 'XPHB'}
+if T14: zb_cls = {s['name']: set(s['classes']) for s in cd['ZB']}   # Paket T2: Klassenlisten 2014 (gendata, PHB)
 extra = {}
 def feat_level(cls, feat_name):
     c = [x for x in json.load(open(os.path.join(SRC, f'class-{cls.lower()}.json')))['class'] if x['source'] == 'XPHB'][0]
@@ -182,17 +208,19 @@ for cls in CLASSES:
                 if not names and not filters: continue
                 # Feature-Name der Stufe, dessen Text den Zauber bzw. die fremde Klasse nennt
                 probe = [n.lower() for n in names] + [x.lower() for f in filters for x in f.get('cls', [])]
-                via = next((f['name'] for f in feats_x if f['level'] == lvl and any(p in json.dumps(f['entries']).lower() for p in probe)), f'{cls} {lvl}')
+                via = next((f['name'] for f in feats_x if f['level'] == lvl and any(p in json.dumps(f['entries']).lower() for p in probe)), (a.get('name') if T14 else None) or f'{cls} {lvl}')
                 old = next((e for e in extra.get(cls, []) if e['via'] == via and e['lvl'] == lvl and 'spells' in e), None)
                 if names:
                     if old: old['spells'] = sorted(set(old['spells']) | names)
                     else: extra.setdefault(cls, []).append({'via': via, 'lvl': lvl, 'spells': sorted(names)})
                 for f in filters:
-                    if not any(e.get('via') == via and e.get('cls') == f.get('cls') for e in extra.get(cls, [])):
+                    same = lambda e: e.get('via') == via and e.get('cls') == f.get('cls') and (not T14 or e.get('lvl') == lvl)   # 2014: je Stufe eigener Eintrag
+                    if not any(same(e) for e in extra.get(cls, [])):
                         extra.setdefault(cls, []).append({'via': via, 'lvl': lvl, **f})
                     else:   # gleiche Liste, weitere Grade (Magical Secrets s6–s9) zusammenführen
-                        e = next(e for e in extra[cls] if e.get('via') == via and e.get('cls') == f.get('cls'))
-                        e['grad'] = sorted(set(e.get('grad', [])) | set(f.get('grad', [])))
+                        e = next(e for e in extra[cls] if same(e))
+                        if 'grad' in e and 'grad' in f: e['grad'] = sorted(set(e['grad']) | set(f['grad']))
+                        else: e.pop('grad', None)   # Filter ohne Grad (Bard 2014 L18: choose "") = alle Grade
 for cls, l in extra.items():
     for e in l: print(f'   Klasse {cls}: {e}')
 
@@ -255,8 +283,7 @@ for cls in CLASSES:
     lst = []
     ap_group(cls, c.get('additionalSpells'), lst, cls, None)
     if lst: ap.setdefault(cls, {})['base'] = {'v': cls, 's': lst}
-    m = re.search(r'// Quelle: 5e\.tools class-' + cls.lower() + r'\.json[^\n]*?neueste Fassung: ([^\n]*)', html)
-    for key, src in [p.rsplit('=', 1) for p in m.group(1).split(', ')]:
+    for key, src in src_pairs(cls):
         key = key.strip(); src = src.strip()
         sc = find_sub(data['subclass'], key, src) if key in cd['SUBS'][cls]['keys'] else None
         if not sc: continue
@@ -280,7 +307,7 @@ if ap_choose: print('   Auswahl (nicht automatisch):', ', '.join(sorted(set(ap_c
 # Feats geben ihre Zauber dauerhaft (XPHB: „You always have … prepared“), daher prepared/known/innate gleich behandelt.
 # Format: {Feat:[{o:Variante|null, s:[[Stufe,Zauber],…], c:[{k,l,n,f:{grad,cls,school,ritual,from}},…]},…]}
 # Stufe = Charakterstufe ('_' = 1); c = Wahl-Plätze (n Zauber aus Filter f, zur Laufzeit gegen ZB_SPELLS).
-ft_pairs = re.findall(r'\{"n": "((?:[^"\\]|\\.)*)", "src": "([^"]*)"', html[html.index('const FT_FEATS='):html.index('\n', html.index('const FT_FEATS='))])
+ft_pairs = [] if T14 else re.findall(r'\{"n": "((?:[^"\\]|\\.)*)", "src": "([^"]*)"', html[html.index('const FT_FEATS='):html.index('\n', html.index('const FT_FEATS='))])
 feats_all = json.load(open(os.path.join(SRC, 'feats.json')))['feat']
 fs, fs_miss = {}, {}
 # Rune Shaper (BGG): 5e.tools führt alle 14 Runen-Zauber als fest; laut Text fest nur Comprehend Languages,
@@ -351,6 +378,12 @@ if '--show' in sys.argv:
         for k, e in d.items():
             if 'filters' in e: print('   Filter', cls, k, e['filters'])
 
+if WRITE and T14:   # Paket T2: je Block eine Datei für build_2014.py
+    T14D = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14')
+    for n, v in (('SUBCLASS_SPELLS', result), ('CLASS_SPELL_EXTRA', extra), ('ALWAYS_PREP', ap)):
+        open(os.path.join(T14D, n + '.js'), 'w', encoding='utf-8').write(f'const {n}=' + json.dumps(v, ensure_ascii=False, separators=(',', ':')) + ';\n')
+    print('geschrieben: tools/t14/SUBCLASS_SPELLS.js, CLASS_SPELL_EXTRA.js, ALWAYS_PREP.js')
+    sys.exit(0)
 if WRITE:
     js = ('// SUBCLASS_SPELLS-START (erzeugt von subclass_spells.py aus 5e.tools additionalSpells; nicht von Hand ändern)\n'
           'const SUBCLASS_SPELLS=' + json.dumps(result, ensure_ascii=False, separators=(',', ':')) + ';\n'

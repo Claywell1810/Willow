@@ -10,6 +10,9 @@ Ausgabe (JSON): base, subclass, table, traits, subclassSources
   Subklasse ohne reprintedAs; Alt-Subklassen in der 5e.tools-Anpassung an die 2024-Klasse
   (_copy mit angepassten Stufen). Key = Dropdown-Name ohne Quellen-Kürzel (B3).
 - Texte: entries rekursiv, {@…}-Tags aufgelöst, Flavor-Einleitung der Subklasse weggelassen.
+- Willow 2014 (Paket T2, 18.10.2026): `t14_setup(src14)` schaltet auf 5etools-2014-src um: Klasse = PHB, nur Einträge
+  mit `srd` (Klassen-/Subklassen-Features, Subklasse, optionale Features), Zauber-/Item-Verweise mit SRD-Namen (T-E1,
+  `T14['rename']` aus spells-phb/items/items-base/magicvariants). Aufruf über `build_class.py --t14` (REFERENZ B30).
 """
 import json, re, sys
 
@@ -18,6 +21,28 @@ ATK = {'mw': 'Melee Weapon Attack:', 'rw': 'Ranged Weapon Attack:', 'ms': 'Melee
        'r': 'Ranged Attack Roll:', 'm,r': 'Melee or Ranged Attack Roll:'}
 ABIL = {'str': 'Strength', 'dex': 'Dexterity', 'con': 'Constitution', 'int': 'Intelligence', 'wis': 'Wisdom', 'cha': 'Charisma'}
 TAG_RE = re.compile(r'\{@(\w+)(?: ([^{}]*))?\}')
+T14 = {'on': False, 'rename': {}}   # Paket T2: Willow-2014-Modus (t14_setup)
+
+
+def t14_setup(src14):
+    """Willow 2014: PHB-Fassung, nur SRD, SRD-Namen (T-E1) für Zauber und Items aus 5etools-2014-src."""
+    import os
+    rn = {}
+    for f, key in [('spells-phb.json', 'spell'), ('items.json', 'item'), ('items-base.json', 'baseitem'), ('magicvariants.json', 'magicvariant')]:
+        p = os.path.join(src14, f)
+        if not os.path.exists(p): continue
+        for x in json.load(open(p)).get(key, []):
+            srd = x.get('srd') if key != 'magicvariant' else (x.get('inherits') or {}).get('srd')
+            if isinstance(srd, str): rn[x['name'].lower()] = srd
+    T14.update(on=True, rename=rn)
+    return rn
+
+
+def srd_name(n):
+    """SRD-Name (T-E1) eines Zaubers/Items; Kleinschreibung im Fließtext bleibt erhalten."""
+    r = T14['rename'].get(n.lower()) if T14['on'] else None
+    if not r: return n
+    return r.lower() if n == n.lower() else r
 
 
 def tag_repl(m):
@@ -36,6 +61,7 @@ def tag_repl(m):
     if tag == 'deity': return p[3] if len(p) > 3 and p[3] else p[0]
     if tag in ('b', 'i', 'u', 's', 'note', 'bold', 'italic', 'b', 'strike', 'book', 'adventure', '5etools', 'filter', 'link', 'footnote', 'help'):
         return p[0]
+    if tag in ('spell', 'item') and T14['on']: return srd_name(p[2] if len(p) > 2 and p[2] else p[0])   # Paket T2: SRD-Namen
     return p[2] if len(p) > 2 and p[2] else p[0]
 
 
@@ -145,12 +171,22 @@ def render(e, ctx, lines=None):
     elif t == 'refOptionalfeature':
         p = e['optionalfeature'].split('|')
         o = ctx.of.get((p[0].lower(), (p[1] if len(p) > 1 and p[1] else 'PHB'))) if ctx else None
+        if T14['on'] and not (o and o.get('srd')): return out   # Paket T2: nur SRD-Optionen (TCE-Fighting-Styles u. ä. entfallen)
         if not o:
             out.append('• ' + clean(p[0]))
         else:
             lv = [x['level']['level'] for x in o.get('prerequisite', []) if isinstance(x.get('level'), dict)]
+            pre = [f'Level {lv[0]}+'] if lv else []
+            if T14['on']:   # Paket T2: weitere Voraussetzungen der Invocations (Pakt, Zauber) mit anzeigen
+                for x in o.get('prerequisite', []):
+                    if x.get('pact'): pre.append('Pact of the ' + x['pact'])
+                    for sp in x.get('spell', []) or []: pre.append(srd_name(sp.split('#')[0].split('|')[0]).title() + (' cantrip' if '#c' in sp else ''))
+                    if x.get('patron'): pre.append(x['patron'])
             sub = render(o['entries'], ctx, [])
-            out.append('• ' + clean(o['name']) + (f' (Level {lv[0]}+)' if lv else '') + '. ' + (sub[0] if sub else ''))
+            if T14['on']:   # Paket T2: „• Name. Prerequisite: …. Text“ – Name bleibt Wahl-Option (FEATURE_PICKS, fpOptText)
+                out.append('• ' + clean(o['name']) + '. ' + (f'Prerequisite: {", ".join(pre)}. ' if pre else '') + (sub[0] if sub else ''))
+            else:
+                out.append('• ' + clean(o['name']) + (f' ({", ".join(pre)})' if pre else '') + '. ' + (sub[0] if sub else ''))
             out.extend(sub[1:])
     elif t == 'refFeat':
         p = e['feat'].split('|')
@@ -215,7 +251,12 @@ def feature(name, lvl, desc):
 
 
 def main_class(data):
-    """Maßgebliche Klassen-Fassung: XPHB, sonst die einzige ohne `reprintedAs` (Artificer: EFA ersetzt TCE)."""
+    """Maßgebliche Klassen-Fassung: XPHB, sonst die einzige ohne `reprintedAs` (Artificer: EFA ersetzt TCE).
+    Willow 2014 (T14['on']): die PHB-Fassung mit `srd` aus 5etools-2014-src."""
+    if T14['on']:
+        x = [c for c in data['class'] if c['source'] == 'PHB' and c.get('srd')]
+        assert len(x) == 1, [(c['name'], c['source']) for c in data['class']]
+        return x[0]
     x = [c for c in data['class'] if c['source'] == 'XPHB']
     if x: return x[0]
     x = [c for c in data['class'] if not c.get('reprintedAs')]
@@ -227,11 +268,15 @@ def extract(data, dropdown, optf=None, feats=None, items=None):
     ctx = Ctx(data, optf, feats, items)
     cls = main_class(data)
     # --- base
-    base = []
+    base, gsf = [], 0
     for ref in cls['classFeatures']:
         r = ref['classFeature'] if isinstance(ref, dict) else ref
-        if r.split('|')[0].lower() == 'subclass feature': continue  # Artificer (EFA): Verweis „Subclass Feature“, Eintrag „Subclass feature“
+        if r.split('|')[0].lower() == 'subclass feature': continue
+        if T14['on'] and isinstance(ref, dict) and ref.get('gainSubclassFeature'):   # Paket T2: „Path feature“ u. ä. wie 2024 „Subclass Feature“ weglassen
+            gsf += 1
+            if gsf > 1: continue  # Artificer (EFA): Verweis „Subclass Feature“, Eintrag „Subclass feature“
         f = ctx.cf_ref(r)
+        if T14['on'] and not f.get('srd'): continue   # Paket T2: nur SRD (Tasha's Optional Class Features entfallen)
         base.append(feature(f['name'], f['level'], text(f['entries'], ctx)))
     # --- subclasses
     subs = [s for s in data['subclass'] if s['className'] == cls['name'] and s.get('classSource') == cls['source']]
@@ -248,6 +293,7 @@ def extract(data, dropdown, optf=None, feats=None, items=None):
     for dd in dropdown:
         key = re.sub(r'\s*\([^)]+\)\s*$', '', dd).strip()
         cands = [s for s in subs if s['name'] == key and not s.get('reprintedAs')]
+        if T14['on']: cands = [s for s in subs if s['name'] == key and s.get('srd') and s['source'] == dd[len(key):].strip(' ()')]   # Paket T2
         if not cands:  # Nachdruck unter NEUEM Namen (nur Sorcerer bisher), Key bleibt Dropdown-Name
             old = [s for s in subs if s['name'] == key and s.get('reprintedAs')]
             if len(old) == 1:
@@ -263,6 +309,7 @@ def extract(data, dropdown, optf=None, feats=None, items=None):
         feats = []
         for ref in s['subclassFeatures']:
             f = ctx.sf_ref(ref if isinstance(ref, str) else ref['subclassFeature'])
+            if T14['on'] and not f.get('srd'): continue   # Paket T2: nur SRD (Life Domain: Blessed Strikes TCE entfällt)
             lvl = int((ref if isinstance(ref, str) else ref['subclassFeature']).split('|')[5])
             if f['name'] == s['name']:
                 # Einleitung: Flavor weglassen; Tabellen/benannte Blöcke/Refs übernehmen
@@ -273,6 +320,7 @@ def extract(data, dropdown, optf=None, feats=None, items=None):
                     t = e.get('type')
                     if t == 'refSubclassFeature':
                         sf = ctx.sf_ref(e['subclassFeature'])
+                        if T14['on'] and not sf.get('srd'): pending_str = None; continue
                         feats.append(feature(sf['name'], lvl, text(sf['entries'], ctx)))
                     elif t == 'table':
                         if not ((pending_str and re.search(r'spell', pending_str, re.I)) or 'Spells' in (e.get('caption') or '')):

@@ -9,12 +9,15 @@ Eine neue Klasse braucht dafür nur ihren Stub (`build_class.py … --stub`, Anl
   app_classes('DnD_Character_App.html')  → ['Artificer', 'Barbarian', …] (alphabetisch)
   python3 willow/tools/klassen.py [DnD_Character_App.html] [--lower]   → Liste für setup.sh
 """
-import re, sys
+import json, re, sys
 
 
 def app_classes(html='DnD_Character_App.html'):
     s = open(html, encoding='utf-8').read() if not html.lstrip().startswith('<') else html
-    return sorted(set(re.findall(r'^CLASS_DATA\["([^"]+)"\]=\{', s, re.M)))
+    k = set(re.findall(r'^CLASS_DATA\["([^"]+)"\]=\{', s, re.M))
+    m = re.search(r'^const CLASS_DATA=(\{.+\});$', s, re.M)   # Willow 2014 (Paket T2): alle Klassen in einer Zeile (tools/t14/CLASS_DATA.js)
+    if m: k |= set(json.loads(m.group(1)))
+    return sorted(k)
 
 
 def sub_proposal(data, main):

@@ -29,6 +29,9 @@ catch (e) { console.log('1) Syntax: FEHLER – ' + e.message); process.exit(1); 
 // Anzeige-Menge eines Trackers: Pips, bei Pool-Zählern (pool:true, seit 27.09.2026) das Maximum aus „/ N"
 const abAmt = (d, n) => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); if (!c) return 0; const m = c.querySelector('.ab-pmax'); return m ? parseInt(m.textContent.replace(/\D/g, '')) : c.querySelectorAll('.ab-pip').length; };
 // Paket N (03.10.2026): Pflichtfeld-Prüfung – js läuft im App-Fenster und schreibt Fundstellen in P; true = alles da
+// Paket T2: Willow 2014 – Block schon aus tools/t14 (T14_BLOCKS)? Pflichttests eines noch nicht umgestellten Blocks warten auf sein Teilpaket.
+// Tests mit r: '2024' prüfen Daten/Verhalten der 2024-Fassung (XPHB); die 2014-Gegenstücke stehen im Test „Paket T2“.
+const t14 = (w, b) => !!w.eval("typeof T14_BLOCKS!=='undefined'&&T14_BLOCKS.includes(" + JSON.stringify(b) + ")");
 const pflicht = (w, js) => { const P = w.eval('(()=>{const P=[];' + js + '\nreturn P;})()'); return P.length ? `${P.length}: ` + P.slice(0, 8).join('; ') + (P.length > 8 ? ' …' : '') : true; };
 const REGRESSION = [
   { name: 'Subklassen-Tracker greifen auch bei Dropdown-Namen mit Quellen-Kürzel', datum: '26.09.2026',
@@ -45,7 +48,7 @@ const REGRESSION = [
       sel('Druid', '', '5'); if (!vis('tabBestien')) return 'bei Druid unsichtbar';
       return true;
     } },
-  { name: 'Tracker-uses je Stufe ({Stufe:Anzahl}) und "pb" (Cleric)', datum: '26.09.2026',
+  { name: 'Tracker-uses je Stufe ({Stufe:Anzahl}) und "pb" (Cleric)', datum: '26.09.2026', r: '2024',
     run: ({ d, sel, CD }) => {
       if (!CD.Cleric?.abilities?.base) return 'Testdaten fehlen (Cleric)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -57,7 +60,7 @@ const REGRESSION = [
       }
       return true;
     } },
-  { name: 'Subklassen-Dropdown: Anzeige neue Quelle, Wert bleibt alter Name (Savegames)', datum: '26.09.2026',
+  { name: 'Subklassen-Dropdown: Anzeige neue Quelle, Wert bleibt alter Name (Savegames)', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel }) => {
       sel('Cleric', 'Life Domain (PHB)', 5);
       const s = d.getElementById('subcls'), o = [...s.options].find(x => x.value === 'Life Domain (PHB)');
@@ -68,7 +71,7 @@ const REGRESSION = [
       if ([...s.options].find(x => x.value === 'Nature Domain (PHB)')?.textContent !== 'Nature Domain (PHB)') return 'Nature Domain falsch umbenannt';
       return true;
     } },
-  { name: 'Fighter: Tracker-uses "con"/"str" (min. 1) und Stufen; Class Table ohne Zauberplatz-Spalten', datum: '26.09.2026',
+  { name: 'Fighter: Tracker-uses "con"/"str" (min. 1) und Stufen; Class Table ohne Zauberplatz-Spalten', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Fighter?.abilities?.base) return 'Testdaten fehlen (Fighter)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -86,7 +89,7 @@ const REGRESSION = [
       if (!d.getElementById('clsTableBody').textContent.includes('Spell Slots')) return 'Cleric-Tabelle ohne Zauberplatz-Spalten';
       return true;
     } },
-  { name: 'Paladin: Halbzauberer-Tabelle (Slots auf 9 aufgefüllt), Channel Divinity/Glory-Tracker je Stufe', datum: '26.09.2026',
+  { name: 'Paladin: Halbzauberer-Tabelle (Slots auf 9 aufgefüllt), Channel Divinity/Glory-Tracker je Stufe', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Paladin?.abilities?.base) return 'Testdaten fehlen (Paladin)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -104,7 +107,7 @@ const REGRESSION = [
       if (!d.getElementById('clsTableBody').textContent.includes('Spell Slots')) return 'Paladin-Tabelle ohne Zauberplatz-Spalten';
       return true;
     } },
-  { name: 'Ranger: Halbzauberer-Tabelle (20×9 Slots), Favored Enemy/Tireless/Swarmkeeper-Tracker je Stufe, Zauberliste', datum: '26.09.2026',
+  { name: 'Ranger: Halbzauberer-Tabelle (20×9 Slots), Favored Enemy/Tireless/Swarmkeeper-Tracker je Stufe, Zauberliste', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Ranger?.abilities?.base) return 'Testdaten fehlen (Ranger)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -127,7 +130,7 @@ const REGRESSION = [
       if (!w.eval('SL_CLASSES').includes('Ranger')) return 'Ranger fehlt im Spell-List-Filter';
       return true;
     } },
-  { name: 'Sorcerer: Sorcery Points = Stufe, Innate Sorcery 2, Restore Balance "cha"/"pb", 20×9-Slots-Tabelle, Zauberliste, Shadow-Magic-Anzeige', datum: '26.09.2026',
+  { name: 'Sorcerer: Sorcery Points = Stufe, Innate Sorcery 2, Restore Balance "cha"/"pb", 20×9-Slots-Tabelle, Zauberliste, Shadow-Magic-Anzeige', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Sorcerer?.abilities?.base) return 'Testdaten fehlen (Sorcerer)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -157,7 +160,7 @@ const REGRESSION = [
       if (!d.getElementById('subclsLoreTitle').textContent.includes('(RHW)')) return 'Shadow-Magic-Lore-Titel ohne RHW';
       return true;
     } },
-  { name: 'Rogue: Class Table (Sneak Attack, keine Zauberplätze), Tracker je Stufe/Attribut, Psychic Blade, Phantom-Anzeige, Wizard-Zauber', datum: '26.09.2026',
+  { name: 'Rogue: Class Table (Sneak Attack, keine Zauberplätze), Tracker je Stufe/Attribut, Psychic Blade, Phantom-Anzeige, Wizard-Zauber', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Rogue?.abilities?.base) return 'Testdaten fehlen (Rogue)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -188,7 +191,7 @@ const REGRESSION = [
       if (JSON.stringify(w.eval('CLASS_SPELL_MAP.Rogue')) !== '["Wizard"]') return 'CLASS_SPELL_MAP.Rogue ≠ Wizard';
       return true;
     } },
-  { name: 'Monk: Focus Points = Stufe (erst ab L2), Uncanny Metabolism, Wholeness "wis" (min. 1), Breath "pb", Class Table (Martial Arts/Focus/Unarmored Movement, keine Zauberplätze), beide Subklassen-Fassungen', datum: '26.09.2026',
+  { name: 'Monk: Focus Points = Stufe (erst ab L2), Uncanny Metabolism, Wholeness "wis" (min. 1), Breath "pb", Class Table (Martial Arts/Focus/Unarmored Movement, keine Zauberplätze), beide Subklassen-Fassungen', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Monk?.abilities?.base) return 'Testdaten fehlen (Monk)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -221,7 +224,7 @@ const REGRESSION = [
       if (!t.includes('Martial') || !t.includes('Focus') || !t.includes('Unarmored') || !t.includes('+30 ft.')) return 'Monk-Tabelle ohne Martial Arts/Focus Points/Unarmored Movement';
       return true;
     } },
-  { name: 'Barbarian: Rages je Stufe (2 → 6), Rage Damage "+2" → "+4", Class Table ohne Zauberplätze, Persistent Rage erst ab L15, Zealot-Pool, Beast "pb", beide Anzeige-Labels', datum: '26.09.2026',
+  { name: 'Barbarian: Rages je Stufe (2 → 6), Rage Damage "+2" → "+4", Class Table ohne Zauberplätze, Persistent Rage erst ab L15, Zealot-Pool, Beast "pb", beide Anzeige-Labels', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Barbarian?.abilities?.base) return 'Testdaten fehlen (Barbarian)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -252,7 +255,7 @@ const REGRESSION = [
       if (lab('Path of the Totem Warrior (PHB)') !== 'Path of the Totem Warrior (PHB)') return 'Totem-Warrior-Anzeige falsch umbenannt';
       return true;
     } },
-  { name: 'Warlock: Pakt-Slots je Stufe (1/2/3/4), Magical Cunning ab L2, Contact Patron ab L9, "cha"/"pb"/Pool-Tracker, Class Table (Pakt-Spalten, keine 9 Zauberplatz-Spalten), Zauberliste, Undead-Anzeige', datum: '26.09.2026',
+  { name: 'Warlock: Pakt-Slots je Stufe (1/2/3/4), Magical Cunning ab L2, Contact Patron ab L9, "cha"/"pb"/Pool-Tracker, Class Table (Pakt-Spalten, keine 9 Zauberplatz-Spalten), Zauberliste, Undead-Anzeige', datum: '26.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       if (!CD.Warlock?.abilities?.base) return 'Testdaten fehlen (Warlock)';
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -291,7 +294,7 @@ const REGRESSION = [
       if (lab('The Hexblade (XGE)') !== 'The Hexblade (XGE)') return 'Hexblade-Anzeige falsch umbenannt';
       return true;
     } },
-  { name: 'Fixliste Sonnet: Wild Shape 2/3/4, Wizard/Bard Class Table (20×9 Slots, Bardic Die), Wizard-Tracker, Tags', datum: '27.09.2026',
+  { name: 'Fixliste Sonnet: Wild Shape 2/3/4, Wizard/Bard Class Table (20×9 Slots, Bardic Die), Wizard-Tracker, Tags', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       const pips = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? c.querySelectorAll('.ab-pip').length : 0; };
       const cards = n => [...d.querySelectorAll('#abList .ab-card')].filter(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)).length;
@@ -327,7 +330,7 @@ const REGRESSION = [
     } },
   // Neubau 27.09.2026: Unbreakable Majesty (XPHB), Animating Performance (TCE) und Spirit Totem (XGE) haben laut 5e.tools-Text
   // KEINE Konzentration (vorher aus handgeschriebenen Kurztexten übernommen) → erwartet ohne „C".
-  { name: 'Konzentrations-Abzeichen "C" nur bei echter Konzentration (Rage ohne, Mantle of Majesty mit)', datum: '27.09.2026',
+  { name: 'Konzentrations-Abzeichen "C" nur bei echter Konzentration (Rage ohne, Mantle of Majesty mit)', datum: '27.09.2026', r: '2024',
     run: ({ d, sel }) => {
       const conc = n => { const c = [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n)); return c ? !!c.querySelector('.sp-conc') : null; };
       sel('Barbarian', 'Path of the Berserker (PHB)', 5); if (conc('Rage') !== false) return 'Rage: ' + conc('Rage') + ' (erwartet ohne C)';
@@ -338,7 +341,7 @@ const REGRESSION = [
       sel('Druid', 'Circle of the Shepherd (XGE)', 3); if (conc('Spirit Totem') !== false) return 'Spirit Totem: ' + conc('Spirit Totem') + ' (erwartet ohne C)';
       return true;
     } },
-  { name: 'Opus-Check Sonnet-Fixes: Wizard-Tracker (Shape-Shifter, Arcane Abeyance, Phantasmal Creatures, Manifest Mind 1 + PB), "C" bei Telekinetic Master/Event Horizon, Barbarian-Info-Tags', datum: '27.09.2026',
+  { name: 'Opus-Check Sonnet-Fixes: Wizard-Tracker (Shape-Shifter, Arcane Abeyance, Phantasmal Creatures, Manifest Mind 1 + PB), "C" bei Telekinetic Master/Event Horizon, Barbarian-Info-Tags', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       const card = n => [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n));
       const pips = n => { const c = card(n); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -368,7 +371,7 @@ const REGRESSION = [
       if (!/controllerchange[\s\S]{0,200}swHadCtrl/.test(js)) return 'Reload bei Update fehlt oder ohne Schutz (swHadCtrl)';
       return true;
     } },
-  { name: 'Neubau Bard/Druid/Wizard: 2024-Stufen der Alt-Subklassen, neueste Fassungen, alte Keys/ids/special erhalten', datum: '27.09.2026',
+  { name: 'Neubau Bard/Druid/Wizard: 2024-Stufen der Alt-Subklassen, neueste Fassungen, alte Keys/ids/special erhalten', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       const card = n => [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n));
       const pips = n => { const c = card(n); return c ? c.querySelectorAll('.ab-pip').length : 0; };
@@ -400,7 +403,7 @@ const REGRESSION = [
       for (const id of ['wz_arcanerecovery', 'wz_st_shapechanger', 'wz_sc_benigntransposition', 'wz_bs_bladesong', 'wz_os_mindcasting']) if (!ids('Wizard').includes(id)) return 'Wizard-Tracker-id fehlt: ' + id;
       return true;
     } },
-  { name: 'Pool-Zähler (Lay on Hands, Sorcery/Focus Points, Healing Light, Balm) und Einzel-Tracker (Runen, Mystic Arcanum, Lunar Sorcery); Tracker-Klicks werden gespeichert', datum: '27.09.2026',
+  { name: 'Pool-Zähler (Lay on Hands, Sorcery/Focus Points, Healing Light, Balm) und Einzel-Tracker (Runen, Mystic Arcanum, Lunar Sorcery); Tracker-Klicks werden gespeichert', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel, CD }) => {
       const card = n => [...d.querySelectorAll('#abList .ab-card')].find(x => x.querySelector('.ab-name').textContent.trim().startsWith(n));
       const val = n => { const i = card(n)?.querySelector('.ab-pval'); return i ? +i.value : null; };
@@ -453,7 +456,7 @@ const REGRESSION = [
       if (w.eval('st.abPick.rk_runes').length !== 3) return 'Reset löscht Runen-Auswahl';
       return true;
     } },
-  { name: 'Zauber-Auswahl: Spell List filtert standardmäßig nach der Klasse (CLASS_SPELL_MAP), Blessed/Druidic Warrior ab L2, Subklassen-Zauber, Magical Secrets ab L10, „All" zeigt alles', datum: '27.09.2026',
+  { name: 'Zauber-Auswahl: Spell List filtert standardmäßig nach der Klasse (CLASS_SPELL_MAP), Blessed/Druidic Warrior ab L2, Subklassen-Zauber, Magical Secrets ab L10, „All" zeigt alles', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel }) => {
       if (w.eval('typeof SUBCLASS_SPELLS') === 'undefined' || w.eval('typeof slMySpellCtx') === 'undefined') return 'Klassenfilter fehlt (SUBCLASS_SPELLS/slMySpellCtx)';
       if (w.eval('typeof zbRender') !== 'undefined') return 'toter Code zbRender noch vorhanden';
@@ -499,7 +502,7 @@ const REGRESSION = [
       w.slClearAllFilters(); if (w.eval('slFClass') !== 'mine' || d.querySelectorAll('#slList .zb-card').length >= ZB.length) return '„Clear all" nicht zurück auf meine Klasse';
       return true;
     } },
-  { name: 'Combat-Tab-Umbau: Kampfwerte-Karte (CLASS_TABLES, Unarmored AC), Features nach Aktion/Bonusaktion/Reaktion/Passiv, Ausschlussliste, keine Dopplung mit Trackern', datum: '27.09.2026',
+  { name: 'Combat-Tab-Umbau: Kampfwerte-Karte (CLASS_TABLES, Unarmored AC), Features nach Aktion/Bonusaktion/Reaktion/Passiv, Ausschlussliste, keine Dopplung mit Trackern', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel }) => {
       const cs = () => d.getElementById('combatStats');
       if (!cs()) return 'Kampfwerte-Karte fehlt (#combatStats)';
@@ -664,7 +667,7 @@ const REGRESSION = [
       w.closeSettings();
       return true;
     } },
-  { name: 'Text-Formatierer: Absätze, Listen, Blocknamen, Tabellen, Tabellenwerte der Stufe; HTML-sicher; überall eingesetzt', datum: '27.09.2026',
+  { name: 'Text-Formatierer: Absätze, Listen, Blocknamen, Tabellen, Tabellenwerte der Stufe; HTML-sicher; überall eingesetzt', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel }) => {
       if (typeof w.fmtDesc !== 'function') return 'fmtDesc fehlt';
       const box = h => { const x = d.createElement('div'); x.innerHTML = h; return x; };
@@ -844,7 +847,7 @@ const REGRESSION = [
       w.eval("st.bg=''"); set('race', '');
       return true;
     } },
-  { name: 'Paket C1: st.picks + calcGrants – Klassen-Saves automatisch, Klassen-/Background-Skill-Wahl, Doppel-Hinweis mit Ersatz, Attributs-Abzeichen (nicht aufgerechnet), alte Saves/manuelle Skills unverändert, kein Übertrag beim Charakterwechsel, BG_DATA vollständig', datum: '28.09.2026',
+  { name: 'Paket C1: st.picks + calcGrants – Klassen-Saves automatisch, Klassen-/Background-Skill-Wahl, Doppel-Hinweis mit Ersatz, Attributs-Abzeichen (nicht aufgerechnet), alte Saves/manuelle Skills unverändert, kein Übertrag beim Charakterwechsel, BG_DATA vollständig', datum: '28.09.2026', r: '2024',
     run: ({ w, d, sel }) => {
       if (typeof w.calcGrants !== 'function' || typeof w.pickUI !== 'function') return 'calcGrants/pickUI fehlen';
       const sk = n => [...d.querySelectorAll('#skillsGrid .sk-row')].find(r => r.querySelector('.sk-name').firstChild.textContent === n);
@@ -983,7 +986,7 @@ const REGRESSION = [
       w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
-  { name: 'Paket C2: Feature-Auswahl (Primal Order · Magician mit +WIS auf Arcana/Nature, Storm Aura → Storm Soul, wechselbar mit ↻), Expertise nur auf geübte Skills (Rogue L1/L6), Jack of All Trades (½), Bonus-Skills und Saves aus Features, nur ab Feature-Stufe und bei passender Subklasse', datum: '29.09.2026',
+  { name: 'Paket C2: Feature-Auswahl (Primal Order · Magician mit +WIS auf Arcana/Nature, Storm Aura → Storm Soul, wechselbar mit ↻), Expertise nur auf geübte Skills (Rogue L1/L6), Jack of All Trades (½), Bonus-Skills und Saves aus Features, nur ab Feature-Stufe und bei passender Subklasse', datum: '29.09.2026', r: '2024',
     run: ({ w, d, sel, set }) => {
       if (typeof w.fpHtml !== 'function' || !w.eval('typeof FEATURE_PICKS==="object"&&Object.keys(FEATURE_PICKS).length>40')) return 'FEATURE_PICKS/fpHtml fehlen';
       // Daten: jeder Schlüssel trifft genau ein Feature, jede Option (außer nt) hat Text im desc
@@ -1167,7 +1170,7 @@ const REGRESSION = [
       w.resetUI();
       return true;
     } },
-  { name: 'Paket D: Zauberplätze aus der Class Table (Stufe, Subklasse EK/AT), −/+ als Korrektur, Grade mit 0 fehlen, Warlock Pakt-Kachel, alte Saves', datum: '29.09.2026',
+  { name: 'Paket D: Zauberplätze aus der Class Table (Stufe, Subklasse EK/AT), −/+ als Korrektur, Grade mit 0 fehlen, Warlock Pakt-Kachel, alte Saves', datum: '29.09.2026', r: '2024',
     run: ({ w, d, set, sel }) => {
       w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest D'");
       w.applyState({ slotMax: [4, 3, 3, 3, 2, 1, 1, 1, 1], slotUsed: [0, 0, 3, 0, 0, 0, 0, 0, 0], _f_lvl: '5' }); // alter Save: slotMax von Hand, kein slotAdj
@@ -1202,7 +1205,7 @@ const REGRESSION = [
       const snap = w.eval('collectState()'); if (!Array.isArray(snap.slotAdj) || snap.hdUsed !== 0) return 'slotAdj/hdUsed nicht im Save';
       w.resetUI(); return true;
     } },
-  { name: 'Paket D: Short Rest (restore short voll, „regain one“ +1, Font of Inspiration erst L5), Long Rest (HP, Temp, Hit Dice, Plätze, Tracker, Free Casts, Death Saves), Hit Dice würfeln/eintippen, Log', datum: '29.09.2026',
+  { name: 'Paket D: Short Rest (restore short voll, „regain one“ +1, Font of Inspiration erst L5), Long Rest (HP, Temp, Hit Dice, Plätze, Tracker, Free Casts, Death Saves), Hit Dice würfeln/eintippen, Log', datum: '29.09.2026', r: '2024',
     run: ({ w, d, set, sel }) => {
       w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest D'");
       w.applyState({ attrs: { STR: 10, DEX: 10, CON: 14, INT: 10, WIS: 16, CHA: 16 }, _f_lvl: '6', _f_hpM: '40', hpC: 12 });
@@ -1350,7 +1353,7 @@ const REGRESSION = [
       if (/white-space:nowrap/.test(m[0]) || !/max-width:calc\(100vw \/ var\(--zf,1\) - 32px\)/.test(m[0])) return 'Toast: ' + m[0].slice(0, 120);
       return true;
     } },
-  { name: 'Paket H: Always Prepared automatisch (Klasse/Subklasse nach Stufe, Abzeichen, gesperrt, Wegfall mit Notiz, manuell, Landtyp-Wahl, ein Log-/Undo-Schritt)', datum: '01.10.2026',
+  { name: 'Paket H: Always Prepared automatisch (Klasse/Subklasse nach Stufe, Abzeichen, gesperrt, Wegfall mit Notiz, manuell, Landtyp-Wahl, ein Log-/Undo-Schritt)', datum: '01.10.2026', r: '2024',
     run: ({ w, d, sel }) => {
       w.resetUI(); w.eval("document.getElementById('charName').textContent='Regressionstest H'");
       const M = () => w.eval('st.mySpells'), F = n => M().find(x => x.name === n), L = () => w.eval('st.log').map(e => e.m);
@@ -1912,7 +1915,7 @@ const REGRESSION = [
       return true;
     } },
   // { name: '…', datum: 'TT.MM.JJJJ', run: ({w,d,set,vis,CD,sel}) => { …; return true; } },
-  { name: 'Paket E2: Effects & Conditions – Zustände (Speed 0), Exhaustion (Long Rest/Tireless), Buffs/Debuffs aus EFFECT_DATA + eigene, Rast räumt nach Dauer auf, Bloodied, Konzentration/Incapacitated, Heroic Inspiration, Temp HP gespeichert, Log, alte Saves', datum: '02.10.2026',
+  { name: 'Paket E2: Effects & Conditions – Zustände (Speed 0), Exhaustion (Long Rest/Tireless), Buffs/Debuffs aus EFFECT_DATA + eigene, Rast räumt nach Dauer auf, Bloodied, Konzentration/Incapacitated, Heroic Inspiration, Temp HP gespeichert, Log, alte Saves', datum: '02.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       if (typeof w.buildFx !== 'function' || !w.eval('typeof EFFECT_DATA==="object"&&EFFECT_DATA.length>40&&EFFECT_RULES["Heroic Inspiration"]')) return 'buildFx/EFFECT_DATA fehlen';
       const fx = () => d.getElementById('fxBody').textContent;
@@ -2163,7 +2166,7 @@ const REGRESSION = [
       w.closeDice(); w.eval('st.mySpells=[];st.slotUsed=[0,0,0,0,0,0,0,0,0]');
       return true;
     } },
-  { name: 'Paket A2: Begleiter-Stat-Blöcke unter Klassen-Features (Info-Tab + Actions), Werte mit Klassenstufe', datum: '03.10.2026',
+  { name: 'Paket A2: Begleiter-Stat-Blöcke unter Klassen-Features (Info-Tab + Actions), Werte mit Klassenstufe', datum: '03.10.2026', r: '2024',
     run: ({ w, d, sel, set }) => {
       if (!w.eval("typeof FEATURE_STATBLOCKS!=='undefined'")) return 'FEATURE_STATBLOCKS fehlt';
       w.eval("st.attrs.WIS=16");
@@ -2222,7 +2225,7 @@ const REGRESSION = [
       w.mcDel(0); if (w.eval('st.mc.length') !== 0) return 'Entfernen nach Rückfrage geht nicht';
       return true;
     } },
-  { name: 'Paket F2: Multiclass – Tracker/Features je Klasse mit Klassenstufe, getrennte Zähler, Extra Attack, Class Table, Rast', datum: '03.10.2026',
+  { name: 'Paket F2: Multiclass – Tracker/Features je Klasse mit Klassenstufe, getrennte Zähler, Extra Attack, Class Table, Rast', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       const ev = s => w.eval(s);
       sel('Cleric', 'Life Domain (PHB)', 6);
@@ -2264,7 +2267,7 @@ const REGRESSION = [
       w.mcDel(0); w.mcDel(0);
       return true;
     } },
-  { name: 'Paket F3: Multiclass – Saves nur Startklasse, Skill-Wahl der weiteren Klasse (CLASS_MC_GAINS), Expertise/Jack of All Trades nach Klassenstufe, Proficiencies in Core Traits', datum: '03.10.2026',
+  { name: 'Paket F3: Multiclass – Saves nur Startklasse, Skill-Wahl der weiteren Klasse (CLASS_MC_GAINS), Expertise/Jack of All Trades nach Klassenstufe, Proficiencies in Core Traits', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       const ev = s => w.eval(s);
       if (ev("typeof CLASS_MC_GAINS") !== 'object' || ev("Object.keys(CLASS_MC_GAINS).length") !== ev("mcAllCls().length")) return 'CLASS_MC_GAINS fehlt';   // seit Paket M: alle Klassen im Klassen-Feld (13)
@@ -2307,7 +2310,7 @@ const REGRESSION = [
       w.mcDel(0); w.mcDel(0);
       return true;
     } },
-  { name: 'Paket F4: Multiclass – Zauberplätze (MC_SLOTS ab zwei Zauberklassen, sonst eine Tabelle), Pakt nach Warlock-Stufe, Klasse je Zauber mit eigenem Attribut, ★-Liste aller Klassen, Cantrips nach Gesamtstufe, Einzelklasse unverändert', datum: '03.10.2026',
+  { name: 'Paket F4: Multiclass – Zauberplätze (MC_SLOTS ab zwei Zauberklassen, sonst eine Tabelle), Pakt nach Warlock-Stufe, Klasse je Zauber mit eigenem Attribut, ★-Liste aller Klassen, Cantrips nach Gesamtstufe, Einzelklasse unverändert', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       const ev = s => w.eval(s);
       if (ev("typeof MC_SLOTS") !== 'object' || ev("MC_SLOTS.rows.length") !== 20 || ev("MC_SLOTS.prog.Paladin") !== 'artificer') return 'MC_SLOTS fehlt/falsch';
@@ -2385,7 +2388,7 @@ const REGRESSION = [
       if (d.querySelectorAll('#hdPips .hdpip').length !== 5) return 'nach Entfernen nicht 5d8';
       w.resetUI(); return true;
     } },
-  { name: 'Paket M: Artificer (EFA) – wählbar (Info + Multiclass), Tracker (INT, 2×INT, Drain/Transmute), Refreshed Genius ab L14, Plätze ab L1, Always Prepared, ★ Mending, Armor Model mit Guardian-Liste, Stat-Blöcke Steel Defender/Eldritch Cannon (Objekt)/Reanimated Companion, Multiclass aufgerundet', datum: '03.10.2026',
+  { name: 'Paket M: Artificer (EFA) – wählbar (Info + Multiclass), Tracker (INT, 2×INT, Drain/Transmute), Refreshed Genius ab L14, Plätze ab L1, Always Prepared, ★ Mending, Armor Model mit Guardian-Liste, Stat-Blöcke Steel Defender/Eldritch Cannon (Objekt)/Reanimated Companion, Multiclass aufgerundet', datum: '03.10.2026', r: '2024',
     run: ({ w, d, sel, set }) => {
       const ev = s => w.eval(s);
       if (!ev("mcAllCls().includes('Artificer')") || !ev("SL_CLASSES.includes('Artificer')") || !ev("!!CLASS_THEMES.Artificer")) return 'Artificer fehlt in Klassen-Feld/Spell-List-Filter/Themes';
@@ -2437,7 +2440,7 @@ const REGRESSION = [
   { name: 'Paket N: Klassen – Listen aus CLASS_DATA (Klassen-Feld, Multiclass, ⚙, Spell-List), Pflichtfelder, Folgeblöcke', datum: '03.10.2026',
     run: ({ w }) => pflicht(w, `const C=allClasses(),own=new Set(ZB_SPELLS.flatMap(s=>s.classes||[])),opt=[...document.getElementById('cls').options].map(o=>o.value),
       th=[...document.getElementById('copyThemeSel').options].map(o=>o.textContent);
-      if(C.length<13)P.push('nur '+C.length+' Klassen');
+      if(C.length<(R14?12:13))P.push('nur '+C.length+' Klassen'); // Willow 2014: 12 SRD-Klassen (kein Artificer)
       C.forEach(c=>{const d=CLASS_DATA[c],t=CLASS_TABLES[c],tr=CLASS_CORE_TRAITS[c];
         if(!Array.isArray(d.special)||!Array.isArray(d.subclassList)||!d.subclassList.length)P.push(c+': special/subclassList');
         if(!(d.base||[]).length||d.base.some(f=>!(f.lvl>=1&&f.lvl<=20)||!f.name||typeof f.desc!=='string'))P.push(c+': base-Features (build_class.py)');
@@ -2469,7 +2472,7 @@ const REGRESSION = [
       [['FEATURE_PICKS',FEATURE_PICKS],['FEATURE_STATBLOCKS',FEATURE_STATBLOCKS]].forEach(([nm,B])=>Object.keys(B).forEach(key=>{const [c,g,f]=key.replace(/@\\d+$/,'').split('|'),d=CLASS_DATA[c];
         const L=!d?null:g==='base'?d.base:(d.subclass[g]||d.subclass[Object.keys(d.subclass).find(x=>strip(x)===g)]);if(!L||!L.some(x=>x.name===f))P.push(nm+' '+key+': Feature fehlt')}));`) },
   { name: 'Paket N: Zauber – Pflichtfelder, Schule, Klassen der App, Kategorie (spell_cats.py), keine verwaisten Würfel/Stat-Blöcke', datum: '03.10.2026',
-    run: ({ w }) => pflicht(w, `const C=allClasses(),seen=new Set(),SCH=/^(Abjuration|Conjuration|Divination|Enchantment|Evocation|Illusion|Necromancy|Transmutation)( \\(ritual\\))?$/;
+    run: ({ w, RULES }) => (RULES === '2014' && !t14(w, 'ZB_SPELLS')) || pflicht(w, `const C=allClasses(),seen=new Set(),SCH=/^(Abjuration|Conjuration|Divination|Enchantment|Evocation|Illusion|Necromancy|Transmutation)( \\(ritual\\))?$/;
       ZB_SPELLS.forEach(s=>{const n=s.name||'?';if(seen.has(n))P.push(n+': doppelt');seen.add(n);
         if(!s.src||!(Number.isInteger(s.grad)&&s.grad>=0&&s.grad<=9)||!SCH.test(s.school))P.push(n+': src/grad/school');
         if(['zeit','reichweite','dauer','komp','desc'].some(k=>typeof s[k]!=='string'||!s[k])||typeof s.higher!=='string')P.push(n+': zeit/reichweite/dauer/komp/desc/higher');
@@ -2534,7 +2537,7 @@ const REGRESSION = [
     } },
   // ── Paket O2 (03.10.2026): Gegenstände + Startausrüstung als Daten (tools/item_convert.py); Pflichtfelder wie Paket N
   { name: 'Paket O2: Items – ITEM_DATA Pflichtfelder (Kategorie aus ITEM_CATS, Waffe/Rüstung/Pack/Gruppe auflösbar), START_EQUIP je Klasse und Background, alle Verweise in ITEM_MAP', datum: '03.10.2026',
-    run: ({ w }) => pflicht(w, `const seen=new Set(),K=new Set(Object.keys(ITEM_CATS)),ok=r=>!!ITEM_MAP[r],D=/^\\d+d\\d+$|^1$/;
+    run: ({ w, RULES }) => (RULES === '2014' && !t14(w, 'START_EQUIP')) || pflicht(w, `const seen=new Set(),K=new Set(Object.keys(ITEM_CATS)),ok=r=>!!ITEM_MAP[r],D=/^\\d+d\\d+$|^1$/;
       if(ITEM_DATA.length<500)P.push('nur '+ITEM_DATA.length+' Gegenstände (item_convert.py --write)');
       ITEM_DATA.forEach(i=>{const k=(i.n||'?')+'|'+i.s;if(seen.has(k))P.push(k+': doppelt');seen.add(k);
         if(!i.n||!i.s||!K.has(i.c))P.push(k+': n/s/c');
@@ -2560,7 +2563,7 @@ const REGRESSION = [
       const gp=L=>(L||[]).reduce((a,e)=>a+(e.cp||0),0),mt=START_EQUIP.bg['Mulhorandi Tomb Raider'];
       if(gp(START_EQUIP.cls.Cleric?.[0]?.o.A)!==700)P.push('Cleric A: '+gp(START_EQUIP.cls.Cleric?.[0]?.o.A)+' cp statt 700 (Text 7 GP)');
       if(mt&&(gp(mt[0].o.A)!==2600||mt[0].o.A.some(e=>/GP/.test(e.dn||''))))P.push('Mulhorandi Tomb Raider A: 26 GP fehlt');`) },
-  { name: 'Paket O3: Startausrüstung – Wahl A/B (Klasse, Background) im Info-Tab, Wahl-Gegenstände, „Add to Items“ trägt Gegenstände (from/ref) und Geld ein, nur einmal (equipDone), gespeichert; Bard/Druid-Text XPHB', datum: '03.10.2026',
+  { name: 'Paket O3: Startausrüstung – Wahl A/B (Klasse, Background) im Info-Tab, Wahl-Gegenstände, „Add to Items“ trägt Gegenstände (from/ref) und Geld ein, nur einmal (equipDone), gespeichert; Bard/Druid-Text XPHB', datum: '03.10.2026', r: '2024',
     run: ({ w, d }) => {
       if (typeof w.seHtml !== 'function') return 'seHtml fehlt (Startausrüstung)';
       const ct = () => d.getElementById('coreTraitsList'), box = () => ct().querySelector('.se');
@@ -2783,7 +2786,7 @@ const REGRESSION = [
       E("const ch2=getAllChars();delete ch2['S1 Test'];localStorage.setItem(LS_KEY,JSON.stringify(ch2));_ciEdit=null;switchTabAll('info')");
       return true;
     } },
-  { name: 'Paket S2: Werte automatisch – PB aus Gesamtstufe (Feld = Korrektur, alte Saves), Zauberattribut aus der Klasse (EK = INT), Max HP (Startklasse voll, Durchschnitt/Wurf je Stufe, CON, Dwarven Toughness, Tough, Frage beim Level-Up, alte Saves behalten ihr Maximum), Origin Feat „+ Add“/„→ Feats“, Startausrüstung „Use now?“ (Equip/→ Weapons), Fighting Style → My Feats, Weapon Mastery (Anzahl aus Class Table/Text, Hervorhebung), Heil-Knopf (Second Wind, Lay on Hands), Zähler Cantrips/Prepared', datum: '04.10.2026',
+  { name: 'Paket S2: Werte automatisch – PB aus Gesamtstufe (Feld = Korrektur, alte Saves), Zauberattribut aus der Klasse (EK = INT), Max HP (Startklasse voll, Durchschnitt/Wurf je Stufe, CON, Dwarven Toughness, Tough, Frage beim Level-Up, alte Saves behalten ihr Maximum), Origin Feat „+ Add“/„→ Feats“, Startausrüstung „Use now?“ (Equip/→ Weapons), Fighting Style → My Feats, Weapon Mastery (Anzahl aus Class Table/Text, Hervorhebung), Heil-Knopf (Second Wind, Lay on Hands), Zähler Cantrips/Prepared', datum: '04.10.2026', r: '2024',
     run: ({ w, d }) => {
       const E = js => w.eval(js), V = id => d.getElementById(id).value;
       if (typeof w.pbSync !== 'function' || typeof w.hpParts !== 'function' || typeof w.fpFsWm !== 'function') return 'pbSync/hpParts/fpFsWm fehlen (Paket S2)';
@@ -2877,7 +2880,7 @@ const REGRESSION = [
       E("st.items=[];st.weapons=[];buildWeapons()");
       return r;
     } },
-  { name: 'Paket S3: Komfort – Magic-Initiate-Liste aus dem Background (BG_DATA.fv), Spell List „Up to <höchster Platz>“, Feats „Level ≤ N“, Standard Array/Point Buy, Log lesbar (keine Doppelzeile Background, Wahl-Werte, Datum), Speichern abgesichert (lsPut, Backup-Hinweis), englische Texte', datum: '04.10.2026',
+  { name: 'Paket S3: Komfort – Magic-Initiate-Liste aus dem Background (BG_DATA.fv), Spell List „Up to <höchster Platz>“, Feats „Level ≤ N“, Standard Array/Point Buy, Log lesbar (keine Doppelzeile Background, Wahl-Werte, Datum), Speichern abgesichert (lsPut, Backup-Hinweis), englische Texte', datum: '04.10.2026', r: '2024',
     run: ({ w, d }) => {
       const E = js => w.eval(js);
       if (typeof w.lsPut !== 'function' || typeof w.agApply !== 'function' || typeof w.slMaxGrad !== 'function' || typeof w._pickVal !== 'function') return 'lsPut/agApply/slMaxGrad/_pickVal fehlen (Paket S3)';
@@ -2932,7 +2935,7 @@ const REGRESSION = [
       E("const c2=getAllChars();delete c2['S3 Test'];localStorage.setItem(LS_KEY,JSON.stringify(c2));_ciEdit=null;switchTabAll('info')");
       return true;
     } },
-  { name: 'Paket R2: Kopf + Navigation – schmale Leiste (SVG-Symbole), großer Kopf (Vignette/Rune je Startklasse, „Klasse Stufe · Subklasse“, „Rasse · Background“, Einklappen), Charakterliste (wechseln, neu, löschen ohne Wechsel), untere Leiste + More, offene Wahlen in der Charakterkarte, englische Texte', datum: '05.10.2026',
+  { name: 'Paket R2: Kopf + Navigation – schmale Leiste (SVG-Symbole), großer Kopf (Vignette/Rune je Startklasse, „Klasse Stufe · Subklasse“, „Rasse · Background“, Einklappen), Charakterliste (wechseln, neu, löschen ohne Wechsel), untere Leiste + More, offene Wahlen in der Charakterkarte, englische Texte', datum: '05.10.2026', r: '2024',
     run: ({ w, d }) => {
       const E = js => w.eval(js);
       if (!d.getElementById('hxBar') || !d.getElementById('hxHero') || typeof w.openCharList !== 'function' || typeof w.toggleMore !== 'function') return 'Kopf/Charakterliste/More fehlen (Paket R2)';
@@ -3089,7 +3092,7 @@ const REGRESSION = [
       if (!/\n\n• You instantaneously extinguish/.test(E("ZB_SPELLS.find(x=>x.name==='Control Flames').desc"))) return 'Control Flames: Liste';
       return true;
     } },
-  { name: 'Paket U: Sammelfunde (Long Rest wie Short Rest, Save-Knopf in der Charakterliste, Feature-Tags englisch, Background-Beschreibung, Features einklappbar, Farbregler „Header Art & Frames“, Feature-Zauber aus innate)', datum: '05.10.2026',
+  { name: 'Paket U: Sammelfunde (Long Rest wie Short Rest, Save-Knopf in der Charakterliste, Feature-Tags englisch, Background-Beschreibung, Features einklappbar, Farbregler „Header Art & Frames“, Feature-Zauber aus innate)', datum: '05.10.2026', r: '2024',
     run: ({ w, d, sel }) => {
       const E = js => w.eval(js);
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
@@ -3214,7 +3217,7 @@ const REGRESSION = [
       E("const c=getAllChars();delete c['V Alt'];localStorage.setItem(LS_KEY,JSON.stringify(c))"); w.switchTab('info');
       return true;
     } },
-  { name: 'Paket R6: Suche „In App / Web“ (Umschalter pro Gerät, Treffer aus Zaubern/Features/Feats/Items/Backgrounds/Bestien/Notizzetteln, Wortanfang im Text, Sprung zur geöffneten Karte inkl. Multiclass, Inline-Treffer + Add to Items, Web wie bisher)', datum: '05.10.2026',
+  { name: 'Paket R6: Suche „In App / Web“ (Umschalter pro Gerät, Treffer aus Zaubern/Features/Feats/Items/Backgrounds/Bestien/Notizzetteln, Wortanfang im Text, Sprung zur geöffneten Karte inkl. Multiclass, Inline-Treffer + Add to Items, Web wie bisher)', datum: '05.10.2026', r: '2024',
     run: ({ w, d }) => {
       const E = js => w.eval(js);
       for (const id of ['webSearchModal', 'srBox', 'webSearchIn', 'srCats', 'srList', 'webSearchRecent']) if (!d.getElementById(id)) return 'fehlt: ' + id;
@@ -3495,7 +3498,7 @@ const REGRESSION = [
       w.eval("st.feats=[];st.mySpells=[];st.picks={}");
       return true;
     } },
-  { name: 'My Spells: Knopf „Always“ setzt Always prepared (onclick-Anführungszeichen), zählt nicht bei Prepared', datum: '17.10.2026',
+  { name: 'My Spells: Knopf „Always“ setzt Always prepared (onclick-Anführungszeichen), zählt nicht bei Prepared', datum: '17.10.2026', r: '2024',
     run: ({ w, d, sel }) => {
       sel('Cleric', 'Life Domain (PHB)', 2);
       w.eval("st.mySpells=['Bless','Cure Wounds','Guiding Bolt','Healing Word','Shield of Faith','Sanctuary','Command'].map(n=>({name:n,grad:1,school:'',prep:true,notes:''}));buildMySpells()");
@@ -3561,7 +3564,72 @@ const REGRESSION = [
       if (!opened.includes(name)) return 'fetch liest nicht aus dem eigenen Cache';
       return true;
     } },
-];// ────────────────────────────────────────────────────────────────────────────
+  { name: 'Paket T2: Willow 2014 – Klassen (PHB/SRD, je 1 Subklasse), Tracker 2014 (Rage Long Rest, Channel Divinity 1/2/3, Wild Shape 2, Divine Sense 1+CHA, Ki/Sorcery-Pool), Short Rest ohne „regain one“, Prepared berechnet/Spells Known, Wahl-Features (Invocations je Stufe), Always Prepared, Multiclass 2014, AC/Speed/Krit/Heil aus 2014-Text, Subklassen-Einleitung unter „Weitere“', datum: '18.10.2026', r: '2014',
+    run: ({ w, d, sel }) => {
+      const E = s => w.eval(s);
+      // Daten: 12 SRD-Klassen, je eine Subklasse (PHB), keine 2024-Reste, SRD-Namen (T-E1)
+      const C = E('allClasses()');
+      if (C.length !== 12 || C.includes('Artificer')) return 'Klassen: ' + C.join(',');
+      for (const c of C) { const l = E(`CLASS_DATA[${JSON.stringify(c)}].subclassList`); if (l.length !== 1 || !/ \(PHB\)$/.test(l[0])) return c + ': subclassList ' + l; }
+      const blob = E('JSON.stringify(CLASS_DATA)');
+      if (/XPHB|Weapon Mastery|Epic Boon|\{@/.test(blob)) return 'CLASS_DATA mit 2024-Resten/Tags';
+      if (/Melf's|Tasha's|Bigby's/i.test(blob) || !/acid arrow/i.test(blob)) return 'SRD-Namen (T-E1) fehlen';
+      if (E('CLASS_DATA.Ranger.base.some(f=>/Favored Foe|Deft Explorer/.test(f.name))')) return 'Tasha-Optionen (TCE) im Ranger';
+      if (!E("CLASS_CORE_TRAITS.Fighter.primaryAbility==='Strength or Dexterity'&&CLASS_CORE_TRAITS.Monk.multiclassingReq==='Dexterity 13 and Wisdom 13'")) return 'Core Traits 2014';
+      if (E("CLASS_TABLES.Barbarian.rows[19].rages") !== 'Unlimited' || E("CLASS_TABLES.Warlock.rows[4].invocations") !== 3) return 'Class Table 2014 (Rages/Invocations Known)';
+      // Tracker 2014
+      E('st.attrs={STR:16,DEX:14,CON:16,INT:10,WIS:16,CHA:16}');
+      sel('Barbarian', 'Path of the Berserker (PHB)', 1); if (abAmt(d, 'Rage') !== 2) return 'Rage L1';
+      sel('Barbarian', 'Path of the Berserker (PHB)', 17); if (abAmt(d, 'Rage') !== 6) return 'Rage L17';
+      if (E("CLASS_DATA.Barbarian.abilities.base[0].restore") !== 'long' || E("restKind(CLASS_DATA.Barbarian.abilities.base[0],5)") !== 'long') return 'Rage nicht Long Rest';
+      sel('Cleric', 'Life Domain (PHB)', 2); if (abAmt(d, 'Channel Divinity') !== 1) return 'Channel Divinity L2 ' + abAmt(d, 'Channel Divinity');
+      sel('Cleric', 'Life Domain (PHB)', 6); if (abAmt(d, 'Channel Divinity') !== 2) return 'Channel Divinity L6';
+      sel('Cleric', 'Life Domain (PHB)', 18); if (abAmt(d, 'Channel Divinity') !== 3) return 'Channel Divinity L18';
+      sel('Druid', 'Circle of the Land (PHB)', 17); if (abAmt(d, 'Wild Shape') !== 2) return 'Wild Shape L17 ' + abAmt(d, 'Wild Shape');
+      sel('Fighter', 'Champion (PHB)', 17); if (abAmt(d, 'Action Surge') !== 2 || abAmt(d, 'Second Wind') !== 1 || abAmt(d, 'Indomitable') !== 3) return 'Fighter L17 Tracker';
+      sel('Monk', 'Way of the Open Hand (PHB)', 1); if (abAmt(d, 'Ki Points')) return 'Ki auf L1';
+      sel('Monk', 'Way of the Open Hand (PHB)', 6); if (abAmt(d, 'Ki Points') !== 6) return 'Ki L6 ' + abAmt(d, 'Ki Points');
+      sel('Paladin', 'Oath of Devotion (PHB)', 4); if (abAmt(d, 'Divine Sense') !== 4) return 'Divine Sense (1 + CHA 3) ' + abAmt(d, 'Divine Sense');
+      if (abAmt(d, 'Lay on Hands') !== 20) return 'Lay on Hands L4 ' + abAmt(d, 'Lay on Hands');
+      if (abAmt(d, 'Channel Divinity') !== 1) return 'Paladin Channel Divinity (Oath) L4';
+      sel('Sorcerer', 'Draconic Bloodline (PHB)', 5); if (abAmt(d, 'Sorcery Points') !== 5) return 'Sorcery Points L5';
+      sel('Warlock', 'The Fiend (PHB)', 11); if (abAmt(d, 'Pact Magic Slots') !== 3) return 'Pakt-Plätze L11';
+      // Short Rest 2014: alle Nutzungen zurück (kein „regain one“)
+      for (const id of ['wildshape', 'channeldivinity', 'secondwind', 'bb_rage']) if (E(`REST_SHORT_ONE.has('${id}')`)) return 'REST_SHORT_ONE enthält ' + id;
+      if (E("restKind({id:'bardicinspiration',restore:'long'},4)") !== 'long' || E("restKind({id:'bardicinspiration',restore:'long'},5)") !== 'short') return 'Font of Inspiration ab L5';
+      // Weiche (i): Prepared = WIS + Stufe (Cleric), CHA + ½ Stufe (Paladin, ab L2); Spells Known (Bard)
+      E('st.mySpells=[]'); sel('Cleric', 'Life Domain (PHB)', 5); E('buildSpCount()');
+      if (!/Prepared 0\/8/.test(d.getElementById('spCountBox').textContent)) return 'Cleric 5 Prepared: ' + d.getElementById('spCountBox').textContent;
+      sel('Paladin', 'Oath of Devotion (PHB)', 1); E('buildSpCount()'); if (/Prepared/.test(d.getElementById('spCountBox').textContent)) return 'Paladin L1 mit Prepared';
+      sel('Paladin', 'Oath of Devotion (PHB)', 5); E('buildSpCount()'); if (!/Prepared 0\/5/.test(d.getElementById('spCountBox').textContent)) return 'Paladin 5 Prepared (CHA 3 + 2): ' + d.getElementById('spCountBox').textContent;
+      E("st.mySpells=[{name:'Charm Person',grad:1,school:'Enchantment',prep:false,notes:''}]"); sel('Bard', 'College of Lore (PHB)', 3); E('buildSpCount()');
+      if (!/Known 1\/6/.test(d.getElementById('spCountBox').textContent)) return 'Bard 3 Known: ' + d.getElementById('spCountBox').textContent;
+      E('st.mySpells=[]');
+      // Wahl-Features: Fighting Style (6 Optionen), Invocations je Stufe (fpN), Landtyp → Always Prepared
+      if (E("FEATURE_PICKS['Fighter|base|Fighting Style'].o.length") !== 6) return 'Fighting Style 2014';
+      if (E("fpN(FEATURE_PICKS['Warlock|base|Eldritch Invocations'],'Warlock',5)") !== 3 || E("fpN(FEATURE_PICKS['Warlock|base|Eldritch Invocations'],'Warlock',18)") !== 8) return 'Invocations je Stufe';
+      if (!/Agonizing Blast\. Prerequisite: Eldritch Blast cantrip\./.test(E("CLASS_DATA.Warlock.base.find(f=>f.name==='Eldritch Invocations').desc"))) return 'Invocation-Optionen fehlen';
+      sel('Cleric', 'Life Domain (PHB)', 3); E('apSync()');
+      if (!E("st.mySpells.some(s=>s.name==='Lesser Restoration'&&s.auto)")) return 'Life Domain L3: Lesser Restoration nicht Always Prepared';
+      sel('Druid', 'Circle of the Land (PHB)', 3); E("st.picks=st.picks||{};st.picks['feat:Druid|Circle of the Land|Circle Spells']=['Arctic'];apSync()");
+      if (!E("st.mySpells.some(s=>s.name==='Hold Person'&&s.auto)") || E("st.mySpells.some(s=>s.name==='Mirror Image')")) return 'Landtyp Arctic → Circle Spells (Always Prepared) falsch';
+      // Multiclass 2014: Paladin/Ranger halbe Stufe abgerundet, Gewinne PHB
+      if (E('MC_SLOTS.prog.Paladin') !== '1/2' || E('MC_SLOTS.src') !== 'PHB' || E("CLASS_MC_GAINS.Rogue.t[0]") !== "thieves' tools") return 'MC_SLOTS/CLASS_MC_GAINS 2014';
+      // AC/Speed/Krit/Heilung aus 2014-Text
+      sel('Barbarian', 'Path of the Berserker (PHB)', 5); const ua = E("combatUnarmoredAC('Barbarian','Path of the Berserker (PHB)',5)");
+      if (!ua || ua.ac !== 15) return 'Unarmored Defense 10+DEX+CON: ' + JSON.stringify(ua);
+      if (!E('stUnarmored()').some(x => x.n === 'Unarmored Defense' && x.ab.join() === 'DEX,CON')) return 'stUnarmored 2014';
+      if (!E("stSpdCalc?stSpdCalc(st.statSrc&&st.statSrc.spd||{}).parts.some(p=>p.l==='Fast Movement'&&p.v===10):true")) return 'Fast Movement 2014';
+      sel('Fighter', 'Champion (PHB)', 3); if (E('stCritMin()') !== 19) return 'Improved Critical 2014: ' + E('stCritMin()');
+      sel('Fighter', 'Champion (PHB)', 15); if (E('stCritMin()') !== 18) return 'Superior Critical 2014';
+      sel('Fighter', 'Champion (PHB)', 5); if (!d.querySelector('#abList .ab-heal-b[data-id="secondwind"]')) return 'Heil-Knopf Second Wind (2014-Text)';
+      // Subklassen-Einleitung („Primal Path“) unter „Weitere“, Kampf-Features nicht
+      sel('Barbarian', 'Path of the Berserker (PHB)', 5);
+      const weit = d.querySelector('.ab-grp-box[data-grp="weitere"]')?.textContent || '';
+      if (!weit.includes('Primal Path')) return 'Primal Path nicht unter „Weitere“';
+      if (weit.includes('Reckless Attack')) return 'Reckless Attack fälschlich unter „Weitere“';
+      return true;
+    } },];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
 async function load(p) {
@@ -3640,9 +3708,15 @@ const get = (w, name) => { try { return w.eval(`typeof ${name}!=='undefined'?JSO
     console.log('3) Datenvergleich alt → neu');
     const o = await load(OLD);
     const blocks = ['ZB_SPELLS', 'BG_SPELLS', 'CLASS_DATA', 'CLASS_TABLES', 'CLASS_CORE_TRAITS', 'CLASS_SPELL_MAP', 'SL_CLASSES', 'SUBCLASS_SPELLS', 'CLASS_SPELL_EXTRA', 'ALWAYS_PREP', 'FEAT_SPELLS', 'RACE_DATA', 'BG_DATA', 'BG_EXTRA', 'FT_FEATS', 'BST_DATA', 'SPELL_STATBLOCKS', 'FEATURE_STATBLOCKS', 'RACE_PICKS', 'SUBCLASS_TABLES', 'MC_SLOTS', 'ITEM_DATA', 'START_EQUIP', 'CLASS_THEMES', 'CLASS_RUNES', 'TEXT_IDS'];
+    // Paket T2 (18.10.2026): Willow 2014 – ein Block wird erstmals aus tools/t14 ersetzt (T14_BLOCKS neu, alt noch 2024-Daten):
+    // einmalige Umstellung, Löschungen gegenüber dem alten Build sind dann gewollt (abgeleitete Blöcke folgen CLASS_DATA)
+    const t14N = JSON.parse(get(w, 'T14_BLOCKS') || '[]'), t14O = JSON.parse(get(o.w, 'T14_BLOCKS') || '[]');
+    const T14_ABGELEITET = { SL_CLASSES: 'CLASS_DATA', CLASS_SPELL_MAP: 'CLASS_DATA' };
+    const umgestellt = b => [b, T14_ABGELEITET[b]].some(x => x && t14N.includes(x) && !t14O.includes(x));
     for (const b of blocks) {
       const A = get(o.w, b), B = get(w, b);
       if (A === null && B === null) continue;
+      if (RULES === '2014' && A !== B && umgestellt(b)) { console.log(`   ${b}: erstmals 2014-Daten (tools/t14) – Umstellung, Löschungen gegenüber dem alten Build erlaubt`); continue; }
       if (A === null) { console.log(`   ${b}: neu hinzugekommen`); continue; }
       if (B === null) { bad(`${b}: FEHLT in neuer Version`); continue; }
       if (A === B) { console.log(`   ${b}: unverändert`); continue; }

@@ -16,6 +16,9 @@ Bedeutung in der App (`mcSlotLvl`): full = Klassenstufe, artificer = halbe Stufe
 (eigene Plätze, zählt nicht). Das Skript prüft die Rundungsregeln gegen den Buchtext und meldet Abweichungen.
 
 Aufruf: python3 willow/tools/mc_slots.py DnD_Character_App.html src [--write]   (--write nur bei 0 Fehlern)
+Willow 2014 (Paket T2, 18.10.2026): python3 willow/tools/mc_slots.py 2014/index.html src14 --t14 [--write]
+  Quelle src14/book-phb.json (setup.sh t14) + PHB-Klassen (Paladin/Ranger „half your levels (rounded down)“ = '1/2'),
+  keine Subklassen-Zauberer im SRD (sub leer); schreibt tools/t14/MC_SLOTS.js.
 """
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -42,15 +45,19 @@ def find(o, pred):
 
 
 def num(x):
-    x = str(x).strip()
+    x = re.sub(r'(st|nd|rd|th)$', '', str(x).strip())   # PHB 2014: Zeilen „1st“, „2nd“ …
     return 0 if x in ('—', '-', '') else int(x)
 
 
 def main():
     html, src = sys.argv[1], sys.argv[2]
     write = '--write' in sys.argv
+    t14 = '--t14' in sys.argv
+    if t14:
+        from class_extract import t14_setup
+        t14_setup(src)
     errors = []
-    book = json.load(open(os.path.join(src, 'book-xphb.json'), encoding='utf-8'))
+    book = json.load(open(os.path.join(src, 'book-phb.json' if t14 else 'book-xphb.json'), encoding='utf-8'))
     mc = find(book, lambda o: o.get('type') == 'section' and o.get('name') == 'Multiclassing')
     sc = mc and find(mc, lambda o: o.get('name') == 'Spellcasting' and o.get('type') == 'entries')
     tab = sc and find(sc, lambda o: o.get('type') == 'table' and 'Multiclass Spellcaster' in str(o.get('caption')))
@@ -94,6 +101,26 @@ def main():
                 errors.append(f"{s['className']} {k}: {p} / {s.get('spellcastingAbility')}"); continue
             sub.setdefault(s['className'], {})[k] = {'p': p, 'ab': a, 'src': s['source']}
 
+    if t14:   # PHB 2014: Regeln stehen als Fließtext im ersten Absatz von „Spell Slots“
+        txt = ' | '.join(e for e in items if isinstance(e, str))
+        sub = {}   # SRD: keine Subklassen mit eigener Zauberei (Eldritch Knight/Arcane Trickster nicht im SRD)
+        m = re.search(r'all your levels in the ([^,]+(?:, [^,]+)*?),? and (\w+) classes', txt)
+        full = (re.findall(r'\w+', m.group(1)) + [m.group(2)]) if m else []
+        if not full: errors.append('Regel „all your levels …“ nicht im Buchtext (PHB)')
+        for k in full:
+            if prog.get(k.capitalize()) != 'full': errors.append(f'{k}: Buch „all your levels“, Daten {prog.get(k.capitalize())}')
+        m = re.search(r'half your levels \(rounded down\) in the (\w+) and (\w+) classes', txt)
+        if not m: errors.append('Regel „half your levels (rounded down)“ nicht im Buchtext (PHB)')
+        for k in (m.groups() if m else []):
+            if prog.get(k.capitalize()) != '1/2': errors.append(f'{k}: Buch „half, rounded down“, Daten {prog.get(k.capitalize())}')
+        for k, p in sorted(prog.items()): print(f'{k}: {p}')
+        for e in errors: print('FEHLER', e)
+        out = {'rows': rows, 'prog': prog, 'sub': {}, 'src': 'PHB'}
+        if not write or errors:
+            print('(Trockenlauf)' if not errors else 'nicht geschrieben'); return
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14', 'MC_SLOTS.js')
+        open(p, 'w', encoding='utf-8').write('const MC_SLOTS=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n')
+        print('geschrieben:', p); return
     # Prüfung gegen den Buchtext: volle Zauberer, Paladin/Ranger aufgerundet, EK/AT ein Drittel abgerundet
     m = re.search(r'All your levels in the ([^|]+?) classes', txt)
     full = re.findall(r'[A-Z]\w+', m.group(1)) if m else []

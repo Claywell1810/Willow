@@ -2557,16 +2557,16 @@ function stFeatures(){ // Paket F2: Features aller Klassen bis zur jeweiligen Kl
 }
 // Paket S1 (04.10.2026): Krit-Schwelle für Waffenangriffe aus dem Feature-Text (Champion: Improved Critical 19, Superior Critical 18).
 // Nur der allgemeine Satz „Your attack rolls with weapons … Critical Hit on a roll of N“; bedingte Fälle (Hexblade's Curse, Invincible Conqueror) nicht.
-function stCritMin(){let m=20;stFeatures().forEach(f=>{const x=/^Your attack rolls with weapons and Unarmed Strikes can (?:now )?score a Critical Hit on a roll of (\d+)/i.exec(f.desc||'');if(x&&+x[1]<m&&+x[1]>1)m=+x[1];});return m;}
+function stCritMin(){let m=20;stFeatures().forEach(f=>{const x=/^Your attack rolls with weapons and Unarmed Strikes can (?:now )?score a Critical Hit on a roll of (\d+)/i.exec(f.desc||'')||(R14?/your weapon attacks score a critical hit on a roll of (\d+)(?:-20| or 20)/i.exec(f.desc||''):null);if(x&&+x[1]<m&&+x[1]>1)m=+x[1];});return m;} // Paket T2: 2014 „your weapon attacks score a critical hit on a roll of 19 or 20“ / „18-20“
 function rlCrit(R){return !!R&&R.nat>=(R.cm||20);}
 function stUnarmored(){
   const out=[];
   stFeatures().forEach(f=>{const t=f.desc||'';let m=/base Armor Class equals (\d+) plus your (\w+)(?: and (\w+))? modifiers?/i.exec(t),b,ab=[];
     if(m&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];if(m[3]&&AB_FULL[m[3]])ab.push(AB_FULL[m[3]]);}
-    else if((m=/your AC equals (\d+) \+ your (\w+) modifier/i.exec(t))&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];}
+    else if((m=/your (?:AC|Armor Class) equals (\d+) \+ your (\w+) modifier(?: \+ your (\w+) modifier)?/i.exec(t))&&AB_FULL[m[2]]){b=+m[1];ab=[AB_FULL[m[2]]];if(m[3]&&AB_FULL[m[3]])ab.push(AB_FULL[m[3]]);} // Paket T2: 2014 auch mit zweitem Attribut
     else return;
     const o=out.find(o=>o.n===f.name);if(o&&o.c===f._c)return;
-    out.push({n:o?f.name+' ('+f._c+')':f.name,c:f._c,b,ab,noSh:/armor or wielding a Shield/i.test(t)});});
+    out.push({n:o?f.name+' ('+f._c+')':f.name,c:f._c,b,ab,noSh:/armor or wielding a Shield|not wielding a shield/i.test(t)});});
   return out;
 }
 function stArmorOf(s){const a=(s&&s.arm)||'';return ARMOR_DATA.find(x=>x.n===a&&x.c!=='S')||null;}
@@ -2601,10 +2601,10 @@ function stSpdCalc(s){
   const race=rcRace(),v=race&&rcVals(race);
   if(v&&v.speed){r.t=v.speed;r.base=`${v.speed} ${rcName(race)}`;r.race=1;}else{r.t=+s.base||0;r.base=`${r.t} Base`;}
   const ac=(st.statSrc&&st.statSrc.ac)||null,ar=ac?stArmorOf(ac):null,sh=!!(ac&&ac.sh);
-  stFeatures().forEach(f=>{const m=/^(?:At \d+\w* level, )?Your (?:walking )?speed increases by (\d+) feet(?: while you aren't wearing (Heavy armor|armor)( or wielding a Shield)?)?\./i.exec(f.desc||'');if(!m)return;
+  stFeatures().forEach(f=>{const m=/^(?:(?:At|Starting at|Beginning at) \d+\w* level, )?Your (?:walking )?speed increases by (\d+) feet(?: while you (?:aren't|are not) wearing (Heavy armor|armor)( or wielding a Shield)?)?\./i.exec(f.desc||'');if(!m)return; // Paket T2: auch 2014-Einleitung „Starting at …“
     if(r.parts.some(p=>p.l===f.name))return;
     let n=+m[1];
-    if(/as shown on the/i.test(f.desc)){const row=(CLASS_TABLES[f._c]&&CLASS_TABLES[f._c].rows||[])[f._cl-1],c=row&&/(\d+)/.exec(row.unarmored||'');if(c)n=+c[1];}
+    if(/as shown (?:on|in) the/i.test(f.desc)){const row=(CLASS_TABLES[f._c]&&CLASS_TABLES[f._c].rows||[])[f._cl-1],c=row&&/(\d+)/.exec(row.unarmored||'');if(c)n=+c[1];}
     if(m[2]){const heavyOnly=/heavy/i.test(m[2]);if(ac&&((heavyOnly&&ar&&ar.c==='H')||(!heavyOnly&&(ar||(m[3]&&sh))))){r.warn.push(`${f.name}: no bonus while wearing ${heavyOnly?'Heavy armor':'armor'+(m[3]?' or a Shield':'')}.`);return;}}
     add(n,f.name,1);});
   if(ar&&ar.str&&(st.attrs.STR||10)<ar.str)add(-10,`${ar.n} (Strength ${ar.str})`,1);
@@ -3360,6 +3360,7 @@ function fpActive(cls){
     if(c===cls&&(g==='base'||g===sk)&&e.l<=lvl)r.push({k,e});});
   return r;
 }
+function fpN(e,cls,lvl){return e.n&&typeof e.n==='object'?(abMaxUses(e.n,lvl||fpLvl(cls))||1):(e.n||1);} // Paket T2: Anzahl je Stufe (Invocations, Metamagic, Favored Enemy 2014)
 function fpFrom(e,cls){
   const cl=(CLASS_CORE_TRAITS[cls]&&CLASS_CORE_TRAITS[cls].skillProficiencies||{}).from||[];
   if(e.f==='any')return SKILLS.map(x=>x.n);
@@ -3378,7 +3379,7 @@ function fpGrants(g,cls){
       sel.forEach(x=>{add('skill',x,'p',q);if(e.e)add('skill',x,'e',q);});
     }else if(e.t==='save')(e.fix||[]).forEach(a=>add('save',a,'p',q));
     else if(e.t==='half')SKILLS.forEach(x=>add('skill',x.n,'half',q));
-    else if(e.t==='opt')pkValid(key,e.o,e.n||1).forEach(o=>{
+    else if(e.t==='opt')pkValid(key,e.o,fpN(e,c)).forEach(o=>{
       const fx=e.fx&&e.fx[o];if(!fx)return;
       if(fx.b)(fx.b).forEach(x=>add('bonus',x,Math.max(fx.m||0,md(st.attrs[fx.a])),o));
       if(fx.p)pkValid(key+':'+o,fx.p.f,fx.p.n).forEach(x=>add('skill',x,'p',q));
@@ -3393,7 +3394,7 @@ function fpOpen(cls){
   fpActive(cls).forEach(({k,e})=>{
     const key=fpKey(k),q=fpName(k)+(/@\d+$/.test(k)?' (L'+e.l+')':'');
     if(e.t==='skill'&&e.n){const c=pkValid(key,fpFrom(e,cls),e.n).length;if(c<e.n)r.push({wo:'feat',txt:`${q} ${c}/${e.n}`});}
-    if(e.t==='opt'&&e.fx){const c=pkValid(key,e.o,e.n||1);if(!c.length)r.push({wo:'feat',txt:`${q} 0/1`});
+    if(e.t==='opt'&&e.fx){const c=pkValid(key,e.o,fpN(e,cls));if(!c.length)r.push({wo:'feat',txt:`${q} 0/1`});
       c.forEach(o=>{const p=e.fx[o]&&e.fx[o].p;if(p){const n=pkValid(key+':'+o,p.f,p.n).length;if(n<p.n)r.push({wo:'feat',txt:`${q} · ${o} ${n}/${p.n}`});}});}
     if(e.t==='exp'){const n=pkValid(key,fpExpOpts(e,G.prof||new Set()),e.n).length;if(n<e.n)r.push({wo:'feat',txt:`${q} ${n}/${e.n}`});}
   });
@@ -3463,7 +3464,7 @@ function fpHtml0(cls,grp,f,ctx,maxLvl){
   const more=(lbl,inner)=>`<details class="fp-more"><summary>${lbl}</summary>${inner}</details>`;
   if(!keys.length){
     const L=grp&&fpLinkOf(cls,grp,f.name);if(!L)return {suf:'',body:desc};
-    const sel=pkValid(fpKey(L.k),L.e.o,L.e.n||1)[0];
+    const sel=pkValid(fpKey(L.k),L.e.o,fpN(L.e,cls))[0];
     if(!sel)return {suf:'',body:`<div class="pk-note" style="margin:0 0 4px">Choice in ${pkEsc(fpName(L.k))}</div>`+desc};
     const t=fpOptText(f.desc,sel);
     return {suf:' · '+sel,body:t?`<div class="fp-sel">${fmtDesc(t,ctx)}</div>`+more('All options',desc):desc};
@@ -3473,7 +3474,7 @@ function fpHtml0(cls,grp,f,ctx,maxLvl){
     const e=FEATURE_PICKS[k],key=fpKey(k),lv=keys.length>1?`<div class="fp-lv">Level ${e.l}</div>`:'';
     const own=new Set(pkGet(key)),marks={};G.prof&&G.prof.forEach(x=>{if(!own.has(x))marks[x]='✓';});
     if(e.t==='opt'){
-      const n=e.n||1,sel=pkValid(key,e.o,n),full=sel.length>=n;
+      const n=fpN(e,cls,ctx&&ctx.lvl),sel=pkValid(key,e.o,n),full=sel.length>=n;
       const chips=pickUI(key,e.o,n,{head:(n>1?`Choose ${n}`:'Choose 1')+(e.sw?` · ↻ ${e.sw}`:'')});
       let fxh='';sel.forEach(o=>{const p=e.fx&&e.fx[o]&&e.fx[o].p;if(p)fxh+=pickUI(key+':'+o,p.f,p.n,{head:`${o}: choose ${p.n} skills`,marks});
         const b=e.fx&&e.fx[o]&&e.fx[o].b;if(b)fxh+=`<div class="pk-note">Skills tab: +${Math.max(e.fx[o].m||0,md(st.attrs[e.fx[o].a]))} (${e.fx[o].a} mod., min. ${e.fx[o].m}) on ${b.join(' and ')}.</div>`;});
@@ -4378,7 +4379,7 @@ function sbLvlHint(prev){if(_lu)return;const wl=clsLvlOf('Wizard');if(!(wl>prev&
 function buildSpCount(){const el=document.getElementById('spCountBox');if(!el)return;
   const X=spMcX(),multi=isMulti();let h='';
   if(!multi&&X.S.length===1){const n=spClsCounts(X.S[0],X),n2=(a,b)=>'<b class="'+(a>b?'spmc-over':'')+'">'+a+'/'+b+'</b>';
-    h=[n.cant!==null?'Cantrips '+n2(n.cc,n.cant):'',n.prep!==null?'Prepared '+n2(n.pc,n.prep):'',X.S[0].cls==='Wizard'?sbTxt():''].filter(Boolean).join(' · ');}
+    h=[n.cant!==null?'Cantrips '+n2(n.cc,n.cant):'',n.prep!==null?(n.pl||'Prepared')+' '+n2(n.pc,n.prep):'',X.S[0].cls==='Wizard'?sbTxt():''].filter(Boolean).join(' · ');}
   el.innerHTML=h;el.style.display=h?'':'none';if(multi)buildSpMc();}
 function buildMySpells0(){
   apSync();buildSpMc(); // Paket F4: Prepared-Zahlen je Klasse
@@ -8282,12 +8283,13 @@ subclass:{
 function getAbUses(id){return (st.abUses=st.abUses||{})[id]||0;}
 function setAbUses(id,n){(st.abUses=st.abUses||{})[id]=n;}
 
-// uses: Zahl | "wis"/"cha" (Modifikator, min. 1) | "level" (Stufe) | "level*5" (Faktor × Stufe) | "pb" (Übungsbonus) | {Stufe:Anzahl} (höchste erreichte Stufe gilt)
+// uses: Zahl | "wis"/"cha" (Modifikator, min. 1) | "level" (Stufe) | "level*5" (Faktor × Stufe) | "1+cha" (Zahl + Modifikator, min. 1) | "pb" (Übungsbonus) | {Stufe:Anzahl} (höchste erreichte Stufe gilt)
 function abMaxUses(u,lvl){
   if(['str','dex','con','int','wis','cha'].includes(u))return Math.max(1,getAbilityMod(u.toUpperCase()));
   if(u==='level')return lvl;
   if(typeof u==='string'&&/^level\*\d+$/.test(u))return lvl*parseInt(u.split('*')[1]);
   if(typeof u==='string'&&/^(str|dex|con|int|wis|cha)\*\d+$/.test(u))return Math.max(1,getAbilityMod(u.slice(0,3).toUpperCase()))*parseInt(u.split('*')[1]); // Paket M: Spell-Storing Item „twice your Intelligence modifier (minimum of twice)“
+  if(typeof u==='string'&&/^\d+\+(str|dex|con|int|wis|cha)$/.test(u)){const p=u.split('+');return Math.max(1,+p[0]+getAbilityMod(p[1].toUpperCase()));} // Paket T2: „1 + your Charisma modifier“ (Divine Sense 2014)
   if(u==='pb')return pbOfLvl(totLvl()); // Paket F2: Übungsbonus = Gesamtstufe (Einzelklasse unverändert)
   if(u&&typeof u==='object'){let m=0;Object.keys(u).forEach(k=>{if(lvl>=+k)m=u[k];});return m;}
   return u;
@@ -8305,11 +8307,16 @@ const COMBAT_SKIP_NAMES=new Set(["Ability Score Improvement","Epic Boon","Spellc
  "Draconic Gift","Otherworldly Glamour","Additional Rune Known","Implement of Peace","Implements of Mercy","Whispers of the Dead",
  "Tools of the Trade","Replicate Magic Item","Magic Item Adept","Magic Item Master"]); // Artificer (Paket M)
 const COMBAT_SKIP_KEEP=new Set(["Beast Spells","Sculpt Spells","Share Spells","Alchemical Savant"]); // enden auf „Spells“, sind aber Kampf-Features
+// Paket T2 (18.10.2026): Willow 2014 – Subklassen-Einleitungen (statt „… Subclass“) und Nicht-Kampf-Passive der SRD-Klassen
+const COMBAT_SKIP_14=new Set(["Primal Path","Bard College","Divine Domain","Druid Circle","Martial Archetype","Monastic Tradition","Sacred Oath",
+ "Ranger Archetype","Roguish Archetype","Sorcerous Origin","Otherworldly Patron","Arcane Tradition","Bonus Cantrip","Additional Magical Secrets",
+ "Natural Explorer","Favored Enemy","Spell Mastery","Timeless Body","Tongue of the Sun and Moon","Divine Health","Purity of Body",
+ "Song of Rest (d6)","Song of Rest (d8)","Song of Rest (d10)","Song of Rest (d12)"]);
 function combatSkip(f){
   if(f.tag&&f.tag!=='Passiv')return false;
   const n=f.name;
   if(COMBAT_SKIP_KEEP.has(n))return false;
-  return COMBAT_SKIP_NAMES.has(n)||/ Subclass$/.test(n)||/ Savant$/.test(n)||/^Tenets of /.test(n)||/ Spells$/.test(n);
+  return COMBAT_SKIP_NAMES.has(n)||(R14&&COMBAT_SKIP_14.has(n))||/ Subclass$/.test(n)||/ Savant$/.test(n)||/^Tenets of /.test(n)||/ Spells$/.test(n);
 }
 function clsSubKey(obj,subcls){
   if(!obj||!subcls)return null;
@@ -8350,7 +8357,7 @@ function combatUnarmoredAC(cls,subcls,lvl){
   const feats=(cd.base||[]).concat(sk?cd.subclass[sk]:[]).filter(f=>f.lvl<=lvl);
   let best=null;
   feats.forEach(f=>{
-    const m=/(?:base Armor Class|your AC) equals (\d+) (?:plus|\+) your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)(?: and (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma))? modifiers?(?!\s+if)/.exec(f.desc||'');
+    const m=/(?:base Armor Class|your AC|your Armor Class) equals (\d+) (?:plus|\+) your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)(?: (?:and|modifier \+ your) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma))? modifiers?(?!\s+if)/.exec(f.desc||''); // Paket T2: auch „10 + your Dexterity modifier + your Constitution modifier“ (2014)
     if(!m)return;
     let ac=parseInt(m[1])+getAbilityMod(AB_FULL[m[2]])+(m[3]?getAbilityMod(AB_FULL[m[3]]):0);
     if(!best||ac>best.ac)best={ac,name:f.name};
@@ -8594,7 +8601,8 @@ function togAb(id){
 function hfMod(a){const m=getAbilityMod(a);return m?fmt(m):'';}
 function hfMa(L){const t=CLASS_TABLES.Monk,r=t&&(t.rows||[]).find(x=>+x.lvl===L);return (r&&r.martial)||'1d6';}
 const HEAL_FX={
-  secondwind:{re:/regain Hit Points equal to 1d10 plus your Fighter level/i,f:L=>'1d10+'+L},
+  secondwind:{re:/regain Hit Points equal to 1d10 (?:plus|\+) your Fighter level/i,f:L=>'1d10+'+L}, // Paket T2: „1d10 + your fighter level“ (2014)
+  mk_oh_wholeness:{re:/regain hit points equal to three times your monk level/i,f:L=>String(3*L)}, // Paket T2: Way of the Open Hand (PHB-Text)
   mk_uncannymetabolism:{re:/roll your Martial Arts die, and regain a number of Hit Points equal to your Monk level plus the number rolled/i,f:L=>hfMa(L)+'+'+L},
   mk_woh_wholeness:{re:/roll your Martial Arts die\. You regain a number of Hit Points equal to the number rolled plus your Wisdom modifier/i,f:L=>hfMa(L)+hfMod('WIS')},
   wl_un_indestructiblelife:{re:/regain hit points equal to 1d8 \+ your warlock level/i,f:L=>'1d8+'+L},
@@ -8603,7 +8611,7 @@ const HEAL_FX={
   bb_zl_warrior:{re:/pool of four d12s that you can spend to heal yourself/i,die:12},
   wl_cep_healinglight:{re:/pool of d6s[\s\S]*maximum number of dice you can expend at once equals your Charisma modifier/i,die:6,cap:()=>Math.max(1,getAbilityMod('CHA'))},
   wl_ce_healinglight:{re:/pool of d6s[\s\S]*maximum number of dice you can spend at once equals your Charisma modifier/i,die:6,cap:()=>Math.max(1,getAbilityMod('CHA'))},
-  layonhands:{re:/restore a total number of Hit Points equal to five times your Paladin level/i,hp:1}
+  layonhands:{re:/restore a total number of Hit Points equal to (?:five times your Paladin level|your paladin level × 5)/i,hp:1} // Paket T2: 2014-Formulierung
 };
 function healHtml(ab,lvl,max,used){
   const H=HEAL_FX[ab.id];if(!H||!H.re.test(ab.desc||''))return '';const rest=max>0?Math.max(0,max-Math.min(used,max)):0,id=ab.id;
@@ -8663,7 +8671,7 @@ function getWisMod(){ return getAbilityMod('WIS'); }
 // App würfelt oder eigenes Ergebnis, + CON-Mod., mind. 1 HP (XPHB „Short Rest“). Long Rest (XPHB): alle HP, alle Hit Dice,
 // Temp HP enden, alle Zauberplätze, alle Tracker, Free Casts; Death Saves zurück (HP zurückgewonnen).
 const REST_SHORT_FROM={bardicinspiration:5,lt_wardingflare:6};
-const REST_SHORT_ONE=new Set(['wildshape','bb_rage','channeldivinity','secondwind','pw_psionicdice','sn_psionicdice']);
+const REST_SHORT_ONE=new Set(R14?[]:['wildshape','bb_rage','channeldivinity','secondwind','pw_psionicdice','sn_psionicdice']); // Paket T2: 2014 kennt das nicht (Wild Shape/Channel Divinity/Second Wind: alle Nutzungen je Short Rest)
 const REST_SHORT_ONE_FROM={af_flashofgenius:14}; // Paket M: Artificer Advanced Artifice „Refreshed Genius“ (L14) – Short Rest +1
 const REST_MANUAL=new Set(['wz_arcanerecovery','sorcerousrestoration','wl_magicalcunning','naturalrecovery']);
 function restKind(ab,lvl){
@@ -10975,7 +10983,7 @@ function luOpenList(){
     else{const n=_lu.feat,inst=st.feats.filter(f=>f.tag==='Feat'&&f.name===n).length-1;if(faPending(n,inst))r.push(n+': choose ability scores');if(fsPending(n))r.push(n+': choose spells');}}
   try{pkOpen().forEach(x=>r.push(x.txt));}catch(e){}
   if(S.includes('spell')){const I=luSpInfo(c);
-    if(I.needC)r.push('Cantrips '+I.n.cc+'/'+I.n.cant);if(I.needP)r.push('Prepared spells '+I.n.pc+'/'+I.n.prep);if(I.needB)r.push('Spellbook '+I.sb.n+'/'+I.sb.y);}
+    if(I.needC)r.push('Cantrips '+I.n.cc+'/'+I.n.cant);if(I.needP)r.push((I.n.pl==='Known'?'Known':'Prepared')+' spells '+I.n.pc+'/'+I.n.prep);if(I.needB)r.push('Spellbook '+I.sb.n+'/'+I.sb.y);}
   return r;
 }
 function luTitle(c){return c.cls+' '+c.lvl+(c.sub&&!luSub0(c.cls)?' ('+mcSubParts(c.cls,c.sub).n+')':'');}
@@ -11054,9 +11062,9 @@ function luStepAsi(L,c){
 function luStepSpell(L,c){
   const I=luSpInfo(c),n=I.n,cn=(lbl,a,b,need)=>'<span class="lu-cn'+(need?' open':(a>=b?' ok':''))+'">'+lbl+' <b>'+a+'/'+b+'</b></span>';
   let h='<div class="lu-h">Spells · '+fdEsc(c.cls)+' '+c.lvl+'</div><div class="lu-cnt">'
-    +(n.cant!==null?cn('Cantrips',n.cc,n.cant,I.needC):'')+(n.prep!==null?cn('Prepared',n.pc,n.prep,I.needP):'')+(I.sb?cn('📘 Spellbook',I.sb.n,I.sb.y,I.needB):'')+'</div>';
+    +(n.cant!==null?cn('Cantrips',n.cc,n.cant,I.needC):'')+(n.prep!==null?cn(n.pl||'Prepared',n.pc,n.prep,I.needP):'')+(I.sb?cn('📘 Spellbook',I.sb.n,I.sb.y,I.needB):'')+'</div>';
   if(n.cant!==null&&n.cant>(I.p.cant||0))h+='<div class="lu-note">+'+(n.cant-(I.p.cant||0))+' cantrip'+(n.cant-(I.p.cant||0)>1?'s':'')+' known.</div>';
-  if(n.prep!==null&&n.prep>(I.p.prep||0))h+='<div class="lu-note">+'+(n.prep-(I.p.prep||0))+' prepared spell'+(n.prep-(I.p.prep||0)>1?'s':'')+'.</div>';
+  if(n.prep!==null&&n.prep>(I.p.prep||0))h+='<div class="lu-note">+'+(n.prep-(I.p.prep||0))+' '+(n.pl==='Known'?'known':'prepared')+' spell'+(n.prep-(I.p.prep||0)>1?'s':'')+'.</div>';
   if(I.g>I.g0)h+='<div class="lu-warn">✦ New: level '+I.g+' spells</div>';
   if(I.sb&&c.lvl>1)h+='<div class="lu-note">📘 Add 2 Wizard spells to your spellbook (up to level '+I.g+'). Spells you add beyond your prepared number go to the spellbook unprepared.</div>';
   if(I.autos.length)h+='<div class="lu-note">✦ Always prepared now: '+fdEsc(I.autos.join(', '))+'</div>';
@@ -11282,7 +11290,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-18a';
+const APP_VERSION = 'willow-app-2026-10-18b';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -11760,11 +11768,19 @@ function spCalcCls(cls){const c=charClasses().find(x=>x.cls===cls);
   attrSync();const ab=c?spAbOf(c.cls,c.sub):'',mod=ab?md(st.attrs[ab]||10):0,p=prof();
   return {ab,mod,atk:p+mod,dc:8+p+mod};}
 function rollSpellAtkCls(cls){const C=spCalcCls(cls);rollD20({k:'atk',ab:C.ab,l:'Spell Attack ('+cls+')',mod:C.atk});}
+// Paket T2 (18.10.2026), Weiche (i): Willow 2014 – vorbereitete Zauber = Attributsmod. + Stufe (Cleric/Druid/Wizard) bzw. + ½ Stufe
+// abgerundet (Paladin, ab L2), mind. 1; die übrigen Zauberklassen haben „Spells Known“ in der Class Table und zählen jeden eigenen
+// Zauber ab Grad 1 (bekannte Zauber sind immer bereit). pl = Beschriftung „Prepared“/„Known“.
+const PREP14={Cleric:[1,1],Druid:[1,1],Wizard:[1,1],Paladin:[0.5,2]};
 function spClsCounts(c,X){ // Class Table der Klasse (Prepared/Cantrips) und eigene Zauber dieser Klasse (ohne Always Prepared)
   const t=CLASS_TABLES[c.cls],r=t&&(t.rows||[]).find(x=>+x.lvl===c.lvl),sx=scTable(c.cls,c.sub),sr=sx&&sx.rows.find(x=>+x.lvl===c.lvl);
   const tv=re=>{for(const [T,R] of [[t,r],[sx,sr]]){if(!T||!R)continue;const e=(T.extra||[]).find(x=>re.test(String(x.l)));if(e){const v=parseInt(R[e.k]);if(!isNaN(v))return v;}}return null;};
-  let pc=0,cc=0;(st.mySpells||[]).forEach(sp=>{if(sp.auto||spClsOf(sp,X)!==c.cls)return;if(+sp.grad>0){if(sp.prep===true)pc++;}else cc++;});
-  return {prep:tv(/prepared/i),cant:tv(/^cantrips/i),pc,cc};
+  const known=R14&&!PREP14[c.cls];
+  let pc=0,cc=0;(st.mySpells||[]).forEach(sp=>{if(sp.auto||spClsOf(sp,X)!==c.cls)return;if(+sp.grad>0){if(sp.prep===true||known)pc++;}else cc++;});
+  let prep=tv(R14?/^spells known/i:/prepared/i);
+  if(R14&&PREP14[c.cls]){const p=PREP14[c.cls],ab=AB_FULL[(CLASS_CORE_TRAITS[c.cls]||{}).spellcastingAbility];
+    prep=c.lvl>=p[1]&&ab?Math.max(1,getAbilityMod(ab)+Math.floor(c.lvl*p[0])):null;}
+  return {prep,cant:tv(/^cantrips/i),pc,cc,pl:known?'Known':'Prepared'};
 }
 function buildSpMc(){const el=document.getElementById('spMcBox');if(!el)return;
   const X=spMcX();
@@ -11772,7 +11788,7 @@ function buildSpMc(){const el=document.getElementById('spMcBox');if(!el)return;
   el.style.display='';
   const n2=(a,b)=>`<span class="${a>b?'spmc-over':''}">${a}/${b}</span>`;
   el.innerHTML=`<div class="spmc-h">By class</div>`+X.S.map(c=>{const C=spCalcCls(c.cls),n=spClsCounts(c,X);
-    const cnt=[n.cant!==null?'Cantrips '+n2(n.cc,n.cant):'',n.prep!==null?'Prepared '+n2(n.pc,n.prep):'',c.cls==='Wizard'?sbTxt():'',c.pact?'Pact Magic':''].filter(Boolean).join(' · ');
+    const cnt=[n.cant!==null?'Cantrips '+n2(n.cc,n.cant):'',n.prep!==null?(n.pl||'Prepared')+' '+n2(n.pc,n.prep):'',c.cls==='Wizard'?sbTxt():'',c.pact?'Pact Magic':''].filter(Boolean).join(' · ');
     return `<div class="spmc-row"><div class="spmc-n"><b>${pkEsc(c.cls)} ${c.lvl}</b><span class="spmc-ab">${C.ab||'—'}</span>${cnt?`<div class="spmc-c">${cnt}</div>`:''}</div>`+
       `<div class="spmc-dc"><label>DC</label>${C.dc}</div><button class="spmc-atk" onclick="rollSpellAtkCls('${c.cls}')" aria-label="Roll spell attack ${pkEsc(c.cls)}">${fmt(C.atk)} <i class="mi mi-dz"></i></button></div>`;}).join('');
 }

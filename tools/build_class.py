@@ -14,6 +14,8 @@ Neue Klasse, Schritt 0 (Paket N, 03.10.2026): Stub mit subclassList-Vorschlag (S
 Einzelne neue Subklasse einer befüllten Klasse (Paket N): an subclassList anhängen + Neubau in einem Aufruf
   python3 build_class.py DnD_Character_App.html src/class-druid.json druid_config.py --rebuild --add-sub "Circle of the Moon (XPHB)"
   (mehrfach möglich; Tracker der neuen Subklasse vorher in der Config ergänzen, sonst hat sie nur Features)
+Willow 2014 (Paket T2, 18.10.2026): python3 build_class.py --t14 [src14] – alle Configs aus tools/t14/ → tools/t14/*.js
+  (PHB-Fassung, nur SRD, SRD-Namen; Details im Abschnitt „Willow 2014“ unten und REFERENZ B30).
 Neubau einer bereits befüllten Klasse (seit 27.09.2026, Bard/Druid/Wizard):
   python3 build_class.py DnD_Character_App.html src/class-druid.json druid_config.py --rebuild
   ersetzt nur den CLASS_DATA-Block; erhält special (z. B. Druid "beasts"), subclassList und vorhandene
@@ -75,6 +77,147 @@ def keep_keys(d, old_keys):
         assert len(hit) <= 1, (k, hit)
         out[hit[0] if hit else k] = v
     return out
+
+# ── Willow 2014 (Paket T2, 18.10.2026): alle 12 SRD-Klassen aus 5etools-2014-src in Datenblöcke tools/t14/*.js ──
+# Aufruf (aus dem Ordner über dem Klon):  python3 willow/tools/build_class.py --t14 [src14]
+# Configs: tools/t14/<k>_config.py (Tracker 2014, feature_tags, optional append_optf, traits = Überschreibungen).
+# Schreibt tools/t14/CLASS_DATA.js, CLASS_TABLES.js, CLASS_CORE_TRAITS.js, SUBCLASS_LABELS.js (je eine Zeile, build_2014.py).
+T14_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14')
+SKILLS18 = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation',
+            'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand',
+            'Stealth', 'Survival']
+AB_LONG = {'str': 'Strength', 'dex': 'Dexterity', 'con': 'Constitution', 'int': 'Intelligence', 'wis': 'Wisdom', 'cha': 'Charisma'}
+
+
+def table_parts(cls):
+    """Class Table einer Klasse: (extra, rows) wie CLASS_TABLES (gleiche Logik wie der 2024-Bau unten)."""
+    extra, cols, slots = [], [], None
+    for g in cls.get('classTableGroups', []):   # Fighter 2014: keine Zusatzspalten
+        if 'rowsSpellProgression' in g: slots = g['rowsSpellProgression']; continue
+        for i, lab in enumerate(g['colLabels']):
+            l = clean(lab); k = re.sub(r'[^a-z]', '', l.split()[0].lower())
+            extra.append({'k': k, 'l': l}); cols.append((k, [r[i] for r in g['rows']]))
+    feat_lv = {}
+    for ref in cls['classFeatures']:
+        r = ref['classFeature'] if isinstance(ref, dict) else ref
+        p = r.split('|'); feat_lv.setdefault(int(p[3]), []).append('Subclass Feature' if p[0].lower() == 'subclass feature' else p[0])
+    return extra, cols, slots, feat_lv
+
+
+def table_rows(cls, keep=None):
+    extra, cols, slots, feat_lv = table_parts(cls)
+    rows = []
+    for lvl in range(1, 21):
+        names = [n for n in feat_lv.get(lvl, []) if keep is None or n in keep]
+        row = {'lvl': lvl, 'pb': math.ceil(lvl / 4) + 1, 'f': ', '.join(names) or '—'}
+        for k, vals in cols:
+            v = vals[lvl - 1]
+            if isinstance(v, dict) and v.get('type') == 'dice':
+                v = '+'.join(f"{x['number']}d{x['faces']}" for x in v['toRoll'])
+            elif isinstance(v, dict) and v.get('type') == 'bonusSpeed':
+                v = f"+{v['value']} ft." if v['value'] else 0
+            elif isinstance(v, dict) and v.get('type') == 'bonus':
+                v = f"+{v['value']}" if v['value'] else 0
+            elif isinstance(v, str):
+                v = clean(v)
+            assert not isinstance(v, (dict, list)), ('Zellentyp', cls['name'], k, v)
+            row[k] = v if v not in (0, None, '') else '—'
+        row['slots'] = (list(slots[lvl - 1]) + [0] * 9)[:9] if slots else [0] * 9
+        rows.append(row)
+    return extra, rows
+
+
+def untag14(t):
+    if isinstance(t, dict): t = t.get('full') or t.get('proficiency', '')   # Druid: {proficiency:'shield', full:'shields (… metal)'}
+    t = clean(t)
+    return t[:1].upper() + t[1:]
+
+
+def traits14(c):
+    """CLASS_CORE_TRAITS aus der PHB-Fassung (5etools-2014-src): hd, proficiency, startingProficiencies,
+    startingEquipment, multiclassing, page. primaryAbility = Multiclass-Voraussetzung (mcReq liest „and“/„or“)."""
+    req = (c.get('multiclassing') or {}).get('requirements') or {}
+    if 'or' in req:
+        ors = [k for o in req['or'] for k in o]; prim = ' or '.join(AB_LONG[k] for k in ors)
+        mreq = ' or '.join(f'{AB_LONG[k]} {v}' for o in req['or'] for k, v in o.items())
+    else:
+        prim = ' and '.join(AB_LONG[k] for k in req); mreq = ' and '.join(f'{AB_LONG[k]} {v}' for k, v in req.items())
+    sp = c.get('startingProficiencies') or {}
+    ARM = {'light': 'Light armor', 'medium': 'Medium armor', 'heavy': 'Heavy armor', 'shield': 'Shields'}
+    WPN = {'simple': 'Simple weapons', 'martial': 'Martial weapons'}
+    arm = ', '.join((ARM.get(a) if isinstance(a, str) else None) or untag14(a) for a in sp.get('armor', []))
+    wpn = ', '.join(WPN.get(w, untag14(w).title() if '{@' in w else untag14(w)) for w in sp.get('weapons', []))
+    tools = ', '.join(untag14(t) for t in sp.get('tools', []))
+    sk = (sp.get('skills') or [{}])[0]
+    if 'any' in sk: skp = {'count': sk['any'], 'from': list(SKILLS18)}
+    else:
+        ch = sk['choose']; low = {x.lower(): x for x in SKILLS18}
+        skp = {'count': ch.get('count', 1), 'from': [low[x.lower()] for x in ch['from']]}
+    se = c.get('startingEquipment') or {}
+    eq = [untag14(x) for x in se.get('default', [])]
+    if se.get('goldAlternative'):   # {@dice 5d4 × 10|5d4 × 10|Starting Gold} → Würfelformel (nicht der Anzeigetext)
+        g = re.sub(r'\{@dice ([^|}]+)[^}]*\}', r'\1', se['goldAlternative'])
+        eq.append('— or — ' + clean(g) + ' GP instead of this equipment')
+    pg = (c.get('multiclassing') or {}).get('proficienciesGained') or {}
+    gains = [(ARM.get(a) if isinstance(a, str) else None) or untag14(a) for a in pg.get('armor', [])]
+    gains += [WPN.get(w) or untag14(w) for w in pg.get('weapons', [])]
+    gains += [clean(t) for t in pg.get('tools', [])]
+    for s in pg.get('skills', []):
+        ch = s.get('choose', {}); n = ch.get('count', 1)
+        gains.append(('one skill' if n == 1 else f'{n} skills') + (' of your choice' if len(ch.get('from', [])) == 18 else ' from the class\'s skill list'))
+    t = {'hd': 'd%d' % c['hd']['faces'], 'primaryAbility': prim,
+         'hpLevel1': '%d + Con modifier' % c['hd']['faces'], 'hpPerLevel': 'd%d (or %d) + Con modifier' % (c['hd']['faces'], c['hd']['faces'] // 2 + 1),
+         'savingThrows': [AB_LONG[x] for x in c['proficiency']], 'armorTraining': arm or 'None', 'weaponProficiencies': wpn}
+    if tools: t['toolProficiencies'] = tools
+    t.update({'skillProficiencies': skp, 'spellcastingAbility': AB_LONG.get(c.get('spellcastingAbility', ''), ''),
+              'startingEquipment': eq, 'multiclassingReq': mreq, 'multiclassingGains': ', '.join(gains) or 'None',
+              'source': f"SRD 5.1 (PHB 2014, page {c.get('page')})"})
+    return t
+
+
+def build_t14(src14):
+    import glob
+    from class_extract import t14_setup, render
+    rn = t14_setup(src14)
+    J = lambda f: json.load(open(os.path.join(src14, f)))
+    optf, feats, items = J('optionalfeatures.json')['optionalfeature'], J('feats.json')['feat'], J('items.json')['item']
+    CD, CT, TR = {}, {}, {}
+    for cf in sorted(glob.glob(os.path.join(T14_DIR, '*_config.py'))):
+        cfg = runpy.run_path(cf)['CONFIG']; name = cfg['class']
+        data = json.load(open(os.path.join(src14, f'class-{name.lower()}.json')))
+        sub = [s for s in data['subclass'] if s.get('srd') and s['classSource'] == 'PHB']
+        assert len(sub) == 1, (name, [s['name'] for s in sub])
+        dropdown = [f"{sub[0]['name']} ({sub[0]['source']})"]
+        cls, base, subs, srcs = extract(data, dropdown, optf, feats, items)
+        apply_feature_tags(cfg, base, subs)
+        for fname, ftype in cfg.get('append_optf', {}).items():   # z. B. Eldritch Invocations: SRD-Optionen (Typ EI) anhängen
+            f = [x for x in base if x['name'] == fname]; assert len(f) == 1, (name, fname)
+            ctx = Ctx(data, optf, feats, items)
+            opts = sorted((o for o in optf if o.get('srd') and ftype in o.get('featureType', [])), key=lambda o: o['name'])
+            lines = render([{'type': 'refOptionalfeature', 'optionalfeature': o['name'] + '|' + o['source']} for o in opts], ctx, [])
+            f[0]['desc'] += '\nEldritch Invocation Options:\n' + '\n'.join(lines) if ftype == 'EI' else '\n' + '\n'.join(lines)
+        abil = build_trackers(cfg, base, subs)
+        ids = [a['id'] for v in abil.values() for a in v]; assert len(ids) == len(set(ids)), ('Tracker-id doppelt', name)
+        CD[name] = {'special': cfg.get('special', []), 'subclassList': dropdown, 'abilities': abil, 'base': base, 'subclass': subs}
+        extra, rows = table_rows(cls)
+        CT[name] = {'extra': extra, 'rows': rows}
+        TR[name] = dict(traits14(cls), **cfg.get('traits', {}))
+        print(f"{name:9} {cls['source']} · {dropdown[0]} · base {len(base)} · Subklasse {sum(len(v) for v in subs.values())} · "
+              f"Tracker {len(ids)} · Tabelle {[e['l'] for e in extra]}")
+    # Prüfung: keine 2024-Reste, keine unaufgelösten Tags, SRD-Namen (T-E1)
+    blob = json.dumps(CD, ensure_ascii=False)
+    for bad in ['{@', 'XPHB'] + [k for k in rn]:
+        if bad.startswith('{@') or bad == 'XPHB': assert bad not in blob, bad
+        elif re.search(r'\b' + re.escape(bad) + r'\b', blob, re.I): print('  !! alter Name statt SRD-Name:', bad)
+    W = lambda n, v: open(os.path.join(T14_DIR, n + '.js'), 'w', encoding='utf-8').write(
+        f'const {n}=' + json.dumps(v, ensure_ascii=False, separators=(',', ':')) + ';\n')
+    W('CLASS_DATA', CD); W('CLASS_TABLES', CT); W('CLASS_CORE_TRAITS', TR); W('SUBCLASS_LABELS', {})
+    print('geschrieben: tools/t14/CLASS_DATA.js, CLASS_TABLES.js, CLASS_CORE_TRAITS.js, SUBCLASS_LABELS.js')
+
+
+if __name__ == '__main__' and sys.argv[1:2] == ['--t14']:
+    build_t14(sys.argv[2] if len(sys.argv) > 2 else 'src14')
+    sys.exit(0)
 
 
 if __name__ == '__main__':

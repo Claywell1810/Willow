@@ -10,7 +10,8 @@
 #   bash willow/tools/setup.sh neu          # + Quellen für neu_check.py (Paket N): alle Klassen aus class/index.json nach src/neu/, backgrounds.json, dazu klassen/zauber/rassen/bestien
 #   bash willow/tools/setup.sh fotos        # + Playwright/Chromium prüfen, echte Schriften (ui_shots.py, theme_shots.py)
 #   bash willow/tools/setup.sh t14          # + Willow 2014 (Paket T): Quellen aus 5etools-2014-src nach src14/ (12 Klassen, spells-phb, races, backgrounds, feats, items, optionalfeatures,
-#                                             conditionsdiseases, actions, variantrules, bestiary-mm, magicvariants, gendata-Lookup) + Cinzel für tools/t14_icon.py
+#                                             conditionsdiseases, actions, variantrules, bestiary-mm, magicvariants, gendata-Lookup, book-phb) + Cinzel für tools/t14_icon.py;
+#                                             Klassen-Datenblöcke danach: bash willow/tools/t14_klassen.sh (Paket T2)
 #   bash willow/tools/setup.sh alle         # alles
 # Mehrere Angaben gehen zusammen: bash willow/tools/setup.sh klassen zauber
 set -e
@@ -86,6 +87,7 @@ if has t14; then
   get14 spells/spells-phb.json; get14 generated/gendata-spell-source-lookup.json
   for f in races backgrounds fluff-backgrounds feats items items-base magicvariants optionalfeatures conditionsdiseases actions variantrules; do get14 "$f.json"; done
   get14 bestiary/bestiary-mm.json
+  get14 book/book-phb.json   # Paket T2: Multiclass-Tabelle/-Regeln PHB 2014 (mc_slots.py --t14)
   [ -d node_modules/@fontsource/cinzel ] || npm i @fontsource/cinzel --silent >/dev/null 2>&1
   echo "   2014-Quellen in src14/ ($(ls src14 | wc -l) Dateien) → Build: python3 $W/tools/build_2014.py DnD_Character_App.html --out 2014"
 fi

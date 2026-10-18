@@ -12,9 +12,11 @@ Aufruf (aus dem Ordner über dem Klon):
 Was der Build ändert (alles andere ist gemeinsamer Code):
   1. const RULES='2024' → '2014' (damit R14=true und LS_PFX='w14_': Regel-Weichen, getrennter Speicher)
   2. APP_VERSION, Name auf dem Home-Bildschirm (apple-mobile-web-app-title), <title>
-  3. Datenblöcke: jede Datei tools/t14/<BLOCK>.js ersetzt die Zeile `const <BLOCK>=…` der Quelle
-     (Datei = genau eine Zeile `const <BLOCK>=…;`, erzeugt von den Konvertern mit --t14 ab Paket T2;
-     in T1 noch leer → 2014-Build läuft mit den 2024-Daten)
+  3. Datenblöcke: jede Datei tools/t14/<BLOCK>.js ersetzt die Anweisung `const <BLOCK>=…;` der Quelle
+     (Datei = genau eine Zeile `const <BLOCK>=…;`, erzeugt von den Konvertern mit --t14 ab Paket T2).
+     Seit T2 auch mehrzeilige Blöcke (CLASS_TABLES, CLASS_CORE_TRAITS, SUBCLASS_LABELS, COMBAT_SKIP_NAMES …): das Ende
+     sucht `stmt_end()` (Klammern/Strings/Kommentare, `;` auf Ebene 0). Bei CLASS_DATA.js werden zusätzlich alle
+     Anweisungen `CLASS_DATA["…"]={…};` der Quelle entfernt (die 2014-Klassen stehen komplett in CLASS_DATA.js).
   4. service-worker.js aus willow/service-worker.js mit eigenem CACHE_NAME, manifest.json aus willow/manifest.json
      mit eigenem Namen und eigener id/scope/start_url (Ordner 2014/ = eigene Installation)
 Icons (2014/willow-icon-*.png, Banderole „2014“) erzeugt tools/t14_icon.py, nicht dieser Build.
@@ -34,6 +36,40 @@ def one(s, alt, neu, was):
     if n != 1:
         fail(f'{was}: Anker {n}× statt 1× gefunden ({alt[:60]!r})')
     return s.replace(alt, neu)
+
+
+def stmt_end(s, i):
+    """Ende der JS-Anweisung ab Index i: Position direkt hinter dem `;` auf Klammer-Ebene 0
+    (Strings '…' "…" `…`, Kommentare // und /* */ werden übersprungen; Datenblöcke enthalten keine Regex-Literale)."""
+    depth, n = 0, len(s)
+    while i < n:
+        c = s[i]
+        if c in '"\'`':
+            q = c; i += 1
+            while i < n and s[i] != q:
+                i += 2 if s[i] == '\\' else 1
+        elif c == '/' and s[i + 1:i + 2] == '/':
+            i = s.find('\n', i)
+            if i < 0: break
+            continue
+        elif c == '/' and s[i + 1:i + 2] == '*':
+            i = s.index('*/', i + 2) + 1
+        elif c in '([{':
+            depth += 1
+        elif c in ')]}':
+            depth -= 1
+        elif c == ';' and depth == 0:
+            return i + 1
+        i += 1
+    fail('Anweisungsende nicht gefunden')
+
+
+def line_rest(s, j):
+    """Hinter dem `;`: Rest der Zeile mitnehmen, wenn dort nur ein Kommentar/Leerraum steht."""
+    k = s.find('\n', j)
+    k = len(s) if k < 0 else k
+    rest = s[j:k].strip()
+    return k if (not rest or rest.startswith('//')) else j
 
 
 def version_of(html):
@@ -66,12 +102,25 @@ def build(src, out, version=None):
         neu = open(f, encoding='utf-8').read().strip()
         if '\n' in neu or not re.match(rf'const {re.escape(name)}\s*=', neu) or not neu.endswith(';'):
             fail(f'{f}: muss genau eine Zeile `const {name}=…;` sein')
-        hits = [m for m in re.finditer(rf'^const {re.escape(name)}\s*=.*$', s, re.M)]
+        hits = [m for m in re.finditer(rf'^const {re.escape(name)}\s*=', s, re.M)]
         if len(hits) != 1:
             fail(f'Block {name}: {len(hits)}× in der Quelle gefunden (Zeile `const {name}=…` muss eindeutig sein)')
-        a, b = hits[0].span()
+        a = hits[0].start()
+        b = line_rest(s, stmt_end(s, a))
         s = s[:a] + neu + s[b:]
         bl.append(name)
+        if name == 'CLASS_DATA':   # Paket T2: 2024-Klassen (je eine Anweisung CLASS_DATA["…"]={…};) entfernen
+            weg = 0
+            while True:
+                m = re.search(r'^CLASS_DATA\["[^"]+"\]=', s, re.M)
+                if not m: break
+                e = line_rest(s, stmt_end(s, m.start()))
+                s = s[:m.start()] + s[e + 1 if s[e:e + 1] == '\n' else e:]
+                weg += 1
+            if not weg:
+                fail('CLASS_DATA: keine Anweisungen CLASS_DATA["…"]= in der Quelle (Aufbau geändert?)')
+    # Paket T2: Liste der ersetzten Blöcke im Build (app_check.js erkennt daran die erste Umstellung eines Blocks auf 2014-Daten)
+    s = one(s, "const RULES='2014';", "const RULES='2014';const T14_BLOCKS=" + json.dumps(bl) + ";", 'T14_BLOCKS')
     # 4) Schreiben
     os.makedirs(out, exist_ok=True)
     open(os.path.join(out, 'index.html'), 'w', encoding='utf-8').write(s)

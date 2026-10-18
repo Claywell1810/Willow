@@ -11,6 +11,8 @@ leeren Listen drin. Das Skript prüft: jede App-Klasse (`CLASS_CORE_TRAITS`) hat
 steht in `SKILLS`, keine unbekannten Felder/Werte.
 
 Aufruf: python3 willow/tools/mc_convert.py DnD_Character_App.html src [--write]
+Willow 2014 (Paket T2, 18.10.2026): python3 willow/tools/mc_convert.py 2014/index.html src14 --t14 [--write]
+  PHB-Fassung (5etools-2014-src), Klassen aus dem 2014-Build; schreibt tools/t14/CLASS_MC_GAINS.js.
 """
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -31,6 +33,10 @@ def untag(t):
 def main():
     html, src = sys.argv[1], sys.argv[2]
     write = '--write' in sys.argv
+    t14 = '--t14' in sys.argv
+    if t14:
+        from class_extract import t14_setup
+        t14_setup(src)
     s = open(html, encoding='utf-8').read()
     skills = re.search(r'const SKILLS\s*=\s*\[([\s\S]*?)\];', s)
     app_sk = re.findall(r"n:\s*['\"]([^'\"]+)['\"]", skills.group(1)) if skills else []
@@ -39,6 +45,9 @@ def main():
     by_low = {x.lower(): x for x in app_sk}
     m = re.search(r'const CLASS_CORE_TRAITS = \{', s)
     app_cls = re.findall(r'\n  "?(\w+)"?\s*:\s*\{', s[m.end() - 1:s.index('\n};', m.end())]) if m else []
+    if t14:
+        from klassen import app_classes
+        app_cls = app_classes(html)
     out, errors = {}, []
     for f in sorted(os.listdir(src)):
         if not re.match(r'class-\w+\.json$', f):
@@ -54,9 +63,12 @@ def main():
                     errors.append(f'{name}: unbekanntes Feld {k}')
             e = {'w': [], 'a': [], 't': [], 'sk': None, 'src': c['source']}
             for w in pg.get('weapons', []):
+                if t14 and w.startswith('{@'):   # Monk 2014: {@item shortsword|phb|shortswords} → „Shortswords“
+                    x = untag(w); e['w'].append(x[:1].upper() + x[1:]); continue
                 if w not in WEAPON: errors.append(f'{name}: Waffe {w}'); continue
                 e['w'].append(WEAPON[w])
             for a in pg.get('armor', []):
+                if isinstance(a, dict): a = a.get('proficiency', '')   # Druid 2014: {proficiency:'shield', full:'shields (… metal)'}
                 if a not in ARMOR: errors.append(f'{name}: Rüstung {a}'); continue
                 e['a'].append(ARMOR[a])
             for t in pg.get('tools', []):
@@ -79,6 +91,12 @@ def main():
             errors.append(f'{k}: keine XPHB-Quelle in {src}')
     for e in errors:
         print('FEHLER', e)
+    if t14:
+        if not write or errors:
+            print('(Trockenlauf)' if not errors else 'nicht geschrieben'); return
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14', 'CLASS_MC_GAINS.js')
+        open(p, 'w', encoding='utf-8').write('const CLASS_MC_GAINS=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n')
+        print('geschrieben:', p); return
     block = ('// CLASS_MC_GAINS-START (tools/mc_convert.py, 5e.tools multiclassing.proficienciesGained XPHB; Paket F3 03.10.2026)\n'
              'const CLASS_MC_GAINS=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n// CLASS_MC_GAINS-END')
     if not write or errors:
