@@ -15,8 +15,11 @@ Nichts wird erfunden: Werte nur aus 5e.tools-Feldern bzw. -Tags:
        upk:{g, k} aus „N additional … for each spell slot level above g“ (fester Zuschlag),
        cs:{'1':'1d10','5':'2d10',…} aus scalingLevelDice (Cantrips, Charakterstufe)}
 Zwei Würfel in einem Satz („{@damage 2d10} Bludgeoning damage and {@damage 4d6} Cold damage“) = eine Option.
+
+Willow 2014 (Paket T3, 18.10.2026):  python3 spell_rolls.py 2014/index.html src14 --t14 [--write]
+  Quelle = PHB-Fassung aus src14/spells-phb.json (SRD-Namen T-E1 über das Feld `srd`), schreibt tools/t14/SPELL_ROLLS.js.
 """
-import glob, json, re, sys
+import glob, json, os, re, sys
 
 ABBR = {'strength': 'STR', 'dexterity': 'DEX', 'constitution': 'CON', 'intelligence': 'INT', 'wisdom': 'WIS', 'charisma': 'CHA'}
 TYPES = 'acid|bludgeoning|cold|fire|force|lightning|necrotic|piercing|poison|psychic|radiant|slashing|thunder'
@@ -75,7 +78,7 @@ def options(sp):
                 if 'THP' in tags and (re.search(r'temporary hit points', plain(rest[:60]), re.I) or re.search(r'temporary hit points equal to\s*$', plain(pre), re.I)): o = {'k': 'temp', 'd': d, 't': ''}
                 elif 'HL' in tags and re.search(r'hit points', win, re.I) and not re.search(r'temporary hit points', win, re.I): o = {'k': 'heal', 'd': d, 't': ''}
                 else: i += 1; continue
-            if re.match(r'\s*(?:(?:' + TYPES + r')\s+damage\s+)?plus your spellcasting ability modifier', rest, re.I): o['m'] = 1
+            if re.match(r'\s*(?:(?:' + TYPES + r')\s+damage\s+)?(?:plus|\+) your spellcasting ability modifier', rest, re.I): o['m'] = 1   # „+ your …“ = PHB 2014 (Paket T3)
             if not any(x['k'] == o['k'] and x['d'] == o['d'] and x['t'] == o['t'] for x in out): out.append(o)
             i += 1
     return out
@@ -130,9 +133,12 @@ def cantrip(sp, opts):
 
 def main():
     html, srcdir = sys.argv[1], sys.argv[2]; write = '--write' in sys.argv
+    T14 = '--t14' in sys.argv
     S = {}
     for f in sorted(glob.glob(srcdir + '/spells-*.json')):
-        for s in json.load(open(f, encoding='utf-8')).get('spell', []): S.setdefault(s['name'], []).append(s)
+        for s in json.load(open(f, encoding='utf-8')).get('spell', []):
+            n = s['srd'] if T14 and isinstance(s.get('srd'), str) else s['name']   # Paket T3: SRD-Namen
+            S.setdefault(n, []).append(s)
     h = open(html, encoding='utf-8').read()
     a = h.index('const ZB_SPELLS='); line = h[a + 16:h.index('\n', a)].rstrip().rstrip(';')
     Z = json.loads(line)
@@ -172,6 +178,9 @@ def main():
             if len(r.get('o', [])) > 1: print(' ', n, '→', ' | '.join(f"{o['l']}: {o['d']}" for o in r['o']))
     if not write: print('(Trockenlauf, --write schreibt)'); return
     row = 'const SPELL_ROLLS=' + json.dumps(res, ensure_ascii=False, separators=(',', ':')) + ';'
+    if T14:
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14', 'SPELL_ROLLS.js')
+        open(p, 'w', encoding='utf-8').write(row + '\n'); print('geschrieben', p); return
     if 'const SPELL_ROLLS=' in h:
         b = h.index('const SPELL_ROLLS='); h = h[:b] + row + h[h.index('\n', b):]
     else:

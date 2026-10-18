@@ -746,7 +746,7 @@ const REGRESSION = [
       if (cs.paddingLeft !== '14px') return '.body-Padding fehlt (' + cs.paddingLeft + ')';
       return true;
     } },
-  { name: 'Paket A: Bestien sauber aus 5e.tools (keine {@-Reste, keine abgeschnittenen Texte), Stat-Block-Anzeige, gespeicherte Bestien mit aktuellen Daten, Zauber mit Stat-Block', datum: '27.09.2026',
+  { name: 'Paket A: Bestien sauber aus 5e.tools (keine {@-Reste, keine abgeschnittenen Texte), Stat-Block-Anzeige, gespeicherte Bestien mit aktuellen Daten, Zauber mit Stat-Block', datum: '27.09.2026', r: '2024',
     run: ({ w, d, sel }) => {
       if (typeof w.sbHtml !== 'function' || w.eval('typeof SPELL_STATBLOCKS') === 'undefined') return 'Stat-Block-Anzeige fehlt (sbHtml/SPELL_STATBLOCKS)';
       const B = JSON.parse(w.eval('JSON.stringify(BST_DATA)'));
@@ -920,7 +920,7 @@ const REGRESSION = [
       w.eval("st.bg=''"); w.buildBgLore();
       return true;
     } },
-  { name: 'Background-Text vollständig aus 5e.tools (Languages, Equipment, Abschnitte, Tabellen) in Info- und Background-Tab; Strixhaven-/Ravnica-Zauber auf „★ My Class“ nur mit Zauberliste', datum: '01.10.2026',
+  { name: 'Background-Text vollständig aus 5e.tools (Languages, Equipment, Abschnitte, Tabellen) in Info- und Background-Tab; Strixhaven-/Ravnica-Zauber auf „★ My Class“ nur mit Zauberliste', datum: '01.10.2026', r: '2024',
     run: ({ w, d, sel }) => {
       const body = d.getElementById('bgLoreBody');
       w.eval("st.bg='Quandrix Student'"); w.buildBgLore();
@@ -1474,10 +1474,11 @@ const REGRESSION = [
       w.eval('apSync=window._apS;st.mySpells=[];st.concActive=null'); w.buildMySpells(); return true;
     } },
   { name: 'Zauber-Kategorien: jeder Zauber hat eine gültige Kategorie (SPELL_CATS), Bild in My Spells (Schadenstyp, Schutz/Heilung, Rahmen nach Zeit)', datum: '01.10.2026',
-    run: ({ w, d }) => {
+    run: ({ w, d, RULES }) => {
       const bad = w.eval("ZB_SPELLS.filter(s=>{const c=SPELL_CATS[s.name]||'';const [k,t]=c.split(':');return !(k==='dmg'?(SPELL_CAT_ICONS.dmg[t]):SPELL_CAT_ICONS[k]&&k!=='dmg')}).map(s=>s.name)");
       if (bad.length) return 'ohne/ungültige Kategorie: ' + bad.slice(0, 5).join(', ');
       const want = { 'Fireball': '🔥', 'Shield': '🛡️', 'Cure Wounds': '💚', 'Bless': '💪', 'Misty Step': '🌀', 'Entangle': '⛓️', 'Chromatic Orb': '🌈', 'Find Familiar': '🐾' };
+      if (RULES === '2014') { delete want['Chromatic Orb']; want['Prismatic Spray'] = '🌈'; }   // Paket T3: Chromatic Orb ist nicht SRD
       w.eval('st.mySpells=' + JSON.stringify(Object.keys(want).map(n => ({ name: n, grad: 1, school: '', prep: true, notes: '' }))));
       w.eval('window._apS=apSync;apSync=()=>false'); w.buildMySpells();
       for (const c of d.querySelectorAll('#mySpells .spell-card')) {
@@ -2100,7 +2101,7 @@ const REGRESSION = [
       ok('30'); if (hp() !== 30) return 'volle HP (nach Kappung) folgen nicht: ' + hp();
       return true;
     } },
-  { name: 'Paket Q: Zauber würfeln – SPELL_ROLLS (Angriff/Save/½/Heilung, Hochstufen, Cantrip-Stufen, MOD), nach Cast → Platz direkt in den Würfel-Dialog (Fireball Save-Hinweis + ½, Fire Bolt Angriff → Schaden), Save ohne Würfel/mehrere Optionen als Auswahl, Heilung „Heal me“, 🎲 ohne Platz mit Grad-Wahl; freier Würfel-Dialog mit Adv/Dis und gemischten Würfeln', datum: '03.10.2026',
+  { name: 'Paket Q: Zauber würfeln – SPELL_ROLLS (Angriff/Save/½/Heilung, Hochstufen, Cantrip-Stufen, MOD), nach Cast → Platz direkt in den Würfel-Dialog (Fireball Save-Hinweis + ½, Fire Bolt Angriff → Schaden), Save ohne Würfel/mehrere Optionen als Auswahl, Heilung „Heal me“, 🎲 ohne Platz mit Grad-Wahl; freier Würfel-Dialog mit Adv/Dis und gemischten Würfeln', datum: '03.10.2026', r: '2024',
     run: ({w, d, sel}) => {
       if (typeof w.spDice !== 'function' || !w.eval('typeof SPELL_ROLLS==="object"')) return 'SPELL_ROLLS/spDice fehlen';
       const SR = n => w.eval(`SPELL_ROLLS[${JSON.stringify(n)}]`);
@@ -3036,7 +3037,7 @@ const REGRESSION = [
       return true;
     } },
   { name: 'Paket R4: übrige Tabs + Fenster (Symbole statt bunter Emojis in Knöpfen/Feldern, Skills-Gruppen, Items-Eingabe beschriftet + nur eine Karte offen + Remove neben Equip, einheitliche Auswahl „Add to Sheet“/„On Sheet“ + „Remove“, ⚙ ohne Inline-Stile, englische Reste)', datum: '05.10.2026',
-    run: ({ w, d }) => {
+    run: ({ w, d, RULES }) => {
       const E = js => w.eval(js);
       if (!d.getElementById('willowTabs') || d.getElementById('willowTabs').nextElementSibling.id !== 'willowKampf') return 'Block willowTabs fehlt / nicht vor willowKampf';
       const css = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
@@ -3089,7 +3090,8 @@ const REGRESSION = [
       // 7) Fixliste 05.10.2026: Zauber-Texte ohne verlorene Listen-Trenner („cube.You“), Listen als „• …“
       const zbBad = E("ZB_SPELLS.filter(x=>/[a-z]\\.[A-Z][a-z]|\\.  [A-Z]/.test(x.desc||'')).map(x=>x.name)");
       if (zbBad.length) return 'Zauber-Texte ohne Trenner: ' + zbBad.slice(0, 4).join(', ');
-      if (!/\n\n• You instantaneously extinguish/.test(E("ZB_SPELLS.find(x=>x.name==='Control Flames').desc"))) return 'Control Flames: Liste';
+      const [ln, lt] = RULES === '2014' ? ['Wish', 'You create one object'] : ['Control Flames', 'You instantaneously extinguish'];   // Paket T3: 2014 ohne XGE
+      if (!new RegExp('\\n\\n• ' + lt).test(E(`ZB_SPELLS.find(x=>x.name==='${ln}').desc`))) return ln + ': Liste';
       return true;
     } },
   { name: 'Paket U: Sammelfunde (Long Rest wie Short Rest, Save-Knopf in der Charakterliste, Feature-Tags englisch, Background-Beschreibung, Features einklappbar, Farbregler „Header Art & Frames“, Feature-Zauber aus innate)', datum: '05.10.2026', r: '2024',
@@ -3426,7 +3428,7 @@ const REGRESSION = [
       return true;
     } },
   { name: 'Paket Z1: Spell List – Quellen-Filter (Knöpfe aus ZB_SPELLS[].src, Mehrfachauswahl, Abzeichen, Clear all)', datum: '17.10.2026',
-    run: ({ w, d, sel }) => {
+    run: ({ w, d, sel, RULES }) => {
       if (w.eval('typeof slFSrc') === 'undefined') return 'slFSrc fehlt';
       sel('Wizard', '', 20); w.eval("slFGrad='all';slFClass='all';slFSchool='all'"); const q = d.getElementById('slQ'); if (q) q.value = '';
       const cnt = JSON.parse(w.eval('JSON.stringify(ZB_SPELLS.reduce((o,s)=>(o[s.src]=(o[s.src]||0)+1,o),{}))'));
@@ -3437,6 +3439,10 @@ const REGRESSION = [
       const shown = () => { w.slRender(); return d.querySelectorAll('#slList .zb-card').length; };
       const total = shown(); if (total !== w.eval('ZB_SPELLS.length')) return 'ohne Filter ' + total + ' Zauber';
       const B = v => btn.find(b => b.dataset.val === v);
+      if (RULES === '2014') {   // Paket T3: Willow 2014 = nur PHB (SRD)
+        if (JSON.stringify(vals) !== '["all","PHB"]') return '2014: Quellen-Knöpfe ' + vals.join(',');
+        B('PHB').click(); if (shown() !== total) return '2014: PHB ' + shown(); w.slClearAllFilters(); return true;
+      }
       B('XGE').click(); if (shown() !== cnt.XGE) return 'XGE: ' + shown() + ' statt ' + cnt.XGE;
       if (!/XGE/.test(d.getElementById('slSrcBadge').textContent) || !/XGE/.test(d.getElementById('slActiveFilters').textContent)) return 'Abzeichen ohne XGE';
       if (!B('XGE').classList.contains('on') || B('all').classList.contains('on')) return 'Knopf-Zustand falsch';
@@ -3628,6 +3634,63 @@ const REGRESSION = [
       const weit = d.querySelector('.ab-grp-box[data-grp="weitere"]')?.textContent || '';
       if (!weit.includes('Primal Path')) return 'Primal Path nicht unter „Weitere“';
       if (weit.includes('Reckless Attack')) return 'Reckless Attack fälschlich unter „Weitere“';
+      return true;
+    } },
+  { name: 'Paket T3: Willow 2014 – Zauber (319 SRD, PHB-Texte, SRD-Namen, Klassenlisten PHB, Kategorien, Würfel 2014, Stat-Blöcke), Bestien (96 SRD MM), Wild Shape 2014 (CR-Grenze nach Druidenstufe, Filter im Beasts-Tab); 2024: Typ-Filter unverändert', datum: '18.10.2026',
+    run: ({ w, d, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      w.switchTab('bestien');
+      const tb = () => [...d.querySelectorAll('#bstTypeFilters .fbtn')].map(b => b.dataset.val).join(',');
+      if (RULES !== '2014') return tb() === 'all,beast,fey,celestial' || '2024: Typ-Filter ' + tb();
+      // Zauber: nur SRD, PHB-Texte, SRD-Namen (T-E1), Listen PHB ohne Monk
+      const Z = J('ZB_SPELLS.map(s=>({n:s.name,src:s.src,c:s.classes}))');
+      if (Z.length !== 319 || Z.some(z => z.src !== 'PHB')) return 'ZB_SPELLS: ' + Z.length + ' Einträge / Quelle nicht PHB';
+      const names = new Set(Z.map(z => z.n));
+      for (const n of ['Acid Arrow', 'Tiny Hut', 'Arcane Hand', 'Hideous Laughter', 'Feeblemind']) if (!names.has(n)) return 'SRD-Zauber fehlt: ' + n;
+      for (const n of ["Melf's Acid Arrow", 'Chromatic Orb', 'Hex', 'Toll the Dead']) if (names.has(n)) return 'Nicht-SRD/2024-Zauber vorhanden: ' + n;
+      if (/Melf|Leomund|Bigby|Tasha/.test(E('JSON.stringify(ZB_SPELLS)'))) return 'Zaubertext mit PHB-Namen statt SRD-Namen';
+      const cnt = c => Z.filter(z => z.c.includes(c)).length;
+      if (cnt('Wizard') !== 204 || cnt('Cleric') !== 105 || cnt('Paladin') !== 31 || cnt('Warlock') !== 64 || cnt('Monk')) return 'Klassenlisten PHB falsch';
+      if (!/1d8 \+ your spellcasting ability modifier/.test(E("ZB_SPELLS.find(s=>s.name==='Cure Wounds').desc"))) return 'Cure Wounds nicht im 2014-Text';
+      if (JSON.stringify(J('SL_CLASSES')) !== '["All","Bard","Cleric","Druid","Paladin","Ranger","Sorcerer","Warlock","Wizard"]') return 'SL_CLASSES ' + J('SL_CLASSES');
+      if (E("CLASS_SPELL_MAP.Fighter||CLASS_SPELL_MAP.Rogue")) return 'CLASS_SPELL_MAP mit Fighter/Rogue (EK/AT nicht SRD)';
+      const ap = J('Object.values(ALWAYS_PREP).flatMap(m=>Object.values(m).flatMap(v=>v.s.map(x=>x[1])))').filter(n => !names.has(n));
+      if (ap.length) return 'ALWAYS_PREP ohne Zauber: ' + ap.join(', ');
+      // Kategorien und Würfel 2014
+      if (E("SPELL_CATS['Acid Arrow']") !== 'dmg:acid' || E("SPELL_CATS.Feeblemind") !== 'debuff') return 'SPELL_CATS 2014';
+      const sd = (n, lv, cl, m) => E(`spDice(SPELL_ROLLS[${JSON.stringify(n)}].o[0],${lv},${cl},${m})`);
+      for (const [n, lv, cl, m, e] of [['Cure Wounds', 2, 3, 3, '2d8+3'], ['Healing Word', 1, 1, 3, '1d4+3'], ['Fireball', 5, 9, 3, '10d6'], ['Fire Bolt', 0, 11, 3, '3d10'], ['Acid Arrow', 3, 5, 3, '5d4']])
+        if (sd(n, lv, cl, m) !== e) return `spDice ${n} Grad ${lv}: ${sd(n, lv, cl, m)} statt ${e}`;
+      // Stat-Blöcke der Zauber: nur SRD-Kreaturen aus dem MM 2014
+      const SS = J('SPELL_STATBLOCKS');
+      if (!(SS['Find Familiar'] || []).some(b => b.n === 'Quipper') || !(SS['Find Steed'] || []).some(b => b.n === 'Warhorse')) return 'SPELL_STATBLOCKS 2014 (Find Familiar/Find Steed)';
+      if (Object.values(SS).flat().some(b => b.src !== 'MM') || SS.Maze || SS.Wish) return 'SPELL_STATBLOCKS: andere Quelle oder Beispiel-Kreatur';
+      // Bestien: 96 SRD-Bestien MM 2014
+      const B = J('BST_DATA');
+      if (B.length !== 96 || B.some(b => b.type !== 'beast') || JSON.stringify(B).includes('{@')) return 'BST_DATA: ' + B.length + ' Einträge / Typ / Tag-Rest';
+      if (!B.find(b => b.n === 'Wolf').actions[0].startsWith('Bite: Melee Weapon Attack: +4 to hit')) return 'Wolf nicht im 2014-Stat-Block';
+      // Wild Shape 2014 (Weiche l): Filter „Wild Shape“ nach Druidenstufe
+      if (tb() !== 'all,ws') return 'Typ-Filter 2014: ' + tb();
+      const ws = d.querySelector('#bstTypeFilters .fbtn[data-val="ws"]'), list = () => [...d.querySelectorAll('#bstList .zb-name')].map(x => x.textContent);
+      sel('Fighter', 'Champion (PHB)', 5); ws.click();
+      if (list().length || !/needs Druid level 2/.test(d.getElementById('bstCount').textContent)) return 'Wild Shape ohne Druide: ' + d.getElementById('bstCount').textContent;
+      const chk = (lvl, n, inn, out, note) => {
+        sel('Druid', 'Circle of the Land (PHB)', lvl); w.switchTab('bestien'); const L = list();
+        if (L.length !== n) return `Druid ${lvl}: ${L.length} statt ${n} Formen`;
+        if (inn.some(x => !L.includes(x)) || out.some(x => L.includes(x))) return `Druid ${lvl}: falsche Formen`;
+        if (!d.getElementById('bstCount').textContent.includes(note)) return `Druid ${lvl}: Hinweis ` + d.getElementById('bstCount').textContent;
+        return null;
+      };
+      const r = chk(2, 31, ['Wolf', 'Riding Horse', 'Cat'], ['Giant Frog', 'Giant Owl', 'Ape', 'Brown Bear'], 'CR ¼ or lower, no flying or swimming speed')
+        || chk(4, 52, ['Ape', 'Crocodile', 'Giant Frog', 'Reef Shark'], ['Giant Owl', 'Giant Wasp', 'Brown Bear'], 'CR ½ or lower, no flying speed')
+        || chk(8, 78, ['Brown Bear', 'Giant Eagle', 'Giant Owl'], ['Giant Constrictor Snake', 'Polar Bear'], 'CR 1 or lower');
+      if (r) return r;
+      const wst = J("(CLASS_DATA.Druid.abilities.base||[]).find(a=>a.id==='wildshape')||{}");
+      if (wst.uses !== 2 || wst.restore !== 'short') return 'Wild Shape nicht 2× je Short Rest: ' + JSON.stringify([wst.uses, wst.restore]);
+      d.querySelector('#bstTypeFilters .fbtn[data-val="all"]').click();
+      if (list().length !== 96) return 'Filter „All“ zeigt ' + list().length;
+      const card = [...d.querySelectorAll('#bstList .zb-card')].find(c => c.querySelector('.zb-name').textContent === 'Wolf');
+      if (!card || !card.innerHTML.includes('#wolf_mm,')) return '5e.tools-Link nicht auf MM (2014)';
       return true;
     } },];// ────────────────────────────────────────────────────────────────────────────
 

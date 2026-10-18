@@ -5,7 +5,17 @@
 #   python3 bst_convert.py features DnD_Character_App.html src [--write] # FEATURE_STATBLOCKS aus der Liste FEATURES (Paket A2)
 # Braucht in src/: bestiary-xmm.json, fluff-bestiary-xmm.json (bst); zusätzlich spells-*.json + bestiary-<quelle>.json (spells)
 # Unbekannte Tags/Formen -> Fehler (Konverter erweitern, nicht raten).
+# Willow 2014 (Paket T3, 18.10.2026), Quelle src14/ (setup.sh t14), Ausgabe tools/t14/<BLOCK>.js statt in die HTML:
+#   python3 bst_convert.py bst 2014/index.html src14 --t14 [--write]     # BST_DATA = alle SRD-Bestien (type beast) aus bestiary-mm.json, nach Name
+#   python3 bst_convert.py spells 2014/index.html src14 --t14 [--write]  # SPELL_STATBLOCKS aus den PHB-Zaubern (SRD-Namen), nur SRD-Kreaturen
 import json, re, sys, os
+
+T14 = '--t14' in sys.argv   # Paket T3
+
+
+def write_t14(name, data):
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14', name + '.js')
+    open(p, 'w', encoding='utf-8').write(js_line(name, data) + '\n'); print('geschrieben', p, os.path.getsize(p), 'Bytes')
 
 ABIL = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 ABIL_LONG = {'str': 'Strength', 'dex': 'Dexterity', 'con': 'Constitution', 'int': 'Intelligence', 'wis': 'Wisdom', 'cha': 'Charisma'}
@@ -288,7 +298,26 @@ def replace_line(html, prefix, newline):
     return html[:i] + newline + html[j:]
 
 
+def cmd_bst14(html_p, src, write):
+    """Paket T3: BST_DATA für Willow 2014 – alle SRD-Bestien aus dem MM (2014), alphabetisch (Weiche (l) Wild Shape)."""
+    M = load(src, 'bestiary-mm.json')
+    new = []
+    for (n, q), m in sorted(M.items()):
+        m = resolve_copy(m, M)
+        tb = m['type'] if isinstance(m['type'], str) else m['type']['type']
+        if q != 'MM' or not m.get('srd') or tb != 'beast': continue
+        new.append(convert(m, ''))
+    new.sort(key=lambda x: x['n'])
+    rest = [x['n'] for x in new if '{@' in json.dumps(x)]
+    assert not rest, rest
+    from collections import Counter
+    print(f'BST_DATA 2014: {len(new)} SRD-Bestien, CR {dict(sorted(Counter(x["cr"] for x in new).items(), key=lambda kv: eval(kv[0])))}')
+    if write: write_t14('BST_DATA', new)
+    return new
+
+
 def cmd_bst(html_p, src, write):
+    if T14: return cmd_bst14(html_p, src, write)
     html = open(html_p, encoding='utf-8').read()
     import subprocess
     old = dump(html_p, 'BST_DATA')
@@ -329,11 +358,14 @@ def cmd_spells(html_p, src, write):
     SRC = {"PHB'24": 'XPHB'}
     S = {}
     for p in glob.glob(os.path.join(src, 'spells-*.json')):
-        for s in json.load(open(p, encoding='utf-8'))['spell']: S[(s['name'], s['source'])] = s
+        for s in json.load(open(p, encoding='utf-8'))['spell']:
+            S[(s['srd'] if T14 and isinstance(s.get('srd'), str) else s['name'], s['source'])] = s   # Paket T3: SRD-Namen
     M = load(src, *[os.path.basename(p) for p in glob.glob(os.path.join(src, 'bestiary-*.json'))])
     out = {}
     # Zauber, deren {@creature}-Verweise nur Beispiele einer freien Wahl sind (Liste unvollständig) -> kein Stat-Block
     EXAMPLES = {'Summon Lesser Demons', 'Summon Greater Demon', 'Infernal Calling'}
+    if T14:   # Paket T3: PHB 2014 – Kreaturen nur als Beispiel bzw. Nebenbemerkung genannt (keine Beschwörung dieser Form)
+        EXAMPLES |= {'Conjure Celestial', 'Conjure Elemental', 'Locate Creature', 'Major Image', 'Maze', 'Sequester', 'Wish'}
     for z in zb:
         if z['name'] in EXAMPLES: continue
         s = S.get((z['name'], SRC.get(z['src'], z['src'])))
@@ -347,10 +379,12 @@ def cmd_spells(html_p, src, write):
         blocks = []
         for k in refs:
             if k not in M: print('  FEHLT im Bestiarium:', z['name'], k); continue
+            if T14 and not resolve_copy(M[k], M).get('srd'): print('  nicht SRD, übergangen:', z['name'], k); continue
             blocks.append(dict(convert(resolve_copy(M[k], M)), src=k[1]))
         if blocks: out[z['name']] = blocks
     print(f'SPELL_STATBLOCKS: {len(out)} Zauber, {sum(len(v) for v in out.values())} Stat-Blöcke')
     for k, v in out.items(): print('  ', k, '->', ', '.join(b['n'] + ' (' + b['src'] + ')' for b in v))
+    if write and T14: write_t14('SPELL_STATBLOCKS', out); return out
     if write:
         html = open(html_p, encoding='utf-8').read()
         html = replace_line(html, 'const SPELL_STATBLOCKS=', js_line('SPELL_STATBLOCKS', out))

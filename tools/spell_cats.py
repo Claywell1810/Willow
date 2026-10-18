@@ -7,7 +7,12 @@
 #   const SPELL_CATS={"Name":"kat" | "dmg:typ", …};
 # in die HTML (ersetzt sie, falls vorhanden, sonst direkt vor der Zeile `const BG_DATA=`).
 # --dry: nur Übersicht + Liste „neu ohne Korrektur“ ausgeben, nichts schreiben.
-import json, glob, re, sys
+# Willow 2014 (Paket T3, 18.10.2026):  python3 willow/tools/spell_cats.py 2014/index.html src14 --t14 [--dry]
+#   Namen aus ZB_SPELLS des 2014-Builds (SRD-Namen, T-E1); Kategorie wie in Willow 2024 (KORREKTUREN bzw. Regel auf die
+#   XPHB-Fassung aus src/, Nachbarordner von src14) – bei SRD-Namen über den PHB-Namen („Acid Arrow“ → „Melf's Acid
+#   Arrow“); gibt es keine XPHB-Fassung, Regel auf die PHB-Fassung aus src14 (Liste „nur 2014“ prüfen, ggf. KORREKTUREN).
+#   Schreibt tools/t14/SPELL_CATS.js (build_2014.py ersetzt damit SPELL_CATS).
+import json, glob, re, sys, os
 
 # ── Kategorien (Schlüssel ↔ Anzeige; Bilder stehen in der App: SPELL_CAT_ICONS) ──────────────
 CATS = {
@@ -79,6 +84,7 @@ KORREKTUREN = {
   "Evard\"s Black Tentacles": "ctrl",
   "Expeditious Retreat": "move",
   "Faerie Fire": "debuff",
+  "Feeblemind": "debuff",   # Paket T3 (2014): INT/CHA auf 1, Schaden nur Nebeneffekt
   "Feign Death": "util",
   "Finger of Death": "dmg:necrotic",
   "Fire Shield": "prot",
@@ -227,8 +233,40 @@ def regel(s):
 def gueltig(v):
     return v in CATS or (v.startswith('dmg:') and (v[4:] in DMG_TYPES or v[4:] == 'multi'))
 
+def main_t14(html, src14, dry):
+    S = {}
+    for f in sorted(glob.glob(os.path.join(os.path.dirname(os.path.abspath(src14)), 'src', 'spells-*.json'))):
+        for s in json.load(open(f, encoding='utf-8')).get('spell', []):
+            if s.get('source') == 'XPHB': S[s['name']] = s
+    assert S, 'src/spells-xphb.json fehlt (setup.sh zauber)'
+    P, orig = {}, {}
+    for s in json.load(open(os.path.join(src14, 'spells-phb.json'), encoding='utf-8'))['spell']:
+        n = s['srd'] if isinstance(s.get('srd'), str) else s['name']; P[n] = s; orig[n] = s['name']
+    h = open(html, encoding='utf-8').read()
+    a = h.index('const ZB_SPELLS='); Z = json.loads(h[a + 16:h.index('\n', a)].rstrip().rstrip(';'))
+    out, nur14 = {}, []
+    for z in Z:
+        n = z['name']; o = orig.get(n, n)
+        if n in KORREKTUREN: out[n] = KORREKTUREN[n]
+        elif o in KORREKTUREN: out[n] = KORREKTUREN[o]
+        elif o in S: out[n] = regel(S[o])
+        else: out[n] = regel(P[n]); nur14.append(n)
+    from collections import Counter
+    print(f'SPELL_CATS 2014: {len(out)} Zauber, über PHB-Namen: {sum(1 for n in out if orig.get(n, n) != n)}')
+    print(Counter(v.split(":")[0] for v in out.values()))
+    gp = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'spell_cats_geprueft.txt')
+    geprueft = {l.strip() for l in open(gp, encoding='utf-8') if l.strip() and not l.startswith('#')}
+    offen = [n for n in nur14 if n not in geprueft]
+    print(f'nur 2014 (keine XPHB-Fassung, Regel auf PHB): {len(nur14)}, davon ungeprüft {len(offen)}' + (': ' + ', '.join(f'{n}={out[n]}' for n in offen) if offen else ''))
+    if dry: return
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14', 'SPELL_CATS.js')
+    open(p, 'w', encoding='utf-8').write('const SPELL_CATS=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n')
+    print('geschrieben', p)
+
+
 def main():
     html, srcdir = sys.argv[1], sys.argv[2]; dry = '--dry' in sys.argv
+    if '--t14' in sys.argv: return main_t14(html, srcdir, dry)
     S = {}
     for f in sorted(glob.glob(srcdir + '/spells-*.json')):
         for s in json.load(open(f, encoding='utf-8')).get('spell', []): S.setdefault(s['name'], []).append(s)
@@ -249,7 +287,6 @@ def main():
     from collections import Counter
     print(f'{len(out)} Zauber, {len(KORREKTUREN)} Korrekturen, ohne 5e.tools-Eintrag: {ohne}')
     print(Counter(v.split(":")[0] for v in out.values()))
-    import os
     gp = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'spell_cats_geprueft.txt')
     geprueft = {l.strip() for l in open(gp, encoding='utf-8') if l.strip() and not l.startswith('#')}
     offen = [n for n in names if n not in geprueft]

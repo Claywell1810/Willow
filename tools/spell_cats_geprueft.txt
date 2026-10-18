@@ -1,5 +1,6 @@
 # Zauber, deren Kategorie geprüft ist (spell_cats.py). Neue Zauber erst prüfen, dann hier ergänzen.
 # Stand 01.10.2026: alle 533 Zauber aus ZB_SPELLS
+# Paket T3 (18.10.2026): + Branding Smite, Feeblemind (nur Willow 2014, PHB-Fassung)
 Abi-Dalzim's Horrid Wilting
 Absorb Elements
 Acid Splash
@@ -54,6 +55,7 @@ Blur
 Bones of the Earth
 Booming Blade
 Borrowed Knowledge
+Branding Smite
 Burning Hands
 Cacophonic Shield
 Call Lightning
@@ -182,6 +184,7 @@ Far Step
 Fast Friends
 Fear
 Feather Fall
+Feeblemind
 Feign Death
 Find Familiar
 Find Greater Steed
