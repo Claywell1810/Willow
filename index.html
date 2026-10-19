@@ -2757,7 +2757,7 @@ function agBack(){_ag=null;renderAttr();}
 function agMode(m){agInit(m);renderAg();}
 function agSet(k,v){if(!_ag)return;_ag.v[k]=+v||0;renderAg();}
 function agStep(k,d){if(!_ag)return;_ag.v[k]=Math.max(8,Math.min(15,(+_ag.v[k]||8)+d));renderAg();}
-function agSuggest(){const r=ATTR_GEN.byCls[curCls()];if(!r||!_ag)return;_ag.m='arr';ATTRS.forEach((a,i)=>_ag.v[a.k]=r[i]);renderAg();}
+function agSuggest(){const r=R14?null:ATTR_GEN.byCls[curCls()];if(!r||!_ag)return;_ag.m='arr';ATTRS.forEach((a,i)=>_ag.v[a.k]=r[i]);renderAg();}
 function agValid(){if(!_ag)return false;const v=ATTRS.map(a=>+_ag.v[a.k]||0);
   if(_ag.m==='arr')return v.slice().sort((x,y)=>y-x).join()===ATTR_GEN.arr.join();
   return v.every(x=>x>=8&&x<=15)&&agCostOf(_ag.v)<=ATTR_GEN.pts;}
@@ -2770,7 +2770,7 @@ function renderAg(){
   const tabs=`<div class="cast-opts" style="flex-direction:row;gap:6px"><button class="pk-chip${m==='arr'?' on':''}" style="flex:1" onclick="agMode('arr')">Standard Array</button><button class="pk-chip${m==='pb'?' on':''}" style="flex:1" onclick="agMode('pb')">Point Buy</button></div>`;
   let rows,head;
   if(m==='arr'){
-    const sug=ATTR_GEN.byCls[curCls()];
+    const sug=R14?null:ATTR_GEN.byCls[curCls()]; // Paket T6: Tabelle nur XPHB
     head=`<div class="rest-note">Use these six scores once each: ${ATTR_GEN.arr.join(', ')}.</div>`+(sug?`<button type="button" class="se-add" style="margin:0 0 4px" onclick="agSuggest()">Suggested for ${curCls()}</button>`:'');
     rows=ATTRS.map(a=>`<div class="at-row"><div class="at-l">${a.l}</div><select class="ag-sel${v[a.k]&&used[v[a.k]]>1?' dup':''}" onchange="agSet('${a.k}',this.value)"><option value="0"${v[a.k]?'':' selected'}>—</option>${ATTR_GEN.arr.map(n=>`<option value="${n}"${v[a.k]===n?' selected':''}>${n}${v[a.k]!==n&&used[n]?' (used)':''}</option>`).join('')}</select></div>`).join('');
   }else{
@@ -2908,7 +2908,7 @@ function calcGrants(){
   mcGrants(g);
   // Doppelte Skills: PHB 2014 erlaubt statt doppelter Proficiency eine andere derselben Art → Ersatzwahl dup:<Skill>,
   // aber nur bei 2014-Backgrounds (ohne Attributswahl). PHB 2024 kennt die Regel nicht → nur Hinweis (Entscheidung Simon 28.09.2026)
-  const legacy=(!!bg&&bgAbOpts(bg).length!==3)||rcLegacy();
+  const legacy=R14||(!!bg&&bgAbOpts(bg).length!==3)||rcLegacy(); // Paket T6: Willow 2014 immer (PHB-Regel)
   const src={};g.filter(x=>x.art==='skill').forEach(x=>{(src[x.ziel]=src[x.ziel]||[]).push(x.quelle);});
   const have=new Set(Object.keys(src));g.dups=[];
   Object.keys(src).filter(k=>src[k].length>1).forEach(k=>{
@@ -3115,7 +3115,7 @@ function crForm(c){
   const opt=(v,l,cur)=>`<option value="${e(v)}"${String(cur??'')===String(v)?' selected':''}>${e(l)}</option>`;
   const asi=c.asi||{};
   let h=`<div class="cr-h"><span class="cr-lbl" style="margin:0;color:var(--gold)">Edit race values</span><button type="button" class="filter-toggle on" onclick="crEditTog(false)" style="padding:3px 10px">✓ Done</button></div>`
-    +`<div class="pk-note" style="margin:0 0 4px">Your own values. They work like a species from 5e.tools: skills, ability badges, Actions tab, natural weapons.</div>`;
+    +`<div class="pk-note" style="margin:0 0 4px">Your own values. They work like a ${R14?'race':'species'} from 5e.tools: skills, ability badges, Actions tab, natural weapons.</div>`;
   h+=`<div class="cr-lbl">Subrace (optional)</div><input class="cr-in" placeholder="—" value="${e(c.sub||'')}" oninput="crSet('sub',this.value)" onchange="crSide();buildRaceLoreTitle()">`;
   h+='<div class="cr-lbl">Size</div>'+crChips('size',Object.keys(RC_SIZE).map(k=>[k,RC_SIZE[k]]),0,c.size);
   h+='<div class="cr-lbl">Speed (ft)</div><div class="cr-grid">'+num('speed','Walk')+num('fly','Fly')+num('swim','Swim')+num('climb','Climb')+'</div>';
@@ -4924,7 +4924,7 @@ function fxCandidates(){
   const q=_fxQ.trim().toLowerCase();
   if(!q)return EFFECT_DATA.map(e=>Object.assign({},e));
   const out=EFFECT_DATA.filter(e=>e.n.toLowerCase().includes(q)).map(e=>Object.assign({},e)),seen=new Set(out.map(e=>e.n));
-  ZB_SPELLS.forEach(sp=>{if(seen.has(sp.name)||!sp.name.toLowerCase().includes(q))return;seen.add(sp.name);const p=fxSpell(sp.name,"PHB'24");out.push({n:sp.name,k:'s',s:p.src,t:'b'});});
+  ZB_SPELLS.forEach(sp=>{if(seen.has(sp.name)||!sp.name.toLowerCase().includes(q))return;seen.add(sp.name);const p=fxSpell(sp.name,R14?'PHB':"PHB'24");out.push({n:sp.name,k:'s',s:p.src,t:'b'});});
   return out.slice(0,40);
 }
 function renderFxList(){
@@ -7361,7 +7361,7 @@ function buildRaceLore(){
   if(r.src) meta.push(r.src);
   // Paket C3: Wahl der Größe und (PHB 2014) der Attributsboni als eigene Karten oben
   const top = [];
-  if(rp && rp.size.length>1) top.push({name:'Size', body:pickUI('race:size',rp.size.map(x=>RC_SIZE[x]),1,{head:'Choose 1',note:'Chosen when you select this species (5e.tools).'})});
+  if(rp && rp.size.length>1) top.push({name:'Size', body:pickUI('race:size',rp.size.map(x=>RC_SIZE[x]),1,{head:'Choose 1',note:'Chosen when you select this '+(R14?'race':'species')+' (5e.tools).'})});
   if(rp && rp.asi){
     const a=rp.asi, fx=Object.keys(a.fix).map(k=>'+'+a.fix[k]+' '+k).join(', ');
     top.push({name:'Ability Score Increase', body:`<div class="fd"><p>${fx}${a.ch?` (fixed), +${a.ch.v} to ${a.ch.n} others of your choice`:''}.</p></div>`
@@ -8437,6 +8437,7 @@ function buildCombatStats(cls,subcls,lvl){
     if(v===undefined||v===null||v===''||v==='—'||v===0||v==='0')return;
     h+=chip(c.l,v);
   });
+  h+=cstPrep14(cls,subcls,lvl,chip);
   const sx=scTable(cls,subcls),sxr=sx&&sx.rows.find(r=>+r.lvl===lvl); // Paket D: Eldritch Knight/Arcane Trickster
   (sx?sx.extra:[]).forEach(c=>{
     const v=sxr&&sxr[c.k];
@@ -8452,6 +8453,10 @@ function buildCombatStats(cls,subcls,lvl){
     (sl?`<div class="cst-slots"><span class="cst-l">Spell Slots</span>${sl}</div>`:'')+`</div>`;
   el.style.display='';
 }
+// Paket T6 (19.10.2026): Willow 2014 – vorbereitete Zauber stehen nicht in der Class Table (PHB), sondern werden berechnet
+// (PREP14/spClsCounts, Weiche i) → eigener Chip „Prepared Spells“ wie die Tabellen-Spalte der 2024-App
+function cstPrep14(cls,sub,lvl,chip){if(!R14)return '';try{if(!PREP14[cls])return '';const n=spClsCounts({cls,sub,lvl});
+  return n.prep?chip('Prepared Spells',n.prep,'',(CLASS_CORE_TRAITS[cls]||{}).spellcastingAbility+' modifier + '+(PREP14[cls][0]<1?'half your ':'')+cls+' level'):'';}catch(e){return '';}}
 // Paket F2: Multiclass – PB aus der Gesamtstufe, beste Unarmored AC aller Klassen, Spalten je Klasse mit Klassenstufe;
 // Zauberplätze seit F4 aus slotTableRow() (Multiclass-Tabelle bzw. die eine Zauberklasse)
 function buildCombatStatsMc(el){
@@ -8462,6 +8467,7 @@ function buildCombatStatsMc(el){
   C.forEach(c=>{
     const t=CLASS_TABLES[c.cls],row=t&&(t.rows||[]).find(r=>+r.lvl===c.lvl);let g='';
     if(row)(t.extra||[]).forEach(x=>{if(ok(row[x.k]))g+=chip(x.l,row[x.k]);});
+    g+=cstPrep14(c.cls,c.sub,c.lvl,chip);
     const sx=scTable(c.cls,c.sub),sxr=sx&&sx.rows.find(r=>+r.lvl===c.lvl);
     (sx?sx.extra:[]).forEach(x=>{const v=sxr&&sxr[x.k];if(ok(v))g+=chip(x.l,v);});
     const a=combatUnarmoredAC(c.cls,c.sub,c.lvl);if(a&&(!best||a.ac>best.ac))best=a;
@@ -11382,7 +11388,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-19c';
+const APP_VERSION = 'willow-app-2026-10-19d';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}

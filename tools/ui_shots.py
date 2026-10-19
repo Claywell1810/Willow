@@ -14,7 +14,7 @@ SETUP = """
 () => {
   document.getElementById('charName').textContent='Testheld';
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=v;};
-  set('lvl','7'); set('cls','Druid'); onClsChange(); set('subcls','Circle of the Stars (XPHB)'); onSubclsChange();
+  set('lvl','7'); set('cls','Druid'); onClsChange(); const so=[...document.getElementById('subcls').options].map(o=>o.value).filter(Boolean); set('subcls', so.includes('Circle of the Stars (XPHB)')?'Circle of the Stars (XPHB)':(so[0]||'')); onSubclsChange(); // Paket T6: Willow 2014 = Circle of the Land
   set('race', document.getElementById('race')?.options?.[3]?.value||'');
   Object.assign(st.attrs,{STR:10,DEX:14,CON:14,INT:12,WIS:18,CHA:8});
   st.weapons=[{name:'Quarterstaff',atk:'+5',dmg:'1d6+2',type:'Bludgeoning'}];
@@ -45,7 +45,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     ctx = b.new_context(viewport={'width': W, 'height': 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
     if zoom:
-        ctx.add_init_script(f"try{{localStorage.setItem('willow_textsize','{zoom}')}}catch(e){{}}")
+        ctx.add_init_script(f"try{{localStorage.setItem('willow_textsize','{zoom}');localStorage.setItem('w14_willow_textsize','{zoom}')}}catch(e){{}}")  # Paket T6: Willow 2014 (LS_PFX)
     pg = ctx.new_page()
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))

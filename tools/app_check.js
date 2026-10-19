@@ -3903,6 +3903,70 @@ const REGRESSION = [
       if (E('st.feats.length') || E("st.picks['fa:Ability Score Improvement']")) return 'Cancel stellt ASI nicht zurück';
       return true;
     } },
+  { name: 'Paket T6: Willow 2014 – Playtest als Ablauf (Fighter Champion 1→5 über den Stufenaufstieg-Assistenten, Wizard 5 + Fighter 1 Multiclass), Rest-Suche: doppelte Proficiency immer ersetzbar (PHB 2014), „race“ statt „species“, kein Standard-Array-Vorschlag nach Klasse (nur XPHB); 2024 unverändert', datum: '19.10.2026',
+    run: async ({ w, d, set, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      const tick = () => new Promise(r => setTimeout(r, 0));
+      const sugBtn = () => { E("st.attrSrc=attrSrcNew();agOpen()"); const t = (d.getElementById('attrBox') || {}).textContent || ''; E('agBack()'); return /Suggested for/.test(t); };
+      const crNote = () => { set('race', 'custom'); w.onRaceChange(); w.crEditTog(true); const t = d.getElementById('raceLoreBody').textContent; w.crEditTog(false); set('race', ''); w.onRaceChange(); return t; };
+      if (RULES !== '2014') {
+        sel('Fighter', '', 1); w.bgSelect('Soldier'); E("st.picks=st.picks||{};st.picks['cls:Fighter:skills']=['Athletics','Perception']");
+        const D = J('calcGrants().dups');
+        if (!D.length || D[0].legacy) return '2024: doppelte Proficiency (Soldier + Fighter) nicht nur Hinweis: ' + JSON.stringify(D);
+        E("st.bg='';st.picks={}");
+        if (!sugBtn()) return '2024: Vorschlag „Suggested for“ fehlt';
+        if (E("cstPrep14('Cleric','',5,(l,v)=>l+v)") !== '') return '2024: cstPrep14 liefert einen Chip';
+        return /like a species/.test(crNote()) || '2024: Custom-Rasse ohne „species“';
+      }
+      // Rest-Suche: Ersatz-Wahl auch ohne Background/Rasse (Klasse + Multiclass), Begriffe, kein XPHB-Vorschlag
+      E("st.mc=[];st.picks={};st.bg=''"); set('race', ''); w.onRaceChange(); sel('Fighter', 'Champion (PHB)', 3);
+      E("st.mc=[{cls:'Rogue',sub:'',lvl:1}];mcChanged();st.picks['cls:Fighter:skills']=['Athletics','Perception'];st.picks[pkKeyMc('Rogue')]=['Athletics']");
+      const D = J('calcGrants().dups');
+      if (!D.length || !D[0].legacy || !D[0].opts.includes('Stealth')) return 'doppelte Proficiency ohne Background/Rasse nicht ersetzbar: ' + JSON.stringify(D).slice(0, 160);
+      E("st.mc=[];st.picks={};mcChanged()");
+      if (sugBtn()) return 'Vorschlag nach Klasse (XPHB-Tabelle) in Willow 2014';
+      const cn = crNote(); if (/species/.test(cn) || !/like a race/.test(cn)) return 'Custom-Rasse: Begriff ' + (cn.match(/like a \w+/) || [''])[0];
+      // Playtest Fighter Champion 1→5 (Human, Standard Array, Acolyte) über den Assistenten
+      w._doNewChar('Regressionstest');
+      set('cls', 'Fighter'); w.onClsChange(); set('lvl', '1'); w.onSubclsChange(); set('race', 'Human'); w.onRaceChange();
+      E("Object.entries({STR:15,DEX:13,CON:14,INT:8,WIS:12,CHA:10}).forEach(([k,v])=>st.attrSrc[k].base=v);buildAttrs()"); w.bgSelect('Acolyte');
+      E("st.picks['cls:Fighter:skills']=['Athletics','Perception'];st.statSrc.ac={arm:'Chain Mail'};st.weapons=[{name:'Longsword',atk:'',dmg:'',type:'',ref:'Longsword|PHB'}];hpSync();autoSave()");
+      if (E('hpMaxVal()') !== 12 || J("ATTRS.map(a=>st.attrs[a.k])").join() !== '16,14,15,9,13,11') return 'Fighter 1: HP/Attribute ' + E('hpMaxVal()') + ' ' + J("ATTRS.map(a=>st.attrs[a.k])");
+      const up = async (o) => { w.luOpen(); await tick(); for (let g = 0; g < 10; g++) { const s = E('_lu.step');
+        if (s === 'sub') w.luSub(0);
+        if (s === 'asi') { w.luFtAsi(); await tick(); for (let k = 0; k < 2; k++) { [...d.querySelectorAll('#luBox .pk-chip')].find(b => b.dataset.o === o).click(); await tick(); } }
+        if (s === 'sum') { const op = J('luOpenList()'); w.luApply(); return op; } w.luNext(); await tick(); } return ['Assistent endet nicht']; };
+      for (const o of ['', '', 'STR', '']) { const op = await up(o); if (op.length) return 'Assistent L' + E('curLvl()') + ' offen: ' + op.join(', '); }
+      const sv = JSON.parse(w.localStorage.getItem('dnd5e_chars')).Regressionstest;
+      const wp = J('wpnAuto(st.weapons[0])'), hd = J('hdInfo()');
+      if (sv._f_lvl !== '5' || E('curSub()') !== 'Champion (PHB)' || E('hpMaxVal()') !== 44 || E('prof()') !== 3 || E('st.attrs.STR') !== 18) return 'Fighter 5: Stufe/Subklasse/HP/PB/STR ' + [sv._f_lvl, E('curSub()'), E('hpMaxVal()'), E('prof()'), E('st.attrs.STR')].join('/');
+      if (wp.atk !== '+7' || wp.dmg !== '1d8+4' || E('stCritMin()') !== 19 || hd.max !== 5 || hd.die !== 10) return 'Fighter 5: Longsword ' + wp.atk + ' ' + wp.dmg + ', Krit ' + E('stCritMin()') + ', Hit Dice ' + hd.max + 'd' + hd.die;
+      w.buildAbilities(); const nm = [...d.querySelectorAll('#abList .ab-card .ab-name')].map(x => x.firstChild.textContent.trim());
+      for (const n of ['Second Wind', 'Action Surge', 'Improved Critical', 'Extra Attack']) if (!nm.includes(n)) return 'Fighter 5: Karte fehlt ' + n;
+      if (nm.includes('Weapon Mastery') || nm.includes('Tactical Mind')) return 'Fighter 5: 2024-Feature';
+      // Wizard Evocation 5 + Fighter 1 (Multiclass): HP, Saves nur Startklasse, Plätze, Hit Dice je Größe
+      w._doNewChar('Regressionstest');
+      set('cls', 'Wizard'); w.onClsChange(); set('lvl', '1'); w.onSubclsChange(); set('race', 'High Elf'); w.onRaceChange();
+      E("Object.entries({STR:13,DEX:14,CON:13,INT:15,WIS:12,CHA:8}).forEach(([k,v])=>st.attrSrc[k].base=v);buildAttrs();hpSync()");
+      for (const o of ['', '', 'INT', '']) await up(o);
+      w.luOpen(); await tick(); w.luOther(); w.luNew(); w.luPick('new', 'Fighter'); await tick();
+      for (let g = 0; g < 8 && E('_lu&&_lu.step') !== 'sum'; g++) { w.luNext(); await tick(); } w.luApply();
+      w.buildSaves(); w.buildSlots();
+      const svs = [...d.querySelectorAll('#savesGrid .sk-row')].filter(r => r.querySelector('.sk-pip.p')).map(r => r.querySelector('.sk-attr').textContent).join();
+      const sl = [...d.querySelectorAll('#spSlots .slvl')].map(s => s.querySelectorAll('.slpip').length).join();
+      const pools = J('hdInfo().pools.map(p=>p.max+"d"+p.die)').join();
+      if (E('totLvl()') !== 6 || E('hpMaxVal()') !== 34 || svs !== 'INT,WIS' || sl !== '4,3,2' || pools !== '1d10,5d6') return 'Wizard 5/Fighter 1: Stufe ' + E('totLvl()') + ', HP ' + E('hpMaxVal()') + ', Saves ' + svs + ', Plätze ' + sl + ', Hit Dice ' + pools;
+      // HP: Wizard 6 + 1 + 4 × (4 + 1) = 27, Fighter als zweite Klasse 6 + 1 (CON 13)
+      if (J('mcGainOf("Fighter").a').join() !== 'Light armor,Medium armor,Shields') return 'Fighter-Multiclass-Gewinne 2014';
+      // Combat Stats: „Prepared Spells“ berechnet (PHB-Tabelle ohne Spalte), auch je Klasse bei Multiclass (Wizard INT 18 + 5 = 9)
+      const cst = () => [...d.querySelectorAll('#combatStats .cst-chip')].map(c => c.querySelector('.cst-l').textContent + ' ' + c.querySelector('.cst-v').textContent);
+      w.buildAbilities(); if (!cst().includes('Prepared Spells 9')) return 'Combat Stats (Multiclass) ohne Prepared Spells 9: ' + cst().join(' | ');
+      E("st.mc=[];mcChanged();st.attrSrc.WIS.base=16;buildAttrs()"); sel('Cleric', 'Life Domain (PHB)', 5); w.buildAbilities();
+      if (!cst().includes('Prepared Spells 8')) return 'Combat Stats Cleric 5 (WIS 16) ohne Prepared Spells 8: ' + cst().join(' | ');
+      sel('Fighter', 'Champion (PHB)', 5); w.buildAbilities(); if (cst().some(x => /Prepared/.test(x))) return 'Combat Stats Fighter mit Prepared Spells';
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.weapons=[]");
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
