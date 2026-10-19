@@ -65,7 +65,10 @@ fi
 # 2b) Willow 2014 (Paket T1): Build aus der 2024-App, eigene Version nur bei Änderung
 APP14=0; V14=""
 rm -rf NEU2014
-python3 "$W/tools/build_2014.py" "$W/index.html" --out NEU2014 >/dev/null || { echo "ABBRUCH: build_2014.py fehlgeschlagen"; exit 1; }
+# Vergleichs-Build mit der Version des Repo-Stands, sonst weicht er immer ab (Version „dev“) und jede Doku-Veröffentlichung
+# bekäme eine neue 2014-Version (Fund 19.10.2026, Commit 02a803e)
+CUR14=""; [ -f "$W/2014/index.html" ] && CUR14="$(grep -o "const APP_VERSION = '[^']*';" "$W/2014/index.html" | sed "s/.*'\(.*\)'.*/\1/" || true)"
+python3 "$W/tools/build_2014.py" "$W/index.html" --out NEU2014 ${CUR14:+--version "$CUR14"} >/dev/null || { echo "ABBRUCH: build_2014.py fehlgeschlagen"; exit 1; }
 for f in index.html service-worker.js manifest.json; do cmp -s "NEU2014/$f" "$W/2014/$f" || APP14=1; done
 if [ $APP14 = 1 ]; then
   echo "== Willow 2014: Prüfskript"
