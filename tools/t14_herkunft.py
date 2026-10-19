@@ -12,7 +12,9 @@ Nur Einträge mit `srd` (SRD 5.1). Erzeugt je eine Zeile `const <BLOCK>=…;`:
 - RACE_PICKS Schema wie race_convert.py (REFERENZ B13): size, speed, dv, res, sk, asi (Attributsboni 2014 = Weiche a),
              adv, hp, tr (Tracker, 2014-Text geprüft), ch (Dragonborn-Ahnen aus subrace._versions; Zauber-Traits aus
              additionalSpells: Tiefling „Infernal Legacy“ = eine Option ohne Wahl, High Elf „Cantrip“ = Wahl aus den
-             Wizard-Cantrips von ZB_SPELLS 2014; `fab` = festes Zauberattribut), more (Nicht-Kampf-Traits → „Weitere“).
+             Wizard-Cantrips von ZB_SPELLS 2014; `fab` = festes Zauberattribut), more (Nicht-Kampf-Traits → „Weitere“),
+             pf (Paket AA3: Waffen-/Werkzeug-/Sprach-Proficiencies aus Grundrasse + Unterrasse, race_profs aus race_convert.py;
+             Sprachwahl aus den PHB-Standardsprachen in src14/languages.json).
 - BG_DATA / BG_EXTRA / BG_SPELLS  Acolyte (SRD; Text aus backgrounds.json, Beschreibung aus fluff-backgrounds.json) und
              „Custom Background“ unverändert aus der 2024-App (eigener Background, Plan T: „Acolyte + Custom“); keine
              Attributswahl, kein Origin Feat (Weiche b), BG_SPELLS {}.
@@ -25,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from class_extract import render, clean, t14_setup, Ctx  # noqa: E402
 from bg_convert import grab, bg_text, bg_data, tables_to_text  # noqa: E402
 from feat_add import pre_text  # noqa: E402
+from race_convert import race_profs, std_langs  # noqa: E402  (Paket AA3)
 
 T14 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 't14')
 ABBR = {'str': 'STR', 'dex': 'DEX', 'con': 'CON', 'int': 'INT', 'wis': 'WIS', 'cha': 'CHA'}
@@ -190,6 +193,11 @@ def races(src14, zb):
             need(t); check_track14(name, t, tag, uses, restore, txt(t))
             tr.append({'id': i, 't': t, 'tag': tag, 'uses': uses, 'restore': restore, 'ic': ic})
         if tr: e['tr'] = tr
+        # Paket AA3: Waffen-/Werkzeug-/Sprach-Proficiencies (Grundrasse + Unterrasse)
+        tt = {x['name']: ' '.join(lines(x['entries'])).lower() for x in ents if isinstance(x, dict) and x.get('name')}
+        pf = race_profs(name, [r, sb], tt, std_langs(src14, 'PHB'), err)
+        for x in pf: need(x['t'])
+        if pf: e['pf'] = pf
         more = sorted(cards & MORE)
         if more: e['more'] = more
         RP[name] = e
@@ -197,7 +205,8 @@ def races(src14, zb):
         print(f'  {name:<18} {ability:<26} speed {speed}, dv {e.get("dv", "–")}, res {e.get("res", "–")}'
               f'{", sk " + e["sk"]["t"] if "sk" in e else ""}'
               + ''.join(f', {c["t"]}: {len(c["o"])} Opt.' + (f' ({c["fab"]})' if c.get('fab') else '') for c in ch)
-              + (', tr ' + '/'.join(x['id'] for x in tr) if tr else '') + (', more ' + '/'.join(more) if more else ''))
+              + (', tr ' + '/'.join(x['id'] for x in tr) if tr else '') + (', more ' + '/'.join(more) if more else '')
+              + ''.join(f', pf {x["k"]} {x["t"]}: ' + ('/'.join(x['fix']) if 'fix' in x else f'{x["n"]} aus {"/".join(x["f"])}') for x in pf))
     return dict(sorted(RD.items())), dict(sorted(RP.items()))
 
 

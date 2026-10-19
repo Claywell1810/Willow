@@ -51,8 +51,8 @@ if has zauber bestien; then
   echo "   Zauber-Quellen in src/ ($(ls src/spells-*.json | wc -l) Dateien)"
 fi
 if has rassen; then
-  get races.json; get spells/spells-xphb.json; get spells/spells-phb.json
-  echo "   Rassen-Quellen in src/ (races.json + spells-xphb/phb)"
+  get races.json; get spells/spells-xphb.json; get spells/spells-phb.json; get languages.json   # languages.json: Sprachwahl (Paket AA3)
+  echo "   Rassen-Quellen in src/ (races.json + spells-xphb/phb + languages)"
 fi
 if has effekte; then
   get conditionsdiseases.json; get variantrules.json; get items-base.json; get actions.json   # actions.json: Standardaktionen (action_convert.py, Paket Z2)
@@ -85,7 +85,7 @@ if has t14; then
   echo "== 5etools-2014-src main: $(git ls-remote https://github.com/5etools-mirror-3/5etools-2014-src refs/heads/main | cut -c1-8)"
   for k in barbarian bard cleric druid fighter monk paladin ranger rogue sorcerer warlock wizard; do get14 "class/class-$k.json"; done
   get14 spells/spells-phb.json; get14 generated/gendata-spell-source-lookup.json
-  for f in races backgrounds fluff-backgrounds feats items items-base magicvariants optionalfeatures conditionsdiseases actions variantrules; do get14 "$f.json"; done
+  for f in races backgrounds fluff-backgrounds feats items items-base magicvariants optionalfeatures conditionsdiseases actions variantrules languages; do get14 "$f.json"; done
   get14 bestiary/bestiary-mm.json
   get14 book/book-phb.json   # Paket T2: Multiclass-Tabelle/-Regeln PHB 2014 (mc_slots.py --t14)
   [ -d node_modules/@fontsource/cinzel ] || npm i @fontsource/cinzel --silent >/dev/null 2>&1

@@ -23,6 +23,10 @@ Typen (Feld t):
   half  Jack of All Trades: halber Übungsbonus (abgerundet) auf nicht geübte Skills
 Erzeugt je Eintrag zusätzlich l (Stufe des Features).
 n darf bei opt auch {Stufe: Anzahl} sein (Paket T2: Invocations, Metamagic, Favored Enemy …; App: fpN()).
+Paket AA2 (19.10.2026): opt + nt darf tx haben = Satz aus dem Feature-Text, der für die Wahl gilt (Anzeige unter der Wahl;
+  geprüft: steht wörtlich im App-desc). Typ spell = Zauberwahl aus dem Spellbook: g = Grad je Platz (z. B. [1, 2] = ein
+  Zauber Grad 1 und einer Grad 2, [3, 3] = zwei Grad 3), ap = Always Prepared (App: apGrants); geprüft: „Nth-level“ und
+  bei ap „always have these spells prepared“ im Text.
 
 Willow 2014 (Paket T2, 18.10.2026):  python3 feature_picks.py 2014/index.html src14 --t14 [--write]
   liest die Klassen aus dem 2014-Build (python3 willow/tools/build_2014.py DnD_Character_App.html --out 2014), nimmt SPEC14
@@ -119,9 +123,14 @@ SPEC14 = {
     "Ranger|Hunter|Superior Hunter's Defense": {'t': 'opt'},
     # Typen/Gelände stehen im Fließtext (keine eigenen Zeilen) → nt; weitere Wahl auf L6/L14 bzw. L6/L10
     'Ranger|base|Favored Enemy': {'t': 'opt', 'nt': 1, 'n': {'1': 1, '6': 2, '14': 3},
+                                  'tx': 'You have advantage on Wisdom (Survival) checks to track your favored enemies, as well as on Intelligence checks to recall information about them.',
                                   'o': ['Aberrations', 'Beasts', 'Celestials', 'Constructs', 'Dragons', 'Elementals', 'Fey', 'Fiends',
                                         'Giants', 'Monstrosities', 'Oozes', 'Plants', 'Undead', 'Humanoid (two races)']},
-    'Ranger|base|Natural Explorer': {'t': 'opt', 'nt': 1, 'n': {'1': 1, '6': 2, '10': 3}, 'o': LANDS14},
+    'Ranger|base|Natural Explorer': {'t': 'opt', 'nt': 1, 'n': {'1': 1, '6': 2, '10': 3}, 'o': LANDS14,
+                                     'tx': "When you make an Intelligence or Wisdom check related to your favored terrain, your proficiency bonus is doubled if you are using a skill that you're proficient in."},
+    # Paket AA2: Zauberwahl aus dem Spellbook (Optionen zur Laufzeit = eigene Wizard-Zauber des Grades)
+    'Wizard|base|Spell Mastery': {'t': 'spell', 'g': [1, 2]},
+    'Wizard|base|Signature Spells': {'t': 'spell', 'g': [3, 3], 'ap': 1},
     'Bard|College of Lore|Bonus Proficiencies': {'t': 'skill', 'n': 3, 'f': 'any'},
     'Rogue|base|Expertise@1': {'t': 'exp', 'n': 2},
     'Rogue|base|Expertise@6': {'t': 'exp', 'n': 2},
@@ -190,6 +199,12 @@ for key, e in SPEC.items():
     src_txt = ' '.join(json.dumps(x) for x in j.get('classFeature', []) + j.get('subclassFeature', []) if x.get('name') == name)
     if T14:   # Paket T2: Optionen aus optionalfeatures (Invocations) bzw. einem anderen Feature der Klasse (Champion → Fighting Style)
         src_txt += ' ' + json.dumps(j) + ' ' + json.dumps([o for o in json.load(open(os.path.join(SRC, 'optionalfeatures.json')))['optionalfeature'] if o.get('srd')])
+    if 'tx' in e and e['tx'] not in f['desc']: print('  tx nicht im App-Text:', key); err += 1
+    if e['t'] == 'spell':
+        ORD = {1: '1st-level', 2: '2nd-level', 3: '3rd-level', 4: '4th-level', 5: '5th-level'}
+        for g in set(e['g']):
+            if ORD[g] not in f['desc']: print(f'  {ORD[g]} nicht im Text: {key}'); err += 1
+        if e.get('ap') and 'always have these spells prepared' not in f['desc']: print('  Always Prepared nicht im Text:', key); err += 1
     if e['t'] == 'opt':
         if 'o' not in e: e['o'] = parse_opts(f['desc'])
         if len(e['o']) < 2: print('zu wenige Optionen:', key, e['o']); err += 1
@@ -210,7 +225,7 @@ for key, e in SPEC.items():
             if s not in SKILLS: print('  kein Skill:', key, s); err += 1
             if s.lower() not in src_txt.lower(): print(f'  Skill nicht im 5e.tools-Text: {key} → {s}'); warn += 1
     out[key] = e
-    print(f"{key:62s} L{e['l']:<2} {e['t']:5s} {e.get('o') or e.get('fix') or e.get('f') or ''}")
+    print(f"{key:62s} L{e['l']:<2} {e['t']:5s} {e.get('o') or e.get('fix') or e.get('f') or e.get('g') or ''}")
 
 print(f'\n{len(out)} Einträge, Fehler {err}, Hinweise {warn}')
 if WRITE and T14:

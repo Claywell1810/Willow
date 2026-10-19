@@ -3930,7 +3930,7 @@ const REGRESSION = [
       w._doNewChar('Regressionstest');
       set('cls', 'Fighter'); w.onClsChange(); set('lvl', '1'); w.onSubclsChange(); set('race', 'Human'); w.onRaceChange();
       E("Object.entries({STR:15,DEX:13,CON:14,INT:8,WIS:12,CHA:10}).forEach(([k,v])=>st.attrSrc[k].base=v);buildAttrs()"); w.bgSelect('Acolyte');
-      E("st.picks['cls:Fighter:skills']=['Athletics','Perception'];st.statSrc.ac={arm:'Chain Mail'};st.weapons=[{name:'Longsword',atk:'',dmg:'',type:'',ref:'Longsword|PHB'}];hpSync();autoSave()");
+      E("st.picks['cls:Fighter:skills']=['Athletics','Perception'];st.picks['feat:Fighter|base|Fighting Style']=['Protection'];st.picks['race:Languages:pf:l']=['Dwarvish'];st.statSrc.ac={arm:'Chain Mail'};st.weapons=[{name:'Longsword',atk:'',dmg:'',type:'',ref:'Longsword|PHB'}];hpSync();autoSave()");
       if (E('hpMaxVal()') !== 12 || J("ATTRS.map(a=>st.attrs[a.k])").join() !== '16,14,15,9,13,11') return 'Fighter 1: HP/Attribute ' + E('hpMaxVal()') + ' ' + J("ATTRS.map(a=>st.attrs[a.k])");
       const up = async (o) => { w.luOpen(); await tick(); for (let g = 0; g < 10; g++) { const s = E('_lu.step');
         if (s === 'sub') w.luSub(0);
@@ -3966,6 +3966,144 @@ const REGRESSION = [
       sel('Fighter', 'Champion (PHB)', 5); w.buildAbilities(); if (cst().some(x => /Prepared/.test(x))) return 'Combat Stats Fighter mit Prepared Spells';
       E("st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.weapons=[]");
       return true;
+    } },
+  { name: 'Paket AA1: Willow 2014 – Rage auf Stufe 20 „Unlimited“ (keine Kreise, kein Rast-Hinweis), Stufe 17 weiter 6 Kreise', datum: '19.10.2026', r: '2014',
+    run: ({ w, d, sel }) => {
+      const card = () => [...d.querySelectorAll('#abList .ab-card')].find(c => (c.querySelector('.ab-name') || {}).firstChild?.textContent.trim() === 'Rage');
+      sel('Barbarian', 'Path of the Berserker (PHB)', 17); w.buildAbilities();
+      let c = card(); if (!c || c.querySelectorAll('.ab-pip').length !== 6) return 'Stufe 17: Rage nicht mit 6 Kreisen';
+      sel('Barbarian', 'Path of the Berserker (PHB)', 20); w.buildAbilities(); c = card();
+      if (!c) return 'Stufe 20: Rage-Karte fehlt';
+      if (c.querySelectorAll('.ab-pip').length || (c.querySelector('.ab-unl') || {}).textContent !== 'Unlimited') return 'Stufe 20: ' + c.querySelectorAll('.ab-pip').length + ' Kreise, Hinweis „' + ((c.querySelector('.ab-unl') || {}).textContent || '') + '“';
+      if (w.eval("abMaxUses(CLASS_DATA.Barbarian.abilities.base.find(a=>a.id==='bb_rage').uses,20)") !== 'unl') return 'abMaxUses ≠ unl';
+      return true;
+    } },
+  { name: 'Paket AA2: Willow 2014 – Favored Enemy/Natural Explorer mit Text zur Wahl, Spell Mastery/Signature Spells als Zauberwahl aus dem Spellbook (offen, Signature = Always Prepared, zählt nicht bei Prepared, bleibt im Spellbook)', datum: '19.10.2026', r: '2014',
+    run: ({ w, d, sel }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      E("st.mc=[];st.picks={};st.mySpells=[]"); sel('Ranger', 'Hunter (PHB)', 1);
+      E("st.picks['feat:Ranger|base|Favored Enemy']=['Beasts'];st.picks['feat:Ranger|base|Natural Explorer']=['Forest']");
+      const fp = n => E(`(()=>{const f=CLASS_DATA.Ranger.base.find(x=>x.name==='${n}');return fpHtml('Ranger','base',f,{cls:'Ranger',lvl:1},1).body})()`);
+      const fe = fp('Favored Enemy'), ne = fp('Natural Explorer');
+      if (!/<b>Beasts\.<\/b>[^<]*advantage on Wisdom \(Survival\) checks/.test(fe)) return 'Favored Enemy ohne Text zur Wahl';
+      if (!/<b>Forest\.<\/b>[^<]*proficiency bonus is doubled/.test(ne)) return 'Natural Explorer ohne Text zur Wahl';
+      sel('Wizard', 'School of Evocation (PHB)', 20);
+      const W = J("ZB_SPELLS.filter(s=>(s.classes||[]).includes('Wizard')).map(s=>({name:s.name,grad:s.grad,school:s.school}))");
+      const g = n => W.filter(s => s.grad === n), add = (s, prep) => ({ name: s.name, grad: s.grad, school: s.school, prep, notes: '' });
+      const s3 = g(3), book = [add(g(1)[0], false), add(g(2)[0], true), add(s3[0], true), add(s3[1], false), add(s3[2], false)];
+      E('st.mySpells=' + JSON.stringify(book));
+      let op = J("fpOpen('Wizard').map(x=>x.txt)");
+      if (!op.includes('Spell Mastery 0/2') || !op.includes('Signature Spells 0/2')) return 'offen fehlt: ' + op.join(', ');
+      if (J("fpSpOpts('Wizard',3)").length !== 3) return 'Optionen Grad 3 ≠ Spellbook';
+      const sb0 = J('sbInfo()').n, pc0 = J("spClsCounts({cls:'Wizard',sub:'',lvl:20})").pc;
+      E(`st.picks['feat:Wizard|base|Signature Spells:g3']=${JSON.stringify([s3[0].name, s3[1].name])};st.picks['feat:Wizard|base|Spell Mastery:g1']=[${JSON.stringify(g(1)[0].name)}];st.picks['feat:Wizard|base|Spell Mastery:g2']=[${JSON.stringify(g(2)[0].name)}];apSync()`);
+      const L = J('st.mySpells'), a = L.find(x => x.name === s3[0].name), b = L.find(x => x.name === s3[1].name);
+      if (!a || a.auto !== 'Signature Spells' || a.prep !== 'free' || !b || b.auto !== 'Signature Spells') return 'Signature Spells nicht Always Prepared: ' + JSON.stringify(a);
+      if (L.length !== 5) return 'Automatik hat Einträge angelegt: ' + L.length;
+      op = J("fpOpen('Wizard').map(x=>x.txt)"); if (op.some(x => /Spell Mastery|Signature/.test(x))) return 'nach Wahl noch offen: ' + op.join(', ');
+      const pc1 = J("spClsCounts({cls:'Wizard',sub:'',lvl:20})").pc;
+      if (pc1 !== pc0 - 1) return 'Prepared zählt Signature Spells: ' + pc0 + ' → ' + pc1;
+      if (J('sbInfo()').n !== sb0) return 'Spellbook ' + sb0 + ' → ' + J('sbInfo()').n;
+      const body = E(`(()=>{const f=CLASS_DATA.Wizard.base.find(x=>x.name==='Signature Spells');return fpHtml('Wizard','base',f,{cls:'Wizard',lvl:20},20).body})()`);
+      if (!body.includes('Always prepared') || !body.includes(s3[0].name)) return 'Karte Signature Spells ohne Wahl/Hinweis';
+      // Wahl wieder weg → Einträge zurück wie vorher
+      E("st.picks['feat:Wizard|base|Signature Spells:g3']=[];apSync()");
+      const L2 = J('st.mySpells'); if (L2.some(x => x.auto) || L2.find(x => x.name === s3[0].name).prep !== true) return 'Wegfall stellt prep nicht her';
+      E("st.picks={};st.mySpells=[]");
+      return true;
+    } },
+  { name: 'Paket AA3: Proficiencies der Rassen (Waffen/Werkzeug/Sprachen aus races.json) – Trait-Karte mit Wahl, offene Wahl, Info-Tab Core Traits „From Race“', datum: '19.10.2026',
+    run: ({ w, d, set, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      const race = r => { set('race', r); w.onRaceChange(); };
+      const core = () => d.getElementById('coreTraitsList').textContent;
+      E("st.mc=[];st.picks={}"); sel('Fighter', '', 1);
+      if (RULES === '2014') {
+        race('Hill Dwarf');
+        if (!core().includes('Weapons: Battleaxe, Handaxe, Light Hammer, Warhammer') || !core().includes('Languages: Common, Dwarvish')) return 'Hill Dwarf: Core Traits ' + core().slice(-200);
+        if (!J('rcOpen().map(x=>x.txt)').includes('Tool Proficiency 0/1')) return 'Hill Dwarf: Werkzeugwahl nicht offen';
+        const c = J("rcCard('Hill Dwarf',{name:'Tool Proficiency',desc:'x'})");
+        if (!/Smith&#39;s Tools|Smith's Tools/.test(c.body) || !c.body.includes('pk-chip')) return 'Hill Dwarf: Karte ohne Wahl';
+        E("st.picks['race:Tool Proficiency:pf:t']=[\"Mason's Tools\"];pkRefresh()");
+        if (!core().includes("Tools: Mason's Tools") || J('rcOpen()').length) return 'Hill Dwarf: Wahl wirkt nicht: ' + core().slice(-160);
+        race('High Elf');
+        const o = J("RACE_PICKS['High Elf'].pf.find(x=>x.t==='Extra Language')");
+        if (!o || o.n !== 1 || o.f.includes('Elvish') || !o.f.includes('Dwarvish')) return 'High Elf: Extra Language ' + JSON.stringify(o);
+        if (!core().includes('Weapons: Longsword, Shortsword, Shortbow, Longbow') || !/choose 1 \(Extra Language\)/.test(core())) return 'High Elf: Core Traits';
+        race('Rock Gnome'); if (!core().includes("Tools: Tinker's Tools")) return 'Rock Gnome: Tinker';
+      } else {
+        race('Half-Elf');
+        if (!core().includes('Languages: Common, Elvish') || !J('rcOpen().map(x=>x.txt)').includes('Languages 0/1')) return 'Half-Elf: Sprachen';
+        E("st.picks['race:Languages:pf:l']=['Giant'];pkRefresh()");
+        if (!core().includes('Languages: Common, Elvish, Giant')) return 'Half-Elf: Wahl wirkt nicht';
+        race('Dwarf'); if (/From Race/.test(core())) return 'XPHB-Zwerg mit „From Race“';
+      }
+      race(''); E("st.picks={}");
+      return true;
+    } },
+  { name: 'Paket AA4: Zusatz-Cantrips/-Zauber aus Features zählen (2014 Land Bonus Cantrip, Lore Additional Magical Secrets; 2024 Thaumaturge, Magician)', datum: '19.10.2026',
+    run: ({ w, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      const n = (c, s, l) => J(`spClsCounts({cls:'${c}',sub:${JSON.stringify(s)},lvl:${l}})`);
+      E("st.mc=[];st.picks={};st.mySpells=[]");
+      if (RULES === '2014') {
+        sel('Druid', 'Circle of the Land (PHB)', 2);
+        const a = n('Druid', '', 2), b = n('Druid', 'Circle of the Land (PHB)', 2);
+        if (b.cant !== a.cant + 1) return 'Land 2: Cantrips ' + a.cant + ' → ' + b.cant;
+        sel('Bard', 'College of Lore (PHB)', 6);
+        const c = n('Bard', '', 6), e = n('Bard', 'College of Lore (PHB)', 6), f = n('Bard', 'College of Lore (PHB)', 5);
+        if (e.prep !== c.prep + 2 || f.prep !== n('Bard', '', 5).prep) return 'Lore: Known ' + c.prep + ' → ' + e.prep + ' (L5 ' + f.prep + ')';
+      } else {
+        sel('Cleric', '', 1); const a = n('Cleric', '', 1);
+        E("st.picks['feat:Cleric|base|Divine Order']=['Thaumaturge']"); const b = n('Cleric', '', 1);
+        E("st.picks['feat:Cleric|base|Divine Order']=['Protector']"); const c = n('Cleric', '', 1);
+        if (b.cant !== a.cant + 1 || c.cant !== a.cant) return 'Thaumaturge: ' + [a.cant, b.cant, c.cant].join('/');
+        sel('Druid', '', 1); const x = n('Druid', '', 1);
+        E("st.picks['feat:Druid|base|Primal Order']=['Magician']"); if (n('Druid', '', 1).cant !== x.cant + 1) return 'Magician';
+      }
+      E("st.picks={}");
+      return true;
+    } },
+  { name: 'Paket AA5: offene Wahlen ohne Skill-Bezug (Fighting Style, Invocations 2014; Fighting Style/Weapon Mastery 2024) unter „Open choices“ und im Assistenten', datum: '19.10.2026',
+    run: ({ w, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      const op = () => J('pkOpen().map(x=>x.txt)');
+      E("st.mc=[];st.picks={};st.feats=[]"); sel('Fighter', '', 1);
+      if (!op().includes('Fighting Style 0/1')) return 'Fighter 1: ' + op().join(', ');
+      if (RULES === '2014') {
+        E("st.picks['feat:Fighter|base|Fighting Style']=['Archery']"); if (op().includes('Fighting Style 0/1')) return 'gewählt, noch offen';
+        sel('Warlock', 'The Fiend (PHB)', 2); if (!op().includes('Eldritch Invocations 0/2')) return 'Warlock 2: ' + op().join(', ');
+      } else {
+        if (!op().some(x => /^Weapon Mastery 0\/\d$/.test(x))) return 'Weapon Mastery fehlt: ' + op().join(', ');
+        E("st.picks['fs:Fighter']=['Archery']"); if (op().includes('Fighting Style 0/1')) return 'gewählt, noch offen';
+        E("st.picks={};st.feats=[{name:'Archery',tag:'Feat',desc:''}]"); if (op().includes('Fighting Style 0/1')) return 'Feat von Hand, noch offen';
+      }
+      E("st.mc=[{cls:'Fighter',sub:'',lvl:1}];st.picks={};st.feats=[];mcChanged()"); sel('Wizard', '', 1);
+      if (!op().includes('Fighting Style 0/1 (Fighter)')) return 'Multiclass-Fighter: ' + op().join(', ');
+      E("st.mc=[];st.picks={};mcChanged()");
+      return true;
+    } },
+  { name: 'Paket AA6: Defense (Fighting Style) +1 AC automatisch mit Rüstung (2014 Wahl, 2024 Feat), ohne Rüstung nicht, Hinweis bei Handeintrag', datum: '19.10.2026',
+    run: ({ w, sel, RULES }) => {
+      const E = x => w.eval(x), J = x => JSON.parse(E('JSON.stringify(' + x + ')'));
+      E("st.mc=[];st.picks={};st.feats=[];st.attrs.DEX=10"); sel('Fighter', '', 1);
+      const ac = s => J('stAcCalc(' + JSON.stringify(s) + ')');
+      const a0 = ac({ arm: 'Chain Mail' }).t;
+      if (RULES === '2014') E("st.picks['feat:Fighter|base|Fighting Style']=['Defense']"); else E("st.feats=[{name:'Defense',tag:'Feat',desc:''}]");
+      const a1 = ac({ arm: 'Chain Mail' }), u = ac({});
+      if (a1.t !== a0 + 1 || !a1.parts.some(p => /Defense/.test(p.l))) return 'mit Rüstung: ' + a0 + ' → ' + a1.t;
+      if (u.parts.some(p => /Defense/.test(p.l))) return 'Defense ohne Rüstung';
+      if (!ac({ arm: 'Chain Mail', feat: 1 }).warn.some(x => /Defense is now added automatically/.test(x))) return 'kein Hinweis bei Handeintrag';
+      if (RULES === '2014') { E("st.picks={}"); sel('Fighter', 'Champion (PHB)', 10); E("st.picks['feat:Fighter|Champion|Additional Fighting Style']=['Defense']");
+        if (ac({ arm: 'Chain Mail' }).t !== a0 + 1) return 'Champion Additional Fighting Style'; }
+      E("st.picks={};st.feats=[]");
+      return true;
+    } },
+  { name: 'Paket AA7: Cleric Blessed Strikes – Optionen als „• Name:“-Zeilen wie 5e.tools (Neubau, rebuild_diff SUMME 0)', datum: '19.10.2026', r: '2024',
+    run: ({ w }) => {
+      const t = w.eval("(CLASS_DATA.Cleric.base.find(f=>f.name==='Blessed Strikes')||{}).desc||''");
+      if (!/\n• Divine Strike: /.test(t) || !/\n• Potent Spellcasting: /.test(t)) return 'Blessed Strikes ohne „• “-Zeilen';
+      return w.eval("JSON.stringify(FEATURE_PICKS['Cleric|base|Blessed Strikes'].o)") === '["Divine Strike","Potent Spellcasting"]' || 'FEATURE_PICKS Blessed Strikes';
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
 

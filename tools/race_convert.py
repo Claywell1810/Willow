@@ -16,6 +16,9 @@ Quelle je Rasse wie in RACE_DATA (10× XPHB, Half-Elf/Half-Orc PHB). Alles struk
 - Paket C4 (Actions-Tab): tr = Tracker (TRACK: id rc_…, tag, uses, restore, minLvl, Icon; check_track prüft Aktionsart,
   PB/1×, Rast und Stufe am Text), Option-Feld inn = [{s, l, u}] (Zauber ohne Platz: u 1 = 1×/Long Rest, 'pb'),
   Option-Feld tag (Goliath-Boon: GIANT_TAG), spk = feste Zauber aus Traits ohne Wahl (Light Bearer, Otherworldly Presence)
+- Paket AA3 (19.10.2026): pf = Waffen-/Werkzeug-/Sprach-Proficiencies (race_profs, auch von t14_herkunft.py genutzt):
+  [{k: 'w'|'t'|'l', t: Trait, fix: [...]} | {k, t, f: [Optionen], n}] – Trait = der Trait, dessen Text sie nennt;
+  „anyStandard“ = Wahl aus den Standardsprachen der Quelle (src/languages.json, setup.sh rassen), ohne die festen.
 Das Skript prüft, dass jeder Trait-Name auch im App-Text (RACE_DATA.traits) als Karte „• Name: …“ steht.
 """
 import json, os, re, subprocess, sys
@@ -81,6 +84,54 @@ def find_trait(r, name):
     for e in r['entries']:
         if isinstance(e, dict) and e.get('name') == name: return e
     return None
+
+
+PF_ART = {'weaponProficiencies': 'w', 'toolProficiencies': 't', 'languageProficiencies': 'l'}
+
+
+def tcase(s): return ' '.join(w[:1].upper() + w[1:] for w in s.split(' '))  # "smith's tools" → "Smith's Tools"
+
+
+def std_langs(srcdir, src):
+    """Standardsprachen einer Quelle aus languages.json (5e.tools), Reihenfolge wie dort."""
+    p = os.path.join(srcdir, 'languages.json')
+    if not os.path.exists(p): return None
+    return [l['name'] for l in json.load(open(p, encoding='utf-8'))['language'] if l['source'] == src and l.get('type') == 'standard']
+
+
+def race_profs(name, profs, traits, langs, err):
+    """Paket AA3: profs = Liste von 5e.tools-Einträgen (Grundrasse, Unterrasse) mit weapon/tool/languageProficiencies,
+    traits = {Trait: Text in Kleinbuchstaben}, langs = Standardsprachen der Quelle → pf (Schema im Kopf)."""
+    def trait_for(words, rx=None):
+        hits = [t for t, tx in traits.items() if all(w.lower() in tx for w in words) and (not rx or re.search(rx, tx))]
+        if len(hits) == 1: return hits[0]
+        err(f'{name}: Trait für {words or rx} ' + ('nicht gefunden' if not hits else f'mehrdeutig {hits}')); return None
+    fix = {'w': [], 't': [], 'l': []}; ch = []; anyl = 0
+    for r in profs:
+        for key in r:
+            if key.endswith('Proficiencies') and key not in PF_ART and key != 'skillProficiencies': err(f'{name}: {key} nicht unterstützt')
+        for key, k in PF_ART.items():
+            for p in r.get(key, []):
+                for x, v in p.items():
+                    if v is True:
+                        n = tcase(x.split('|')[0])
+                        if n not in fix[k]: fix[k].append(n)
+                    elif k == 'l' and x == 'anyStandard': anyl = max(anyl, int(v))
+                    elif k == 't' and x == 'choose': ch.append({'k': 't', 'f': [tcase(y) for y in v['from']], 'n': v.get('count', 1)})
+                    else: err(f'{name}: {key} {x}={v} nicht unterstützt')
+    pf = []
+    for k in ('w', 't', 'l'):
+        if fix[k]:
+            t = trait_for(fix[k])
+            if t: pf.append({'k': k, 't': t, 'fix': fix[k]})
+    for c in ch:
+        t = trait_for(c['f'])
+        if t: pf.append(dict(c, t=t))
+    if anyl:
+        t = trait_for([], r'(?:one|an) extra language of your cho(?:ice|osing)')
+        if not langs: err(f'{name}: Standardsprachen fehlen (languages.json)')
+        elif t: pf.append({'k': 'l', 't': t, 'f': [x for x in langs if x not in fix['l']], 'n': anyl})
+    return pf
 
 
 def app_race_data(html):
@@ -250,12 +301,18 @@ def main():
             s_ = [names.get(x.lower(), x) for x in spell_tags(json.dumps(tr_['entries']))]
             if s_: need(tr_['name']); spk.append({'t': tr_['name'], 's': s_})
         if spk: e['spk'] = spk
+        # Paket AA3: Waffen-/Werkzeug-/Sprach-Proficiencies
+        tt = {x['name']: ' '.join(lines(x['entries'])).lower() for x in r['entries'] if isinstance(x, dict) and x.get('name')}
+        pf = race_profs(race, [r], tt, std_langs(srcdir, src), err)
+        for x in pf: need(x['t'])
+        if pf: e['pf'] = pf
         out[race] = e
         print(f'  {race:<11} size {"/".join(e["size"])}, speed {e["speed"]}, dv {e.get("dv", "–")}, res {e.get("res", "–")}'
               f'{", sk " + e["sk"]["t"] if "sk" in e else ""}{", asi" if "asi" in e else ""}'
               + ''.join(f', {c["t"]}: {"/".join(o["n"] for o in c["o"])}{" ab " + "/".join(c["ab"]) if c.get("ab") else ""}' for c in ch)
               + (', tr ' + '/'.join(x['id'] for x in e.get('tr', [])) if e.get('tr') else '')
               + ''.join(f', {x["t"]}: {"/".join(x["s"])}' for x in e.get('spk', []))
+              + ''.join(f', pf {x["k"]} {x["t"]}: ' + ('/'.join(x['fix']) if 'fix' in x else f'{x["n"]} aus {len(x["f"])}') for x in e.get('pf', []))
               + ''.join(f', inn {o["n"]}: ' + '/'.join(f'{z["s"]}@{z["l"]}×{z["u"]}' for z in o['inn']) for c in ch for o in c['o'] if o.get('inn')))
     print(f'Fehler: {len(ERR)}')
     if ERR or not write: sys.exit(1 if ERR else 0)
