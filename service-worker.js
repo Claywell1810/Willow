@@ -1,4 +1,4 @@
-const CACHE_NAME = "willow-app-2026-10-24e";
+const CACHE_NAME = "willow-app-2026-10-25a";
 // Paket T1 (18.10.2026): Willow und Willow 2014 (Ordner 2014/) liegen auf derselben Domain und teilen sich Cache Storage.
 // Jede App räumt nur ihre eigenen Caches auf (Präfix bis „-app-“: "willow-app-" bzw. "willow14-app-") und liest nur aus dem eigenen.
 const CACHE_PFX = CACHE_NAME.replace(/-app-.*$/, "-app-");

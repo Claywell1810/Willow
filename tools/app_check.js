@@ -4433,6 +4433,41 @@ const REGRESSION = [
       E('luCancel(1)'); E("st.picks={};_lastSnap=null;_undoClear()");
       return true;
     } },
+  { name: 'Paket AC: PC-Ansicht – Querformat ab 1350 px 3 Spalten (Auswahl je Spalte, Tausch, switchTab ersetzt rechte Spalte, Beasts fällt weg, übrige Spalten nach autoSave neu), ab 1100 px 2, Off in ⚙, Hochformat/schmal wie vorher', datum: '25.10.2026',
+    run: async ({ w, d, sel }) => {
+      if (w.eval('typeof dkApply') !== 'function') return 'dkApply fehlt';
+      const E = s => w.eval(s), T = ms => new Promise(r => setTimeout(r, ms));
+      const sz = (W, H) => { Object.defineProperty(w, 'innerWidth', { value: W, configurable: true }); Object.defineProperty(w, 'innerHeight', { value: H, configurable: true }); E('dkApply()'); };
+      const on = () => [...d.querySelectorAll('.panel.on')].sort((a, b) => (+a.dataset.dk || 0) - (+b.dataset.dk || 0)).map(p => p.id.slice(4)).join();
+      const dk = () => d.documentElement.dataset.desk || '';
+      const W0 = w.innerWidth, H0 = w.innerHeight;
+      if (dk()) return 'PC-Ansicht schon bei ' + W0 + '×' + H0;
+      E("localStorage.removeItem(LS_PFX+'willow_desk');dkCols=['info','zauber','skills']");
+      try {
+        sz(1920, 1080); if (dk() !== '3') return 'keine 3 Spalten bei 1920×1080: ' + dk();
+        if (on() !== 'info,zauber,skills') return 'Spalten: ' + on();
+        E("dkPick(2,'feats')"); if (on() !== 'info,zauber,feats') return 'Auswahl: ' + on();
+        E("dkPick(0,'zauber')"); if (on() !== 'zauber,info,feats') return 'Tausch: ' + on();
+        if (d.querySelector('.dk-head[data-col="0"] select').value !== 'zauber') return 'Auswahlfeld Spalte 1';
+        E("switchTab('hintergrund')"); if (on() !== 'zauber,info,hintergrund') return 'switchTab auf verdeckten Tab: ' + on();
+        E("switchTab('info')"); if (on() !== 'zauber,info,hintergrund') return 'switchTab auf sichtbaren Tab ändert Spalten: ' + on();
+        if (E("JSON.parse(localStorage.getItem(LS_PFX+'willow_desk_cols')).join()") !== 'zauber,info,hintergrund') return 'Spalten nicht gemerkt';
+        // übrige Spalten nach autoSave neu, die bearbeitete nicht
+        E("window._dkTi=[];window._dkO=tabInit;tabInit=function(t){_dkTi.push(t);return _dkO(t);}");
+        E("autoSave({target:document.querySelector('#tab-info input')||document.getElementById('tab-info')})"); await T(350);
+        const ti = E('_dkTi.join()'); E('tabInit=_dkO');
+        if (!/zauber/.test(ti) || !/hintergrund/.test(ti) || /info/.test(ti)) return 'Nachzeichnen nach autoSave: ' + ti;
+        sel('Druid', '', 5); E("dkPick(2,'bestien')"); if (!on().endsWith('bestien')) return 'Beasts bei Druid: ' + on();
+        E('st.savedBeasts=[]'); sel('Bard', '', 5); if (on().includes('bestien')) return 'Beasts bleibt bei Bard sichtbar: ' + on();
+        if ([...d.querySelectorAll('.dk-head select option')].some(o => o.value === 'bestien')) return 'Beasts in der Auswahl bei Bard';
+        sz(1280, 720); if (dk() !== '2' || on().split(',').length !== 2) return '2 Spalten bei 1280×720: ' + dk() + ' ' + on();
+        sz(1920, 1080); E("setDesk('off')"); if (dk() || on().split(',').length !== 1) return 'Off: ' + on();
+        E("setDesk('auto')"); if (dk() !== '3') return 'Auto';
+        sz(1080, 1920); if (dk() || on().split(',').length !== 1) return 'Hochformat: ' + on();
+        if (on() !== E('dkCols[0]')) return 'zurück im Handy-Modus nicht Spalte 1: ' + on();
+      } finally { sz(W0, H0); E("localStorage.removeItem(LS_PFX+'willow_desk_cols');localStorage.removeItem(LS_PFX+'willow_desk');dkCols=['info','zauber','skills'];switchTab('info')"); }
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');

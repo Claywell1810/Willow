@@ -1635,6 +1635,24 @@ html[data-mode="light"] .ci-rune{box-shadow:0 1px 3px rgba(90,58,18,.25)}
 html[data-mode="light"] .sp-conc.active{box-shadow:0 1px 2px rgba(90,58,18,.3)}
 html[data-mode="light"] .die-shape.crit{box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 40%,transparent)}
 html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,var(--red) 40%,transparent)}
+/* PC-Ansicht (Paket AC, 25.10.2026): breites Querformat → html[data-desk="2|3"], Tabs als Spalten (dkApply) */
+.dk-head,.dk-only{display:none}
+html[data-desk] .app{max-width:none;height:calc(100vh / var(--zf,1));min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html[data-desk] .hx-bar,html[data-desk] .hx-hero{flex:0 0 auto}
+html[data-desk] .body{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(var(--dkn,3),minmax(0,1fr));grid-template-rows:auto minmax(0,1fr);column-gap:18px;padding:10px 18px 0;overflow:hidden}
+html[data-desk="2"] .body{--dkn:2}
+html[data-desk] .body::after{display:none}
+html[data-desk] .dk-head{display:block;grid-row:1;padding-bottom:8px;min-width:0}
+html[data-desk] .dk-head[data-col="1"]{grid-column:2}
+html[data-desk] .dk-head[data-col="2"]{grid-column:3}
+html[data-desk="2"] .dk-head[data-col="2"]{display:none}
+.dk-sel{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--gold);font-family:'Cinzel',serif;font-size:var(--fs-sm);letter-spacing:1px;padding:7px 10px;outline:none;cursor:pointer}
+html[data-desk] .panel.on{grid-row:2;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:0 6px 28px 2px;scrollbar-width:thin}
+html[data-desk] .panel[data-dk="0"]{grid-column:1}
+html[data-desk] .panel[data-dk="1"]{grid-column:2}
+html[data-desk] .panel[data-dk="2"]{grid-column:3}
+html[data-desk] .bottom-nav,html[data-desk] .more-modal{display:none}
+html[data-desk] .dk-only{display:inline-block}
 </style>
 <!-- Paket T1 (18.10.2026): ein Code, zwei Builds – RULES setzt tools/build_2014.py auf '2014' (Ordner 2014/); Regel-Weichen mit if(R14).
      LS_PFX: gleiche Domain = gemeinsamer localStorage → Willow 2014 speichert alles unter 'w14_…' -->
@@ -1650,6 +1668,7 @@ html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,v
     <button class="undo-btn hx-ib" id="undoBtn" onclick="doUndo()" title="Undo" aria-label="Undo" disabled><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
     <button class="undo-btn hx-ib" id="redoBtn" onclick="doRedo()" title="Redo" aria-label="Redo" disabled><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
     <button class="hx-title" id="hxTitle" onclick="hxTitleTap()" aria-label="Character Sheet"><span class="hx-t0">Character Sheet</span><span class="hx-t1"><span class="hx-mini" id="hxMini"></span><span class="hx-mininame" id="hxMiniName"></span></span></button>
+    <button class="hx-ib dk-only" onclick="openDice('',0)" id="dkDiceBtn" title="Dice Roller" aria-label="Dice Roller"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20.5 7.3v9.4L12 21.5 3.5 16.7V7.3z"/><path d="M12 7.6 16.6 15.6H7.4z"/><path d="M12 2.5v5.1M20.5 7.3l-3.9 8.3M3.5 7.3l3.9 8.3M7.4 15.6 3.5 16.7M16.6 15.6l3.9 1.1M7.4 15.6 12 21.5l4.6-5.9"/></svg></button>
     <button class="hx-ib" onclick="openWebSearch()" id="webSearchBtn" title="Search" aria-label="Search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
     <button class="hx-ib" onclick="openSettings()" id="settingsBtn" title="Settings" aria-label="Settings"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.00 9.60 L21.41 10.11 L21.41 13.89 L19.00 14.40 L18.65 15.26 L19.99 17.32 L17.32 19.99 L15.26 18.65 L14.40 19.00 L13.89 21.41 L10.11 21.41 L9.60 19.00 L8.74 18.65 L6.68 19.99 L4.01 17.32 L5.35 15.26 L5.00 14.40 L2.59 13.89 L2.59 10.11 L5.00 9.60 L5.35 8.74 L4.01 6.68 L6.68 4.01 L8.74 5.35 L9.60 5.00 L10.11 2.59 L13.89 2.59 L14.40 5.00 L15.26 5.35 L17.32 4.01 L19.99 6.68 L18.65 8.74 Z"/><circle cx="12" cy="12" r="3"/></svg></button>
   </div>
@@ -1703,6 +1722,10 @@ html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,v
 </div>
 
   <div class="body">
+    <!-- PC-Ansicht (Paket AC): Tab-Auswahl je Spalte, nur bei html[data-desk] sichtbar -->
+    <div class="dk-head" data-col="0"><select class="dk-sel" aria-label="Column 1" onchange="dkPick(0,this.value)"></select></div>
+    <div class="dk-head" data-col="1"><select class="dk-sel" aria-label="Column 2" onchange="dkPick(1,this.value)"></select></div>
+    <div class="dk-head" data-col="2"><select class="dk-sel" aria-label="Column 3" onchange="dkPick(2,this.value)"></select></div>
 
     <!-- INFO TAB -->
     <div class="panel on" id="tab-info">
@@ -7284,10 +7307,14 @@ function switchSubtab(parent, btn){
 
 function switchTab(t){
   const tabId = typeof t === 'string' ? t : t.dataset.tab;
+  if(dkN){dkShow(tabId);return;} // Paket AC: PC-Ansicht
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+tabId));
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tabId));
   document.getElementById('bnavMore')?.classList.toggle('on',MORE_TABS.includes(tabId));closeMore(); // Paket R2
+  tabInit(tabId);
+}
+function tabInit(tabId){ // Paket AC: Aufbau eines Tabs beim Anzeigen (aus switchTab; PC-Ansicht auch für die übrigen Spalten)
   if(tabId==='ausruestung'){renderItems();}
   if(tabId==='notizen'){ntRender();} // Paket V
   if(tabId==='bestien'){bstInit();if(bstFType==='ws')bstRender();buildSavedBeasts();} // Paket T3: Wild-Shape-Filter folgt der Druidenstufe
@@ -7298,6 +7325,61 @@ function switchTab(t){
   if(tabId==='log'){buildLog();}
   if(tabId==='info'){buildClsLore();buildClassTable();buildSubclsLore();buildRaceLore();buildBgLore();buildFeatsInfo();syncCharInfo();buildAttrs();}
 }
+
+// PC-Ansicht (Paket AC, 25.10.2026): ab ~1100 px Breite im Querformat (Breite / Textgröße) 2, ab 1350 px 3 Spalten nebeneinander,
+// jede mit eigener Tab-Auswahl (.dk-head). Spalten pro Gerät (LS_PFX+'willow_desk_cols'), ⚙ „Desktop Layout“ Auto/Off (LS_PFX+'willow_desk').
+// Sichtbare Tabs tragen .on + data-dk=Spalte; switchTab auf einen nicht sichtbaren Tab ersetzt die rechte Spalte.
+// Nach autoSave/Undo werden die übrigen Spalten neu gezeichnet (dkSoon), nie die, in der gerade gearbeitet wird.
+const DK_TABS=[['info','Info'],['skills','Skills'],['ausruestung','Items'],['zauber','Actions'],['notizen','Notes'],['bestien','Beasts'],['hintergrund','Background'],['feats','Feats'],['spelllist','Spell List'],['log','Log']];
+let dkN=0,dkCols=['info','zauber','skills'],_dkT=null;
+try{const v=JSON.parse(localStorage.getItem(LS_PFX+'willow_desk_cols')||'null');if(Array.isArray(v)&&v.length===3&&v.every(t=>DK_TABS.some(x=>x[0]===t)))dkCols=v;}catch(e){}
+function dkOff(){try{return localStorage.getItem(LS_PFX+'willow_desk')==='off';}catch(e){return false;}}
+function dkCalc(){
+  if(dkOff())return 0;
+  const zf=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zf'))||1;
+  const W=window.innerWidth||0,H=window.innerHeight||0,w=W/zf;
+  if(W<=H*1.15)return 0;
+  return w>=1350?3:w>=1100?2:0;
+}
+function dkSave(){try{localStorage.setItem(LS_PFX+'willow_desk_cols',JSON.stringify(dkCols));}catch(e){}}
+function dkAvail(){const b=document.getElementById('tabBestien');return DK_TABS.map(x=>x[0]).filter(t=>t!=='bestien'||!b||b.style.display!=='none');}
+function dkFix(){const av=dkAvail(),out=[];
+  dkCols.forEach((t,i)=>{if(!av.includes(t)||out.includes(t))t=av.find(x=>!out.includes(x)&&!dkCols.slice(i+1).includes(x))||av.find(x=>!out.includes(x));out.push(t);});
+  if(out.join()!==dkCols.join()){dkCols=out;dkSave();}}
+function dkVis(){return dkCols.slice(0,dkN);}
+function dkRender(only){
+  if(!dkN)return;dkFix();const vis=dkVis(),av=dkAvail();
+  document.querySelectorAll('.panel').forEach(p=>{const i=vis.indexOf(p.id.slice(4));p.classList.toggle('on',i>=0);if(i>=0)p.dataset.dk=i;else delete p.dataset.dk;});
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',vis.includes(b.dataset.tab)));
+  document.querySelectorAll('.dk-head').forEach(h=>{const i=+h.dataset.col,s=h.querySelector('select');if(!s)return;
+    s.innerHTML=DK_TABS.filter(x=>av.includes(x[0])).map(([t,l])=>`<option value="${t}"${t===dkCols[i]?' selected':''}>${l}</option>`).join('');});
+  (only||vis).forEach(t=>{if(vis.includes(t))tabInit(t);});
+}
+function dkPick(i,t){
+  if(!dkN||!dkAvail().includes(t))return;const j=dkCols.indexOf(t),old=dkCols[i];
+  if(j===i)return;if(j>=0)dkCols[j]=old;dkCols[i]=t;dkSave();
+  dkRender(j>=0&&j<dkN?[t,old]:[t]);const p=document.getElementById('tab-'+t);if(p)p.scrollTop=0;
+}
+function dkShow(t){ // switchTab im Spalten-Modus
+  closeMore();const b=dkVis().join();dkFix();
+  if(!dkVis().includes(t)&&dkAvail().includes(t)){const i=dkN-1,j=dkCols.indexOf(t);if(j>=0)dkCols[j]=dkCols[i];dkCols[i]=t;dkSave();}
+  if(dkVis().join()!==b){dkRender();const p=document.getElementById('tab-'+t);if(p)p.scrollTop=0;}else tabInit(t);
+}
+function dkApply(){
+  const n=dkCalc(),was=dkN;if(n===was){if(n)dkRender([]);return;}
+  dkN=n;const h=document.documentElement;
+  if(n){h.dataset.desk=n;dkRender();}
+  else{delete h.dataset.desk;document.querySelectorAll('.panel').forEach(p=>delete p.dataset.dk);switchTab(dkCols[0]||'info');}
+  try{hxScroll();}catch(e){}
+}
+function dkSoon(ev){
+  if(!dkN)return;const t=ev&&ev.target&&ev.target.closest?ev.target:document.activeElement;const src=t&&t.closest?t.closest('.panel'):null;
+  clearTimeout(_dkT);_dkT=setTimeout(()=>{_dkT=null;if(!dkN)return;const a=document.activeElement,act=a&&a.closest?a.closest('.panel'):null;
+    dkVis().forEach(id=>{const p=document.getElementById('tab-'+id);if(!p||p===src||p===act)return;const y=p.scrollTop;try{tabInit(id);}catch(e){}p.scrollTop=y;});},250);
+}
+function markDesk(){const v=dkOff()?'off':'auto';document.querySelectorAll('#dkRow .fbtn').forEach(b=>b.classList.toggle('on',b.dataset.dk===v));}
+function setDesk(v){try{if(v==='off')localStorage.setItem(LS_PFX+'willow_desk','off');else localStorage.removeItem(LS_PFX+'willow_desk');}catch(e){}markDesk();dkApply();}
+function dkInit(){dkApply();window.addEventListener('resize',()=>dkApply());}
 
 // ===== NOTES (Paket V, 05.10.2026): Notizzettel statt fester Felder =====
 // st.notes=[{id, t:Titel, x:Text, c:[Kategorien], d:erstellt, u:geändert (ms)}], st.noteCats=[Kategorien, Reihenfolge der Chips].
@@ -8219,7 +8301,7 @@ function _undoStep(from,to,lbl){
   if(document.getElementById('tab-spelllist')?.classList.contains('on')&&typeof slRender==='function') slRender();
   if(document.getElementById('tab-log')?.classList.contains('on')) buildLog();
   if(Math.abs((window.scrollY||0)-y)>1){try{window.scrollTo(0,y);}catch(e){}}
-  updUndoBtns();
+  updUndoBtns();dkSoon(); // Paket AC
   showToast(lbl+(msgs[0]?': '+(msgs[0].length>40?msgs[0].slice(0,40)+'…':msgs[0]):'')); // Toast bricht um (01.10.2026, Foto Simon)
 }
 function doUndo(){_undoStep(_undo,_redo,'↶ Undone');}
@@ -8249,6 +8331,7 @@ function autoSave(e){
     _lastSnap = JSON.parse(JSON.stringify(snap));
     _lastSnapName = name;
   }
+  dkSoon(ev); // Paket AC: übrige Spalten der PC-Ansicht aktuell halten
 }
 
 
@@ -9330,7 +9413,7 @@ function setTextSize(v){
   if(!TEXT_SIZES.includes(v))v='normal';
   try{localStorage.setItem(LS_PFX+'willow_textsize',v);}catch(e){}
   if(v==='normal')delete document.documentElement.dataset.ts;else document.documentElement.dataset.ts=v;
-  markTextSize();measureNav();
+  markTextSize();measureNav();dkApply(); // Paket AC
 }
 // Freifläche unten (Paket I, 30.09.2026): tatsächliche Höhe der unteren Leiste inkl. hochstehendem Würfel-Knopf → --nav-h
 function measureNav(){
@@ -9344,7 +9427,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow14-app-2026-10-24e';
+const APP_VERSION = 'willow14-app-2026-10-25a';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -9360,7 +9443,7 @@ function loadThemeOverrides(){
 }
 function saveThemeOverrides(ov){ try{localStorage.setItem(themeLs(), JSON.stringify(ov));}catch(e){showToast('⚠ Could not save colors (storage full or blocked)',5000);} }
 
-function openSettings(){
+function openSettings(){markDesk(); // Paket AC
   markTextSize();markDesign();
   const vl=document.getElementById('appVersionLabel'); if(vl) vl.textContent='v '+APP_VERSION;
   bkLabel();
@@ -9958,6 +10041,7 @@ initContentLists(); // Paket N: Klassen-/Rassenlisten aus CLASS_DATA/RACE_DATA, 
 slBuildFilters();
 initApp();
 storageInit(); // Paket S3
+try{dkInit();}catch(e){console.error(e);} // Paket AC: PC-Ansicht
 
 // SERVICE WORKER (offline + Updates; Registrierung fehlte seit 03.06.2026, wieder eingebaut 27.09.2026)
 // Übernimmt nach einem Update ein neuer Worker, wird die Seite einmal neu geladen → neue Version sofort sichtbar.
@@ -10062,6 +10146,12 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
           <button class="fbtn" data-ts="normal" onclick="setTextSize('normal')">Normal</button>
           <button class="fbtn" data-ts="gross" onclick="setTextSize('gross')">Large</button>
           <button class="fbtn" data-ts="sehrgross" onclick="setTextSize('sehrgross')">X-Large</button>
+        </div>
+        <div class="set-h">Desktop Layout</div>
+        <div class="set-p">On wide screens in landscape (PC, tablet) tabs are shown side by side: 3 columns from about 1350 px, 2 columns from 1100 px. Pick a tab at the top of each column. Saved on this device.</div>
+        <div class="ts-row" id="dkRow">
+          <button class="fbtn" data-dk="auto" onclick="setDesk('auto')">Auto</button>
+          <button class="fbtn" data-dk="off" onclick="setDesk('off')">Off</button>
         </div>
         <div class="set-h">Data</div>
         <div class="set-p">Share the current character, back up all characters (incl. your colors and design), or import a character or backup file.</div>
