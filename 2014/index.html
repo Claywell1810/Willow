@@ -1112,6 +1112,19 @@ html[data-ts="gross"] .hx-t0{letter-spacing:3px}html[data-ts="sehrgross"] .hx-t0
 .cl-txt small.dim{color:var(--muted)}
 .cl-cur{flex:0 0 auto;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
 .cl-del{width:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:none;border:1px solid color-mix(in srgb,var(--red) 40%,transparent);border-radius:10px;color:var(--red);cursor:pointer}
+.cl-ren{width:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border2);border-radius:10px;color:var(--text2);cursor:pointer}
+.nc-new{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.nc-opt{display:block;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;min-height:54px;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nc-opt b{display:block;font-family:'Cinzel',serif;font-size:var(--fs-md);font-weight:400;letter-spacing:.5px}
+.nc-opt small{display:block;font-size:var(--fs-sm);color:var(--text2);margin-top:2px}
+.nc-opt.pri{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,var(--bg3))}
+.nc-opt.pri b{color:var(--gold)}
+.cg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.cg-grid .lu-opt{margin:0;min-height:52px;padding:8px 10px;gap:6px}
+.cg-grid .lu-opt-n{font-size:var(--fs-sm)}
+.cg-facts{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:var(--fs-sm);color:var(--desc);line-height:1.35;margin:2px 0 4px}
+.cg-facts dt{font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;text-transform:uppercase;color:var(--text3);padding-top:2px}
+.cg-facts dd{margin:0}
 .cl-sv{width:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:none;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:10px;color:var(--gold);cursor:pointer}
 /* Paket U: Class/Subclass-Features im Info-Tab einklappbar */
 .lf-lvl{margin-bottom:8px}
@@ -1617,12 +1630,16 @@ html[data-mode="light"] .die-shape.fail{box-shadow:0 0 0 2px color-mix(in srgb,v
       <div class="hx-cls" id="hxCls"></div><div class="hx-sub" id="hxSub"></div>
     </div>
   </div>
-  <div id="newCharModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
+  <div id="newCharModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1001;align-items:center;justify-content:center"><!-- Paket AB1: über der Charakterliste (Umbenennen) -->
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin:20px;width:100%;max-width:340px">
-      <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:12px;letter-spacing:1px">New Character</div>
+      <div id="ncTitle" style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--gold);margin-bottom:12px;letter-spacing:1px">New Character</div>
       <input id="newCharName" placeholder="Enter a name..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Cinzel',serif;font-size:var(--fs-md);padding:10px;border-radius:8px;box-sizing:border-box;margin-bottom:12px">
+      <div id="ncNew" class="nc-new"><!-- Paket AB1 (AB-E1): geführt oder leeres Blatt wie bisher -->
+        <button type="button" class="nc-opt pri" onclick="ncGuided()"><b>✦ Guided</b><small>Step by step: class, then everything else</small></button>
+        <button type="button" class="nc-opt" onclick="confirmNewChar()"><b>Empty sheet</b><small>Fill in everything yourself</small></button>
+      </div>
       <div style="display:flex;gap:8px">
-        <button class="add-btn" style="flex:1;margin:0" onclick="confirmNewChar()">Create</button>
+        <button class="add-btn" id="ncOk" style="flex:1;margin:0" onclick="confirmNewChar()">Create</button>
         <button class="char-btn" style="flex:1" onclick="document.getElementById('newCharModal').style.display='none'">Cancel</button>
       </div>
     </div>
@@ -7521,6 +7538,7 @@ function saveChar(){
   const name = document.getElementById('charName')?.textContent.trim();
   if(!name){
     const modal=document.getElementById('newCharModal');
+    ncMode('save');
     modal.style.display='flex';
     modal.dataset.mode='save';
     document.getElementById('newCharName').value='';
@@ -7562,15 +7580,55 @@ function loadChar(name){
 
 function newChar(){
   const modal=document.getElementById('newCharModal');
+  ncMode('new');
   modal.style.display='flex';
   modal.dataset.mode='new';
   document.getElementById('newCharName').value='';
   setTimeout(()=>document.getElementById('newCharName').focus(),50);
 }
+// Paket AB1: ein Namensfenster für Neu (Guided / Empty sheet), Speichern („Save this sheet as…“) und Umbenennen (AB-E5)
+function ncMode(m){
+  const T={new:'New Character',save:'Save Character',rename:'Rename Character'},ok=document.getElementById('ncOk'),nw=document.getElementById('ncNew'),t=document.getElementById('ncTitle');
+  if(t)t.textContent=T[m]||T.new;if(nw)nw.style.display=m==='new'?'':'none';
+  if(ok){ok.style.display=m==='new'?'none':'';ok.textContent=m==='rename'?'Rename':'Save';}
+}
+function ncTaken(name,old){return name!==old&&Object.prototype.hasOwnProperty.call(getAllChars(),name);}
+function ncGuided(){
+  const modal=document.getElementById('newCharModal'),name=document.getElementById('newCharName').value.trim();
+  if(!name){showToast('Please enter a name');return;}
+  if(ncTaken(name)){showToast('A character named “'+name+'” already exists');return;}
+  modal.style.display='none';cgStart(name);
+}
+function clRename(i){
+  const n=(window._clNames||[])[i];if(n===undefined)return;
+  const modal=document.getElementById('newCharModal');ncMode('rename');
+  modal.style.display='flex';modal.dataset.mode='rename';modal.dataset.old=n;
+  const inp=document.getElementById('newCharName');inp.value=n;setTimeout(()=>{inp.focus();try{inp.select();}catch(e){}},50);
+}
+// Umbenennen: Eintrag in getAllChars() unter neuem Namen (Reihenfolge und Log bleiben), Log-Zeile „✎ Renamed: alt → neu“
+function _renameChar(oldN,newN){
+  const chars=getAllChars();if(!chars[oldN]||!newN||oldN===newN||ncTaken(newN,oldN))return false;
+  const o={};Object.keys(chars).forEach(k=>{o[k===oldN?newN:k]=chars[k];});
+  const c=o[newN];c.log=(c.log||[]).concat([{t:Date.now(),m:'✎ Renamed: '+oldN+' → '+newN}]);while(c.log.length>300)c.log.shift();
+  if(!lsPut(o))return false;
+  const el=document.getElementById('charName'),cur=(el?.textContent||'').trim();
+  if(cur===oldN){el.textContent=newN;if(_lastSnapName===oldN)_lastSnapName=newN;st.log=c.log;if(typeof buildLog==='function')buildLog();}
+  refreshCharSel(cur===oldN?newN:cur);
+  return true;
+}
 function confirmNewChar(){
   const modal=document.getElementById('newCharModal');
   const name=document.getElementById('newCharName').value.trim();
   if(!name){showToast('Please enter a name');return;}
+  if(modal.dataset.mode==='rename'){
+    const old=modal.dataset.old||'';
+    if(name===old){modal.style.display='none';return;}
+    if(ncTaken(name,old)){showToast('A character named “'+name+'” already exists');return;}
+    modal.style.display='none';
+    if(_renameChar(old,name))showToast('✎ Renamed to '+name);
+    return;
+  }
+  if(ncTaken(name)){showToast('A character named “'+name+'” already exists');return;} // Paket AB1: früher still überschrieben
   modal.style.display='none';
   if(modal.dataset.mode==='save'){
     _saving=true;
@@ -7587,6 +7645,7 @@ function confirmNewChar(){
 }
 function resetUI(){
   if(typeof _lu!=='undefined'&&_lu){_lu=null;document.getElementById('luModal')?.classList.remove('on');} // Paket Z4
+  if(typeof _cg!=='undefined'&&_cg){_cg=null;document.getElementById('cgModal')?.classList.remove('on');} // Paket AB1
   _crEdit=null;
   Object.assign(st, {
     attrs:{STR:10,DEX:10,CON:10,INT:10,WIS:10,CHA:10},
@@ -7614,10 +7673,9 @@ function resetUI(){
   _undoClear();
 }
 
-function _doNewChar(name){
-  const _name=name;
+// Paket AB1: leeres neues Blatt (Empty sheet; der Erstellungs-Assistent nutzt es mit Name '' bis „Create“). Lässt _saving gesetzt.
+function _newSheetReset(_name){
   _crEdit=null;_ciEdit=null;_mcDelAsk=-1;ntReset(); // Paket V
-  {
   _saving = true;
   // Reset state
   Object.assign(st, {
@@ -7643,6 +7701,11 @@ function _doNewChar(name){
   buildAttrs();buildSaves();buildSkills();buildWeapons();updBar();_hpMPrev=hpMaxRaw();
   buildSlots();buildMySpells();buildFeats();buildAbilities();buildSavedBeasts();
   calcSpell();ntRender(); // Paket V
+}
+function _doNewChar(name){
+  const _name=name;
+  {
+  _newSheetReset(_name);
   const chars = getAllChars();
   const snap = collectState();
   snap.log = [{t:Date.now(),m:'✨ Character created'}];
@@ -8130,7 +8193,8 @@ let _saving = false;
 document.addEventListener('input', autoSave);
 function autoSave(e){
   if(_saving) return;
-  if(_lu){if(apSync())buildMySpells();const t=e&&e.target;if(!(t&&t.closest&&t.closest('[data-luq]')))luSoon();return;} // Paket Z4: Assistent offen → nichts speichern, Fenster neu zeichnen (nicht beim Tippen in der Suche)
+  if(_lu){if(apSync())buildMySpells();const t=e&&e.target;if(!(t&&t.closest&&t.closest('[data-luq]')))luSoon();return;} // Paket Z4
+  if(_cg){if(apSync())buildMySpells();const t=e&&e.target;if(!(t&&t.closest&&t.closest('[data-luq]')))cgSoon();return;} // Paket AB1: Erstellungs-Assistent offen → nichts speichern: Assistent offen → nichts speichern, Fenster neu zeichnen (nicht beim Tippen in der Suche)
   if(apSync()) buildMySpells();   // Paket H: Always Prepared folgt Klasse/Subklasse/Stufe/Wahl im selben Schritt
   const ev=(e&&e.target)?e:(typeof window!=='undefined'?window.event:null); // auch oninput="…;autoSave()" kennt so das Feld
   const name = document.getElementById('charName')?.textContent.trim();
@@ -8277,7 +8341,7 @@ function applyTheme(cls){
 }
 
 // ===== KOPF + CHARAKTERLISTE (Paket R2, 05.10.2026; Bilder aus tools/design_r_art.py) =====
-const WILLOW_ICO={"trash": "<svg class='ico' viewBox='0 0 24 24' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6'/></svg>", "save": "<svg class='ico' viewBox='0 0 24 24' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z'/><path d='M8 3v5h7V3M8 21v-7h8v7'/></svg>"}; // nur, was JS selbst einsetzt (übrige Symbole stehen direkt im HTML)
+const WILLOW_ICO={"trash": "<svg class='ico' viewBox='0 0 24 24' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6'/></svg>", "save": "<svg class='ico' viewBox='0 0 24 24' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z'/><path d='M8 3v5h7V3M8 21v-7h8v7'/></svg>", "edit": "<svg class='ico' viewBox='0 0 24 24' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 20h4L19 9l-4-4L4 16z'/><path d='m13.5 6.5 4 4'/></svg>"}; // nur, was JS selbst einsetzt (übrige Symbole stehen direkt im HTML)
 const WILLOW_VIG={"": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='st' cx='170' cy='22' r='1'/><circle class='st' cx='210' cy='50' r='0.8'/><circle class='st' cx='250' cy='14' r='1.2'/><circle class='st' cx='300' cy='34' r='1'/><circle class='st' cx='350' cy='18' r='1.3'/><circle class='st' cx='385' cy='52' r='0.9'/><circle class='st' cx='280' cy='66' r='0.7'/><circle class='moon' cx='374' cy='30' r='11'/><path class='s2' d='M0 131 L0 112 Q80 92 160 106 T300 98 T400 104 L400 131 Z'/><path class='s1' d='M120 131 Q200 112 270 120 T400 114 L400 131 Z'/></svg>", "Artificer": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><path class='s2' d='M120 131 V100 L150 86 V100 L180 86 V100 L210 86 V100 L240 86 V131 Z'/><path class='s2' fill-rule='evenodd' d='M264.52 86.94 L271.78 88.16 L271.78 95.84 L264.52 97.06 L263.50 100.88 L269.18 105.57 L265.34 112.21 L258.44 109.64 L255.64 112.44 L258.21 119.34 L251.57 123.18 L246.88 117.50 L243.06 118.52 L241.84 125.78 L234.16 125.78 L232.94 118.52 L229.12 117.50 L224.43 123.18 L217.79 119.34 L220.36 112.44 L217.56 109.64 L210.66 112.21 L206.82 105.57 L212.50 100.88 L211.48 97.06 L204.22 95.84 L204.22 88.16 L211.48 86.94 L212.50 83.12 L206.82 78.43 L210.66 71.79 L217.56 74.36 L220.36 71.56 L217.79 64.66 L224.43 60.82 L229.12 66.50 L232.94 65.48 L234.16 58.22 L241.84 58.22 L243.06 65.48 L246.88 66.50 L251.57 60.82 L258.21 64.66 L255.64 71.56 L258.44 74.36 L265.34 71.79 L269.18 78.43 L263.50 83.12 Z M238 81 a11 11 0 1 0 .01 0 Z'/><circle class='moon' cx='288' cy='32' r='5' opacity='.25'/><circle class='moon' cx='294' cy='22' r='7' opacity='.25'/><circle class='moon' cx='302' cy='10' r='8' opacity='.25'/><circle class='moon' cx='357' cy='44' r='5' opacity='.25'/><circle class='moon' cx='362' cy='33' r='6' opacity='.25'/><path class='s1' d='M262 131 V84 L300 60 L338 84 V131 Z M338 131 V96 H400 V131 ZM282 74 V40 H292 V68 Z M352 96 V52 H362 V96 Z'/><rect class='lit' x='284' y='98' width='8' height='10' rx='1'/><rect class='lit' x='308' y='98' width='8' height='10' rx='1'/><rect class='lit' x='352' y='106' width='8' height='10' rx='1'/><rect class='lit' x='374' y='106' width='8' height='10' rx='1'/><circle class='halo' cx='318' cy='120' r='5.5'/><circle class='halo' cx='326' cy='112' r='4.5'/><circle class='halo' cx='312' cy='114' r='4.0'/><circle class='halo' cx='330' cy='122' r='3.5'/><circle class='lit' cx='318' cy='120' r='1.1'/><circle class='lit' cx='326' cy='112' r='0.9'/><circle class='lit' cx='312' cy='114' r='0.8'/><circle class='lit' cx='330' cy='122' r='0.7'/></svg>", "Barbarian": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='st' cx='180' cy='20' r='1'/><circle class='st' cx='240' cy='12' r='1.2'/><circle class='st' cx='390' cy='16' r='1'/><circle class='st' cx='360' cy='40' r='0.8'/><path class='s2' d='M100 124 L126 34 L153 106 L182 26 L211 104 L240 28 L269 105 L291 63 L314 112 L339 19 L364 103 L381 21 L399 103 L419 41 L438 107 L410 124 L410 131 L100 131 Z'/><path class='s1' d='M140 131 L159 99 L178 118 L195 101 L212 119 L225 103 L237 120 L250 77 L262 109 L277 87 L291 113 L306 92 L321 116 L339 100 L357 118 L370 102 L383 120 L395 104 L408 120 L427 94 L446 116 L410 131 L410 131 L140 131 Z'/><circle class='halo' cx='312' cy='120' r='23.400000000000002'/><path class='lit' d='M306 127 Q304 116 311 108 Q311 116 316 112 Q320 120 317 127 Z'/><circle class='lit' cx='318' cy='96' r='0.9'/><circle class='lit' cx='306' cy='86' r='0.8'/><circle class='lit' cx='324' cy='74' r='0.7'/><circle class='lit' cx='312' cy='64' r='0.6'/></svg>", "Bard": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><path class='s2' d='M0 131 L0 116 Q90 100 170 112 T400 108 L400 131 Z'/><g class='st' transform='translate(318 34) scale(0.9) rotate(-12)'><ellipse cx='0' cy='0' rx='3.4' ry='2.4'/><rect x='2.4' y='-13' width='1.2' height='13'/><path d='M3.6 -13 q5 3 4 8 q-1-4-4-5z'/></g><g class='st' transform='translate(334 18) scale(0.75) rotate(-12)'><ellipse cx='0' cy='0' rx='3.4' ry='2.4'/><rect x='2.4' y='-13' width='1.2' height='13'/><path d='M3.6 -13 q5 3 4 8 q-1-4-4-5z'/></g><g class='st' transform='translate(352 30) scale(0.65) rotate(-12)'><ellipse cx='0' cy='0' rx='3.4' ry='2.4'/><rect x='2.4' y='-13' width='1.2' height='13'/><path d='M3.6 -13 q5 3 4 8 q-1-4-4-5z'/></g><path class='s1' d='M250 131 V82 L290 52 L330 82 V131 Z M330 131 V96 H384 V131 ZM306 66 V44 H316 V74 Z M330 96 L357 76 L384 96 Z'/><path class='s1' d='M246 86 H226 V88 H246 Z M230 88 V92 M242 88 V92'/><rect class='s1' x='227' y='92' width='18' height='13' rx='2'/><rect class='lit' x='262' y='94' width='9' height='11' rx='4.5'/><rect class='lit' x='306' y='94' width='9' height='11' rx='4.5'/><rect class='lit' x='342' y='106' width='9' height='11' rx='4.5'/><rect class='lit' x='364' y='106' width='9' height='11' rx='4.5'/><rect class='lit' x='283' y='110' width='12' height='21' rx='6'/><circle class='halo' cx='289' cy='120' r='12'/></svg>", "Cleric": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><path class='halo' d='M276 -10 L214 131 L242 131 Z'/><path class='halo' d='M300 -10 L286 131 L314 131 Z'/><path class='halo' d='M324 -10 L358 131 L386 131 Z'/><path class='s2' d='M0 131 L0 120 Q100 104 200 116 T400 112 L400 131 Z'/><path class='s1' d='M232 131 V90 L262 70 L292 90 V131 ZM292 131 V58 L291 58 L306 18 L321 58 L320 58 V131 ZM320 131 V96 L346 80 L372 96 V131 Z'/><circle class='lit' cx='306' cy='12' r='3.4'/><circle class='lit' cx='262' cy='96' r='7'/><rect class='lit' x='301' y='72' width='10' height='16' rx='5'/><rect class='lit' x='240' y='108' width='7' height='13' rx='3.5'/><rect class='lit' x='276' y='108' width='7' height='13' rx='3.5'/><rect class='lit' x='334' y='108' width='7' height='13' rx='3.5'/><rect class='lit' x='352' y='108' width='7' height='13' rx='3.5'/><circle class='halo' cx='306' cy='12' r='20.4'/></svg>", "Druid": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><path class='s1' d='M0 128 L13 71 L27 108 L41 65 L54 106 L64 52 L74 101 L89 82 L105 112 L116 70 L127 108 L139 33 L152 95 L165 41 L178 98 L188 51 L198 101 L214 51 L230 101 L245 57 L260 103 L269 49 L279 101 L293 45 L306 99 L316 68 L325 107 L338 40 L351 97 L367 47 L383 100 L399 47 L415 100 L410 128 L410 131 L0 131 Z'/><path class='s2' d='M0 131 L11 98 L21 120 L33 97 L44 119 L51 83 L58 114 L65 107 L73 122 L81 80 L90 113 L98 91 L106 117 L114 95 L122 118 L132 100 L141 120 L153 92 L164 117 L175 89 L186 116 L198 84 L210 114 L217 90 L224 116 L236 83 L247 114 L256 82 L266 114 L273 88 L281 116 L290 84 L299 115 L306 102 L313 121 L324 84 L336 114 L347 108 L357 123 L364 98 L372 119 L382 102 L392 121 L399 83 L406 114 L412 91 L419 117 L410 131 L410 131 L0 131 Z'/><circle class='halo' cx='262' cy='52' r='15.400000000000002'/><circle class='halo' cx='318' cy='30' r='11.200000000000001'/><circle class='halo' cx='352' cy='64' r='14'/><circle class='halo' cx='230' cy='78' r='9.799999999999999'/><circle class='halo' cx='385' cy='44' r='10.5'/><circle class='lit' cx='262' cy='52' r='2.2'/><circle class='lit' cx='318' cy='30' r='1.6'/><circle class='lit' cx='352' cy='64' r='2'/><circle class='lit' cx='230' cy='78' r='1.4'/><circle class='lit' cx='385' cy='44' r='1.5'/></svg>", "Fighter": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='st' cx='170' cy='30' r='1'/><circle class='st' cx='220' cy='16' r='1.2'/><circle class='st' cx='270' cy='40' r='0.8'/><circle class='st' cx='380' cy='26' r='1.1'/><circle class='moon' cx='230' cy='40' r='12'/><path class='s2' d='M0 131 L0 114 Q90 100 170 110 L170 131 Z'/><path class='s1' d='M150 131 V100 H155 V93 H160 V100 H170 H175 V93 H180 V100 H190 H195 V93 H200 V100 H210 H215 V93 H220 V100 H230 H235 V93 H240 V100 H250 H255 V93 H260 V100 H270 H275 V93 H280 V100 H290 H295 V93 H300 V100 H310 H315 V93 H320 V100 H330 H335 V93 H340 V100 H350 H355 V93 H360 V100 H370 H375 V93 H380 V100 H390 H395 V93 H400 V100 H400 V131 Z M290 131 V52 H294 V45 H298 V52 H306 H310 V45 H314 V52 H322 H326 V45 H330 V52 H338 H342 V45 H346 V52 H346 V131 Z'/><rect class='s1' x='317' y='14' width='2.4' height='32'/><path class='s1' d='M319.4 16 H344 L337 23 L344 30 H319.4 Z'/><path class='lit' d='M306 131 V116 a12 12 0 0 1 24 0 V131 Z' opacity='.55'/><rect class='lit' x='304' y='68' width='3' height='9' rx='1.5'/><rect class='lit' x='330' y='68' width='3' height='9' rx='1.5'/><rect class='lit' x='200' y='110' width='3' height='9' rx='1.5'/><rect class='lit' x='370' y='110' width='3' height='9' rx='1.5'/><circle class='halo' cx='298' cy='112' r='8.0'/><circle class='halo' cx='338' cy='112' r='8.0'/><circle class='lit' cx='298' cy='112' r='1.6'/><circle class='lit' cx='338' cy='112' r='1.6'/></svg>", "Monk": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='moon' cx='350' cy='34' r='20'/><path class='s2' d='M0 131 L0 108 Q60 92 120 104 T230 96 L230 131 Z'/><path class='s1' d='M200 131 Q230 120 250 104 L268 96 Q300 92 330 98 L360 104 Q390 112 405 110 V131 Z'/><path class='s1' d='M266 86 Q286.4 83 300 75 Q313.6 83 334 86 Z'/><rect class='s1' x='279' y='86' width='42' height='10'/><path class='s1' d='M273 66 Q289.2 63 300 55 Q310.8 63 327 66 Z'/><rect class='s1' x='283' y='66' width='33' height='9'/><path class='s1' d='M280 47 Q292.0 44 300 36 Q308.0 44 320 47 Z'/><rect class='s1' x='288' y='47' width='25' height='8'/><rect class='s1' x='299' y='18' width='2' height='20'/><circle class='halo' cx='276' cy='92' r='6.0'/><circle class='halo' cx='324' cy='92' r='6.0'/><circle class='halo' cx='300' cy='72' r='4.8'/><circle class='lit' cx='276' cy='92' r='1.5'/><circle class='lit' cx='324' cy='92' r='1.5'/><circle class='lit' cx='300' cy='72' r='1.2'/><ellipse class='mist' cx='250' cy='110' rx='70' ry='4'/><ellipse class='mist' cx='350' cy='118' rx='60' ry='4'/><ellipse class='mist' cx='200' cy='100' rx='40' ry='4'/></svg>", "Paladin": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><path class='halo' d='M318 112 L394 88 L392 81 Z'/><path class='halo' d='M318 112 L382 64 L377 58 Z'/><path class='halo' d='M318 112 L361 45 L354 41 Z'/><path class='halo' d='M318 112 L336 34 L328 33 Z'/><path class='halo' d='M318 112 L308 33 L300 34 Z'/><path class='halo' d='M318 112 L282 41 L275 45 Z'/><path class='halo' d='M318 112 L259 58 L254 64 Z'/><path class='halo' d='M318 112 L244 81 L242 88 Z'/><circle class='halo' cx='318' cy='112' r='56'/><circle class='halo' cx='318' cy='112' r='36'/><circle class='moon' cx='318' cy='112' r='20'/><path class='s2' d='M0 131 L0 118 Q90 106 180 116 L180 131 Z'/><path class='s1' d='M314 104 V42 L318 30 L322 42 V104 Z M302 42 H334 V47 H302 Z M315.5 30 V16 H320.5 V30 Z M318 7 a5 5 0 1 0 .01 0 Z'/><path class='s1' d='M150 131 Q230 102 318 100 T410 112 V131 Z'/></svg>", "Ranger": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='st' cx='190' cy='20' r='1'/><circle class='st' cx='300' cy='14' r='1.1'/><circle class='st' cx='360' cy='26' r='0.9'/><circle class='st' cx='220' cy='50' r='0.8'/><circle class='moon' cx='330' cy='40' r='11'/><path class='st' d='M246 34 q8 -6 14 0 q6 -6 14 0 q-7 -2 -14 3 q-7 -5 -14 -3z'/><path class='s2' d='M60 118 L88 78 L116 106 L146 61 L176 101 L197 81 L218 107 L239 82 L260 107 L279 59 L299 100 L319 67 L340 103 L364 76 L388 105 L415 54 L441 99 L410 118 L410 131 L60 131 Z'/><path class='s1' d='M135 125 L150 104 L165 125 Z M138 112 L150 91 L162 112 Z M141 100 L150 79 L159 100 Z M144 87 L150 66 L156 87 Z M148 131 V123 H152 V131 Z M152 125 L172.89766924217568 95 L193 125 Z M156 107 L172.89766924217568 78 L189 107 Z M160 90 L172.89766924217568 60 L185 90 Z M164 72 L172.89766924217568 42 L182 72 Z M170.89766924217568 131 V123 H174.89766924217568 V131 Z M179 125 L193.6886739627502 103 L209 125 Z M181 112 L193.6886739627502 90 L206 112 Z M184 99 L193.6886739627502 77 L203 99 Z M187 86 L193.6886739627502 63 L200 86 Z M191.6886739627502 131 V123 H195.6886739627502 V131 Z M195 125 L217.61500754475264 92 L240 125 Z M199 105 L217.61500754475264 72 L236 105 Z M204 86 L217.61500754475264 53 L231 86 Z M208 66 L217.61500754475264 33 L227 66 Z M215.61500754475264 131 V123 H219.61500754475264 V131 Z M220 125 L238.73956994112856 98 L258 125 Z M224 109 L238.73956994112856 81 L254 109 Z M227 92 L238.73956994112856 65 L250 92 Z M231 76 L238.73956994112856 49 L247 76 Z M236.73956994112856 131 V123 H240.73956994112856 V131 Z M245 125 L257.1001335760907 107 L270 125 Z M247 114 L257.1001335760907 96 L267 114 Z M249 103 L257.1001335760907 85 L265 103 Z M252 92 L257.1001335760907 74 L262 92 Z M255.10013357609068 131 V123 H259.1001335760907 V131 Z M257 125 L276.81060049241177 96 L297 125 Z M261 108 L276.81060049241177 79 L293 108 Z M265 91 L276.81060049241177 62 L289 91 Z M268 74 L276.81060049241177 45 L285 74 Z M274.81060049241177 131 V123 H278.81060049241177 V131 Z M271 125 L293.50324812424486 92 L316 125 Z M275 106 L293.50324812424486 73 L312 106 Z M280 86 L293.50324812424486 54 L307 86 Z M284 67 L293.50324812424486 34 L303 67 Z M291.50324812424486 131 V123 H295.50324812424486 V131 Z M296 125 L311.82577528857706 103 L327 125 Z M299 112 L311.82577528857706 89 L324 112 Z M302 98 L311.82577528857706 76 L321 98 Z M305 85 L311.82577528857706 63 L318 85 Z M309.82577528857706 131 V123 H313.82577528857706 V131 Z M303 125 L328.24912945508896 89 L353 125 Z M308 103 L328.24912945508896 67 L348 103 Z M313 82 L328.24912945508896 45 L344 82 Z M318 60 L328.24912945508896 24 L339 60 Z M326.24912945508896 131 V123 H330.24912945508896 V131 Z M328 125 L351.6360069747786 91 L375 125 Z M333 105 L351.6360069747786 71 L371 105 Z M337 84 L351.6360069747786 50 L366 84 Z M342 64 L351.6360069747786 30 L362 64 Z M349.6360069747786 131 V123 H353.6360069747786 V131 Z M361 125 L373.79490786467 106 L387 125 Z M363 114 L373.79490786467 95 L384 114 Z M366 103 L373.79490786467 84 L382 103 Z M368 91 L373.79490786467 73 L379 91 Z M371.79490786467 131 V123 H375.79490786467 V131 Z M374 125 L393.0842013282093 98 L412 125 Z M378 109 L393.0842013282093 82 L408 109 Z M382 93 L393.0842013282093 65 L405 93 Z M385 76 L393.0842013282093 49 L401 76 Z M391.0842013282093 131 V123 H395.0842013282093 V131 Z'/></svg>", "Rogue": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='st' cx='160' cy='18' r='1'/><circle class='st' cx='290' cy='14' r='1.2'/><circle class='st' cx='330' cy='40' r='0.9'/><circle class='st' cx='380' cy='22' r='1.1'/><circle class='st' cx='200' cy='60' r='0.8'/><circle class='moon' cx='230' cy='34' r='15'/><path class='s2' d='M0 131 L0 104 L30 104 L30 92 L60 92 L60 100 L95 100 L95 86 L150 86 L150 131 Z'/><path class='s1' d='M150 131 L150 67 L175 67 L175 57 L181 57 L181 67 L186 67 L186 83 L208 67 L230 83 L230 83 L257 83 L257 73 L263 73 L263 83 L269 83 L269 57 L283 41 L298 57 L298 74 L325 74 L325 64 L331 64 L331 74 L337 74 L337 84 L356 68 L376 84 L376 90 L391 74 L405 90 L405 131 Z'/><rect class='lit' x='241' y='97' width='6' height='8'/><rect class='lit' x='277' y='71' width='6' height='8'/><rect class='lit' x='310' y='88' width='6' height='8'/><rect class='lit' x='385' y='104' width='6' height='8'/></svg>", "Sorcerer": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><path class='moon' d='M196 22 L250 34 L196 26 Z' opacity='.45'/><circle class='lit' cx='250' cy='34' r='2.2'/><path class='s2' d='M0 131 L0 118 Q80 104 170 116 L170 131 Z'/><path class='s1' d='M223 131 L226 114 L224 101 L238 113 L241 131 Z M240 131 L244 99 L258 73 L260 96 L264 131 Z M261 131 L266 83 L272 43 L286 78 L291 131 Z M289 131 L292 95 L309 65 L308 91 L311 131 Z M306 131 L311 74 L316 27 L333 69 L338 131 Z M336 131 L340 91 L353 59 L356 88 L360 131 Z M362 131 L365 102 L365 79 L379 100 L382 131 Z M381 131 L385 85 L397 47 L403 81 L407 131 Z'/><circle class='halo' cx='308' cy='42' r='6.0'/><circle class='halo' cx='309' cy='46' r='5.76'/><circle class='halo' cx='305' cy='49' r='5.52'/><circle class='halo' cx='295' cy='51' r='5.28'/><circle class='halo' cx='284' cy='49' r='5.04'/><circle class='lit' cx='308' cy='42' r='1.5'/><circle class='lit' cx='309' cy='46' r='1.44'/><circle class='lit' cx='305' cy='49' r='1.38'/><circle class='lit' cx='295' cy='51' r='1.32'/><circle class='lit' cx='284' cy='49' r='1.26'/><circle class='lit' cx='276' cy='43' r='1.2'/><circle class='lit' cx='277' cy='34' r='1.14'/><circle class='lit' cx='289' cy='26' r='1.08'/><circle class='lit' cx='308' cy='24' r='1.02'/><circle class='lit' cx='328' cy='29' r='0.96'/><circle class='lit' cx='340' cy='40' r='0.9'/><circle class='lit' cx='337' cy='54' r='0.84'/><circle class='lit' cx='319' cy='65' r='0.78'/><circle class='lit' cx='290' cy='69' r='0.72'/></svg>", "Warlock": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='halo' cx='300' cy='44' r='40'/><circle class='moon' cx='300' cy='44' r='28'/><path class='s1' d='M280 44 Q300 30 320 44 Q300 58 280 44 Z'/><ellipse class='lit' cx='300' cy='44' rx='2.6' ry='7'/><path class='s2' d='M0 131 L0 120 Q90 108 200 118 L200 131 Z'/><path class='s1 br' d='M352 116 Q351 102 348 82 M348 82 Q344 76 332 65 M332 65 Q319 63 315 62 M315 62 Q312 69 305 68 M305 68 Q302 68 300 74 M305 68 Q299 66 298 69 M315 62 Q314 56 306 56 M306 56 Q298 51 298 57 M306 56 Q309 57 302 51 M332 65 Q332 54 328 49 M328 49 Q326 51 320 42 M320 42 Q314 41 312 42 M320 42 Q316 40 316 36 M328 49 Q328 47 331 39 M331 39 Q328 36 329 32 M331 39 Q329 40 336 35 M348 82 Q352 73 359 62 M359 62 Q356 52 362 47 M362 47 Q356 45 356 37 M356 37 Q357 34 349 34 M356 37 Q353 36 357 30 M362 47 Q369 38 367 38 M367 38 Q368 39 367 31 M367 38 Q368 34 372 34 M359 62 Q366 63 370 53 M370 53 Q368 53 375 44 M375 44 Q374 37 374 36 M375 44 Q377 37 380 40 M370 53 Q378 48 379 51 M379 51 Q386 49 384 46 M379 51 Q379 55 386 52'/><path class='s1' d='M210 131 Q290 108 352 112 T410 118 V131 Z'/><circle class='halo' cx='262' cy='92' r='4.8'/><circle class='halo' cx='236' cy='70' r='3.6'/><circle class='halo' cx='330' cy='86' r='4'/><circle class='halo' cx='382' cy='60' r='3.2'/><circle class='halo' cx='250' cy='40' r='3.2'/><circle class='lit' cx='262' cy='92' r='1.2'/><circle class='lit' cx='236' cy='70' r='0.9'/><circle class='lit' cx='330' cy='86' r='1'/><circle class='lit' cx='382' cy='60' r='0.8'/><circle class='lit' cx='250' cy='40' r='0.8'/></svg>", "Wizard": "<svg class='hx-vig' viewBox='0 0 400 130' preserveAspectRatio='xMaxYMax slice' aria-hidden='true'><circle class='st' cx='150' cy='20' r='1.2'/><circle class='st' cx='190' cy='44' r='0.9'/><circle class='st' cx='228' cy='14' r='1.4'/><circle class='st' cx='262' cy='36' r='1'/><circle class='st' cx='300' cy='10' r='1.1'/><circle class='st' cx='392' cy='30' r='1.2'/><circle class='st' cx='170' cy='70' r='0.8'/><circle class='st' cx='382' cy='70' r='0.9'/><path class='moon' d='M248 40 a16 16 0 1 0 14 -24 a12 12 0 1 1 -14 24 Z'/><path class='s2' d='M0 131 L0 118 Q60 104 120 114 T240 108 T400 112 L400 131 Z'/><path class='s1' d='M318 131 V58 L314 58 L338 4 L362 58 L358 58 V131 ZM300 131 V92 L296 92 L310 66 L324 92 L320 92 V131 Z'/><rect class='lit' x='334' y='66' width='7' height='11' rx='3.5'/><rect class='lit' x='334' y='90' width='7' height='11' rx='3.5'/><rect class='lit' x='307' y='100' width='5' height='8' rx='2.5'/><circle class='lit' cx='286' cy='58' r='1.1'/><circle class='lit' cx='372' cy='84' r='1'/><circle class='lit' cx='296' cy='30' r='0.8'/></svg>"};
 const WILLOW_EMB={"": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 14 L68 52 L106 60 L68 68 L60 106 L52 68 L14 60 L52 52 Z'/><circle cx='60' cy='60' r='7'/></svg>", "Artificer": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M94.01 51.72 L103.55 53.72 L103.55 66.28 L94.01 68.28 L92.38 73.29 L98.92 80.52 L91.54 90.68 L82.65 86.69 L78.38 89.78 L79.43 99.48 L67.48 103.36 L62.64 94.90 L57.36 94.90 L52.52 103.36 L40.57 99.48 L41.62 89.78 L37.35 86.69 L28.46 90.68 L21.08 80.52 L27.62 73.29 L25.99 68.28 L16.45 66.28 L16.45 53.72 L25.99 51.72 L27.62 46.71 L21.08 39.48 L28.46 29.32 L37.35 33.31 L41.62 30.22 L40.57 20.52 L52.52 16.64 L57.36 25.10 L62.64 25.10 L67.48 16.64 L79.43 20.52 L78.38 30.22 L82.65 33.31 L91.54 29.32 L98.92 39.48 L92.38 46.71 Z'/><circle cx='60' cy='60' r='15'/><path d='M60 45 V75 M45 60 H75' class='th'/></svg>", "Barbarian": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 10 V112'/><path d='M63 20 Q98 6 108 40 Q98 74 63 60 Z M57 20 Q22 6 12 40 Q22 74 57 60 Z'/><path d='M55 78 H65 M55 88 H65 M55 98 H65' class='th'/></svg>", "Bard": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 52 C84 52 92 76 86 94 C80 112 40 112 34 94 C28 76 36 52 60 52 Z'/><circle cx='60' cy='80' r='7'/><path d='M54 53 L56 18 H64 L66 53'/><path d='M56 18 L52 8 H68 L64 18'/><path d='M57 30 V100 M60 30 V100 M63 30 V100' class='th'/><path d='M50 100 H70'/></svg>", "Cleric": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><circle cx='60' cy='60' r='17'/><circle cx='60' cy='60' r='7' class='th'/><path d='M84.0 60.0 L106.0 60.0'/><path d='M80.8 72.0 L91.2 78.0'/><path d='M72.0 80.8 L83.0 99.8'/><path d='M60.0 84.0 L60.0 96.0'/><path d='M48.0 80.8 L37.0 99.8'/><path d='M39.2 72.0 L28.8 78.0'/><path d='M36.0 60.0 L14.0 60.0'/><path d='M39.2 48.0 L28.8 42.0'/><path d='M48.0 39.2 L37.0 20.2'/><path d='M60.0 36.0 L60.0 24.0'/><path d='M72.0 39.2 L83.0 20.2'/><path d='M80.8 48.0 L91.2 42.0'/></svg>", "Druid": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 104L60 74M60 74L50 56M50 56L38 48M38 48L27 47M38 48L33 39M50 56L50 41M50 41L45 32M50 41L55 32M60 74L70 56M70 56L70 41M70 41L65 32M70 41L75 32M70 56L82 48M82 48L87 39M82 48L93 47'/><path d='M60 104 Q48 108 36 112 M60 104 Q72 108 84 112 M60 104 V112'/><path d='M22 64 C20 34 40 14 60 14 C80 14 100 34 98 64' class='th'/></svg>", "Fighter": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 6 L66 18 V96 H54 V18 Z'/><path d='M40 96 H80'/><path d='M60 96 V108'/><circle cx='60' cy='112' r='4'/><path d='M60 30 C78 30 92 42 92 60 C92 78 78 90 60 90 C42 90 28 78 28 60 C28 42 42 30 60 30 Z' class='th'/><path d='M60 18 V92' class='th'/></svg>", "Monk": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 26 C72 42 72 66 60 82 C48 66 48 42 60 26 Z'/><path d='M58 82 C46 76 36 62 36 46 C48 50 56 60 58 70'/><path d='M62 82 C74 76 84 62 84 46 C72 50 64 60 62 70'/><path d='M56 84 C40 86 26 78 18 66 C32 64 44 68 52 76'/><path d='M64 84 C80 86 94 78 102 66 C88 64 76 68 68 76'/><path d='M24 96 H96 M36 104 H84' class='th'/></svg>", "Paladin": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 12 L98 24 V58 C98 84 80 100 60 110 C40 100 22 84 22 58 V24 Z'/><path d='M60 22 L88 31 V58 C88 78 75 91 60 99 C45 91 32 78 32 58 V31 Z' class='th'/><path d='M60 36 V86 M44 52 H76'/></svg>", "Ranger": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M42 14 C78 34 78 86 42 106'/><path d='M42 14 V106' class='th'/><path d='M20 60 H104'/><path d='M104 60 L94 54 M104 60 L94 66'/><path d='M20 60 L12 52 M20 60 L12 68 M28 60 L20 52 M28 60 L20 68' class='th'/></svg>", "Rogue": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><g transform='translate(60 60) rotate(38) scale(1.18)'><path d='M0 -50 L7 -14 L0 -8 L-7 -14 Z M-16 -8 H16 M0 -8 V18'/><circle cx='0' cy='23' r='5'/><path d='M0 -44 V-16' class='th'/></g><g transform='translate(60 60) rotate(-38) scale(1.18)'><path d='M0 -50 L7 -14 L0 -8 L-7 -14 Z M-16 -8 H16 M0 -8 V18'/><circle cx='0' cy='23' r='5'/><path d='M0 -44 V-16' class='th'/></g></svg>", "Sorcerer": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 108 C36 108 24 90 28 70 C31 56 42 48 44 32 C52 40 54 48 54 56 C58 42 66 26 62 10 C80 22 94 44 94 70 C94 92 82 108 60 108 Z'/><path d='M60 62 L64 76 L78 80 L64 84 L60 98 L56 84 L42 80 L56 76 Z'/></svg>", "Warlock": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M14 60 Q60 18 106 60 Q60 102 14 60 Z'/><circle cx='60' cy='60' r='16'/><path d='M60 46 Q66 60 60 74 Q54 60 60 46 Z'/><path d='M60 14 V24 M34 22 L39 31 M86 22 L81 31 M18 36 L25 42 M102 36 L95 42' class='th'/></svg>", "Wizard": "<svg class='emb' viewBox='0 0 120 120' aria-hidden='true' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M60 108 C44 98 24 98 10 104 V46 C24 40 44 40 60 50 C76 40 96 40 110 46 V104 C96 98 76 98 60 108 Z M60 50 V108'/><path d='M18 58 C30 54 42 54 52 60 M18 72 C30 68 42 68 52 74 M68 60 C78 54 90 54 102 58 M68 74 C78 68 90 68 102 72' class='th'/><path d='M60 6 L64 22 L80 26 L64 30 L60 44 L56 30 L40 26 L56 22 Z'/></svg>"};
 function hxEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -8320,6 +8384,7 @@ function buildCharList(){
     return '<div class="cl-row'+(n===cur?' on':'')+'"><button class="cl-pick" onclick="clPick('+i+')"><span class="cl-rune">'+e+'</span>'
       +'<span class="cl-txt"><b>'+hxEsc(n)+'</b>'+(s?'<small>'+hxEsc(s)+'</small>':'<small class="dim">No class yet</small>')+'</span>'
       +(n===cur?'<span class="cl-cur">Open</span>':'')+'</button>'
+      +'<button class="cl-ren" onclick="clRename('+i+')" aria-label="Rename '+hxEsc(n)+'">'+WILLOW_ICO.edit+'</button>' // Paket AB1 (AB-E5)
       +(n===cur?'<button class="cl-sv" onclick="saveChar()" aria-label="Save '+hxEsc(n)+'">'+WILLOW_ICO.save+'</button>':'')  // Paket U: selbst speichern (nur geöffneter Charakter, Liste bleibt offen)
       +'<button class="cl-del" onclick="deleteChar(window._clNames['+i+'])" aria-label="Delete '+hxEsc(n)+'">'+WILLOW_ICO.trash+'</button></div>';}).join('')
     :'<div class="cl-empty">No characters yet.</div>';
@@ -8355,7 +8420,7 @@ function luRestore(S){
 }
 function luAutoNames(){return (st.mySpells||[]).filter(s=>s&&s.auto).map(s=>s.name);}
 function luOpen(){
-  if(_lu||!curCls()||totLvl()>=20)return;
+  if(_lu||_cg||!curCls()||totLvl()>=20)return;
   hpSync();autoSave(); // Max HP aktuell, offene Eingaben vorher sichern
   const hm=document.getElementById('hpM');
   _lu={S0:_undoStrip(collectState()),C0:charClasses().map(c=>({cls:c.cls,sub:c.sub,lvl:c.lvl})),multi0:isMulti(),hp0:parseInt(hm&&hm.value)||0,
@@ -8626,6 +8691,134 @@ function luRender(){
   }finally{_luR=false;}
 }
 
+// ===== Paket AB1 (24.10.2026): Charakter-Erstellungs-Assistent =====
+// „New Character“ → Namensfenster mit „✦ Guided“ / „Empty sheet“ (AB-E1). Guided = Fenster wie der Stufenaufstieg (Z4, gleiche CSS lu-*):
+// Schritt-Leiste, jeder Schritt anklickbar, „Next“ immer möglich (AB-E3). Schreibt live in dieselben Felder wie das leere Blatt (kein eigenes
+// Datenmodell), speichert aber nichts: autoSave ist gesperrt, solange _cg gesetzt ist, der Name bleibt bis „Create“ leer.
+// Cancel = Charakter wird nicht angelegt, vorheriger Charakter samt Undo zurück. Create = Anlegen + ein Log-Eintrag mit den Wahlen.
+// Präfix cg*, weil cr* schon die Custom-Rasse ist (Paket K). AB1: Schritte Class (+ Subklasse, wenn auf Stufe 1 fällig) und Summary;
+// AB2–AB5 ergänzen Species, Background, Skills, Abilities, Features, Spells, Equipment und Start level (cgSteps, CG_STEP).
+var _cg=null,_cgQ=0,_cgR=false;
+const CG_STEP={cls:'Class',sum:'Summary'};
+function cgSteps(){return ['cls','sum'];}
+function cgSoon(){if(_cgQ||_cgR)return;_cgQ=1;Promise.resolve().then(()=>{_cgQ=0;if(_cg)cgRender();});}
+function cgStart(name){
+  if(_cg||_lu||!name)return;
+  autoSave(); // offener Charakter: letzter Stand ist gesichert
+  const el=document.getElementById('charName'),prev=(el?.textContent||'').trim();
+  _cg={name,prev,S0:_undoStrip(collectState()),log0:st.log,U0:{u:_undo,r:_redo},L0:{s:_lastSnap,n:_lastSnapName},ci0:_ciEdit,step:'cls',ask:false};
+  try{_newSheetReset('');st.log=[];}finally{_saving=false;}
+  _lastSnap=null;_lastSnapName='';_undo=[];_redo=[];_undoGrp=null;updUndoBtns();
+  _cg.B0=_undoStrip(collectState());
+  document.getElementById('cgModal').classList.add('on');
+  cgRender();
+}
+function cgCls(){return document.getElementById('cls')?.value||'';}
+function cgSubLvl(cls){return cls?luSubLvl(cls):0;}
+function cgNeedSub(cls){return !!cls&&cgSubLvl(cls)===1&&((CLASS_DATA[cls]||{}).subclassList||[]).length>0;}
+function cgPick(cls){
+  if(!_cg||!CLASS_DATA[cls])return;
+  if(cgCls()!==cls){const c=document.getElementById('cls'),l=document.getElementById('lvl');c.value=cls;if(l)l.value='1';onClsChange();hpSync();buildCharCard();}
+  autoSave();cgRender();
+}
+function cgSub(i){
+  const cls=cgCls(),sl=(CLASS_DATA[cls]||{}).subclassList||[],el=document.getElementById('subcls');let v=sl[i];if(v==null||!el)return;
+  if(v===el.value)v=''; // erneut antippen = keine Wahl
+  el.value=v;onSubclsChange();autoSave();cgRender();
+}
+function cgGo(s){if(!_cg)return;_cg.step=s;_cg.ask=false;const b=document.querySelector('#cgBox .lu-body');if(b)b.scrollTop=0;cgRender();}
+function cgNext(){const C=_cg;if(!C)return;if(C.step==='sum'){cgApply();return;}const S=cgSteps(),i=S.indexOf(C.step);cgGo(S[Math.min(S.length-1,i+1)]);}
+function cgBack(){const C=_cg;if(!C)return;const S=cgSteps(),i=S.indexOf(C.step);if(i>0)cgGo(S[i-1]);}
+function cgMsgs(){try{return _diffSnaps(_cg.B0,collectState()).map(x=>typeof x==='string'?x:x.m).filter(Boolean)
+  .filter(m=>!/^(Max HP|HP): /.test(m)) // HP steht in der Zusammenfassung (Stufe 1 = Maximum), Grundwert 10 des leeren Blatts ist kein Schritt
+  .map(m=>{const x=/^(.*?): (.+?) → (.+)$/.exec(m);return x?x[1]+': '+x[3].replace(/^"(.*)"$/,'$1'):m;});}catch(e){return [];}} // „Class: "—" → "Fighter"“ → „Class: Fighter“ (alles ist neu)
+function cgOpenList(){
+  const cls=cgCls(),r=[];
+  if(!cls)r.push('Class not chosen');
+  else if(cgNeedSub(cls)&&!(document.getElementById('subcls')?.value))r.push('Subclass not chosen');
+  const race=document.getElementById('race')?.value||'';if(!race)r.push(R14?'Race not chosen':'Species not chosen');
+  if(!st.bg)r.push('Background not chosen');
+  try{pkOpen().forEach(x=>r.push(x.txt));}catch(e){}
+  return r;
+}
+function cgApply(){
+  const C=_cg;if(!C)return;
+  if(ncTaken(C.name)){showToast('A character named “'+C.name+'” already exists');return;}
+  const M=cgMsgs();
+  _cg=null;document.getElementById('cgModal').classList.remove('on');
+  if(apSync())buildMySpells();
+  _saving=true;
+  try{
+    document.getElementById('charName').textContent=C.name;
+    const chars=getAllChars(),snap=collectState(),e={t:Date.now(),m:'✨ Character created (guided)'};if(M.length)e.d={list:M};
+    snap.log=[e];st.log=snap.log;chars[C.name]=snap;lsPut(chars);refreshCharSel(C.name);
+    _lastSnap=JSON.parse(JSON.stringify(snap));_lastSnapName=C.name;
+  }finally{_saving=false;}
+  _undoClear();if(typeof buildLog==='function')buildLog();
+  _ciEdit=(document.getElementById('race')?.value&&st.bg)?null:true; // Herkunft noch offen → Formular im Info-Tab offen (wie Empty sheet)
+  switchTabAll('info');buildCharCard();(document.scrollingElement||document.documentElement).scrollTop=0;
+  showToast('✨ New Character: '+C.name);
+}
+function cgCancel(force){
+  const C=_cg;if(!C)return;
+  if(!force&&!C.ask&&cgMsgs().length){C.ask=true;cgRender();return;}
+  _cg=null;document.getElementById('cgModal').classList.remove('on');
+  _saving=true;
+  try{document.getElementById('charName').textContent=C.prev;const t=JSON.parse(JSON.stringify(C.S0));Object.keys(st).forEach(k=>{if(k!=='log'&&!(k in t))delete st[k];});applyState(t);}
+  finally{st.log=C.log0;_saving=false;}
+  _lastSnap=C.L0.s;_lastSnapName=C.L0.n;_undo=C.U0.u;_redo=C.U0.r;_undoGrp=null;updUndoBtns();
+  _ciEdit=C.ci0;refreshCharSel(C.prev);buildCharCard();if(typeof buildLog==='function')buildLog();
+  showToast('New character discarded');
+}
+function cgKeep(){if(!_cg)return;_cg.ask=false;cgRender();}
+// ── Anzeige ──
+function cgAbbr(t){return String(t||'').replace(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\b/g,m=>m.slice(0,3).toUpperCase());}
+function cgStepCls(C){
+  const cls=cgCls(),sub=document.getElementById('subcls')?.value||'';
+  let h='<div class="lu-h">Choose your class</div><div class="cg-grid">'+allClasses().map(k=>{const t=CLASS_CORE_TRAITS[k]||{},d=hdDieOf(k);
+    return '<button type="button" class="lu-opt'+(k===cls?' on':'')+'" onclick="cgPick(\''+pkEsc(k)+'\')"><span class="lu-opt-n">'+fdEsc(k)+'<span class="lu-opt-s">'+(d?'d'+d+' · ':'')+fdEsc(cgAbbr(t.primaryAbility))+'</span></span></button>';}).join('')+'</div>';
+  if(!cls)return h+'<div class="lu-note">Tap a class to see what it gives at level 1. You can skip this step and choose later.</div>';
+  const t=CLASS_CORE_TRAITS[cls]||{},sv=(t.savingThrows||[]).map(cgAbbr).join(', '),sk=t.skillProficiencies,src=String(t.source||'').replace(/,\s*page\s*\d+/i,'');
+  const row=(k,v)=>v?'<dt>'+k+'</dt><dd>'+fdEsc(v)+'</dd>':'';
+  h+='<div class="lu-chosen"><div class="lu-chosen-h"><span>'+fdEsc(cls)+(src?'<span class="ci-src">'+fdEsc(src)+'</span>':'')+'</span></div><dl class="cg-facts">'
+    +row('Hit Points',t.hpLevel1)+row('Primary',cgAbbr(t.primaryAbility))+row('Saves',sv)+row('Armor',t.armorTraining)+row('Weapons',t.weaponProficiencies)
+    +row('Skills',sk&&sk.count?'Choose '+sk.count+(sk.from&&sk.from.length<18?' from '+sk.from.join(', '):''):'')+row('Spellcasting',cgAbbr(t.spellcastingAbility))+'</dl></div>';
+  const sl=(CLASS_DATA[cls]||{}).subclassList||[],lv=cgSubLvl(cls);
+  if(cgNeedSub(cls)){
+    h+='<div class="lu-h lu-h2">Choose your subclass</div><div class="lu-note">'+fdEsc(cls)+'s choose their subclass at level 1.</div><div class="lu-scl">'+sl.map((o,i)=>{const p=mcSubParts(cls,o);
+      return '<button type="button" class="lu-opt'+(o===sub?' on':'')+'" onclick="cgSub('+i+')"><span class="lu-opt-n">'+fdEsc(p.n)+'</span>'+(p.src?'<span class="ci-src">'+fdEsc(p.src)+'</span>':'')+'</button>';}).join('')+'</div>';
+  }else if(lv>1&&sl.length)h+='<div class="lu-note">Subclass at level '+lv+' – the level up assistant asks for it.</div>';
+  return h;
+}
+function cgStepSum(C){
+  const cls=cgCls(),sub=document.getElementById('subcls')?.value||'',sn=sub?mcSubParts(cls,sub).n:'',M=cgMsgs(),O=cgOpenList();
+  let h='<div class="lu-big">'+fdEsc(C.name)+'</div><div class="lu-note" style="text-align:center;color:var(--desc)">'+(cls?fdEsc(cls)+' 1'+(sn?' · '+fdEsc(sn):''):'No class yet')+'</div>'
+    +(cls?'<div class="lu-note" style="text-align:center">Level 1 · PB +'+prof()+' · Max HP '+hpMaxRaw()+'</div>':'');
+  h+='<div class="lu-h">Your choices</div>'+(M.length?'<ul class="lu-list">'+M.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul>':'<div class="lu-note">Nothing chosen yet.</div>');
+  if(O.length)h+='<div class="lu-h">Still open</div><ul class="lu-list lu-open">'+O.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul><div class="lu-note">You can create the character now and finish these later in the Info tab.</div>';
+  else h+='<div class="lu-note">✓ All choices made. Everything stays editable in the Info tab.</div>';
+  return h;
+}
+function cgRender(){
+  const C=_cg,box=document.getElementById('cgBox');if(!C||!box)return;
+  _cgR=true;
+  try{
+    const S=cgSteps();if(!S.includes(C.step))C.step=S[0];
+    const i=S.indexOf(C.step),cls=cgCls(),ob=box.querySelector('.lu-body'),keep=ob&&box.dataset.step===C.step,sc=ob?ob.scrollTop:0;
+    let h='<div class="lu-head"><div class="lu-ttl"><div class="lu-t">New character</div><div class="lu-cls">'+fdEsc(C.name)+'</div>'
+      +'<div class="lu-sub">'+(cls?fdEsc(cls)+' · Level 1':'Level 1')+'</div></div>'
+      +'<button type="button" class="lu-x" onclick="cgCancel()" aria-label="Cancel new character">✕</button></div>';
+    h+='<div class="lu-steps">'+S.map((s,k)=>'<button type="button" class="lu-st'+(k===i?' on':k<i?' done':'')+'" onclick="cgGo(\''+s+'\')">'+(k+1)+' '+CG_STEP[s]+'</button>').join('')+'</div>';
+    if(C.ask)h+='<div class="lu-ask"><span>Discard this character? Nothing will be saved.</span><button type="button" class="lu-mini" onclick="cgKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="cgCancel(1)">Discard</button></div>';
+    const F={cls:cgStepCls,sum:cgStepSum}[C.step];
+    h+='<div class="lu-body">'+(F?F(C):'')+'</div>';
+    h+='<div class="lu-foot"><button type="button" class="lu-b" onclick="cgBack()"'+(i>0?'':' disabled')+'>← Back</button>'
+      +'<button type="button" class="lu-b pri" onclick="cgNext()">'+(C.step==='sum'?'✓ Create':'Next →')+'</button></div>';
+    box.innerHTML=h;box.dataset.step=C.step;
+    const nb=box.querySelector('.lu-body');if(keep&&nb)nb.scrollTop=sc;
+  }finally{_cgR=false;}
+}
+
 // TABS (Paket R2: #tabs = Kacheln im More-Fenster)
 document.getElementById('tabs').addEventListener('click',e=>{
   const btn=e.target.closest('.tab');if(!btn)return;
@@ -8795,7 +8988,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow14-app-2026-10-19f';
+const APP_VERSION = 'willow14-app-2026-10-24a';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
@@ -9445,6 +9638,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
 <div id="restModal" class="ws-overlay" onclick="if(event.target===this)restBackdrop()"><div class="ws-box rest-box" id="restBox"></div></div>
 <div id="fxModal" class="ws-overlay" onclick="if(event.target===this)closeFx()"><div class="ws-box rest-box" id="fxBox"></div></div>
 <div id="luModal" class="lu-modal"><div class="lu-sheet" id="luBox" role="dialog" aria-modal="true" aria-label="Level up"></div></div><!-- Paket Z4 -->
+<div id="cgModal" class="lu-modal"><div class="lu-sheet" id="cgBox" role="dialog" aria-modal="true" aria-label="New character"></div></div><!-- Paket AB1 -->
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:20px;max-width:280px;width:90%;text-align:center">
     <div style="font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text);margin-bottom:8px">Delete Character?</div>

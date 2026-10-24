@@ -4105,6 +4105,73 @@ const REGRESSION = [
       if (!/\n• Divine Strike: /.test(t) || !/\n• Potent Spellcasting: /.test(t)) return 'Blessed Strikes ohne „• “-Zeilen';
       return w.eval("JSON.stringify(FEATURE_PICKS['Cleric|base|Blessed Strikes'].o)") === '["Divine Strike","Potent Spellcasting"]' || 'FEATURE_PICKS Blessed Strikes';
     } },
+  { name: 'Paket AB1: Erstellungs-Assistent – Namensfenster Guided/Empty sheet, Name belegt → Hinweis, Assistent speichert nichts bis Create, Cancel stellt den vorigen Charakter samt Undo wieder her, Create = ein Log-Eintrag, Subklasse auf Stufe 1 (2014 Cleric), Umbenennen in der Charakterliste', datum: '24.10.2026',
+    run: async ({ w, d, sel, RULES }) => {
+      if (w.eval('typeof cgStart') === 'undefined') return 'cgStart fehlt';
+      const E = s => w.eval(s), cn = v => Array.isArray(v) ? v.map(cn) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, k) => (o[k] = cn(v[k]), o), {}) : v, LS = () => JSON.stringify(cn(JSON.parse(w.localStorage.getItem('dnd5e_chars') || '{}'))), C = () => JSON.parse(LS() || '{}'), nm = () => d.getElementById('charName').textContent.trim();
+      const on = () => d.getElementById('cgModal').classList.contains('on'), nc = () => d.getElementById('newCharModal');
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='AB1 Alt'");
+      sel('Fighter', '', 3); E("st.hpLv={Fighter:3};st.hpAsk=[];autoSave()");
+      E("document.getElementById('lvl').value='4';autoSave()"); const u0 = E('_undo.length'); if (!u0) return 'Vorbereitung: kein Undo-Schritt';
+      // Namensfenster: Guided + Empty sheet, kein „Create“-Knopf; Name belegt → Hinweis, Fenster bleibt offen
+      E('newChar()'); if (d.getElementById('ncNew').style.display === 'none' || d.getElementById('ncOk').style.display !== 'none') return 'Namensfenster: Guided/Empty sheet fehlt';
+      d.getElementById('newCharName').value = 'AB1 Alt'; E('ncGuided()');
+      if (on() || nc().style.display === 'none' || !/already exists/.test(d.getElementById('toast').textContent)) return 'Guided mit belegtem Namen nicht abgelehnt';
+      d.getElementById('newCharName').value = 'AB1 Alt'; E('confirmNewChar()');
+      if (nc().style.display === 'none' || C()['AB1 Alt']._f_lvl !== '4') return 'Empty sheet überschreibt belegten Namen';
+      // Guided: speichert nichts, leeres Blatt, Schritte Class + Summary
+      d.getElementById('newCharName').value = 'AB1 Held'; E('ncGuided()');
+      if (!on() || nc().style.display !== 'none') return 'Assistent nicht offen';
+      const s0 = LS(); if (C()['AB1 Held'] || C()['AB1 Alt']._f_lvl !== '4') return 'Start des Assistenten: ' + Object.keys(C()).join(); // cgStart sichert den offenen Charakter (autoSave)
+      if (nm() !== '' || d.getElementById('cls').value !== '' || E('_undo.length')) return 'kein leeres Blatt: ' + nm() + '/' + d.getElementById('cls').value;
+      if (E('JSON.stringify(cgSteps())') !== '["cls","sum"]') return 'Schritte: ' + E('JSON.stringify(cgSteps())');
+      if (d.querySelectorAll('#cgBox .cg-grid .lu-opt').length !== E('allClasses().length')) return 'Klassen-Auswahl unvollständig';
+      E("cgPick('Fighter')");
+      if (d.getElementById('cls').value !== 'Fighter' || d.getElementById('lvl').value !== '1') return 'Klasse/Stufe nicht gesetzt';
+      if (E('hpMaxRaw()') !== 10 + Math.floor((E('st.attrs.CON') - 10) / 2)) return 'Max HP Stufe 1 ≠ Maximum: ' + E('hpMaxRaw()');
+      if (!d.querySelector('#cgBox .lu-chosen .cg-facts')) return 'Klassen-Details fehlen';
+      if (LS() !== s0) return 'während des Assistenten gespeichert';
+      // Cancel: erst nachfragen, dann vorigen Charakter samt Undo zurück, nichts gespeichert
+      E('cgCancel()'); if (!on() || !d.querySelector('#cgBox .lu-ask')) return 'Cancel fragt nicht nach';
+      E('cgCancel(1)');
+      if (on() || nm() !== 'AB1 Alt' || d.getElementById('cls').value !== 'Fighter' || d.getElementById('lvl').value !== '4') return 'Cancel stellt nicht wieder her: ' + nm() + ' ' + d.getElementById('lvl').value;
+      if (LS() !== s0 || C()['AB1 Held']) return 'Cancel hat gespeichert';
+      if (E('_undo.length') !== u0) return 'Undo nach Cancel: ' + E('_undo.length') + ' statt ' + u0;
+      // Subklasse auf Stufe 1 nur 2014 (Cleric); erneut antippen = keine Wahl
+      E('newChar()'); d.getElementById('newCharName').value = 'AB1 Held'; E('ncGuided()'); const s1 = LS(); E("cgPick('Cleric')"); // s1: cgStart sichert den (nach Cancel normalisierten) Charakter
+      if (E("cgNeedSub('Cleric')") !== (RULES === '2014')) return 'Cleric Subklasse Stufe 1: ' + E("cgNeedSub('Cleric')");
+      let sub = '';
+      if (RULES === '2014') {
+        E('cgSub(0)'); sub = E('CLASS_DATA.Cleric.subclassList[0]'); if (d.getElementById('subcls').value !== sub) return 'Subklasse nicht gesetzt';
+        E('cgSub(0)'); if (d.getElementById('subcls').value) return 'erneut antippen nimmt Subklasse nicht weg';
+        E('cgSub(0)');
+      } else if (d.querySelector('#cgBox .lu-scl')) return '2024: Subklassen-Wahl auf Stufe 1';
+      // Summary + Create: genau ein Log-Eintrag, gespeichert, Undo leer, alter Charakter unverändert
+      E("cgGo('sum')"); if (d.querySelector('#cgBox .lu-big').textContent !== 'AB1 Held') return 'Zusammenfassung ohne Name';
+      const open = d.querySelector('#cgBox .lu-open')?.textContent || ''; if (!/Background not chosen/.test(open)) return 'Still open: ' + open;
+      if (LS() !== s1) return 'Zusammenfassung hat gespeichert';
+      E('cgNext()');
+      const H = C()['AB1 Held']; if (on() || !H || H._f_cls !== 'Cleric' || H._f_lvl !== '1' || (H._f_subcls || '') !== sub) return 'Create nicht gespeichert: ' + JSON.stringify(H && [H._f_cls, H._f_lvl, H._f_subcls]);
+      if (nm() !== 'AB1 Held' || E('_undo.length') || E('_lastSnapName') !== 'AB1 Held') return 'nach Create: ' + nm();
+      if (H.log.length !== 1 || !/^✨ Character created \(guided\)/.test(H.log[0].m) || !(H.log[0].d && H.log[0].d.list.length)) return 'Log: ' + JSON.stringify(H.log);
+      if (C()['AB1 Alt']._f_lvl !== '4') return 'alter Charakter verändert';
+      // Umbenennen (AB-E5): Reihenfolge und Log bleiben, Name belegt → Hinweis, danach speichert autoSave unter dem neuen Namen
+      E('openCharList()'); const names = () => JSON.parse(E('JSON.stringify(window._clNames)'));
+      const i = names().indexOf('AB1 Held'); if (i < 0 || !d.querySelectorAll('#charList .cl-ren')[i]) return 'Knopf ✎ fehlt';
+      E('clRename(' + i + ')'); if (nc().style.display === 'none' || d.getElementById('newCharName').value !== 'AB1 Held' || d.getElementById('ncOk').textContent !== 'Rename') return 'Umbenennen-Fenster falsch';
+      d.getElementById('newCharName').value = 'AB1 Alt'; E('confirmNewChar()'); if (!C()['AB1 Held'] || nc().style.display === 'none') return 'Umbenennen auf belegten Namen nicht abgelehnt';
+      d.getElementById('newCharName').value = 'AB1 Neu'; E('confirmNewChar()');
+      if (C()['AB1 Held'] || !C()['AB1 Neu'] || names().indexOf('AB1 Neu') !== i || nm() !== 'AB1 Neu' || E('_lastSnapName') !== 'AB1 Neu') return 'Umbenennen falsch: ' + names().join(',');
+      const lg = C()['AB1 Neu'].log; if (lg.length !== 2 || lg[1].m !== '✎ Renamed: AB1 Held → AB1 Neu' || E('st.log.length') !== 2) return 'Log nach Umbenennen: ' + JSON.stringify(lg);
+      E("document.getElementById('lvl').value='2';autoSave()"); if (C()['AB1 Neu']._f_lvl !== '2' || C()['AB1 Held']) return 'autoSave nach Umbenennen';
+      const j = names().indexOf('AB1 Alt'); E('clRename(' + j + ')'); d.getElementById('newCharName').value = 'AB1 Alt2'; E('confirmNewChar()');
+      if (!C()['AB1 Alt2'] || C()['AB1 Alt'] || nm() !== 'AB1 Neu' || E('st.log.length') !== C()['AB1 Neu'].log.length) return 'Umbenennen eines anderen Charakters falsch';
+      E('closeCharList()');
+      // aufräumen
+      const c = C(); ['AB1 Alt2', 'AB1 Neu'].forEach(k => delete c[k]); w.localStorage.setItem('dnd5e_chars', JSON.stringify(c));
+      E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};_lastSnap=null;_lastSnapName='';_undoClear()");
+      return true;
+    } },
 ];// ────────────────────────────────────────────────────────────────────────────
 
 const { JSDOM, VirtualConsole } = require('jsdom');
