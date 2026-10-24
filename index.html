@@ -4348,7 +4348,7 @@ function fsHtml(name){
   }
   return h?`<div class="fs-box">${h}</div>`:'';
 }
-function fsOpen(el){_fsOpenKeys.add(el.dataset.k);_fsKeep=el.dataset.k.split(':')[1];ftRenderMy();}
+function fsOpen(el){_fsOpenKeys.add(el.dataset.k);_fsKeep=el.dataset.k.split(':')[1];ftRenderMy();if(_cg)cgSoon();} // Paket AB4: Feat-Wahl im Erstellungs-Assistenten
 function fsTog(el){
   const k=el.dataset.k,x=el.dataset.o,n=parseInt(el.dataset.n)||1;
   if(!st.picks)st.picks={};
@@ -11384,14 +11384,14 @@ function luRender(){
 // Präfix cg*, weil cr* schon die Custom-Rasse ist (Paket K). AB1: Schritte Class (+ Subklasse, wenn auf Stufe 1 fällig) und Summary;
 // AB2–AB5 ergänzen Species, Background, Skills, Abilities, Features, Spells, Equipment und Start level (cgSteps, CG_STEP).
 var _cg=null,_cgQ=0,_cgR=false;
-const CG_STEP={cls:'Class',race:R14?'Race':'Species',bg:'Background',abl:'Abilities',skills:'Skills',sum:'Summary'}; // Paket AB2: Herkunft, AB3: Abilities
-function cgSteps(){return ['cls','race','bg','abl','skills','sum'];}
+const CG_STEP={cls:'Class',race:R14?'Race':'Species',bg:'Background',abl:'Abilities',skills:'Skills',feat:'Features',spell:'Spells',eq:'Equipment',sum:'Summary'}; // Paket AB2: Herkunft, AB3: Abilities, AB4: Features, Spells, Equipment
+function cgSteps(){const cls=cgCls(),I=cls?cgSpInfo():null;return ['cls','race','bg','abl','skills','feat'].concat(!cls||(I&&I.caster)?['spell']:[],['eq','sum']);} // Paket AB4: Spells nur für Zauberer auf Stufe 1 (ohne Klasse sichtbar)
 function cgSoon(){if(_cgQ||_cgR)return;_cgQ=1;Promise.resolve().then(()=>{_cgQ=0;if(_cg)cgRender();});}
 function cgStart(name){
   if(_cg||_lu||!name)return;
   autoSave(); // offener Charakter: letzter Stand ist gesichert
   const el=document.getElementById('charName'),prev=(el?.textContent||'').trim();
-  _cg={name,prev,S0:_undoStrip(collectState()),log0:st.log,U0:{u:_undo,r:_redo},L0:{s:_lastSnap,n:_lastSnapName},ci0:_ciEdit,step:'cls',ask:false,bgQ:'',bgAll:false,bgFt:''};
+  _cg={name,prev,S0:_undoStrip(collectState()),log0:st.log,U0:{u:_undo,r:_redo},L0:{s:_lastSnap,n:_lastSnapName},ci0:_ciEdit,step:'cls',ask:false,bgQ:'',bgAll:false,bgFt:'',sp:[],spTab:'',spQ:'',spOpen:-1,lo:{}};
   try{_newSheetReset('');st.log=[];}finally{_saving=false;}
   _lastSnap=null;_lastSnapName='';_undo=[];_redo=[];_undoGrp=null;updUndoBtns();
   _cg.B0=_undoStrip(collectState());
@@ -11403,20 +11403,22 @@ function cgSubLvl(cls){return cls?luSubLvl(cls):0;}
 function cgNeedSub(cls){return !!cls&&cgSubLvl(cls)===1&&((CLASS_DATA[cls]||{}).subclassList||[]).length>0;}
 function cgPick(cls){
   if(!_cg||!CLASS_DATA[cls])return;
-  if(cgCls()!==cls){const c=document.getElementById('cls'),l=document.getElementById('lvl');if(st.picks&&c.value)delete st.picks[pkKeyCls(c.value)];c.value=cls;if(l)l.value='1';onClsChange();hpSync();buildCharCard();}
+  if(cgCls()!==cls){const c=document.getElementById('cls'),l=document.getElementById('lvl');cgClsDrop(c.value);c.value=cls;if(l)l.value='1';onClsChange();hpSync();buildCharCard();}
   autoSave();cgRender();
 }
 function cgSub(i){
   const cls=cgCls(),sl=(CLASS_DATA[cls]||{}).subclassList||[],el=document.getElementById('subcls');let v=sl[i];if(v==null||!el)return;
   if(v===el.value)v=''; // erneut antippen = keine Wahl
-  el.value=v;onSubclsChange();autoSave();cgRender();
+  cgSubDrop(cls,el.value);el.value=v;onSubclsChange();autoSave();cgRender();
 }
 function cgGo(s){if(!_cg)return;_cg.step=s;_cg.ask=false;const b=document.querySelector('#cgBox .lu-body');if(b)b.scrollTop=0;cgRender();}
 function cgNext(){const C=_cg;if(!C)return;if(C.step==='sum'){cgApply();return;}const S=cgSteps(),i=S.indexOf(C.step);cgGo(S[Math.min(S.length-1,i+1)]);}
 function cgBack(){const C=_cg;if(!C)return;const S=cgSteps(),i=S.indexOf(C.step);if(i>0)cgGo(S[i-1]);}
 function cgMsgs(){try{return _diffSnaps(_cg.B0,collectState()).map(x=>typeof x==='string'?x:x.m).filter(Boolean)
   .filter(m=>!/^(Max HP|HP): /.test(m)&&!CG_AB_RE.test(m)&&!/^(AC|Initiative): /.test(m)) // Paket AB3 (AC/Initiative folgen aus DEX): Attributs-Zeilen (Wert + Base je Attribut) → eine Zeile cgAbMsg // HP steht in der Zusammenfassung (Stufe 1 = Maximum), Grundwert 10 des leeren Blatts ist kein Schritt
-  .map(m=>{const x=/^(.*?): (.+?) → (.+)$/.exec(m);return x?x[1]+': '+x[3].replace(/^"(.*)"$/,'$1'):m;}).concat(cgAbMsg());}catch(e){return [];}} // „Class: "—" → "Fighter"“ → „Class: Fighter“ (alles ist neu)
+  .map(m=>{const x=/^(.*?): (.+?) → (.+)$/.exec(m);return x?x[1]+': '+x[3].replace(/^"(.*)"$/,'$1'):m;}).concat(cgAbMsg()).filter(m=>!/^Choice Starting equipment /.test(m)).reduce(cgMsgGrp,[]);}catch(e){return [];}} // Paket AB4: Ausrüstungs-Wahl steht schon in „Starting equipment added“, Gegenstände/Zauber je eine Zeile // „Class: "—" → "Fighter"“ → „Class: Fighter“ (alles ist neu)
+function cgMsgGrp(a,m){const x=/^\+ (Item|Spell): (.+)$/.exec(m);if(!x){a.push(m);return a;} // Paket AB4: „+ Item: A“, „+ Item: B“ → „Items: A, B“
+  const L=x[1]==='Item'?'Items':'Spells',j=a.findIndex(y=>y.startsWith(L+': '));if(j<0)a.push(L+': '+x[2]);else a[j]+=', '+x[2];return a;}
 function cgOpenList(){
   const cls=cgCls(),r=[];
   if(!cls)r.push('Class not chosen');
@@ -11426,13 +11428,14 @@ function cgOpenList(){
   if(!st.bg)r.push('Background not chosen');
   {const x=cgAbOpen();if(x)r.push(x);} // Paket AB3
   try{pkOpen().forEach(x=>r.push(x.txt));}catch(e){}
+  try{cgOpenAb4().forEach(x=>r.push(x));}catch(e){} // Paket AB4
   return r;
 }
 function cgApply(){
   const C=_cg;if(!C)return;
   if(ncTaken(C.name)){showToast('A character named “'+C.name+'” already exists');return;}
   const M=cgMsgs();
-  _cg=null;document.getElementById('cgModal').classList.remove('on');
+  cgLoreReset(C);_cg=null;document.getElementById('cgModal').classList.remove('on');
   if(apSync())buildMySpells();
   _saving=true;
   try{
@@ -11449,7 +11452,7 @@ function cgApply(){
 function cgCancel(force){
   const C=_cg;if(!C)return;
   if(!force&&!C.ask&&cgMsgs().length){C.ask=true;cgRender();return;}
-  _cg=null;document.getElementById('cgModal').classList.remove('on');
+  cgLoreReset(C);_cg=null;document.getElementById('cgModal').classList.remove('on');
   _saving=true;
   try{document.getElementById('charName').textContent=C.prev;const t=JSON.parse(JSON.stringify(C.S0));Object.keys(st).forEach(k=>{if(k!=='log'&&!(k in t))delete st[k];});applyState(t);}
   finally{st.log=C.log0;_saving=false;}
@@ -11510,6 +11513,7 @@ function cgBgFtDrop(){const C=_cg,n=C&&C.bgFt;if(!n)return;C.bgFt='';
 function cgBg(i){
   const C=_cg,b=BG_DATA[i];if(!C||!b)return;
   const v=st.bg===b.n?'':b.n; // erneut antippen = keine Wahl
+  cgEqDrop('bg',st.bg); // Paket AB4: Gegenstände und Geld des alten Backgrounds (braucht dessen Wahlen, deshalb vor dem Löschen)
   if(st.picks)Object.keys(st.picks).forEach(k=>{if(k.startsWith('bg:'))delete st.picks[k];});
   cgBgFtDrop();
   st.bg=v;bgRenderMy();bgRender();
@@ -11640,6 +11644,118 @@ function cgStepAbl(C){
   return h;
 }
 // ── Anzeige ──
+// ===== Paket AB4 (24.10.2026): Features, Spells, Equipment =====
+// Bausteine des Info-Tabs bzw. des Stufenaufstiegs (Z4): Feature-Karten loreFeatHtml/fpHtml (Fighting Style, Weapon Mastery, Expertise …),
+// Feat-Wahlen faHtml/fsHtml (Origin Feat), Zauberzähler spClsCounts/sbInfo wie luSpInfo, Startausrüstung seHtml (Add to Items, 2014 Startgold).
+// Leeres Blatt: Wechsel von Klasse/Subklasse/Background verwirft deren Wahlen, Zauber aus diesem Schritt und schon eingetragene Ausrüstung.
+function cgC(){const cls=cgCls();return cls?(charClasses().find(c=>c.cls===cls)||{cls,lvl:1,sub:document.getElementById('subcls')?.value||'',start:true}):null;}
+function cgSpInfo(){const c=cgC();if(!c)return null;
+  const X=spMcX(),n=spClsCounts(c,X),g=luMaxG(c.cls,c.sub,c.lvl),sb=c.cls==='Wizard'?sbInfo():null,autos=luAutoNames();
+  const needC=n.cant!==null?Math.max(0,n.cant-n.cc):0,needP=n.prep!==null?Math.max(0,n.prep-n.pc):0,needB=sb?Math.max(0,sb.y-sb.n):0;
+  return {c,n,g,sb,autos,needC,needP,needB,caster:n.cant!==null||n.prep!==null||g>0};}
+function cgEqDrop(src,name){ // eingetragene Startausrüstung samt Geld zurücknehmen (nur im Assistenten: leeres Blatt)
+  if(!name)return;const key=src+':'+name,D=st.equipDone||{},done=D[key];
+  if(done){
+    const cp=done==='gold'?(parseInt(pkGet('cls:'+name+':gold')[0])||0)*100:seCollect(src,name).cp;
+    const sub=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=Math.max(0,(parseInt(el.value)||0)-v);};
+    sub('cur_gp',Math.floor(cp/100));sub('cur_sp',Math.floor(cp%100/10));sub('cur_cp',Math.round(cp%10));
+    const rm=(st.items||[]).filter(i=>i.from===name),ids=new Set(rm.map(i=>i.id)),s=statOn('ac')?st.statSrc.ac:null;
+    rm.forEach(i=>{const a=i.eq&&itArmor(i);if(!a||!s)return;if(a.c==='S')delete s.sh;else if(s.arm===a.n)s.arm='';});
+    st.items=(st.items||[]).filter(i=>!ids.has(i.id));st.weapons=(st.weapons||[]).filter(w=>!ids.has(w.iid));
+    delete D[key];if(st.seLinkOff)delete st.seLinkOff[key];
+    if(s)statRefresh();renderItems();buildWeapons();
+  }
+  if(st.picks)Object.keys(st.picks).forEach(k=>{if(k.startsWith(key+':equip')||k===key+':gold')delete st.picks[k];});
+}
+function cgSpDrop(){const C=_cg;if(!C||!C.sp.length)return;const N=new Set(C.sp);
+  st.mySpells=(st.mySpells||[]).filter(s=>!(s&&!s.auto&&N.has(s.name)));
+  if(st.zbAdded)ZB_SPELLS.forEach((s,i)=>{if(N.has(s.name))st.zbAdded.delete(i);});C.sp=[];buildMySpells();}
+function cgClsDrop(old){
+  if(!old)return;cgEqDrop('cls',old);cgSpDrop();
+  if(st.picks)Object.keys(st.picks).forEach(k=>{if(k.startsWith('cls:'+old+':')||k.startsWith('feat:'+old+'|')||k==='fs:'+old||k==='wm:'+old)delete st.picks[k];});
+  fsSync();
+}
+function cgSubDrop(cls,old){const cd=CLASS_DATA[cls];if(!old||!cd||!st.picks)return;const sk=clsSubKey(cd.subclass||{},old);if(!sk)return;
+  Object.keys(st.picks).forEach(k=>{if(k.startsWith('feat:'+cls+'|'+sk+'|'))delete st.picks[k];});}
+function cgOpenAb4(){
+  const r=[],cls=cgCls(),cnt={};
+  (st.feats||[]).forEach(f=>{if(!f||f.tag!=='Feat')return;const i=cnt[f.name]=(cnt[f.name]===undefined?0:cnt[f.name]+1);
+    if(faPending(f.name,i))r.push(f.name+': choose ability scores');if(fsPending(f.name))r.push(f.name+': choose spells');});
+  const I=cls?cgSpInfo():null;
+  if(I&&I.caster){if(I.needC)r.push('Cantrips '+I.n.cc+'/'+I.n.cant);if(I.needP)r.push((I.n.pl==='Known'?'Known':'Prepared')+' spells '+I.n.pc+'/'+I.n.prep);if(I.needB)r.push('Spellbook '+I.sb.n+'/'+I.sb.y);}
+  const D=st.equipDone||{};
+  if(cls&&seGroups('cls',cls).length&&!D['cls:'+cls])r.push('Class equipment not added');
+  if(st.bg&&seGroups('bg',st.bg).length&&!D['bg:'+st.bg])r.push('Background equipment not added');
+  return r;
+}
+// Features: Karten mit Wahl offen, übrige zu (Startzustand nur im Assistenten, danach wieder wie im Info-Tab)
+function cgLoreDef(cls,grp,list){const C=_cg;list.forEach(f=>{const k=cls+'|'+grp+'|'+f.lvl+'|'+f.name;if(C.lo[k])return;C.lo[k]=1;
+  let b='';try{b=fpHtml(cls,grp,f,{cls,lvl:1}).body;}catch(e){}_loreOpen[k]={o:/class="pk[\s"-]/.test(b),l:1};});}
+function cgLoreReset(C){Object.keys((C&&C.lo)||{}).forEach(k=>{delete _loreOpen[k];});}
+function cgStepFeat(C){
+  const c=cgC();if(!c)return '<div class="lu-note">Choose a class first – its level 1 features appear here.</div>';
+  const F=luFeats(c);cgLoreDef(c.cls,'base',F.base);if(F.sk)cgLoreDef(c.cls,F.sk,F.sub);
+  let h='<div class="lu-h">'+fdEsc(c.cls)+' 1</div>'+(F.base.length?loreFeatHtml(c.cls,'base',{1:F.base},1,false):'<div class="lu-note">No class features at level 1.</div>');
+  if(F.sub.length)h+='<div class="lu-h lu-h2">'+fdEsc(mcSubParts(c.cls,c.sub).n)+'</div>'+loreFeatHtml(c.cls,F.sk,{1:F.sub},1,true);
+  else if(cgNeedSub(c.cls))h+='<div class="lu-note">Choose your subclass in step 1 – its level 1 features appear here.</div>';
+  const cnt={};let fh='';
+  (st.feats||[]).forEach(f=>{if(!f||f.tag!=='Feat')return;const i=cnt[f.name]=(cnt[f.name]===undefined?0:cnt[f.name]+1),x=faHtml(f.name,i)+fsHtml(f.name);
+    if(x)fh+='<div class="lu-chosen"><div class="lu-chosen-h"><span>✦ '+fdEsc(f.name)+'</span></div>'+x+'</div>';});
+  if(fh)h+='<div class="lu-h lu-h2">Feats</div>'+fh;
+  return h+'<div class="lu-note">Features with a choice are open. Tap a feature to read it; everything stays in the Info tab.</div>';
+}
+// Spells: wie luStepSpell (Zähler, Grad-Reiter, Suche), Liste = Zauber der Klasse bis zum höchsten Grad mit Plätzen auf Stufe 1
+function cgSpCands(I){
+  const C=_cg,base=CLASS_SPELL_MAP[I.c.cls]||[I.c.cls],mine=new Set((st.mySpells||[]).map(s=>String(s.name).toLowerCase())),add=new Set(C.sp),q=(C.spQ||'').toLowerCase().trim();
+  const okG=g=>q?((g===0&&I.n.cant!==null)||(g>=1&&g<=I.g)):(C.spTab==='C'?g===0:g===+C.spTab);
+  return ZB_SPELLS.map((s,i)=>({s,i})).filter(({s})=>(s.classes||[]).some(x=>base.includes(x))&&okG(+s.grad)&&(add.has(s.name)||!mine.has(String(s.name).toLowerCase()))&&(!q||s.name.toLowerCase().includes(q)))
+    .sort((a,b)=>a.s.grad-b.s.grad||a.s.name.localeCompare(b.s.name));
+}
+function cgSpTab(t){if(!_cg)return;_cg.spTab=t;_cg.spOpen=-1;cgRender();}
+function cgSpOpen(i){if(!_cg)return;_cg.spOpen=_cg.spOpen===i?-1:i;cgSpList();}
+function cgSpTog(i){
+  const C=_cg,I=C&&cgSpInfo(),s=ZB_SPELLS[i];if(!I||!s)return;
+  if(C.sp.includes(s.name)){const j=st.mySpells.findIndex(x=>x&&!x.auto&&x.name===s.name);if(j>=0)st.mySpells.splice(j,1);if(st.zbAdded)st.zbAdded.delete(i);C.sp=C.sp.filter(x=>x!==s.name);}
+  else{const prep=+s.grad===0?true:(I.c.cls==='Wizard'?I.n.pc<(I.n.prep||0):true);
+    st.mySpells=st.mySpells||[];st.mySpells.push({name:s.name,grad:s.grad,school:s.school,prep,notes:''});if(st.zbAdded)st.zbAdded.add(i);C.sp.push(s.name);}
+  buildMySpells();autoSave();
+}
+function cgSpList(){
+  const el=document.getElementById('cgSpList'),C=_cg,I=C&&cgSpInfo();if(!el||!I)return;
+  const L=cgSpCands(I);
+  el.innerHTML=L.length?L.map(({s,i})=>{const on=C.sp.includes(s.name);
+    return '<div class="lu-row"><div class="lu-row-n" onclick="cgSpOpen('+i+')">'+fdEsc(s.name)+'<small>'+(+s.grad?'L'+s.grad+' · ':'')+fdEsc(s.school||'')+' · '+fdEsc(s.src||'')+'</small></div>'
+      +'<button type="button" class="lu-add sym'+(on?' on':'')+'" onclick="cgSpTog('+i+')" aria-label="'+(on?'Remove ':'Add ')+pkEsc(s.name)+'">'+(on?'✓':'+')+'</button></div>'
+      +(C.spOpen===i?'<div class="lu-desc">'+fmtDesc(s.desc||'')+(s.higher?'\n'+fmtDesc(s.higher):'')+'</div>':'');}).join('')
+    :'<div class="lu-note">No more spells of this level on your list.</div>';
+}
+function cgStepSpell(C){
+  const I=cgSpInfo();if(!I)return '<div class="lu-note">Choose a class first – if it casts spells at level 1, you pick them here.</div>';
+  if(!I.caster)return '<div class="lu-note">'+fdEsc(I.c.cls)+'s don’t cast spells at level 1.</div>';
+  const n=I.n,cn=(lbl,a,b,need)=>'<span class="lu-cn'+(need?' open':(a>=b?' ok':''))+'">'+lbl+' <b>'+a+'/'+b+'</b></span>';
+  let h='<div class="lu-h">Spells · '+fdEsc(I.c.cls)+' 1</div><div class="lu-cnt">'
+    +(n.cant!==null?cn('Cantrips',n.cc,n.cant,I.needC):'')+(n.prep!==null?cn(n.pl||'Prepared',n.pc,n.prep,I.needP):'')+(I.sb?cn('📘 Spellbook',I.sb.n,I.sb.y,I.needB):'')+'</div>';
+  if(I.sb)h+='<div class="lu-note">📘 Your spellbook starts with '+I.sb.y+' level 1 Wizard spells. Spells you add beyond your prepared number go to the spellbook unprepared.</div>';
+  if(I.autos.length)h+='<div class="lu-note">✦ Always prepared: '+fdEsc(I.autos.join(', '))+'</div>';
+  if(n.cant!==null||I.g>0){
+    const tabs=(n.cant!==null?['C']:[]).concat(Array.from({length:I.g},(_,k)=>String(k+1)));
+    if(!tabs.includes(String(C.spTab)))C.spTab=I.needC>0&&tabs.includes('C')?'C':(tabs.includes('1')?'1':tabs[0]);
+    h+='<div class="lu-tabs">'+tabs.map(t=>'<button type="button" class="fbtn'+(String(C.spTab)===t?' on':'')+'" onclick="cgSpTab(\''+t+'\')">'+(t==='C'?'Cantrips':'Level '+t)+'</button>').join('')+'</div>'
+      +'<input class="lu-q" type="search" data-luq="1" placeholder="Search your class list…" value="'+pkEsc(C.spQ)+'" oninput="_cg.spQ=this.value;cgSpList()" aria-label="Search spells">'
+      +'<div id="cgSpList"></div><div class="lu-note">Swap prepared spells later in the Spells tab.</div>';
+  }
+  return h;
+}
+// Equipment: Startausrüstung von Klasse und Background wie im Info-Tab (Wahl A/B …, „Add to Items“, 2014 Startgold), darunter das Ergebnis
+function cgStepEq(C){
+  const cls=cgCls(),bg=st.bg||'';let h='',n=0;
+  const sec=(t,src,name)=>{const x=name?seHtml(src,name):'';if(!x)return;h+='<div class="lu-h'+(n++?' lu-h2':'')+'">'+t+'</div>'+x;};
+  sec(fdEsc(cls)+' starting equipment','cls',cls);sec('Background: '+fdEsc(bg),'bg',bg);
+  if(!n)return h+'<div class="lu-note">'+(cls||bg?'No starting equipment data for this choice – add items in the Items tab.':'Choose a class and a background first – their starting equipment appears here.')+'</div>';
+  const it=st.items||[],cp=['gp','sp','cp'].map(k=>{const v=parseInt(document.getElementById('cur_'+k)?.value)||0;return v?v+' '+k.toUpperCase():'';}).filter(Boolean).join(' ');
+  if(it.length||cp)h+='<div class="lu-h lu-h2">Your items ('+it.length+')</div><ul class="lu-list cg-skl">'+it.map(i=>'<li><b>'+(i.qty>1?i.qty+'× ':'')+fdEsc(i.name)+'</b>'+(i.eq?' <span>equipped</span>':'')+'</li>').join('')+(cp?'<li><b>'+cp+'</b> <span>Currency</span></li>':'')+'</ul>';
+  return h+'<div class="lu-note">Items go to the Items tab, money to Currency. You can also skip this and add it later in the Info tab.</div>';
+}
 function cgAbbr(t){return String(t||'').replace(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\b/g,m=>m.slice(0,3).toUpperCase());}
 function cgStepCls(C){
   const cls=cgCls(),sub=document.getElementById('subcls')?.value||'';
@@ -11678,11 +11794,11 @@ function cgRender(){
       +'<button type="button" class="lu-x" onclick="cgCancel()" aria-label="Cancel new character">✕</button></div>';
     h+='<div class="lu-steps">'+S.map((s,k)=>'<button type="button" class="lu-st'+(k===i?' on':k<i?' done':'')+'" onclick="cgGo(\''+s+'\')">'+(k+1)+' '+CG_STEP[s]+'</button>').join('')+'</div>';
     if(C.ask)h+='<div class="lu-ask"><span>Discard this character? Nothing will be saved.</span><button type="button" class="lu-mini" onclick="cgKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="cgCancel(1)">Discard</button></div>';
-    const F={cls:cgStepCls,race:cgStepRace,bg:cgStepBg,abl:cgStepAbl,skills:cgStepSkills,sum:cgStepSum}[C.step];
+    const F={cls:cgStepCls,race:cgStepRace,bg:cgStepBg,abl:cgStepAbl,skills:cgStepSkills,feat:cgStepFeat,spell:cgStepSpell,eq:cgStepEq,sum:cgStepSum}[C.step];
     h+='<div class="lu-body">'+(F?F(C):'')+'</div>';
     h+='<div class="lu-foot"><button type="button" class="lu-b" onclick="cgBack()"'+(i>0?'':' disabled')+'>← Back</button>'
       +'<button type="button" class="lu-b pri" onclick="cgNext()">'+(C.step==='sum'?'✓ Create':'Next →')+'</button></div>';
-    box.innerHTML=h;box.dataset.step=C.step;
+    box.innerHTML=h;box.dataset.step=C.step;if(C.step==='spell')cgSpList(); // Paket AB4
     const nb=box.querySelector('.lu-body');if(keep&&nb)nb.scrollTop=sc;
     const sr=box.querySelector('.lu-steps'),so=sr&&sr.querySelector('.lu-st.on');if(so&&so.offsetLeft+so.offsetWidth>sr.clientWidth)sr.scrollLeft=so.offsetLeft-16; // Paket AB2: aktueller Schritt sichtbar (wie luRender)
   }finally{_cgR=false;}
@@ -11857,7 +11973,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-24c';
+const APP_VERSION = 'willow-app-2026-10-24d';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}

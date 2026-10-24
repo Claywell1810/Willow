@@ -4179,7 +4179,7 @@ const REGRESSION = [
       const q = s => d.querySelector('#cgBox ' + s), qa = s => [...d.querySelectorAll('#cgBox ' + s)], r14 = RULES === '2014';
       E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='AB2 Alt';autoSave()");
       E("cgStart('AB2 Held')"); const s0 = LS();
-      const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S.join() !== 'cls,race,bg,abl,skills,sum') return 'Schritte: ' + S.join(); // AB3: abl
+      const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S.join() !== 'cls,race,bg,abl,skills,feat,spell,eq,sum') return 'Schritte: ' + S.join(); // AB3: abl, AB4: feat/spell/eq
       if (!qa('.lu-st').some(b => b.textContent === '2 ' + (r14 ? 'Race' : 'Species'))) return 'Schritt-Name Species/Race';
       E("cgPick('Fighter')"); E("cgGo('race')");
       if (qa('.cg-grid .lu-opt').length !== E('cgRaces().length') + 1) return 'Rassen-Auswahl unvollständig (+ Custom)';
@@ -4296,6 +4296,77 @@ const REGRESSION = [
       if (!H || H.attrSrc.STR.base !== R[0].t || H.attrSrc.CHA.base !== R[5].t || !(H.log[0].d.list || []).some(x => /^Rolled 4d6/.test(x))) return 'Create: ' + JSON.stringify(H && H.attrSrc);
       const c = C(); ['AB3 Held'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
       E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.bg='';document.getElementById('race').value='';_lastSnap=null;_lastSnapName='';_undoClear()");
+      return true;
+    } },
+  { name: 'Paket AB4: Erstellungs-Assistent Features, Spells, Equipment – Spells nur für Zauberer auf Stufe 1, Feature-Karten mit Wahl offen (Fighting Style, Weapon Mastery), Feat-Wahl des Origin Feat (2024), Zauber mit Zählern/Spellbook, Startausrüstung (2024 A/B, 2014 Startgold), Klassen-/Background-Wechsel nimmt Ausrüstung/Geld/Zauber zurück, Still open, Zusammenfassung, nichts gespeichert bis Create', datum: '24.10.2026',
+    run: async ({ w, d, RULES }) => {
+      if (w.eval('typeof cgStepEq') === 'undefined') return 'cgStepEq fehlt';
+      const E = s => w.eval(s), T = () => new Promise(r => setTimeout(r, 5)), C = () => JSON.parse(E('JSON.stringify(getAllChars())')), LS = () => JSON.stringify(C());
+      const q = s => d.querySelector('#cgBox ' + s), qa = s => [...d.querySelectorAll('#cgBox ' + s)], r14 = RULES === '2014', OP = () => E('cgOpenList().join("|")');
+      const GP = () => parseInt(d.getElementById('cur_gp').value) || 0, bi = n => E('BG_DATA.findIndex(b=>b.n===' + JSON.stringify(n) + ')');
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};st.items=[];st.weapons=[];document.getElementById('charName').textContent='AB4 Alt';autoSave()");
+      E("cgStart('AB4 Held')"); const s0 = LS(), St = () => E('cgSteps().join()');
+      if (!/feat,spell,eq,sum$/.test(St())) return 'Schritte ohne Klasse: ' + St();
+      E("cgGo('feat')"); if (!/Choose a class first/.test(q('.lu-body').textContent)) return 'Features ohne Klasse';
+      E("cgPick('Fighter')"); if (/spell/.test(St()) || !/skills,feat,eq,sum$/.test(St())) return 'Fighter: Schritte ' + St();
+      if (!qa('.lu-st').some(b => / Equipment$/.test(b.textContent))) return 'Schritt-Name Equipment';
+      // Features: Karten mit Wahl offen, übrige zu
+      E("cgGo('feat')"); await T();
+      const card = n => qa('.lf-card').find(c => c.querySelector('.lf-name').textContent.startsWith(n));
+      if (!card('Fighting Style') || !card('Fighting Style').classList.contains('on') || !card('Second Wind') || card('Second Wind').classList.contains('on')) return 'Feature-Karten: Wahl offen / übrige zu';
+      if (!/Fighting Style 0\/1/.test(OP())) return 'Fighting Style nicht offen: ' + OP();
+      if (!r14) {
+        if (!card('Weapon Mastery') || !card('Weapon Mastery').classList.contains('on') || !/Weapon Mastery 0\/3/.test(OP())) return 'Weapon Mastery';
+        E("pkTog(document.querySelector('#cgBox .pk-chip[data-k=\"fs:Fighter\"]'))"); await T();
+        if (!E("st.feats.some(f=>f.via==='fs:Fighter')") || /Fighting Style/.test(OP())) return 'Fighting-Style-Feat nicht eingetragen';
+        E('cgBg(' + bi('Sage') + ')'); E("cgGo('feat')"); await T();
+        if (!qa('.lu-chosen-h').some(x => /Magic Initiate/.test(x.textContent)) || !q('.fs-box') || !/Magic Initiate: choose spells/.test(OP())) return 'Origin Feat: Wahl fehlt im Features-Schritt';
+      } else {
+        E("pkTog(document.querySelector('#cgBox .lf-card.on .pk-chip'))"); await T(); if (/Fighting Style/.test(OP())) return '2014: Fighting Style';
+        E('cgBg(' + bi('Acolyte') + ')');
+      }
+      // Equipment: Wahl, Add to Items, verknüpfen
+      E("cgGo('eq')"); await T(); const bgN = E('st.bg');
+      if (qa('.lu-h').length < 2 || !/Class equipment not added/.test(OP()) || !/Background equipment not added/.test(OP())) return 'Equipment: Abschnitte/offen ' + OP();
+      const add = () => qa('.se-add').forEach(x => { if (!x.disabled) x.click(); });
+      if (!r14) { qa('.se-opt').filter(x => /^A/.test(x.textContent)).forEach(x => x.click()); await T(); add(); await T(); }
+      else { qa('.se-opt').filter(x => x.dataset.k.startsWith('bg:') && /^\(a\)/.test(x.textContent)).forEach(x => x.click()); await T(); add(); await T();
+        E("seGoldRoll('Fighter')"); E("seGoldAdd('Fighter')"); await T(); }
+      if (/equipment not added/.test(OP())) return 'Ausrüstung nicht eingetragen: ' + OP();
+      const nI = E('st.items.length'), g0 = GP(), nCls = E("st.items.filter(i=>i.from==='Fighter').length");
+      if (!nI || !g0 || !q('.cg-skl') || !/Your items/.test(q('.lu-body').textContent)) return 'Items/Gold: ' + nI + '/' + g0;
+      if (!r14) { if (!nCls) return 'Klassen-Ausrüstung fehlt'; E("seLinkAll('cls','Fighter')"); await T(); if (!E("st.items.some(i=>i.eq)") || !E('st.weapons.length')) return 'Verknüpfen'; }
+      E("cgGo('sum')"); const M = E('cgMsgs().join("|")');
+      if (!/Items: /.test(M) || /\+ Item: |Choice Starting equipment/.test(M) || !/Starting equipment added/.test(M)) return 'Zusammenfassung: ' + M;
+      // Klassenwechsel: Ausrüstung, Geld, Wahlen der alten Klasse weg
+      E("cgPick('Wizard')"); await T();
+      if (E("st.items.filter(i=>i.from==='Fighter').length") || E('st.weapons.length') || E("st.items.some(i=>i.eq)") || Object.keys(E('st.picks')).some(k => /Fighter/.test(k)) || E("st.feats.some(f=>f.via==='fs:Fighter')")) return 'Wechsel: Fighter-Reste ' + JSON.stringify(Object.keys(E('st.picks')));
+      if (!r14 && E('(st.statSrc&&st.statSrc.ac&&st.statSrc.ac.arm)||""')) return 'Wechsel: Rüstung bleibt in AC';
+      if (GP() >= g0 && !r14 || r14 && GP() >= g0) return 'Wechsel: Geld bleibt ' + GP() + '/' + g0;
+      if (!/spell/.test(St())) return 'Wizard ohne Spells-Schritt';
+      // Spells
+      E("cgGo('spell')"); await T();
+      const cnt = () => q('.lu-cnt').textContent;
+      if (!/Cantrips 0\/3/.test(cnt()) || !/Spellbook 0\/6/.test(cnt()) || !qa('#cgSpList .lu-row').length) return 'Spells: ' + cnt();
+      if (!/Cantrips 0\/3/.test(OP()) || !/Spellbook 0\/6/.test(OP())) return 'Spells offen: ' + OP();
+      qa('#cgSpList .lu-add')[0].click(); await T(); if (!/Cantrips 1\/3/.test(cnt()) || E('_cg.sp.length') !== 1) return 'Cantrip hinzufügen';
+      E("cgSpTab('1')"); await T(); qa('#cgSpList .lu-add').slice(0, 2).forEach(x => x.click()); await T();
+      if (!/Spellbook 2\/6/.test(cnt()) || !E('st.mySpells.filter(s=>+s.grad>0&&s.prep===true).length')) return 'Level-1-Zauber: ' + cnt();
+      qa('#cgSpList .lu-add.on')[0].click(); await T(); if (!/Spellbook 1\/6/.test(cnt())) return 'Zauber entfernen';
+      E("_cg.spQ='zzzz';cgSpList()"); if (qa('#cgSpList .lu-row').length) return 'Suche'; E("_cg.spQ=''");
+      E("cgPick('Fighter')"); if (E('st.mySpells.filter(s=>!s.auto).length') || E('_cg.sp.length')) return 'Klassenwechsel: Zauber bleiben';
+      E("cgPick('Wizard')"); E("cgGo('spell')"); await T(); qa('#cgSpList .lu-add')[0].click(); await T();
+      // Background-Wechsel nimmt dessen Ausrüstung zurück
+      if (!E("st.items.some(i=>i.from===" + JSON.stringify(bgN) + ")")) return 'Background-Ausrüstung fehlt';
+      E('cgBg(' + bi(bgN) + ')'); if (E("st.items.some(i=>i.from===" + JSON.stringify(bgN) + ")") || GP() !== 0) return 'Background abgewählt: Ausrüstung/Geld bleibt ' + GP();
+      if (LS() !== s0) return 'während des Assistenten gespeichert';
+      const lo = Object.keys(E('_cg.lo')); if (!lo.length) return 'Aufklapp-Zustand nicht gesetzt';
+      E("cgGo('sum')"); E('cgNext()'); const H = C()['AB4 Held'];
+      if (!H || H._f_cls !== undefined && false) return 'Create';
+      if (!H || (H.mySpells || []).filter(s => !s.auto).length !== 1 || H.log.length !== 1 || !(H.log[0].d.list || []).some(x => /^Spells: /.test(x))) return 'Create: ' + JSON.stringify(H && [H.mySpells, H.log]);
+      if (lo.some(k => E('_loreOpen[' + JSON.stringify(k) + ']'))) return 'Aufklapp-Zustand bleibt nach Create';
+      const c = C(); ['AB4 Held'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
+      E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.items=[];st.weapons=[];st.equipDone={};st.bg='';document.getElementById('race').value='';['gp','sp','cp'].forEach(k=>{const e=document.getElementById('cur_'+k);if(e)e.value=''});_lastSnap=null;_lastSnapName='';_undoClear()");
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
