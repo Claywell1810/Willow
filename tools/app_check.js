@@ -3465,7 +3465,7 @@ const REGRESSION = [
       w.luOpen(); if (!d.getElementById('luModal').classList.contains('on')) return 'Fenster nicht offen';
       if (d.getElementById('lvl').value !== '4') return 'Stufe nicht +1: ' + d.getElementById('lvl').value;
       const S = JSON.parse(w.eval('JSON.stringify(luSteps())'));
-      if (S.join() !== 'sub,asi,hp,sum') return 'Schritte Fighter 3→4 ohne Subklasse: ' + S.join();
+      if (S.join() !== 'sub,feat,asi,hp,sum') return 'Schritte Fighter 3→4 ohne Subklasse: ' + S.join(); // seit 24.10.2026: Weapon Mastery 3→4 = Features-Schritt (Test „Fix 24.10.2026: Weapon Mastery“)
       if (w.hpMaxVal() !== hp0 + 6 + Math.floor((w.eval('st.attrs.CON') - 10) / 2)) return 'HP nicht mit Average: ' + hp0 + ' → ' + w.hpMaxVal();
       if (w.eval('(st.hpAsk||[]).length')) return 'HP-Frage bleibt offen trotz Average';
       w.luGo('asi'); w.luFtAsi(); await tick();
@@ -4367,6 +4367,70 @@ const REGRESSION = [
       if (lo.some(k => E('_loreOpen[' + JSON.stringify(k) + ']'))) return 'Aufklapp-Zustand bleibt nach Create';
       const c = C(); ['AB4 Held'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
       E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.items=[];st.weapons=[];st.equipDone={};st.bg='';document.getElementById('race').value='';['gp','sp','cp'].forEach(k=>{const e=document.getElementById('cur_'+k);if(e)e.value=''});_lastSnap=null;_lastSnapName='';_undoClear()");
+      return true;
+    } },
+  { name: 'Paket AB5: Erstellungs-Assistent Start level – Feld in der Zusammenfassung (1–20, nur mit Klasse), Create legt Stufe 1 an und öffnet den Stufenaufstieg einmal je Stufe (Kopf „Level 2 of 4“), je Stufe ein Log-Eintrag, Cancel in der Kette hält an (erreichte Stufen bleiben), Kette endet an der Startstufe', datum: '24.10.2026',
+    run: async ({ w, d, RULES }) => {
+      if (w.eval('typeof cgLv') === 'undefined' || w.eval('typeof luChainNext') === 'undefined') return 'cgLv/luChainNext fehlt';
+      const E = s => w.eval(s), T = () => new Promise(r => setTimeout(r, 5)), C = () => JSON.parse(E('JSON.stringify(getAllChars())')), LS = () => JSON.stringify(C());
+      const q = s => d.querySelector(s), cg = () => q('#cgModal').classList.contains('on'), lu = () => q('#luModal').classList.contains('on'), L = () => d.getElementById('lvl').value;
+      const con = () => Math.floor((E('st.attrs.CON') - 10) / 2);
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};st.items=[];st.weapons=[];document.getElementById('charName').textContent='AB5 Alt';autoSave()");
+      E("cgStart('AB5 Held')"); const s0 = LS();
+      E("cgGo('sum')"); if (q('#cgBox .cg-lv')) return 'Start level ohne Klasse sichtbar';
+      E("cgPick('Fighter')"); E("cgGo('sum')"); await T();
+      const lv = () => q('#cgBox .cg-lv .cg-ab-v')?.textContent, bt = () => [...d.querySelectorAll('#cgBox .cg-lv .hbtn')];
+      if (lv() !== '1' || !bt()[0].disabled || bt()[1].disabled) return 'Start level: Feld/Grenzen ' + lv();
+      E('cgLv(1);cgLv(1);cgLv(1)'); if (lv() !== '4' || !/2 → 4/.test(q('#cgBox .cg-lv small').textContent) || !/Level 1 → 4/.test(q('#cgBox .lu-sub').textContent)) return 'Start level 4: ' + lv() + ' / ' + q('#cgBox .lu-sub').textContent;
+      E('for(let i=0;i<30;i++)cgLv(1)'); if (lv() !== '20') return 'Grenze 20: ' + lv(); E('for(let i=0;i<16;i++)cgLv(-1)'); if (lv() !== '4' || L() !== '1') return 'Start level ändert die Stufe im Assistenten';
+      if (LS() !== s0) return 'während des Assistenten gespeichert';
+      // Create: Stufe 1 gespeichert, dann Stufenaufstieg „Level 2 of 4“
+      E('cgNext()'); let H = C()['AB5 Held'];
+      if (cg() || !H || H._f_lvl !== '1' || H.log.length !== 1 || !(H.log[0].d.list || []).includes('Start level: 4')) return 'Create: ' + JSON.stringify(H && [H._f_lvl, H.log]);
+      if (!lu() || L() !== '2' || !/^Level 2 of 4$/.test(q('#luBox .lu-t').textContent)) return 'Kette startet nicht: ' + L() + ' ' + (q('#luBox .lu-t') || {}).textContent;
+      if (C()['AB5 Held']._f_lvl !== '1') return 'Stufenaufstieg speichert vor Apply';
+      E("luGo('sum')"); E('luNext()'); await T();
+      if (!lu() || L() !== '3' || !/^Level 3 of 4$/.test(q('#luBox .lu-t').textContent) || C()['AB5 Held']._f_lvl !== '2') return 'Stufe 2 → 3: ' + L() + ' / gespeichert ' + C()['AB5 Held']._f_lvl;
+      if (!E('luSteps().includes("sub")')) return 'Stufe 3 ohne Subklassen-Schritt'; E("luGo('sub')"); E('luSub(0)'); await T(); const sub = E('CLASS_DATA.Fighter.subclassList[0]');
+      E("luGo('sum')"); E('luNext()'); await T();
+      if (!lu() || L() !== '4' || C()['AB5 Held']._f_lvl !== '3' || C()['AB5 Held']._f_subcls !== sub) return 'Stufe 3: ' + JSON.stringify([L(), C()['AB5 Held']._f_lvl, C()['AB5 Held']._f_subcls]);
+      // Cancel in der Kette: nachfragen, dann bei Stufe 3 anhalten
+      E("luGo('sum')"); E('luCancel()'); if (!/stays at level 3/.test(q('#luBox .lu-ask')?.textContent || '')) return 'Cancel-Frage in der Kette: ' + (q('#luBox .lu-ask') || {}).textContent;
+      E('luCancel(1)'); H = C()['AB5 Held'];
+      if (lu() || L() !== '3' || E('_luChain') !== null || !/stopped at level 3/.test(d.getElementById('toast').textContent)) return 'Cancel hält nicht an: ' + L();
+      if (H._f_lvl !== '3' || H.log.length !== 3 || !H.log.slice(1).every(x => /^⬆ Level up: Fighter [23]/.test(x.m))) return 'Log nach Kette: ' + JSON.stringify(H.log.map(x => x.m));
+      if (E('hpMaxRaw()') !== 10 + con() + 2 * (6 + con())) return 'Max HP Stufe 3: ' + E('hpMaxRaw()');
+      E("luOpen()"); if (!/^Level up$/.test(q('#luBox .lu-t').textContent)) return 'Kopf nach Kette nicht zurückgesetzt'; E('luCancel(1)');
+      // Kette endet an der Startstufe (2)
+      E("cgStart('AB5 Zwei')"); E("cgPick('Wizard')"); E("cgGo('sum')"); E('cgLv(1)'); E('cgNext()'); if (!lu() || q('#luBox .lu-t').textContent !== 'Level 2 of 2') return 'Start level 2';
+      E("luGo('sum')"); E('luNext()'); await T();
+      if (lu() || E('_luChain') !== null || C()['AB5 Zwei']._f_lvl !== '2' || !/AB5 Zwei: level 2/.test(d.getElementById('toast').textContent)) return 'Kette endet nicht: ' + C()['AB5 Zwei']._f_lvl;
+      // Start level 1 = kein Stufenaufstieg; ohne Klasse zählt die Startstufe nicht
+      E("cgStart('AB5 Eins')"); E("cgPick('Rogue')"); E("cgGo('sum')"); E('cgNext()'); if (lu() || C()['AB5 Eins']._f_lvl !== '1') return 'Start level 1 öffnet den Stufenaufstieg';
+      E("cgStart('AB5 Leer')"); E('cgLv(3)'); E("cgGo('sum')"); E('cgNext()'); if (lu() || E('_luChain') !== null || !C()['AB5 Leer'] || (C()['AB5 Leer'].log[0].d || { list: [] }).list.some(x => /Start level/.test(x))) return 'ohne Klasse: Startstufe zählt';
+      const c = C(); ['AB5 Held', 'AB5 Zwei', 'AB5 Eins', 'AB5 Leer'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
+      E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.items=[];st.weapons=[];st.equipDone={};st.bg='';document.getElementById('race').value='';['gp','sp','cp'].forEach(k=>{const e=document.getElementById('cur_'+k);if(e)e.value=''});_lastSnap=null;_lastSnapName='';_undoClear()");
+      return true;
+    } },
+  { name: 'Fix 24.10.2026 (Fund Paket AB5): Stufenaufstieg zeigt frühere Wahl mit mehr Plätzen (Fighter Weapon Mastery 3→4 auf Stufe 4) im Features-Schritt, Wahl dort möglich, ohne offene Wahl kein Schritt', datum: '24.10.2026', r: '2024',
+    run: async ({ w, d, sel }) => {
+      if (w.eval('typeof luGrow') === 'undefined') return 'luGrow fehlt';
+      const E = s => w.eval(s), T = () => new Promise(r => setTimeout(r, 5)), S = () => E('luSteps().join()');
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='Regressionstest'");
+      sel('Fighter', '', 3); E("st.hpLv={Fighter:3};st.hpAsk=[];autoSave()");
+      const o = E("wmOptsOf(stFeatures().find(f=>f.name==='Weapon Mastery'&&f._c==='Fighter').desc)"); E("st.picks['wm:Fighter']=" + JSON.stringify(o.slice(0, 3)) + ";autoSave()");
+      E('luOpen()'); if (!/feat/.test(S())) return 'Stufe 4 ohne Features-Schritt: ' + S();
+      E("luGo('feat')"); await T();
+      const card = [...d.querySelectorAll('#luBox .lf-card')].find(c => c.querySelector('.lf-name').textContent.startsWith('Weapon Mastery'));
+      if (!card || !card.classList.contains('on') || !/More choices/.test(d.querySelector('#luBox .lu-body').textContent)) return 'Weapon-Mastery-Karte fehlt im Features-Schritt';
+      const ch = [...card.querySelectorAll('.pk-chip')].find(x => !x.classList.contains('on')); if (!ch) return 'keine freie Waffe'; ch.click(); await T();
+      if (E("st.picks['wm:Fighter'].length") !== 4 || E('luOpenList().some(x=>/Weapon Mastery/.test(x))')) return 'Wahl im Assistenten: ' + E("JSON.stringify(st.picks['wm:Fighter'])");
+      if (!/feat/.test(S())) return 'Schritt verschwindet nach der Wahl';
+      E('luCancel(1)'); if (E("st.picks['wm:Fighter'].length") !== 3) return 'Cancel stellt Wahl nicht zurück';
+      // ohne gewachsene Wahl (Stufe 4 → 5: Extra Attack ist neu, Weapon Mastery bleibt 4) keine „More choices“
+      E("st.picks['wm:Fighter']=" + JSON.stringify(o.slice(0, 4)) + ";document.getElementById('lvl').value='4';onClsChange();autoSave()"); E('luOpen()'); E("luGo('feat')"); await T();
+      if (/More choices/.test(d.querySelector('#luBox .lu-body').textContent)) return 'More choices ohne gewachsene Wahl';
+      E('luCancel(1)'); E("st.picks={};_lastSnap=null;_undoClear()");
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────

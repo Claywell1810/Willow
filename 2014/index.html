@@ -1151,6 +1151,10 @@ html[data-ts="gross"] .hx-t0{letter-spacing:3px}html[data-ts="sehrgross"] .hx-t0
 .cg-roll b{font-family:'Cinzel',serif;font-size:20px;font-weight:400;color:var(--gold)}
 .cg-roll small{font-size:var(--fs-xs);color:var(--text3);letter-spacing:1px}
 .cg-drop{font-style:normal;opacity:.5}
+.cg-lv{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg2)} /* Paket AB5: Start level */
+.cg-lv-l{min-width:0}.cg-lv-l b{display:block;font-family:'Cinzel',serif;font-size:var(--fs-md);font-weight:400;color:var(--gold)}
+.cg-lv-l small{display:block;font-size:var(--fs-xs);color:var(--text3);line-height:1.35;margin-top:2px}
+.cg-lv .cg-ab-c{flex:0 0 auto}
 #cgBox .lu-q{margin-bottom:8px}
 .cl-sv{width:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:none;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:10px;color:var(--gold);cursor:pointer}
 /* Paket U: Class/Subclass-Features im Info-Tab einklappbar */
@@ -8441,7 +8445,7 @@ function ciGoChoice(wo){
 // Schreibt live in dieselben Felder wie Info-/Spells-/Feats-Tab (Z4-E3: st.picks, st.feats, st.mySpells, st.hpRoll …), speichert aber erst
 // beim Übernehmen: autoSave ist gesperrt, solange _lu gesetzt ist; „Cancel“ stellt den Stand vom Öffnen wieder her (applyState wie Undo).
 // Übernehmen = ein Undo-Schritt und ein Log-Eintrag „⬆ Level up: …“ (Änderungen aufklappbar). Nur je +1 (Z4-E4), HP: Average vorausgewählt (Z4-E2).
-var _lu=null,_luQ=0,_luR=false;
+var _lu=null,_luQ=0,_luR=false,_luChain=null; // Paket AB5: _luChain={to,name} = Start auf höherer Stufe, Assistent einmal je Stufe
 const LU_STEP={cls:'Class',sub:'Subclass',feat:'Features',asi:'ASI / Feat',spell:'Spells',hp:'Hit Points',sum:'Summary'};
 function luBtnHtml(){return curCls()?'<button type="button" class="ci-lvup" onclick="luOpen()"'+(totLvl()>=20?' disabled':'')+' aria-label="Level up"><svg class="ci-lvup-i" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12 6-6 6 6"/><path d="m6 18 6-6 6 6"/></svg>Level up</button>':'';}
 function luSoon(){if(_luQ||_luR)return;_luQ=1;Promise.resolve().then(()=>{_luQ=0;if(_lu)luRender();});}
@@ -8467,11 +8471,20 @@ function luOpen(){
 function luSet(t){
   const L=_lu;if(!L)return;
   if(L.t)luRestore(L.S0);
+  const fp0=t.kind!=='new'&&t.cls?luFpTxt(t.cls):null; // Fix 24.10.2026 (Fund AB5): offene Feature-Wahlen vor dem Aufstieg
   Object.assign(L,{t,hp:null,feat:null,sp:[],spTab:null,spOpen:-1,spQ:'',ftCat:null,ftQ:'',ftOpen:-1,ask:false});
   if(t.kind==='start')chLvl(1);
   else if(t.kind==='mc'){const i=mcList().findIndex(m=>m.cls===t.cls);if(i>=0)mcLv(i,1);}
   else if(t.cls){if(!Array.isArray(st.mc))st.mc=[];st.mc.push({cls:t.cls,sub:'',lvl:1});mcChanged();}
   luHp('avg');
+  L.grow=fp0?luFpTxt(t.cls).filter(x=>!fp0.includes(x)):[]; // z. B. „Weapon Mastery 3/4“ auf Stufe 4: frühere Wahl bekommt mehr Plätze
+}
+function luFpTxt(cls){try{return fpOpen(cls).map(x=>x.txt);}catch(e){return [];}}
+// Fix 24.10.2026 (Fund Paket AB5): frühere Features, deren Wahl mit dieser Stufe wächst (Weapon Mastery, Invocations …) → Karte im Features-Schritt
+function luGrow(c){
+  const G=(_lu&&_lu.grow)||[],cd=CLASS_DATA[c.cls]||{},sk=c.sub?clsSubKey(cd.subclass,c.sub):null,hit=f=>+f.lvl<c.lvl&&G.some(x=>x.startsWith(f.name+' '));
+  const uq=a=>a.filter((f,i)=>a.findIndex(y=>y.name===f.name)===i);
+  return {base:uq((cd.base||[]).filter(hit)),sub:sk?uq((cd.subclass[sk]||[]).filter(hit)):[],sk};
 }
 function luCur(){const t=_lu&&_lu.t;return t&&t.cls?charClasses().find(c=>c.cls===t.cls)||null:null;}
 function luSub0(cls){const c=(_lu.C0||[]).find(x=>x.cls===cls);return c?c.sub:'';}
@@ -8501,7 +8514,7 @@ function luSteps(){
   if(!c)return r.length?r:['cls'];
   const sl=luSubLvl(c.cls);
   if(sl&&c.lvl>=sl&&!luSub0(c.cls)&&((CLASS_DATA[c.cls]||{}).subclassList||[]).length)r.push('sub');
-  const F=luFeats(c);if(F.base.length||F.sub.length||L.t.kind==='new')r.push('feat');
+  const F=luFeats(c),Gw=luGrow(c);if(F.base.length||F.sub.length||Gw.base.length||Gw.sub.length||L.t.kind==='new')r.push('feat');
   if(luAsiF(c))r.push('asi');
   if(luSpInfo(c).show)r.push('spell');
   if(hdDieOf(c.cls))r.push('hp');
@@ -8607,12 +8620,15 @@ function luApply(){
     _lastSnap=JSON.parse(JSON.stringify(snap));_lastSnapName=name;
   }
   buildCharCard();showToast('⬆ '+title);
+  luChainNext(); // Paket AB5
 }
+// Paket AB5 (AB-E2): Start auf höherer Stufe – nach „Create“ öffnet sich der Stufenaufstieg einmal je Stufe, bis die Startstufe erreicht ist
+function luChainNext(){const K=_luChain;if(!K)return;if(totLvl()>=K.to){_luChain=null;showToast('✨ '+K.name+': level '+totLvl());return;}luOpen();if(!_lu)_luChain=null;}
 function luCancel(force){
   const L=_lu;if(!L)return;
   if(!force&&luSteps().indexOf(L.step)>0&&!L.ask){L.ask=true;luRender();return;}
   _lu=null;document.getElementById('luModal').classList.remove('on');
-  luRestore(L.S0);showToast('Level up cancelled');
+  luRestore(L.S0);if(_luChain){_luChain=null;showToast('Level up stopped at level '+totLvl());}else showToast('Level up cancelled'); // Paket AB5: Abbruch beendet die Kette, erreichte Stufen bleiben
 }
 function luKeep(){if(!_lu)return;_lu.ask=false;luRender();}
 // ── Anzeige ──
@@ -8643,7 +8659,10 @@ function luStepFeat(L,c){
   if(L.t.kind==='new'){const g=mcGainHtml(c.cls);if(g)h+='<div class="lu-h">Proficiencies</div><div class="lu-txt lu-gain">'+g+'</div>';}
   if(F.base.length)h+='<div class="lu-h">'+fdEsc(c.cls)+' '+c.lvl+'</div>'+loreFeatHtml(c.cls,'base',{[c.lvl]:F.base},c.lvl,false);
   if(F.sub.length)h+='<div class="lu-h">'+fdEsc(mcSubParts(c.cls,c.sub).n)+'</div>'+loreFeatHtml(c.cls,F.sk,{[c.lvl]:F.sub},c.lvl,true);
-  if(!F.base.length&&!F.sub.length&&L.t.kind!=='new')h+='<div class="lu-note">No new features at this level.</div>';
+  const Gw=luGrow(c),grp=a=>a.reduce((o,f)=>((o[f.lvl]=o[f.lvl]||[]).push(f),o),{}); // Fix 24.10.2026: frühere Wahl mit mehr Plätzen
+  if(Gw.base.length||Gw.sub.length)h+='<div class="lu-h">More choices</div><div class="lu-note">Level '+c.lvl+' adds a choice to an earlier feature.</div>'
+    +(Gw.base.length?loreFeatHtml(c.cls,'base',grp(Gw.base),c.lvl,false):'')+(Gw.sub.length?loreFeatHtml(c.cls,Gw.sk,grp(Gw.sub),c.lvl,true):'');
+  if(!F.base.length&&!F.sub.length&&!Gw.base.length&&!Gw.sub.length&&L.t.kind!=='new')h+='<div class="lu-note">No new features at this level.</div>';
   return h;
 }
 function luStepAsi(L,c){
@@ -8705,14 +8724,14 @@ function luRender(){
   try{
     const S=luSteps();if(!S.includes(L.step))L.step=S[0];
     const i=S.indexOf(L.step),c=luCur(),ob=box.querySelector('.lu-body'),keep=ob&&box.dataset.step===L.step,sc=ob?ob.scrollTop:0;
-    let h='<div class="lu-head"><div class="lu-ttl"><div class="lu-t">Level up</div>';
+    let h='<div class="lu-head"><div class="lu-ttl"><div class="lu-t">'+(_luChain?'Level '+totLvl()+' of '+_luChain.to:'Level up')+'</div>'; // Paket AB5: Kopf „Level 3 of 5“
     if(c){const was=L.t.kind==='new'?0:c.lvl-1;h+='<div class="lu-cls">'+fdEsc(c.cls)+' <b>'+(was?was+'<span class="lu-arrow">→</span>':'')+c.lvl+'</b></div>'
       +'<div class="lu-sub">'+(L.t.kind==='new'?'New class · ':'')+'Character level '+totLvl()+'</div>';}
     else h+='<div class="lu-cls">Choose a class</div>';
     h+='</div>'+(!L.multi0&&!L.pickCls&&i===0?'<button type="button" class="lu-mini" onclick="luOther()">Other class…</button>':'')
       +'<button type="button" class="lu-x" onclick="luCancel()" aria-label="Cancel level up">✕</button></div>';
     h+='<div class="lu-steps">'+S.map((s,k)=>'<button type="button" class="lu-st'+(k===i?' on':k<i?' done':'')+'" onclick="luGo(\''+s+'\')"'+(!c&&s!=='cls'?' disabled':'')+'>'+(k+1)+' '+(s==='asi'&&c&&luAsiF(c)&&luAsiF(c).name==='Epic Boon'?'Epic Boon':LU_STEP[s])+'</button>').join('')+'</div>';
-    if(L.ask)h+='<div class="lu-ask"><span>Discard this level up? Nothing will be changed.</span><button type="button" class="lu-mini" onclick="luKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="luCancel(1)">Discard</button></div>';
+    if(L.ask)h+='<div class="lu-ask"><span>'+(_luChain?'Stop here? The character stays at level '+L.C0.reduce((a,x)=>a+x.lvl,0)+'.':'Discard this level up? Nothing will be changed.')+'</span><button type="button" class="lu-mini" onclick="luKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="luCancel(1)">'+(_luChain?'Stop':'Discard')+'</button></div>';
     const F={cls:luStepCls,sub:luStepSub,feat:luStepFeat,asi:luStepAsi,spell:luStepSpell,hp:luStepHp,sum:luStepSum}[L.step];
     h+='<div class="lu-body">'+(F&&(c||L.step==='cls')?F(L,c):'')+'</div>';
     h+='<div class="lu-foot"><button type="button" class="lu-b" onclick="luBack()"'+(i>0?'':' disabled')+'>← Back</button>'
@@ -8739,7 +8758,7 @@ function cgStart(name){
   if(_cg||_lu||!name)return;
   autoSave(); // offener Charakter: letzter Stand ist gesichert
   const el=document.getElementById('charName'),prev=(el?.textContent||'').trim();
-  _cg={name,prev,S0:_undoStrip(collectState()),log0:st.log,U0:{u:_undo,r:_redo},L0:{s:_lastSnap,n:_lastSnapName},ci0:_ciEdit,step:'cls',ask:false,bgQ:'',bgAll:false,bgFt:'',sp:[],spTab:'',spQ:'',spOpen:-1,lo:{}};
+  _cg={name,prev,S0:_undoStrip(collectState()),log0:st.log,U0:{u:_undo,r:_redo},L0:{s:_lastSnap,n:_lastSnapName},ci0:_ciEdit,step:'cls',ask:false,bgQ:'',bgAll:false,bgFt:'',sp:[],spTab:'',spQ:'',spOpen:-1,lo:{},lv:1};
   try{_newSheetReset('');st.log=[];}finally{_saving=false;}
   _lastSnap=null;_lastSnapName='';_undo=[];_redo=[];_undoGrp=null;updUndoBtns();
   _cg.B0=_undoStrip(collectState());
@@ -8782,7 +8801,7 @@ function cgOpenList(){
 function cgApply(){
   const C=_cg;if(!C)return;
   if(ncTaken(C.name)){showToast('A character named “'+C.name+'” already exists');return;}
-  const M=cgMsgs();
+  const M=cgMsgs(),lv=cgCls()?C.lv||1:1;if(lv>1)M.push('Start level: '+lv); // Paket AB5
   cgLoreReset(C);_cg=null;document.getElementById('cgModal').classList.remove('on');
   if(apSync())buildMySpells();
   _saving=true;
@@ -8796,6 +8815,7 @@ function cgApply(){
   _ciEdit=(document.getElementById('race')?.value&&st.bg)?null:true; // Herkunft noch offen → Formular im Info-Tab offen (wie Empty sheet)
   switchTabAll('info');buildCharCard();(document.scrollingElement||document.documentElement).scrollTop=0;
   showToast('✨ New Character: '+C.name);
+  if(lv>1){_luChain={to:lv,name:C.name};luOpen();if(!_lu)_luChain=null;} // Paket AB5 (AB-E2): Stufenaufstieg-Assistent einmal je Stufe
 }
 function cgCancel(force){
   const C=_cg;if(!C)return;
@@ -8808,6 +8828,7 @@ function cgCancel(force){
   _ciEdit=C.ci0;refreshCharSel(C.prev);buildCharCard();if(typeof buildLog==='function')buildLog();
   showToast('New character discarded');
 }
+function cgLv(d){const C=_cg;if(!C)return;C.lv=Math.max(1,Math.min(20,(C.lv||1)+d));cgRender();} // Paket AB5: Startstufe (Assistent bleibt auf Stufe 1, danach Z4 je Stufe)
 function cgKeep(){if(!_cg)return;_cg.ask=false;cgRender();}
 // ===== Paket AB2 (24.10.2026): Herkunft – Species/Race, Background, Skills =====
 // Schreibt wie das Info-Tab in #race, st.bg und st.picks (pickUI/pkTog, Karten aus rcLoreParts). Leeres Blatt: Wahlen aus einem
@@ -9126,6 +9147,8 @@ function cgStepSum(C){
   const cls=cgCls(),sub=document.getElementById('subcls')?.value||'',sn=sub?mcSubParts(cls,sub).n:'',M=cgMsgs(),O=cgOpenList();
   let h='<div class="lu-big">'+fdEsc(C.name)+'</div><div class="lu-note" style="text-align:center;color:var(--desc)">'+(cls?fdEsc(cls)+' 1'+(sn?' · '+fdEsc(sn):''):'No class yet')+'</div>'
     +(cls?'<div class="lu-note" style="text-align:center">Level 1 · PB +'+prof()+' · Max HP '+hpMaxRaw()+'</div>':'');
+  if(cls){const v=C.lv||1;h+='<div class="cg-lv"><div class="cg-lv-l"><b>Start level</b><small>'+(v>1?'After Create, the level-up assistant opens '+(v===2?'once (level 2)':(v-1)+' times, once per level (2 → '+v+')')+'.':'Starting higher? Raise it – the level-up assistant then guides you through each level.')+'</small></div>'
+    +'<div class="cg-ab-c"><button class="hbtn" onclick="cgLv(-1)"'+(v<=1?' disabled':'')+' aria-label="Start level minus">−</button><span class="cg-ab-v">'+v+'</span><button class="hbtn" onclick="cgLv(1)"'+(v>=20?' disabled':'')+' aria-label="Start level plus">+</button></div></div>';} // Paket AB5 (AB-E2)
   h+='<div class="lu-h">Your choices</div>'+(M.length?'<ul class="lu-list">'+M.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul>':'<div class="lu-note">Nothing chosen yet.</div>');
   if(O.length)h+='<div class="lu-h">Still open</div><ul class="lu-list lu-open">'+O.map(x=>'<li>'+fdEsc(x)+'</li>').join('')+'</ul><div class="lu-note">You can create the character now and finish these later in the Info tab.</div>';
   else h+='<div class="lu-note">✓ All choices made. Everything stays editable in the Info tab.</div>';
@@ -9138,7 +9161,7 @@ function cgRender(){
     const S=cgSteps();if(!S.includes(C.step))C.step=S[0];
     const i=S.indexOf(C.step),cls=cgCls(),ob=box.querySelector('.lu-body'),keep=ob&&box.dataset.step===C.step,sc=ob?ob.scrollTop:0;
     let h='<div class="lu-head"><div class="lu-ttl"><div class="lu-t">New character</div><div class="lu-cls">'+fdEsc(C.name)+'</div>'
-      +'<div class="lu-sub">'+[cls,cgRcName()].filter(Boolean).map(fdEsc).concat('Level 1').join(' · ')+'</div></div>'
+      +'<div class="lu-sub">'+[cls,cgRcName()].filter(Boolean).map(fdEsc).concat('Level 1'+(cls&&C.lv>1?' → '+C.lv:'')).join(' · ')+'</div></div>'
       +'<button type="button" class="lu-x" onclick="cgCancel()" aria-label="Cancel new character">✕</button></div>';
     h+='<div class="lu-steps">'+S.map((s,k)=>'<button type="button" class="lu-st'+(k===i?' on':k<i?' done':'')+'" onclick="cgGo(\''+s+'\')">'+(k+1)+' '+CG_STEP[s]+'</button>').join('')+'</div>';
     if(C.ask)h+='<div class="lu-ask"><span>Discard this character? Nothing will be saved.</span><button type="button" class="lu-mini" onclick="cgKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="cgCancel(1)">Discard</button></div>';
@@ -9321,7 +9344,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow14-app-2026-10-24d';
+const APP_VERSION = 'willow14-app-2026-10-24e';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
