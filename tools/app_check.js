@@ -4124,7 +4124,7 @@ const REGRESSION = [
       if (!on() || nc().style.display !== 'none') return 'Assistent nicht offen';
       const s0 = LS(); if (C()['AB1 Held'] || C()['AB1 Alt']._f_lvl !== '4') return 'Start des Assistenten: ' + Object.keys(C()).join(); // cgStart sichert den offenen Charakter (autoSave)
       if (nm() !== '' || d.getElementById('cls').value !== '' || E('_undo.length')) return 'kein leeres Blatt: ' + nm() + '/' + d.getElementById('cls').value;
-      if (E('JSON.stringify(cgSteps())') !== '["cls","sum"]') return 'Schritte: ' + E('JSON.stringify(cgSteps())');
+      { const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S[0] !== 'cls' || S[S.length - 1] !== 'sum') return 'Schritte: ' + S.join(); } // AB2 ff. fügen Schritte dazwischen ein
       if (d.querySelectorAll('#cgBox .cg-grid .lu-opt').length !== E('allClasses().length')) return 'Klassen-Auswahl unvollständig';
       E("cgPick('Fighter')");
       if (d.getElementById('cls').value !== 'Fighter' || d.getElementById('lvl').value !== '1') return 'Klasse/Stufe nicht gesetzt';
@@ -4170,6 +4170,69 @@ const REGRESSION = [
       // aufräumen
       const c = C(); ['AB1 Alt2', 'AB1 Neu'].forEach(k => delete c[k]); w.localStorage.setItem('dnd5e_chars', JSON.stringify(c));
       E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};_lastSnap=null;_lastSnapName='';_undoClear()");
+      return true;
+    } },
+  { name: 'Paket AB2: Erstellungs-Assistent Herkunft – Species/Race mit Wahlen (Wechsel verwirft alte Wahl, Custom mit Name), Background (2024: Suche/Quellen, Origin Feat wird eingetragen und beim Wechsel ersetzt; 2014: Skill-Wahl), Skills (Klassenwahl mit BG-Markierung, Übersicht), nichts gespeichert bis Create, Info-Tab-Rassenkarte gleich', datum: '24.10.2026',
+    run: async ({ w, d, RULES }) => {
+      if (w.eval('typeof cgStepRace') === 'undefined') return 'cgStepRace fehlt';
+      const E = s => w.eval(s), T = () => new Promise(r => setTimeout(r, 5)), C = () => JSON.parse(E('JSON.stringify(getAllChars())')), LS = () => JSON.stringify(C());
+      const q = s => d.querySelector('#cgBox ' + s), qa = s => [...d.querySelectorAll('#cgBox ' + s)], r14 = RULES === '2014';
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='AB2 Alt';autoSave()");
+      E("cgStart('AB2 Held')"); const s0 = LS();
+      const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S.join() !== 'cls,race,bg,skills,sum') return 'Schritte: ' + S.join();
+      if (!qa('.lu-st').some(b => b.textContent === '2 ' + (r14 ? 'Race' : 'Species'))) return 'Schritt-Name Species/Race';
+      E("cgPick('Fighter')"); E("cgGo('race')");
+      if (qa('.cg-grid .lu-opt').length !== E('cgRaces().length') + 1) return 'Rassen-Auswahl unvollständig (+ Custom)';
+      // Rasse mit Wahl: 2024 Human (Size, Skillful), 2014 Half-Elf (Attributsboni, Skills, Sprache)
+      const rn = r14 ? 'Half-Elf' : 'Human', ri = E('cgRaces().indexOf(' + JSON.stringify(rn) + ')'); E('cgRcPick(' + ri + ')'); await T();
+      if (d.getElementById('race').value !== rn || !q('.lu-chosen') || !/· Level 1$/.test(q('.lu-sub').textContent) || !q('.lu-sub').textContent.includes(rn)) return 'Rasse nicht gesetzt';
+      const pk = qa('.lu-body > div .pk'); if (pk.length < 2) return 'Wahl-Karten der Rasse fehlen: ' + pk.length;
+      E("pkTog(document.querySelector('#cgBox .lu-body > div .pk .pk-chip'))"); await T();
+      if (!Object.keys(E('st.picks')).some(k => k.startsWith('race:'))) return 'Rassen-Wahl nicht gespeichert';
+      if (!q('details.cg-more')) return 'übrige Traits nicht zugeklappt';
+      const oi = E('cgRaces().findIndex(r=>r!==' + JSON.stringify(rn) + ')'); E('cgRcPick(' + oi + ')'); await T();
+      if (Object.keys(E('st.picks')).some(k => k.startsWith('race:'))) return 'Rassenwechsel: alte Wahl bleibt';
+      E('cgRcPick(' + oi + ')'); if (d.getElementById('race').value) return 'erneut antippen nimmt Rasse nicht weg';
+      E('cgRcPick(-1)'); if (d.getElementById('race').value !== 'custom' || !q('input[data-luq]')) return 'Custom ohne Namensfeld';
+      if (!E('cgOpenList().join()').includes('Custom')) return 'Custom ohne Namen nicht offen';
+      E("cgRcNameSet('Kenku')"); if (d.getElementById('raceCustom').value !== 'Kenku' || E('cgOpenList().join()').includes('Custom')) return 'Custom-Name';
+      E('cgRcPick(' + ri + ')'); if (d.getElementById('raceCustom').value) return 'Custom-Name bleibt nach Wechsel';
+      // Background
+      E("cgGo('bg')"); const bi = n => E('BG_DATA.findIndex(b=>b.n===' + JSON.stringify(n) + ')');
+      if (!r14) {
+        if (qa('#cgBgList .lu-opt').length !== E("BG_DATA.filter(b=>b.src==='XPHB').length")) return 'Standard: nur XPHB';
+        E('cgBgAllTog()'); if (qa('#cgBgList .lu-opt').length !== E('BG_DATA.length')) return 'All sources';
+        E("_cg.bgQ='sag';cgBgList()"); if (!qa('#cgBgList .lu-opt').length || qa('#cgBgList .lu-opt-n').some(x => !/sag/i.test(x.firstChild.textContent))) return 'Suche';
+        E("_cg.bgQ=''"); E('cgBg(' + bi('Sage') + ')'); await T();
+        if (E('st.bg') !== 'Sage' || !E("st.feats.some(f=>f.name==='Magic Initiate')") || !/added to My Feats/.test(q('.cg-facts').textContent)) return 'Sage: Origin Feat nicht eingetragen';
+        if (!q('.lu-chosen .pk')) return 'Attributswahl des Backgrounds fehlt';
+        E('cgBg(' + bi('Soldier') + ')'); await T();
+        if (E('st.bg') !== 'Soldier' || E("st.feats.some(f=>f.name==='Magic Initiate')") || !E("st.feats.some(f=>f.name==='Savage Attacker')") || Object.keys(E('st.picks')).some(k => k.startsWith('fs:Magic'))) return 'Wechsel: Origin Feat nicht ersetzt: ' + E('JSON.stringify(st.feats.map(f=>f.name))');
+        E('cgBg(' + bi('Acolyte') + ')'); await T();
+      } else {
+        if (qa('#cgBgList .lu-opt').length !== E('BG_DATA.length') || q('.lu-q')) return '2014: alle Backgrounds ohne Suche';
+        E('cgBg(' + bi('Custom Background') + ')'); await T();
+        if (!q('.lu-chosen .pk')) return 'Custom Background: Skill-Wahl fehlt';
+        E("pkTog(document.querySelector('#cgBox .lu-chosen .pk .pk-chip'))"); if (!Object.keys(E('st.picks')).some(k => k.startsWith('bg:'))) return 'BG-Wahl';
+        E('cgBg(' + bi('Acolyte') + ')'); await T(); if (Object.keys(E('st.picks')).some(k => k.startsWith('bg:'))) return 'Wechsel: alte BG-Wahl bleibt';
+        if (!/Shelter of the Faithful/.test(q('.cg-facts').textContent)) return '2014: Background-Feature fehlt';
+        if (E('st.feats.length')) return '2014: Feat eingetragen';
+      }
+      if (E('st.bg') !== 'Acolyte') return 'Acolyte nicht gewählt';
+      // Skills: Klassenwahl, Insight vom Acolyte markiert
+      E("cgGo('skills')"); const ins = qa('.pk-chip').find(b => b.dataset.k === 'cls:Fighter:skills' && b.dataset.o === 'Insight');
+      if (!ins || !/BG/.test(ins.querySelector('small')?.textContent || '')) return 'Klassen-Skill Insight ohne BG-Markierung';
+      E("pkTog(document.querySelector('#cgBox .pk-chip[data-k=\"cls:Fighter:skills\"][data-o=\"Athletics\"]'))"); await T();
+      const ov = q('.cg-skl')?.textContent || ''; if (!/Athletics/.test(ov) || !/Insight/.test(ov) || !/Religion/.test(ov)) return 'Übersicht: ' + ov;
+      if (!qa('.pk-h').some(x => x.textContent.includes(rn))) return 'Rassen-Skill-Wahl fehlt im Skills-Schritt';
+      if (LS() !== s0) return 'während des Assistenten gespeichert';
+      E("cgGo('sum')"); if (!/Class skills 1\/2/.test(q('.lu-open')?.textContent || '')) return 'Still open: ' + (q('.lu-open')?.textContent || '');
+      E('cgNext()'); const H = C()['AB2 Held'];
+      if (!H || H._f_race !== rn || H.bg !== 'Acolyte' || !(H.picks['cls:Fighter:skills'] || []).includes('Athletics') || H.log.length !== 1) return 'Create: ' + JSON.stringify(H && [H._f_race, H.bg, H.picks]);
+      // Info-Tab: Rassenkarte (rcLoreParts) wie im Assistenten
+      E('buildRaceLore()'); if (!d.getElementById('raceLoreBody').textContent.includes(r14 ? 'Skill Versatility' : 'Skillful')) return 'Info-Tab Rassenkarte';
+      const c = C(); ['AB2 Held'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
+      E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.bg='';document.getElementById('race').value='';_lastSnap=null;_lastSnapName='';_undoClear()");
       return true;
     } },
 ];// ────────────────────────────────────────────────────────────────────────────
