@@ -4179,7 +4179,7 @@ const REGRESSION = [
       const q = s => d.querySelector('#cgBox ' + s), qa = s => [...d.querySelectorAll('#cgBox ' + s)], r14 = RULES === '2014';
       E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='AB2 Alt';autoSave()");
       E("cgStart('AB2 Held')"); const s0 = LS();
-      const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S.join() !== 'cls,race,bg,skills,sum') return 'Schritte: ' + S.join();
+      const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S.join() !== 'cls,race,bg,abl,skills,sum') return 'Schritte: ' + S.join(); // AB3: abl
       if (!qa('.lu-st').some(b => b.textContent === '2 ' + (r14 ? 'Race' : 'Species'))) return 'Schritt-Name Species/Race';
       E("cgPick('Fighter')"); E("cgGo('race')");
       if (qa('.cg-grid .lu-opt').length !== E('cgRaces().length') + 1) return 'Rassen-Auswahl unvollständig (+ Custom)';
@@ -4232,6 +4232,69 @@ const REGRESSION = [
       // Info-Tab: Rassenkarte (rcLoreParts) wie im Assistenten
       E('buildRaceLore()'); if (!d.getElementById('raceLoreBody').textContent.includes(r14 ? 'Skill Versatility' : 'Skillful')) return 'Info-Tab Rassenkarte';
       const c = C(); ['AB2 Held'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
+      E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.bg='';document.getElementById('race').value='';_lastSnap=null;_lastSnapName='';_undoClear()");
+      return true;
+    } },
+  { name: 'Paket AB3: Erstellungs-Assistent Abilities – Standard Array (Tausch, Vorschlag 2024), Point Buy (27 Punkte, Grenze), Roll 4d6 (sechs Würfe, kein Neuwurf, verteilen), Manual; schreibt Grundwerte live, Boni von Background (2024) bzw. Rasse (2014) dazu, Still open, nichts gespeichert bis Create, Log mit Würfen', datum: '24.10.2026',
+    run: async ({ w, d, RULES }) => {
+      if (w.eval('typeof cgStepAbl') === 'undefined') return 'cgStepAbl fehlt';
+      const E = s => w.eval(s), T = () => new Promise(r => setTimeout(r, 5)), C = () => JSON.parse(E('JSON.stringify(getAllChars())')), LS = () => JSON.stringify(C());
+      const q = s => d.querySelector('#cgBox ' + s), qa = s => [...d.querySelectorAll('#cgBox ' + s)], r14 = RULES === '2014';
+      const B = k => E('st.attrSrc.' + k + '.base'), SC = k => E('st.attrs.' + k), OP = () => E('cgOpenList().join("|")');
+      E("st.mc=[];st.feats=[];st.mySpells=[];st.zbAdded=new Set();st.picks={};st.hpRoll={};document.getElementById('charName').textContent='AB3 Alt';autoSave()");
+      E("cgStart('AB3 Held')"); const s0 = LS();
+      const S = JSON.parse(E('JSON.stringify(cgSteps())')); if (S.indexOf('abl') !== S.indexOf('bg') + 1 || S.indexOf('skills') !== S.indexOf('abl') + 1) return 'Schritt abl nicht zwischen Background und Skills: ' + S.join();
+      E("cgPick('Fighter')"); E("cgGo('abl')");
+      if (qa('.cg-am .pk-chip').length !== 4 || qa('.cg-ab:not(.cg-ab-hd)').length !== 6) return 'Methoden/Zeilen fehlen';
+      if (!/Ability scores not set/.test(OP())) return 'nicht gesetzt nicht offen';
+      if (!q('.cg-ab.pri')) return 'Hauptattribut nicht markiert';
+      // Standard Array: zuteilen, Doppelte werden getauscht
+      E("cgAbAs('STR',0)"); if (B('STR') !== 15 || SC('STR') !== 15) return 'Array STR';
+      E("cgAbAs('DEX',0)"); if (B('DEX') !== 15 || B('STR') !== 10) return 'Array: Tausch';
+      if (!/1 not assigned|5 not assigned/.test(OP())) return 'Array offen: ' + OP();
+      ['STR','DEX','CON','INT','WIS','CHA'].forEach((k, i) => E("cgAbAs('" + k + "'," + i + ")"));
+      if (/Ability scores/.test(OP()) || B('CHA') !== 8) return 'Array komplett: ' + OP();
+      if (!r14) { E('cgAbSug()'); if (B('STR') !== 15 || B('INT') !== 8 || B('CHA') !== 12) return 'Vorschlag Fighter'; if (!q('.se-add')) return 'Vorschlag-Knopf'; }
+      else if (q('.se-add')) return '2014: Vorschlag (nur XPHB)';
+      // Point Buy
+      E("cgAbMode('pb')"); if (B('STR') !== 8 || !/Point Buy: 27 points left/.test(OP())) return 'Point Buy Start: ' + OP();
+      for (const k of ['STR', 'DEX', 'CON']) for (let i = 0; i < 9; i++) E("cgAbPb('" + k + "',1)");
+      if (B('STR') !== 15 || B('CON') !== 15 || /Point Buy/.test(OP())) return 'Point Buy 15/15/15: ' + OP();
+      E("cgAbPb('INT',1)"); if (B('INT') !== 8) return 'Point Buy über 27';
+      if (!q('.ag-pts') || !/Points left: 0/.test(q('.ag-pts').textContent)) return 'Punkteanzeige';
+      // Manual
+      E("cgAbMode('man')"); if (B('STR') !== 10) return 'Manual Start';
+      E("cgAbMan('CON','17')"); E("cgAbMan('CON',0,1)"); E("cgAbMan('CON','x')"); if (B('CON') !== 18 || !q('input.cg-ab-in[data-luq]')) return 'Manual CON';
+      // Wechsel zurück behält den Entwurf
+      E("cgAbMode('pb')"); if (B('STR') !== 15) return 'Wechsel verliert Point Buy';
+      // Roll 4d6
+      E("cgAbMode('roll')"); if (!/not rolled/.test(OP()) || B('STR') !== 10) return 'Roll Start: ' + OP();
+      E('cgAbRoll()'); const R = JSON.parse(E('JSON.stringify(_cg.ab.roll)'));
+      if (!R || R.length !== 6 || R.some(x => x.d.length !== 4 || x.t !== x.d.reduce((a, b) => a + b, 0) - Math.min(...x.d))) return 'Würfe: ' + JSON.stringify(R);
+      if (qa('.cg-roll').length !== 6 || qa('.cg-roll .cg-drop').length !== 6) return 'Würfe-Anzeige';
+      E('cgAbRoll()'); if (E('JSON.stringify(_cg.ab.roll)') !== JSON.stringify(R)) return 'Neuwurf möglich';
+      if (!/6 not assigned/.test(OP())) return 'Roll offen: ' + OP();
+      ['STR','DEX','CON','INT','WIS','CHA'].forEach((k, i) => E("cgAbAs('" + k + "'," + i + ")"));
+      if (['STR','DEX','CON','INT','WIS','CHA'].some((k, i) => B(k) !== R[i].t) || /Ability scores/.test(OP())) return 'Roll verteilt';
+      // Boni: 2024 Background (+1/+1/+1 Soldier), 2014 Rasse
+      if (!r14) {
+        if (!/Background step/.test(q('.lu-body').textContent)) return 'Hinweis Background fehlt';
+        E('cgBg(' + E("BG_DATA.findIndex(b=>b.n==='Soldier')") + ')'); E("cgGo('abl')"); await T();
+        if (!qa('.lu-h').some(x => /Background increases/.test(x.textContent))) return 'Background-Wahl fehlt im Schritt';
+        E("pkAb(document.querySelector('#cgBox .pk-chip[data-v=\"+1/+1/+1\"]'))"); await T();
+        if (SC('STR') !== R[0].t + 1 || !/\+1 BG/.test(qa('.cg-ab:not(.cg-ab-hd)')[0].textContent)) return 'BG-Bonus: ' + SC('STR');
+      } else {
+        const ri = E("cgRaces().findIndex(r=>{const d=RACE_DATA[r]||{};return /\\+2/.test(JSON.stringify(d.ability||''))})"); if (ri < 0) return 'Testdaten fehlen: Rasse mit +2';
+        E('cgRcPick(' + ri + ')'); E("cgGo('abl')"); await T();
+        const row = qa('.cg-ab:not(.cg-ab-hd)').find(x => / Race/.test(x.querySelector('.cg-ab-b').textContent)); if (!row) return '2014: Rassen-Bonus nicht angezeigt';
+        if (/Background increases/.test(q('.lu-body').textContent)) return '2014: Background-Attribute';
+      }
+      if (LS() !== s0) return 'während des Assistenten gespeichert';
+      E("cgGo('sum')"); const M = E('cgMsgs().join("|")');
+      if (!/Ability scores \(Roll 4d6\): STR \d+/.test(M) || !/Rolled 4d6: /.test(M) || /\(score\)| Base: /.test(M)) return 'Zusammenfassung: ' + M;
+      E('cgNext()'); const H = C()['AB3 Held'];
+      if (!H || H.attrSrc.STR.base !== R[0].t || H.attrSrc.CHA.base !== R[5].t || !(H.log[0].d.list || []).some(x => /^Rolled 4d6/.test(x))) return 'Create: ' + JSON.stringify(H && H.attrSrc);
+      const c = C(); ['AB3 Held'].forEach(k => delete c[k]); E('lsPut(' + JSON.stringify(c) + ')');
       E("document.getElementById('charName').textContent='Regressionstest';st.attrSrc=null;st.statSrc=null;st.mc=[];st.feats=[];st.mySpells=[];st.picks={};st.bg='';document.getElementById('race').value='';_lastSnap=null;_lastSnapName='';_undoClear()");
       return true;
     } },

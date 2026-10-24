@@ -1130,6 +1130,27 @@ html[data-ts="gross"] .hx-t0{letter-spacing:3px}html[data-ts="sehrgross"] .hx-t0
 .cg-more{margin-top:10px}
 .cg-src{margin:0 0 10px}
 .cg-skl span{color:var(--text3);font-size:var(--fs-sm)}
+/* Paket AB3: Abilities im Erstellungs-Assistenten */
+.cg-am{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 8px}
+.cg-am .pk-chip{margin:0;justify-content:center;text-align:center;min-height:38px}
+.cg-ab{display:grid;grid-template-columns:56px minmax(0,1fr) auto 46px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2)}
+.cg-ab-hd{padding:2px 0 4px;font-family:'Cinzel',serif;font-size:var(--fs-2xs);letter-spacing:.5px;text-transform:uppercase;color:var(--text3)}
+.cg-ab-hd>span:nth-child(n+3){text-align:right}
+.cg-ab-l b{display:block;font-family:'Cinzel',serif;font-size:var(--fs-md);font-weight:400;color:var(--text)}
+.cg-ab-l small{display:block;font-size:var(--fs-2xs);color:var(--text3);overflow-wrap:anywhere}
+.cg-ab.pri .cg-ab-l b{color:var(--gold)}
+.cg-ab-c{display:flex;align-items:center;gap:6px;min-width:0}
+.cg-ab-c .ag-sel{width:100%;max-width:120px}
+.cg-ab-v{min-width:26px;text-align:center;font-family:'Cinzel',serif;font-size:var(--fs-md);color:var(--text)}
+.cg-ab-in{width:46px;box-sizing:border-box;text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);-webkit-text-fill-color:var(--text);font-family:'Cinzel',serif;font-size:16px;padding:5px 2px;outline:none}
+.cg-ab-b{font-size:var(--fs-xs);color:var(--green);text-align:right;line-height:1.3;white-space:nowrap}
+.cg-ab-t{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);text-align:right;line-height:1}
+.cg-ab-t small{display:block;font-size:var(--fs-xs);color:var(--text2);margin-top:3px}
+.cg-rolls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 10px}
+.cg-roll{display:flex;flex-direction:column;align-items:center;border:1px solid var(--border2);border-radius:8px;padding:6px 4px;background:var(--bg2)}
+.cg-roll b{font-family:'Cinzel',serif;font-size:20px;font-weight:400;color:var(--gold)}
+.cg-roll small{font-size:var(--fs-xs);color:var(--text3);letter-spacing:1px}
+.cg-drop{font-style:normal;opacity:.5}
 #cgBox .lu-q{margin-bottom:8px}
 .cl-sv{width:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:none;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:10px;color:var(--gold);cursor:pointer}
 /* Paket U: Class/Subclass-Features im Info-Tab einklappbar */
@@ -8711,8 +8732,8 @@ function luRender(){
 // Präfix cg*, weil cr* schon die Custom-Rasse ist (Paket K). AB1: Schritte Class (+ Subklasse, wenn auf Stufe 1 fällig) und Summary;
 // AB2–AB5 ergänzen Species, Background, Skills, Abilities, Features, Spells, Equipment und Start level (cgSteps, CG_STEP).
 var _cg=null,_cgQ=0,_cgR=false;
-const CG_STEP={cls:'Class',race:R14?'Race':'Species',bg:'Background',skills:'Skills',sum:'Summary'}; // Paket AB2: Herkunft
-function cgSteps(){return ['cls','race','bg','skills','sum'];}
+const CG_STEP={cls:'Class',race:R14?'Race':'Species',bg:'Background',abl:'Abilities',skills:'Skills',sum:'Summary'}; // Paket AB2: Herkunft, AB3: Abilities
+function cgSteps(){return ['cls','race','bg','abl','skills','sum'];}
 function cgSoon(){if(_cgQ||_cgR)return;_cgQ=1;Promise.resolve().then(()=>{_cgQ=0;if(_cg)cgRender();});}
 function cgStart(name){
   if(_cg||_lu||!name)return;
@@ -8742,8 +8763,8 @@ function cgGo(s){if(!_cg)return;_cg.step=s;_cg.ask=false;const b=document.queryS
 function cgNext(){const C=_cg;if(!C)return;if(C.step==='sum'){cgApply();return;}const S=cgSteps(),i=S.indexOf(C.step);cgGo(S[Math.min(S.length-1,i+1)]);}
 function cgBack(){const C=_cg;if(!C)return;const S=cgSteps(),i=S.indexOf(C.step);if(i>0)cgGo(S[i-1]);}
 function cgMsgs(){try{return _diffSnaps(_cg.B0,collectState()).map(x=>typeof x==='string'?x:x.m).filter(Boolean)
-  .filter(m=>!/^(Max HP|HP): /.test(m)) // HP steht in der Zusammenfassung (Stufe 1 = Maximum), Grundwert 10 des leeren Blatts ist kein Schritt
-  .map(m=>{const x=/^(.*?): (.+?) → (.+)$/.exec(m);return x?x[1]+': '+x[3].replace(/^"(.*)"$/,'$1'):m;});}catch(e){return [];}} // „Class: "—" → "Fighter"“ → „Class: Fighter“ (alles ist neu)
+  .filter(m=>!/^(Max HP|HP): /.test(m)&&!CG_AB_RE.test(m)&&!/^(AC|Initiative): /.test(m)) // Paket AB3 (AC/Initiative folgen aus DEX): Attributs-Zeilen (Wert + Base je Attribut) → eine Zeile cgAbMsg // HP steht in der Zusammenfassung (Stufe 1 = Maximum), Grundwert 10 des leeren Blatts ist kein Schritt
+  .map(m=>{const x=/^(.*?): (.+?) → (.+)$/.exec(m);return x?x[1]+': '+x[3].replace(/^"(.*)"$/,'$1'):m;}).concat(cgAbMsg());}catch(e){return [];}} // „Class: "—" → "Fighter"“ → „Class: Fighter“ (alles ist neu)
 function cgOpenList(){
   const cls=cgCls(),r=[];
   if(!cls)r.push('Class not chosen');
@@ -8751,6 +8772,7 @@ function cgOpenList(){
   const race=document.getElementById('race')?.value||'';if(!race)r.push(R14?'Race not chosen':'Species not chosen');
   else if(race==='custom'&&!(document.getElementById('raceCustom')?.value||'').trim())r.push('Custom '+(R14?'race':'species')+': name and values (Info tab)');
   if(!st.bg)r.push('Background not chosen');
+  {const x=cgAbOpen();if(x)r.push(x);} // Paket AB3
   try{pkOpen().forEach(x=>r.push(x.txt));}catch(e){}
   return r;
 }
@@ -8887,6 +8909,84 @@ function cgStepSkills(C){
   h+='<div class="lu-h lu-h2">Your skill proficiencies ('+L.length+')</div>'+(L.length?'<ul class="lu-list cg-skl">'+L.map(n=>'<li><b>'+fdEsc(n)+'</b> <span>'+fdEsc(by[n].join(', '))+'</span></li>').join('')+'</ul>':'<div class="lu-note">None yet.</div>');
   return h;
 }
+// ===== Paket AB3 (24.10.2026): Abilities – Standard Array, Point Buy, Roll 4d6, Manual (AB-E4) =====
+// Regeln aus 5e.tools: XPHB „Generate Your Scores“ (book-xphb.json S. 38: Standard Array, Random Generation, Point Cost) bzw. PHB 2014
+// „Determine Ability Scores“ (book-phb.json S. 12–13: 4d6 oder 15, 14, 13, 12, 10, 8; Point Buy als Variante). Schreibt live in
+// st.attrSrc[k].base wie agApply (Info-Tab); Boni von Background/Rasse rechnet attrCalc dazu. Entwurf je Methode in _cg.ab, ein Wechsel
+// verliert nichts; nicht zugeteilte Werte = 10 wie das leere Blatt. Der Wurf bleibt (kein Neuwurf, wie der HP-Wurf) und steht im Log.
+const CG_AB_M={arr:'Standard Array',pb:'Point Buy',roll:'Roll 4d6',man:'Manual'};
+const CG_AB_RE=new RegExp('^(('+ATTRS.map(a=>a.k).join('|')+') \\(score\\)|('+ATTRS.map(a=>a.l).join('|')+') Base): ');
+function cgAb(){const C=_cg;if(!C)return null;
+  if(!C.ab){const f=v=>{const o={};ATTRS.forEach(a=>o[a.k]=v);return o;};C.ab={m:'arr',on:false,arr:f(-1),pb:f(8),roll:null,rl:f(-1),man:f(10)};}
+  return C.ab;}
+function cgAbPool(A){return A.m==='arr'?ATTR_GEN.arr:A.m==='roll'&&A.roll?A.roll.map(x=>x.t):[];}
+function cgAbVals(){const A=cgAb(),o={};
+  ATTRS.forEach(a=>{const k=a.k;let v=10;
+    if(A.m==='arr'||A.m==='roll'){const i=(A.m==='arr'?A.arr:A.rl)[k],P=cgAbPool(A);if(i>=0&&P[i]!=null)v=P[i];}
+    else v=A.m==='pb'?A.pb[k]:A.man[k];
+    o[k]=v;});
+  return o;}
+function cgAbWrite(){const A=cgAb();if(!A)return;A.on=true;if(!attrOn())st.attrSrc=attrSrcNew();const v=cgAbVals();
+  ATTRS.forEach(a=>{const s=st.attrSrc[a.k]||(st.attrSrc[a.k]={base:10});s.base=v[a.k];});
+  attrRefresh();autoSave();cgRender();}
+function cgAbMode(m){const A=cgAb();if(!A||!CG_AB_M[m])return;A.m=m;cgAbWrite();}
+function cgAbAs(k,i){const A=cgAb();if(!A||(A.m!=='arr'&&A.m!=='roll'))return;const p=A.m==='arr'?A.arr:A.rl;i=+i;if(!(i>=0))i=-1;
+  const prev=p[k];if(i>=0)ATTRS.forEach(a=>{if(a.k!==k&&p[a.k]===i)p[a.k]=prev;}); // schon vergeben → tauschen
+  p[k]=i;cgAbWrite();}
+function cgAbSug(){const A=cgAb(),r=R14?null:ATTR_GEN.byCls[cgCls()];if(!A||!r)return;A.m='arr';ATTRS.forEach((a,i)=>{A.arr[a.k]=ATTR_GEN.arr.indexOf(r[i]);});cgAbWrite();}
+function cgAbPb(k,d){const A=cgAb();if(!A)return;const v=Math.max(8,Math.min(15,(+A.pb[k]||8)+d)),t=Object.assign({},A.pb,{[k]:v});
+  if(agCostOf(t)>ATTR_GEN.pts)return;A.pb[k]=v;A.m='pb';cgAbWrite();}
+function cgAbRoll(){const A=cgAb();if(!A)return;A.m='roll';
+  if(!A.roll)A.roll=ATTRS.map(()=>{const d=[0,0,0,0].map(()=>1+Math.floor(Math.random()*6)),s=d.slice().sort((x,y)=>y-x);return {d,t:s[0]+s[1]+s[2]};});
+  cgAbWrite();}
+function cgAbMan(k,v,step){const A=cgAb();if(!A)return;let n=step?(+A.man[k]||10)+step:parseInt(v,10);if(!(n>=1)){cgRender();return;}
+  A.man[k]=Math.max(1,Math.min(30,n));A.m='man';cgAbWrite();}
+function cgAbOpen(){const A=_cg&&_cg.ab;if(!A||!A.on)return 'Ability scores not set';
+  if(A.m==='roll'&&!A.roll)return 'Ability scores not rolled';
+  if(A.m==='arr'||A.m==='roll'){const p=A.m==='arr'?A.arr:A.rl,n=ATTRS.filter(a=>!(p[a.k]>=0)).length;if(n)return 'Ability scores: '+n+' not assigned';}
+  if(A.m==='pb'){const l=ATTR_GEN.pts-agCostOf(A.pb);if(l>0)return 'Point Buy: '+l+' point'+(l>1?'s':'')+' left';}
+  return '';}
+function cgAbMsg(){const A=_cg&&_cg.ab,on=!!(A&&A.on),v=ATTRS.map(a=>+st.attrs[a.k]||10);if(!on&&v.every(x=>x===10))return [];
+  const r=['Ability scores'+(on?' ('+CG_AB_M[A.m]+')':'')+': '+ATTRS.map((a,i)=>a.k+' '+v[i]).join(', ')];
+  if(on&&A.m==='roll'&&A.roll)r.push('Rolled 4d6: '+A.roll.map(x=>x.t+' ('+x.d.join(' ')+')').join(', '));
+  return r;}
+function cgStepAbl(C){
+  const A=cgAb(),m=A.m,cls=cgCls(),G=calcGrants(),t=CLASS_CORE_TRAITS[cls]||{},pri=String(t.primaryAbility||''),b=st.bg?BG_DATA.find(x=>x.n===st.bg):null;
+  let h='<div class="lu-h">Determine your ability scores</div><div class="cg-am">'+Object.keys(CG_AB_M).map(k=>'<button type="button" class="pk-chip'+(m===k?' on':'')+'" onclick="cgAbMode(\''+k+'\')">'+CG_AB_M[k]+'</button>').join('')+'</div>';
+  const P=cgAbPool(A);let ctl;
+  if(m==='arr'){
+    h+='<div class="lu-note">'+(R14?'If you don’t want to roll, use these six scores instead: ':'Use these six scores, once each: ')+ATTR_GEN.arr.join(', ')+'.</div>';
+    const sug=R14?null:ATTR_GEN.byCls[cls];if(sug)h+='<button type="button" class="se-add" style="margin:0 0 6px" onclick="cgAbSug()">Suggested for '+fdEsc(cls)+'</button>';
+  }else if(m==='pb'){const left=ATTR_GEN.pts-agCostOf(A.pb);
+    h+='<div class="ag-pts'+(left<0?' bad':'')+'">Points left: '+left+' / '+ATTR_GEN.pts+'</div><div class="lu-note">'+(R14?'Variant, at your DM’s option. ':'')+'You have '+ATTR_GEN.pts+' points to spend on scores from 8 to 15. Cost: '+Object.keys(ATTR_GEN.cost).map(s=>s+' = '+ATTR_GEN.cost[s]).join(', ')+'.</div>';
+  }else if(m==='roll'){
+    h+='<div class="lu-note">Roll four d6s and record the total of the highest three dice. Do this five more times, so you have six numbers'+(R14?' – then assign each number to an ability.':'.')+'</div>';
+    if(!A.roll)h+='<button type="button" class="lu-opt" onclick="cgAbRoll()"><span class="lu-opt-n">Roll 4d6 six times<span class="lu-opt-s">One roll, no re-rolls – the numbers stay</span></span><span class="lu-opt-r"><i class="mi mi-dz" aria-hidden="true"></i></span></button>';
+    else h+='<div class="cg-rolls">'+A.roll.map(x=>{const lo=x.d.indexOf(Math.min(...x.d));return '<span class="cg-roll"><b>'+x.t+'</b><small>'+x.d.map((n,j)=>j===lo?'<i class="cg-drop" title="dropped">('+n+')</i>':n).join(' ')+'</small></span>';}).join('')+'</div>';
+  }else h+='<div class="lu-note">Enter your own scores, e.g. rolled at the table or set by your DM.</div>';
+  if(!R14&&m!=='man')h+='<div class="lu-note">Your DM might prefer you to use a particular method.</div>';
+  h+='<div class="cg-ab cg-ab-hd"><span>Ability</span><span>Base</span><span>Bonus</span><span>Score</span></div>';
+  const by={};if(m==='arr'||m==='roll'){const p=m==='arr'?A.arr:A.rl;ATTRS.forEach(a=>{if(p[a.k]>=0)by[p[a.k]]=a.k;});}
+  h+=ATTRS.map(a=>{const k=a.k,r=attrCalc(k,G),au=attrAuto(k,G),isP=!!pri&&new RegExp('\\b'+a.l+'\\b').test(pri),bon=[];
+    if(au.bg)bon.push(fmt(au.bg)+' BG');if(au.race)bon.push(fmt(au.race)+' '+(R14?'Race':'Species'));if(au.feat)bon.push(fmt(au.feat)+' Feat');
+    if(m==='arr'||m==='roll'){const i=(m==='arr'?A.arr:A.rl)[k];
+      ctl='<select class="ag-sel'+(i>=0?'':' dup')+'" onchange="cgAbAs(\''+k+'\',this.value)" aria-label="'+a.l+' base score"'+(P.length?'':' disabled')+'><option value="-1"'+(i>=0?'':' selected')+'>—</option>'
+        +P.map((n,j)=>'<option value="'+j+'"'+(i===j?' selected':'')+'>'+n+(by[j]&&by[j]!==k?' ('+by[j]+')':'')+'</option>').join('')+'</select>';
+    }else if(m==='pb'){const v=A.pb[k],left=ATTR_GEN.pts-agCostOf(A.pb);
+      ctl='<button class="hbtn" onclick="cgAbPb(\''+k+'\',-1)"'+(v<=8?' disabled':'')+' aria-label="'+a.l+' minus">−</button><span class="cg-ab-v">'+v+'</span><button class="hbtn" onclick="cgAbPb(\''+k+'\',1)"'+(v>=15||(ATTR_GEN.cost[v+1]-ATTR_GEN.cost[v])>left?' disabled':'')+' aria-label="'+a.l+' plus">+</button><span class="ag-cost">'+ATTR_GEN.cost[v]+' pt</span>';
+    }else{const v=A.man[k];
+      ctl='<button class="hbtn" onclick="cgAbMan(\''+k+'\',0,-1)"'+(v<=1?' disabled':'')+' aria-label="'+a.l+' minus">−</button><input class="cg-ab-in" type="text" inputmode="numeric" data-luq="1" value="'+v+'" onchange="cgAbMan(\''+k+'\',this.value)" aria-label="'+a.l+' base score"><button class="hbtn" onclick="cgAbMan(\''+k+'\',0,1)"'+(v>=30?' disabled':'')+' aria-label="'+a.l+' plus">+</button>';}
+    return '<div class="cg-ab'+(isP?' pri':'')+'"><div class="cg-ab-l"><b>'+k+'</b><small>'+a.l+(isP?' ★':'')+'</small></div><div class="cg-ab-c">'+ctl+'</div><div class="cg-ab-b">'+(bon.join('<br>')||'—')+'</div><div class="cg-ab-t">'+r.total+'<small>'+fmt(md(r.total))+'</small></div></div>';}).join('');
+  const o=cgAbOpen();
+  h+=o?'<div class="lu-warn">'+fdEsc(o)+'</div>':'<div class="lu-note" style="color:var(--green)">✓ All six base scores set.</div>';
+  if(pri&&cls)h+='<div class="lu-note">★ = primary ability of the '+fdEsc(cls)+' ('+fdEsc(cgAbbr(pri))+').</div>';
+  if(ATTRS.some(a=>attrCalc(a.k,G).cap))h+='<div class="lu-warn">'+(R14?'Ability Score Improvements can’t raise a score above 20.':'Background increases can’t raise a score above 20.')+'</div>';
+  if(!R14){
+    if(b&&bgAbOpts(b).length===3)h+='<div class="lu-h lu-h2">Background increases</div>'+bgAbilityUI(b);
+    else if(!b)h+='<div class="lu-note">Your background adds +2 / +1 or +1 / +1 / +1 to three abilities – choose it in the Background step.</div>';
+  }else h+='<div class="lu-note">Racial ability score increases are added on top (Race step).</div>';
+  return h;
+}
 // ── Anzeige ──
 function cgAbbr(t){return String(t||'').replace(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\b/g,m=>m.slice(0,3).toUpperCase());}
 function cgStepCls(C){
@@ -8926,7 +9026,7 @@ function cgRender(){
       +'<button type="button" class="lu-x" onclick="cgCancel()" aria-label="Cancel new character">✕</button></div>';
     h+='<div class="lu-steps">'+S.map((s,k)=>'<button type="button" class="lu-st'+(k===i?' on':k<i?' done':'')+'" onclick="cgGo(\''+s+'\')">'+(k+1)+' '+CG_STEP[s]+'</button>').join('')+'</div>';
     if(C.ask)h+='<div class="lu-ask"><span>Discard this character? Nothing will be saved.</span><button type="button" class="lu-mini" onclick="cgKeep()">Keep going</button><button type="button" class="lu-mini warn" onclick="cgCancel(1)">Discard</button></div>';
-    const F={cls:cgStepCls,race:cgStepRace,bg:cgStepBg,skills:cgStepSkills,sum:cgStepSum}[C.step];
+    const F={cls:cgStepCls,race:cgStepRace,bg:cgStepBg,abl:cgStepAbl,skills:cgStepSkills,sum:cgStepSum}[C.step];
     h+='<div class="lu-body">'+(F?F(C):'')+'</div>';
     h+='<div class="lu-foot"><button type="button" class="lu-b" onclick="cgBack()"'+(i>0?'':' disabled')+'>← Back</button>'
       +'<button type="button" class="lu-b pri" onclick="cgNext()">'+(C.step==='sum'?'✓ Create':'Next →')+'</button></div>';
@@ -9105,7 +9205,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow14-app-2026-10-24b';
+const APP_VERSION = 'willow14-app-2026-10-24c';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
