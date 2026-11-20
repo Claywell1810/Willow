@@ -36,6 +36,11 @@ fi
 # 2) App-Veröffentlichung oder nur Doku?
 APP=0
 if [ -f DnD_Character_App.html ] && [ -f ALT.html ] && ! cmp -s DnD_Character_App.html ALT.html; then APP=1; fi
+# Seit 20.11.2026: auch geänderte Cache-Dateien (manifest.json, Icons) brauchen eine neue Version, sonst liefert der
+# Service Worker die alte Fassung aus dem Cache. NEUE_VERSION=1 erzwingt eine neue Version ohne HTML-Änderung.
+if [ -f DnD_Character_App.html ] && [ -f ALT.html ]; then
+  if ! G diff --quiet HEAD -- manifest.json willow-icon-192.png willow-icon-512.png || [ "${NEUE_VERSION:-0}" = 1 ]; then APP=1; fi
+fi
 
 if [ $APP = 1 ]; then
   echo "== Prüfskript"

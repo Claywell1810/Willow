@@ -227,6 +227,7 @@ Große Datenmengen (Features, Zauber) im Skript erzeugen und einfügen, nie als 
 **5. Veröffentlichen:** `bash willow/tools/publish.sh "Nachricht"` (aus dem Ordner über dem Klon, seit 01.10.2026). Das Skript
 - bricht ab, wenn `origin/main` neuere Commits hat, und stellt den Remote auf `Claywell1810/Willow` um;
 - bei geänderter Arbeitskopie (≠ `ALT.html`): `app_check.js` muss „alles OK“ melden, dann neue Version in `APP_VERSION` **und** `CACHE_NAME` (sonst kommt das Update auf dem Handy nie an), Kopie nach `willow/index.html`;
+- ebenso bei geändertem `manifest.json` oder Icons (seit 20.11.2026; sonst liefert der Service Worker die alte Datei aus dem Cache); `NEUE_VERSION=1 bash willow/tools/publish.sh …` erzwingt eine neue Version ohne HTML-Änderung;
 - sonst: Commit nur mit Doku/Skripten, ohne neue App-Version;
 - **Willow 2014 (seit Paket T1):** baut `2014/` aus der neuen `index.html` (`build_2014.py`, Datenblöcke aus `tools/t14/`); weicht der Build vom Stand im Repo ab, muss `app_check.js … --rules 2014` „alles OK“ melden, dann eigene Version `willow14-app-<Datum><Buchstabe>` (APP_VERSION + CACHE_NAME in `2014/`) – im selben Commit. Nichts in `2014/` von Hand ändern (REFERENZ B30);
 - `git add -A`, ein Commit, Push nach `main`, Größe von `index.html` auf GitHub (über den Commit-Hash) gegenprüfen.
