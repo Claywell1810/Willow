@@ -2229,7 +2229,8 @@ html[data-desk] .dk-only{display:inline-block}
     <div class="panel" id="tab-log">
       <div class="sec sec-row">
         <span>Change Log</span>
-        <button class="filter-toggle" onclick="clearLog()"><i class="mi mi-trash l"></i>Clear</button>
+        <button class="filter-toggle" onclick="exportLog()"><i class="mi mi-share l"></i>Export</button>
+        <button class="filter-toggle" onclick="clearLog()" style="margin-left:6px"><i class="mi mi-trash l"></i>Clear</button>
       </div>
       <div class="log-hint">Changes to this character are recorded automatically. Tap ▾ for details.</div>
       <div id="logList"></div>
@@ -10897,6 +10898,33 @@ function buildLog(){
   box.innerHTML=html;
 }
 
+// Log-Export (Wunsch Simon 20.11.2026): Change Log als lesbare Textdatei (Teilen-Menü, sonst Download), älteste Einträge zuerst, Details eingerückt
+function logExportText(name,log){
+  const p=n=>String(n).padStart(2,'0'),ts=t=>{const d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());};
+  const L=['Willow – Change Log','Character: '+name,'Exported: '+ts(Date.now())+(typeof APP_VERSION!=='undefined'?' ('+APP_VERSION+')':''),'Entries: '+log.length,''];
+  log.forEach(e=>{
+    if(!e)return;
+    L.push(ts(e.t)+'  '+String(e.m??''));
+    if(e.d&&Array.isArray(e.d.list))e.d.list.forEach(x=>L.push('      • '+String(typeof x==='string'?x:(x&&x.m)||'')));
+    else if(e.d){if(e.d.a)L.push('      Before: '+String(e.d.a).replace(/\n/g,'\n              '));if(e.d.b)L.push('      After:  '+String(e.d.b).replace(/\n/g,'\n              '));}
+  });
+  return L.join('\n')+'\n';
+}
+function exportLog(){
+  const name=document.getElementById('charName')?.textContent.trim();
+  if(!name){showToast('No character loaded');return;}
+  const chars=getAllChars();
+  const log=(chars[name]&&chars[name].log)||st.log||[];
+  if(!log.length){showToast('Log is empty');return;}
+  const txt=logExportText(name,log);
+  const fname=(name.replace(/[\\/:*?"<>|\x00-\x1f]+/g,'_').trim()||'Character')+'_log_'+new Date().toISOString().slice(0,10)+'.txt';
+  let f=null;try{f=new File([txt],fname,{type:'text/plain'});}catch(err){}
+  const ok=f&&navigator.share&&navigator.canShare&&(()=>{try{return navigator.canShare({files:[f]});}catch(err){return false;}})();
+  const dl=()=>{const blob=new Blob([txt],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('⬇ '+fname);};
+  if(ok){navigator.share({files:[f],title:name+' – Log'}).then(()=>showToast('📤 Log shared')).catch(err=>{if(err&&err.name==='AbortError')return;dl();});}
+  else dl();
+}
+
 function clearLog(){
   const name=document.getElementById('charName')?.textContent.trim();
   if(!name) return;
@@ -12079,7 +12107,7 @@ function initNavMeasure(){const nav=document.getElementById('bottomNav');if(!nav
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavMeasure);else initNavMeasure();
 try{hxUpd();hxScroll();}catch(e){} // Paket R2: Kopf beim Start
 window.addEventListener('resize',measureNav);window.addEventListener('load',measureNav);
-const APP_VERSION = 'willow-app-2026-10-25a';
+const APP_VERSION = 'willow-app-2026-11-20a';
 const SETTINGS_LS = LS_PFX+'dnd5e_theme_overrides';
 const SETTINGS_LS_LIGHT = LS_PFX+'dnd5e_theme_overrides_light';   // Paket R5: eigene Farben für Pergament getrennt (gleiche Keys wie COLOR_LABELS)
 function themeLs(){return willowMode()==='light'?SETTINGS_LS_LIGHT:SETTINGS_LS;}
