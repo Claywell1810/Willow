@@ -4,7 +4,7 @@
   "description": "D&D 5e Charakterbogen (Regeln 2014, SRD 5.1)",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#0d0b14",
   "theme_color": "#141020",
